@@ -162,7 +162,7 @@ case 'open':
 if ($status != 'closed' && $queue_name != 'assigned') {
     $hideassigned = ($cfg && !$cfg->showAssignedTickets()) && !$thisstaff->showAssignedTickets();
     $showassigned = !$hideassigned;
-    if ($status == 'open' && $hideassigned)
+    if ($queue_name == 'open' && $hideassigned)
         $tickets->filter(array('staff_id'=>0, 'team_id'=>0));
     else
         $tickets->values('staff__firstname', 'staff__lastname', 'team__name');
