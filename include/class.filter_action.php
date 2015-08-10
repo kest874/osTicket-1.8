@@ -290,8 +290,8 @@ class FA_RouteDepartment extends TriggerAction {
                     Dept::getDepartments() +
                     array(':new:' => '— '.__('Add New').' —')
                 ,
-                'validators' => function($self) {
-                    if ($self->getClean() === ':new:')
+                'validators' => function($self, $clean) {
+                    if ($clean === ':new:')
                         $self->addError(__('Select a department'));
                 }
             )),
@@ -372,8 +372,8 @@ class FA_AssignTeam extends TriggerAction {
                     $choices,
                     array(':new:' => '— '.__('Add New').' —')
                 ),
-                'validators' => function($self) {
-                    if ($self->getClean() === ':new:')
+                'validators' => function($self, $clean) {
+                    if ($clean === ':new:')
                         $self->addError(__('Select a team'));
                 }
             )),
