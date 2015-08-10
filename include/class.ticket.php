@@ -2314,7 +2314,7 @@ implements RestrictedAccess, Threadable {
                       'cannedattachments' => $files
         );
         $errors = array();
-        if (!($response=$this->postReply($info, $errors, false)))
+        if (!($response=$this->postReply($info, $errors, false, false)))
             return null;
 
         $this->markUnAnswered();
@@ -2353,9 +2353,8 @@ implements RestrictedAccess, Threadable {
     }
 
     /* public */
-    function postReply($vars, &$errors, $alert = true) {
+    function postReply($vars, &$errors, $alert=true, $claim=true) {
         global $thisstaff, $cfg;
-
 
         if (!$vars['poster'] && $thisstaff)
             $vars['poster'] = $thisstaff;
@@ -2378,7 +2377,7 @@ implements RestrictedAccess, Threadable {
         }
 
         // Claim on response bypasses the department assignment restrictions
-        if ($thisstaff && $this->isOpen() && !$this->getStaffId()
+        if ($claim && $thisstaff && $this->isOpen() && !$this->getStaffId()
             && $cfg->autoClaimTickets()
         ) {
             $this->setStaffId($thisstaff->getId()); //direct assignment;
