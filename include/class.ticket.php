@@ -2075,7 +2075,7 @@ implements RestrictedAccess, Threadable {
                 if ($thisstaff && $thisstaff->getId() == $assignee->getId())
                     $evd['claim'] = true;
                 else
-                    $evd['staff'] = array($assignee->getId(), $assignee->getName());
+                    $evd['staff'] = array($assignee->getId(), (string) $assignee->getName());
             }
         } elseif ($assignee instanceof Team) {
             if ($this->getTeamId() == $assignee->getId()) {
