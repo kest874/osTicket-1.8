@@ -162,7 +162,7 @@ case 'open':
 if ($status != 'closed' && $queue_name != 'assigned') {
     $hideassigned = ($cfg && !$cfg->showAssignedTickets()) && !$thisstaff->showAssignedTickets();
     $showassigned = !$hideassigned;
-    if ($status == 'open' && $hideassigned)
+    if ($queue_name == 'open' && $hideassigned)
         $tickets->filter(array('staff_id'=>0, 'team_id'=>0));
     else
         $tickets->values('staff__firstname', 'staff__lastname', 'team__name');
@@ -500,7 +500,15 @@ return false;">
                     ><?php echo $tid; ?></a></td>
                 <td align="center" nowrap><?php echo Format::datetime($T[$date_col ?: 'lastupdate']) ?: $date_fallback; ?></td>
                 <td><a <?php if ($flag) { ?> class="Icon <?php echo $flag; ?>Ticket" title="<?php echo ucfirst($flag); ?> Ticket" <?php } ?>
-                    style="max-width: 210px;"
+                    style="max-width: <?php
+                    $base = 280;
+                    // Make room for the paperclip and some extra
+                    if ($T['attachment_count']) $base -= 18;
+                    // Assume about 8px per digit character
+                    if ($threadcount > 1) $base -= 20 + ((int) log($threadcount, 10) + 1) * 8;
+                    // Make room for overdue flag and friends
+                    if ($flag) $base -= 20;
+                    echo $base; ?>px;"
                     href="tickets.php?id=<?php echo $T['ticket_id']; ?>"><span
                     class="truncate"><?php echo $subject; ?></span></a>
 <?php               if ($T['attachment_count'])
