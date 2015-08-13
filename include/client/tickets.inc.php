@@ -63,15 +63,7 @@ if($_REQUEST['order'] && $orderWays[strtoupper($_REQUEST['order'])])
 $x=$sort.'_sort';
 $$x=' class="'.strtolower($_REQUEST['order'] ?: 'desc').'" ';
 
-// Add visibility constraints
-$tickets
-    ->constrain(array(
-        'thread__collaborators' => new Q(array('thread__collaborators__user_id' => $thisclient->getId())),
-    ))
-    ->filter(Q::any(array(
-    'user_id' => $thisclient->getId(),
-    'thread__collaborators__user_id' => $thisclient->getId(),
-)));
+
 
 // Perform basic search
 if ($settings['keywords']) {

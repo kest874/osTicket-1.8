@@ -8,7 +8,7 @@ $htmlId = $options['html-id'] ?: ('thread-'.$this->getId());
 <div id="<?php echo $htmlId; ?>">
     <div id="thread-items" data-thread-id="<?php echo $this->getId(); ?>">
     <?php
-    if ($entries->exists(true)) {
+    if (count($entries)) {
         // Go through all the entries and bucket them by time frame
         $buckets = array();
         $rel = 0;
