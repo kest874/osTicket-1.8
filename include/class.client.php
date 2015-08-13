@@ -294,8 +294,13 @@ class  EndUser extends BaseAuthenticatedUser {
 
         // Share tickets among the organization for owners only
         $mine = clone $basic;
-        $mine->filter(Q::any(array(
+        $collab = clone $basic;
+        $mine->filter(array(
             'user_id' => $this->getId(),
+        ));
+
+        // TODO: Implement UNION ALL support in the ORM
+        $mine->union($collab->filter(array(
             'thread__collaborators__user_id' => $this->getId()
         )));
 
@@ -304,8 +309,6 @@ class  EndUser extends BaseAuthenticatedUser {
             $myorg->filter(array('user__org_id' => $this->getOrgId()))
                 ->values('user__org_id');
         }
-
-        // TODO: Implement UNION ALL support in the ORM
 
         return array('mine' => $mine, 'myorg' => $myorg);
     }
