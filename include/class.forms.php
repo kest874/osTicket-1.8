@@ -1944,6 +1944,658 @@ FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
         'department' => array(__('Department'), DepartmentField),
     );
 });
+
+//*********************** Child Departments ***********************
+// PID 1 through 13
+class ChildDepartmentsField1 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>1))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments1' => array(__('Child Departments pid:1'), ChildDepartmentsField1),
+    );
+});
+class ChildDepartmentsField2 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>2))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments2' => array(__('Child Departments pid:2'), ChildDepartmentsField2),
+    );
+});
+class ChildDepartmentsField3 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>3))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments3' => array(__('Child Departments pid:3'), ChildDepartmentsField3),
+    );
+});
+class ChildDepartmentsField4 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>4))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments4' => array(__('Child Departments pid:4'), ChildDepartmentsField4),
+    );
+});
+class ChildDepartmentsField5 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>5))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments5' => array(__('Child Departments pid:5'), ChildDepartmentsField5),
+    );
+});
+class ChildDepartmentsField6 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>6))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments6' => array(__('Child Departments pid:6'), ChildDepartmentsField6),
+    );
+});
+class ChildDepartmentsField7 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>7))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments7' => array(__('Child Departments pid:7'), ChildDepartmentsField7),
+    );
+});
+class ChildDepartmentsField8 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>8))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments8' => array(__('Child Departments pid:8'), ChildDepartmentsField8),
+    );
+});
+class ChildDepartmentsField9 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>9))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments9' => array(__('Child Departments pid:9'), ChildDepartmentsField9),
+    );
+});
+class ChildDepartmentsField10 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>10))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments10' => array(__('Child Departments pid:10'), ChildDepartmentsField10),
+    );
+});
+class ChildDepartmentsField12 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>12))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments12' => array(__('Child Departments pid:12'), ChildDepartmentsField12),
+    );
+});
+class ChildDepartmentsField13 extends ChoiceField {
+     function getWidget() {
+        $widget = parent::getWidget();
+        if ($widget->value instanceof Dept)
+            $widget->value = $widget->value->getId();
+        return $widget;
+    }
+    function hasIdValue() {
+        return true;
+    }
+    function getChoices() {
+        global $cfg;
+        $choices = array();
+        if (($depts = Dept::getDepartments(array('CD'=>13))))
+            foreach ($depts as $id => $name)
+                $choices[$id] = $name;
+        return $choices;
+    }
+    function parse($id) {
+        return $this->to_php(null, $id);
+    }
+    function to_php($value, $id=false) {
+        if (is_array($id)) {
+            reset($id);
+            $id = key($id);
+        }
+        return $id;
+    }
+    function to_database($dept) {
+        return ($dept instanceof Dept)
+            ? array($dept->getName(), $dept->getId())
+            : $dept;
+    }
+    function toString($value) {
+        return (string) $value;
+    }
+    function searchable($value) {
+        return null;
+    }
+    function getConfigurationOptions() {
+        return array(
+            'prompt' => new TextboxField(array(
+                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
+                'hint'=>__('Leading text shown before a value is selected'),
+                'configuration'=>array('size'=>40, 'length'=>40),
+            )),
+        );
+    }
+}
+FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
+    return array(
+        'childdepartments13' => array(__('Child Departments pid:13'), ChildDepartmentsField13),
+    );
+});
+//*****************************************************************
 class AssigneeField extends ChoiceField {
     var $_choices = array();
     var $_criteria = null;
