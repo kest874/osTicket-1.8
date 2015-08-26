@@ -204,7 +204,7 @@ if($ticket->isOverdue())
     <?php echo Format::htmlchars($ticket->getSubject()); ?>
     </h3>
 </div>
-<table class="ticket_info" cellspacing="0" cellpadding="0" width="940" border="0">
+<table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
     <tr>
         <td width="50%">
             <table border="0" cellspacing="" cellpadding="4" width="100%">
@@ -335,7 +335,7 @@ if($ticket->isOverdue())
     </tr>
 </table>
 <br>
-<table class="ticket_info" cellspacing="0" cellpadding="0" width="940" border="0">
+<table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
     <tr>
         <td width="50%">
             <table cellspacing="0" cellpadding="4" width="100%" border="0">
@@ -426,7 +426,7 @@ foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
     if (count($displayed) == 0)
         continue;
     ?>
-    <table class="ticket_info custom-data" cellspacing="0" cellpadding="0" width="940" border="0">
+    <table class="ticket_info custom-data" cellspacing="0" cellpadding="0" width="100%" border="0">
     <thead>
         <th colspan="2"><?php echo Format::htmlchars($form->getTitle()); ?></th>
     </thead>
