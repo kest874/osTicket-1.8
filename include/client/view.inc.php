@@ -1,5 +1,5 @@
 <?php
-if(!defined('OSTCLIENTINC') || !$thisclient || !$ticket || !$ticket->checkUserAccess($thisclient)) die('Access Denied!');
+//if(!defined('OSTCLIENTINC') || !$thisclient || !$ticket || !$ticket->checkUserAccess($thisclient)) die('Access Denied!');
 
 $info=($_POST && $errors)?Format::htmlchars($_POST):array();
 
@@ -14,7 +14,8 @@ if(!$dept || !$dept->isPublic())
 
 if ($thisclient && $thisclient->isGuest()
     && $cfg->isClientRegistrationEnabled()) { ?>
-
+<div class="row">
+	<div class="col-md-12">
 <div id="msg_info">
     <i class="icon-compass icon-2x pull-left"></i>
     <strong><?php echo __('Looking for your other tickets?'); ?></strong><br />
@@ -24,29 +25,34 @@ if ($thisclient && $thisclient->isGuest()
     <?php echo sprintf(__('or %s register for an account %s for the best experience on our help desk.'),
         '<a href="account.php?do=create" style="text-decoration:underline">','</a>'); ?>
     </div>
-
-<?php } ?>
-
-<table width="800" cellpadding="1" cellspacing="0" border="0" id="ticketInfo">
-    <tr>
-        <td colspan="2" width="100%">
-            <h2>
-                <a href="tickets.php?id=<?php echo $ticket->getId(); ?>" title="<?php echo __('Reload'); ?>"><i class="refresh icon-refresh"></i></a>
-                <b><?php echo Format::htmlchars($ticket->getSubject()); ?></b>
-                <small>#<?php echo $ticket->getNumber(); ?></small>
-<div class="pull-right">
-    <a class="action-button btn-lg" href="tickets.php?a=print&id=<?php
-        echo $ticket->getId(); ?>"><i class="icon-print"></i> <?php echo __('Print'); ?></a>
-<?php if ($ticket->hasClientEditableFields()
-        // Only ticket owners can edit the ticket details (and other forms)
-        && $thisclient->getId() == $ticket->getUserId()) { ?>
-                <a class="action-button  btn-lg" href="tickets.php?a=edit&id=<?php
-                     echo $ticket->getId(); ?>"><i class="icon-edit"></i> <?php echo __('Edit'); ?></a>
-<?php } ?>
 </div>
-            </h2>
-        </td>
-    </tr></table>
+</div>
+<?php } ?>
+<div class="row">
+	<div class="col-md-12">
+		<table width="800" cellpadding="1" cellspacing="0" border="0" id="ticketInfo">
+			<tr>
+				<td colspan="2" width="100%">
+					<h2>
+						<a href="tickets.php?id=<?php echo $ticket->getId(); ?>" title="<?php echo __('Reload'); ?>"><i class="refresh icon-refresh"></i></a>
+						<b><?php echo Format::htmlchars($ticket->getSubject()); ?></b>
+						<small>#<?php echo $ticket->getNumber(); ?></small>
+						<div class="pull-right">
+							<a class="action-button btn-lg" href="tickets.php?a=print&id=<?php
+								echo $ticket->getId(); ?>"><i class="icon-print"></i> <?php echo __('Print'); ?></a>
+						<?php if ($ticket->hasClientEditableFields()
+								// Only ticket owners can edit the ticket details (and other forms)
+								&& $thisclient->getId() == $ticket->getUserId()) { ?>
+										<a class="action-button  btn-lg" href="tickets.php?a=edit&id=<?php
+											 echo $ticket->getId(); ?>"><i class="icon-edit"></i> <?php echo __('Edit'); ?></a>
+						<?php } ?>
+						</div>
+					</h2>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
 <div class="row">
     <div class="col-md-6">
 		<div>
@@ -84,98 +90,125 @@ if ($thisclient && $thisclient->isGuest()
 	 </div>
 </div>
 <div class="row">
-<div class="col-md-12">
-<!-- Custom Data -->
-<?php
-foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
-    // Skip core fields shown earlier in the ticket view
-    $answers = $form->getAnswers()->exclude(Q::any(array(
-        'field__flags__hasbit' => DynamicFormField::FLAG_EXT_STORED,
-        'field__name__in' => array('subject', 'priority'),
-        Q::not(array('field__flags__hasbit' => DynamicFormField::FLAG_CLIENT_VIEW)),
-    )));
-    if (count($answers) == 0)
-        continue;
-    ?>
-        <div class="col-md-4 row">
-        <div><h3><?php echo $form->getTitle(); ?></h3></div>
-        <?php foreach($answers as $a) {
-            if (!($v = $a->display())) continue; ?>
-            <div>
-                <label><?php
-    echo $a->getField()->get('label');
-                ?>:</label>
-               <?php
-    echo $v;
-                ?>
-            
-            <?php } ?>
-			</div>
-    <?php
-    $idx++;
-} ?></br>
+	<div class="col-md-12">
+	<!-- Custom Data -->
+	<?php
+	foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
+		// Skip core fields shown earlier in the ticket view
+		$answers = $form->getAnswers()->exclude(Q::any(array(
+			'field__flags__hasbit' => DynamicFormField::FLAG_EXT_STORED,
+			'field__name__in' => array('subject', 'priority'),
+			Q::not(array('field__flags__hasbit' => DynamicFormField::FLAG_CLIENT_VIEW)),
+		)));
+		if (count($answers) == 0)
+			continue;
+		?>
+			<div class="col-md-4 row">
+			<div><h3><?php echo $form->getTitle(); ?></h3></div>
+			<?php foreach($answers as $a) {
+				if (!($v = $a->display())) continue; ?>
+				<div>
+					<label><?php
+		echo $a->getField()->get('label');
+					?>:</label>
+				   <?php
+		echo $v;
+					?>
+				</div>
+				<?php } ?>
+				
+		<?php
+		$idx++;
+	} ?></br>
+		</div>
 	</div>
 </div>
-</div>
-
-<div class="col-md-12">
-
-
-<?php
-    $ticket->getThread()->render(array('M', 'R'), array(
-                'mode' => Thread::MODE_CLIENT,
-                'html-id' => 'ticketThread')
-            );
-?>
+<div class="row">
+	<div class="col-md-12">
 
 
-<?php if($errors['err']) { ?>
-    <div id="error" class="alert alert-danger"><?php echo $errors['err']; ?></div>
-<?php }elseif($msg) { ?>
-    <div id="msg_notice" class="alert alert-warning"><?php echo $msg; ?></div>
-<?php }elseif($warn) { ?>
-    <div id="msg_warning" class="alert alert-danger"><?php echo $warn; ?></div>
-<?php }
+	<?php
+		$ticket->getThread()->render(array('M', 'R'), array(
+					'mode' => Thread::MODE_CLIENT,
+					'html-id' => 'ticketThread')
+				);
+	?>
 
-if (!$ticket->isClosed() || $ticket->isReopenable()) { ?>
-<form id="reply" action="tickets.php?id=<?php echo $ticket->getId();
-?>#reply" name="reply" method="post" enctype="multipart/form-data">
-    <?php csrf_token(); ?>
-    <h2><?php echo __('Post a Reply');?></h2>
-    <input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
-    <input type="hidden" name="a" value="reply">
-    <div>
-        <p><em><?php
-         echo __('To best assist you, we request that you be specific and detailed'); ?></em>
+
+	<?php if($errors['err']) { ?>
+		<div id="error" class="alert alert-danger"><?php echo $errors['err']; ?></div>
+	<?php }elseif($msg) { ?>
+		<div id="msg_notice" class="alert alert-warning"><?php echo $msg; ?></div>
+	<?php }elseif($warn) { ?>
+		<div id="msg_warning" class="alert alert-danger"><?php echo $warn; ?></div>
 		
-        <font class="error alert">*&nbsp;<?php echo $errors['message']; ?></font>
-        </p>
-        <textarea name="message" id="message" cols="50" rows="9" wrap="soft"
-            class="<?php if ($cfg->isRichTextEnabled()) echo 'richtext';
-                ?> draft" <?php
-list($draft, $attrs) = Draft::getDraftAndDataAttrs('ticket.client', $ticket->getId(), $info['message']);
-echo $attrs; ?>><?php echo $draft ?: $info['message'];
-            ?></textarea>
-    <?php
-    if ($messageField->isAttachmentsEnabled()) {
-        print $attachments->render(array('client'=>true));
-    } ?>
-    </div>
-<?php if ($ticket->isClosed()) { ?>
-    <div class="alert alert-info">
-        <?php echo __('Ticket will be reopened on message post'); ?>
-    </div>
-<?php } ?>
-    <p >
-        <input  class="btn btn-success" type="submit" value="<?php echo __('Post Reply');?>">
-        <input  class="btn btn-warning" type="reset" value="<?php echo __('Reset');?>">
-        <input  class="btn btn-default" type="button" value="<?php echo __('Cancel');?>" onClick="location.href='/tickets.php'">
-    </p>
-</form>
+
+	<?php } ?>
+	
+		</div>	
 </div>
-<div class="clearfix"></div>
 <?php
-} ?>
+
+if ($thisclient->getId() == $ticket->getUserId()  ) { ?>
+
+<div class="row">
+	<div id="reply" class="col-md-12">
+		<form id="reply" action="tickets.php?id=<?php echo $ticket->getId();
+		?>#reply" name="reply" method="post" enctype="multipart/form-data">
+			<?php csrf_token(); ?>
+			<h2><?php echo __('Post a Reply');?></h2>
+			<input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
+			<input type="hidden" name="a" value="reply">
+			<div>
+				<p><em><?php
+				 echo __('To best assist you, we request that you be specific and detailed'); ?></em>
+				
+				<font class="error alert">*&nbsp;<?php echo $errors['message']; ?></font>
+				</p>
+				<textarea name="message" id="message" cols="50" rows="9" wrap="soft"
+					class="<?php if ($cfg->isRichTextEnabled()) echo 'richtext';
+						?> draft" <?php
+		list($draft, $attrs) = Draft::getDraftAndDataAttrs('ticket.client', $ticket->getId(), $info['message']);
+		echo $attrs; ?>><?php echo $draft ?: $info['message'];
+					?></textarea>
+			<?php
+			if ($messageField->isAttachmentsEnabled()) {
+				print $attachments->render(array('client'=>true));
+			} ?>
+			</div>
+		<?php if ($ticket->isClosed()) { ?>
+			<div class="alert alert-info">
+				<?php echo __('Ticket will be reopened on message post'); ?>
+			</div>
+		<?php } ?>
+			<p >
+				<input  class="btn btn-success" type="submit" value="<?php echo __('Post Reply');?>">
+				<input  class="btn btn-warning" type="reset" value="<?php echo __('Reset');?>">
+				<input  class="btn btn-default" type="button" value="<?php echo __('Cancel');?>" onClick="location.href='/tickets.php'">
+			</p>
+		</form>
+	</div>
+</div>
+<?php
+} 
+
+else {
+
+?>
+<div class="row">
+	<div class="col-md-12">
+		</br>
+		 <p >
+		 <input class="btn btn-success" type="button" value="<?php echo __('Go back');?>" onClick="history.go(-1)">
+		 </p>
+	</div>
+</div>
+
+<?php
+}	?> 
+
+
+<div class="clearfix"></div>
 <script type="text/javascript">
 <?php
 // Hover support for all inline images

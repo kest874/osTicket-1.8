@@ -1,11 +1,9 @@
 	<!--Begin of footer-->
- <div class="push"></div>
+				<div class="push"></div>
+				</div> <!--col-md-12-->
 		</div><!--row-->
-
-	 <!--container-->
-</div>
-</div>
-	</div>
+	</div><!--container-->
+</div><!--wrapper-->
 	
 
 	

@@ -13,6 +13,13 @@ if (isset($_REQUEST['topic_id'])) {
 if (isset($_REQUEST['status'])) {
     $settings['status'] = $_REQUEST['status'];
 }
+if (isset($_REQUEST['my'])) {
+    $settings['my'] = $_REQUEST['my'];
+}
+$mine = $settings['my'];
+if (!isset($mine)) {
+    $mine=1;
+};
 
 if ($settings['keywords']) {
     // Don't show stat counts for searches
@@ -30,6 +37,9 @@ else {
 $tickets = TicketModel::objects();
 $qs = array();
 $status=null;
+
+
+
 if ($settings['status'])
     $status = strtolower($settings['status']);
     switch ($status) {
@@ -37,10 +47,19 @@ if ($settings['status'])
         $status = 'open';
     case 'open':
     case 'closed':
-		$results_type = ($status == 'closed') ? __('<span style="color:rgb(192, 80, 77)"><strong> Closed </strong></span> Tickets') : __('<span style="color:rgb(192, 80, 77)"><strong> Open </strong></span> Tickets');
+		$results_type = ($status == 'closed') ? __('<span style="color:rgb(192, 80, 77)"><strong>All Closed </strong></span> Tickets') : __('<span style="color:rgb(192, 80, 77)"><strong> All Open </strong></span> Tickets');
         $tickets->filter(array('status__state' => $status));
         break;
 }
+if ($mine != 0){
+	$results_type = ($settings['my'] != 0 && $status == 'closed') ? __('<span style="color:rgb(192, 80, 77)"><strong>My Closed  </strong></span>Tickets') : __('<span style="color:rgb(192, 80, 77)"><strong>My Open </strong></span> Tickets');
+// Add visibility constraints
+$tickets->filter(Q::any(array(
+    'user_id' => $thisclient->getId(),
+    'thread__collaborators__user_id' => $thisclient->getId(),
+)));
+}
+
 $sortOptions=array('id'=>'number', 'subject'=>'cdata__subject',
                     'status'=>'status__name', 'dept'=>'dept__name','date'=>'created');
 $orderWays=array('DESC'=>'-','ASC'=>'');
@@ -55,10 +74,10 @@ if($_REQUEST['order'] && $orderWays[strtoupper($_REQUEST['order'])])
 $x=$sort.'_sort';
 $$x=' class="'.strtolower($_REQUEST['order'] ?: 'desc').'" ';
 // Add visibility constraints
-$tickets->filter(Q::any(array(
-    'user_id' => $thisclient->getId(),
-    'thread__collaborators__user_id' => $thisclient->getId(),
-)));
+//$tickets->filter(Q::any(array(
+//    'user_id' => $thisclient->getId(),
+//    'thread__collaborators__user_id' => $thisclient->getId(),
+//)));
 // Perform basic search
 if ($settings['keywords']) {
     $q = $settings['keywords'];
@@ -122,8 +141,9 @@ $tickets->values(
 				<option value="">&mdash; <?php echo __('All Help Topics');?> &mdash;</option>
 		<?php foreach (Topic::getHelpTopics(true) as $id=>$name) {
 				$count = $thisclient->getNumTopicTickets($id);
-				if ($count == 0)
-					continue;
+				//Show all topics
+				//if ($count == 0)
+				//	continue;
 		?>
 				<option value="<?php echo $id; ?>"i
 					<?php if ($settings['topic_id'] == $id) echo 'selected="selected"'; ?>
@@ -141,7 +161,7 @@ $tickets->values(
 
 <div class="row">
 
-		<div class="col-xs-6 col-md-6">
+		<div class="col-xs-5 col-md-5">
 			<h2>
 				<a href="<?php echo Format::htmlchars($_SERVER['REQUEST_URI']); ?>">
 				<i class="refresh icon-refresh"></i>
@@ -149,21 +169,26 @@ $tickets->values(
 				</a>
 			</h2>
 		</div>
-		<div class="col-xs-6 col-md-6 text-right">
+		<div class="col-xs-7 col-md-7 text-right">
 			<h3 style="color: #337ab7;">
-			
-			<a class="action-button btn-lg <?php if ($status == 'open') echo 'active'; ?>"
-				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'open')); ?>">
-			<i class="icon-file-alt"></i> <?php echo sprintf('%s (%d)', _P('ticket-status', 'Open'), $thisclient->getNumOpenTickets()); ?>
+			<a class="action-button btn-lg <?php if ($mine != 0  && $status == 'open') echo 'active'; ?>"
+				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'open', 'my' => '1')); ?>">
+			<i class="icon-file-alt"></i>  <?php echo sprintf('%s (%d)', __('My Open'), $thisclient->getNumOpenTickets()); ?>
+			</a>     			
+			 <span style="color:lightgray">|</span>
+			<a class="action-button btn-lg <?php if ($mine != 0  && $status == 'closed') echo 'active'; ?>"
+				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'closed', 'my' => '1')); ?>">
+			<i class="icon-file-text"></i>  <?php echo sprintf('%s (%d)', __('My Closed'), $thisclient->getNumClosedTickets()); ?>
 			</a>
 			
-	
+			<a class="action-button btn-lg <?php if ($status == 'open' && $mine != 1) echo 'active'; ?>"
+				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'open', 'my' => '0')); ?>">
+			<i class="icon-file-alt"></i> <?php echo sprintf('%s (%d)', _P('ticket-status', 'All Open'), $thisclient->getNumOpenTickets()); ?>
+			</a>
 			<span style="color:lightgray">|</span>
-		
-			
-			<a class="action-button btn-lg <?php if ($status == 'closed') echo 'active'; ?>"
-				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'closed')); ?>">
-			<i class="icon-file-text"></i> <?php echo sprintf('%s (%d)', __('Closed'), $thisclient->getNumClosedTickets()); ?>
+			<a class="action-button btn-lg <?php if ($status == 'closed' && $mine != 1) echo 'active'; ?>"
+				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'closed', 'my' => '0')); ?>">
+			<i class="icon-file-text"></i> <?php echo sprintf('%s (%d)', __('All Closed'), $thisclient->getNumClosedTickets()); ?>
 			</a>
 			</h3>
 		</div>
