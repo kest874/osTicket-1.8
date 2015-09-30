@@ -515,6 +515,8 @@ class FormField {
     function getClean() {
         if (!isset($this->_clean)) {
             $this->_clean = (isset($this->value))
+                // XXX: The widget value may be parsed already if this is
+                //      linked to dynamic data via ::getAnswer()
                 ? $this->value : $this->parse($this->getWidget()->value);
             if ($vs = $this->get('cleaners')) {
                 if (is_array($vs)) {
@@ -1834,6 +1836,8 @@ class PriorityField extends ChoiceField {
         return $this->to_php(null, $id);
     }
     function to_php($value, $id=false) {
+        if ($value instanceof Priority)
+            return $value;
         if (is_array($id)) {
             reset($id);
             $id = key($id);
@@ -1850,6 +1854,14 @@ class PriorityField extends ChoiceField {
             ? array($prio->getDesc(), $prio->getId())
             : $prio;
     }
+
+    function display($prio) {
+        if (!$prio instanceof Priority)
+            return parent::display($prio);
+        return sprintf('<span style="padding: 2px; background-color: %s">%s</span>',
+            $prio->getColor(), Format::htmlchars($prio->getDesc()));
+    }
+
     function toString($value) {
         return ($value instanceof Priority) ? $value->getDesc() : $value;
     }
@@ -3958,6 +3970,11 @@ class FreeTextWidget extends Widget {
     }
 }
 class VisibilityConstraint {
+
+    static $operators = array(
+        'eq' => 1,
+    );
+
     const HIDDEN =      0x0001;
     const VISIBLE =     0x0002;
     var $initial;
@@ -4007,6 +4024,16 @@ class VisibilityConstraint {
     function isVisible($field) {
         return $this->compileQPhp($this->constraint, $field);
     }
+
+    static function splitFieldAndOp($field) {
+        if (false !== ($last = strrpos($field, '__'))) {
+            $op = substr($field, $last + 2);
+            if (isset(static::$operators[$op]))
+                $field = substr($field, 0, strrpos($field, '__'));
+        }
+        return array($field, $op);
+    }
+
     function compileQPhp(Q $Q, $field) {
         if (!($form = $field->getForm())) {
             return $this->initial == self::VISIBLE;
@@ -4017,7 +4044,7 @@ class VisibilityConstraint {
                 $expr[] = $this->compileQPhp($value, $field);
             }
             else {
-                @list($f, $op) = explode('__', $c, 2);
+                @list($f, $op) = self::splitFieldAndOp($c);
                 $field = $form->getField($f);
                 $wval = $field->getClean();
                 switch ($op) {
@@ -4042,7 +4069,7 @@ class VisibilityConstraint {
                 $this->getAllFields($c, $fields);
             }
             else {
-                list($f, $op) = explode('__', $c, 2);
+                @list($f) = self::splitFieldAndOp($c);
                 $fields[$f] = true;
             }
         }
@@ -4055,7 +4082,7 @@ class VisibilityConstraint {
                 $expr[] = $this->compileQ($value, $form);
             }
             else {
-                list($f, $op) = explode('__', $c, 2);
+                list($f, $op) = self::splitFieldAndOp($c);
                 $widget = $form->getField($f)->getWidget();
                 $id = $widget->id;
                 switch ($op) {

@@ -13,53 +13,33 @@ if (isset($_REQUEST['topic_id'])) {
 if (isset($_REQUEST['status'])) {
     $settings['status'] = $_REQUEST['status'];
 }
+$org_tickets = $thisclient->canSeeOrgTickets();
+if ($settings['keywords']) {
+    // Don't show stat counts for searches
+    $openTickets = $closedTickets = -1;
+}
+elseif ($settings['topic_id']) {
+    $openTickets = $thisclient->getNumTopicTicketsInState($settings['topic_id'],
+        'open', $org_tickets);
+    $closedTickets = $thisclient->getNumTopicTicketsInState($settings['topic_id'],
+        'closed', $org_tickets);
+}
+else {
+    $openTickets = $thisclient->getNumOpenTickets($org_tickets);
+    $closedTickets = $thisclient->getNumClosedTickets($org_tickets);
+}
 if (isset($_REQUEST['my'])) {
     $settings['my'] = $_REQUEST['my'];
+	
 }
 $mine = $settings['my'];
 if (!isset($mine)) {
     $mine=1;
 };
 
-if ($settings['keywords']) {
-    // Don't show stat counts for searches
-    $openTickets = $closedTickets = -1;
-}
-elseif ($settings['topic_id']) {
-    $openTickets = $thisclient->getNumTopicTicketsInState($settings['topic_id'], 'open');
-    $closedTickets = $thisclient->getNumTopicTicketsInState($settings['topic_id'], 'closed');
-}
-else {
-    $openTickets = $thisclient->getNumOpenTickets();
-    $closedTickets = $thisclient->getNumClosedTickets();
-}
-
-$tickets = TicketModel::objects();
+$tickets = Ticket::objects();
 $qs = array();
 $status=null;
-
-
-
-if ($settings['status'])
-    $status = strtolower($settings['status']);
-    switch ($status) {
-    default:
-        $status = 'open';
-    case 'open':
-    case 'closed':
-		$results_type = ($status == 'closed') ? __('<span style="color:rgb(192, 80, 77)"><strong>All Closed </strong></span> Tickets') : __('<span style="color:rgb(192, 80, 77)"><strong> All Open </strong></span> Tickets');
-        $tickets->filter(array('status__state' => $status));
-        break;
-}
-if ($mine != 0){
-	$results_type = ($settings['my'] != 0 && $status == 'closed') ? __('<span style="color:rgb(192, 80, 77)"><strong>My Closed  </strong></span>Tickets') : __('<span style="color:rgb(192, 80, 77)"><strong>My Open </strong></span> Tickets');
-// Add visibility constraints
-$tickets->filter(Q::any(array(
-    'user_id' => $thisclient->getId(),
-    'thread__collaborators__user_id' => $thisclient->getId(),
-)));
-}
-
 $sortOptions=array('id'=>'number', 'subject'=>'cdata__subject',
                     'status'=>'status__name', 'dept'=>'dept__name','date'=>'created');
 $orderWays=array('DESC'=>'-','ASC'=>'');
@@ -73,11 +53,50 @@ if($_REQUEST['order'] && $orderWays[strtoupper($_REQUEST['order'])])
     $order=$orderWays[strtoupper($_REQUEST['order'])];
 $x=$sort.'_sort';
 $$x=' class="'.strtolower($_REQUEST['order'] ?: 'desc').'" ';
-// Add visibility constraints
-//$tickets->filter(Q::any(array(
-//    'user_id' => $thisclient->getId(),
-//    'thread__collaborators__user_id' => $thisclient->getId(),
-//)));
+$basic_filter = Ticket::objects();
+if ($settings['topic_id']) {
+    $basic_filter = $basic_filter->filter(array('topic_id' => $settings['topic_id']));
+}
+if ($settings['status'])
+    $status = strtolower($settings['status']);
+    switch ($status) {
+    default:
+        $status = 'open';
+    case 'open':
+    case 'closed':
+		//$results_type = ($status == 'closed') ? __('Closed Tickets') : __('Open Tickets');
+		$results_type = ($status == 'closed') ? __('<span style="color:rgb(192, 80, 77)"><strong>All Closed </strong></span> Tickets') : __('<span style="color:rgb(192, 80, 77)"><strong> All Open </strong></span> Tickets');
+        $basic_filter->filter(array('status__state' => $status));
+        break;
+}
+// Add visibility constraints — use a union query to use multiple indexes,
+// use UNION without "ALL" (false as second parameter to union()) to imply
+// unique values
+$visibility = $basic_filter->copy()
+    ->values_flat('ticket_id')
+    ->filter(array('user_id' => $thisclient->getId()))
+    ->union($basic_filter->copy()
+        ->values_flat('ticket_id')
+        ->filter(array('thread__collaborators__user_id' => $thisclient->getId()))
+    , false);
+	
+if ($thisclient->canSeeOrgTickets()) {
+    $visibility = $visibility->union(
+        $basic_filter->copy()->values_flat('ticket_id')
+            ->filter(array('user__org_id' => $thisclient->getOrgId()))
+    , false);
+}
+
+
+if  ($mine != 1) {
+	$visibility = $basic_filter->copy()
+    ->values_flat('ticket_id')
+		->union($basic_filter->copy()
+        ->values_flat('ticket_id')
+        ->filter(array('thread__collaborators__user_id' => $thisclient->getId()))
+    , false);
+}
+
 // Perform basic search
 if ($settings['keywords']) {
     $q = $settings['keywords'];
@@ -88,9 +107,7 @@ if ($settings['keywords']) {
         $tickets = $ost->searcher->find($q, $tickets);
     }
 }
-if ($settings['topic_id']) {
-    $tickets = $tickets->filter(array('topic_id' => $settings['topic_id']));
-}
+$tickets->distinct('ticket_id');
 TicketForm::ensureDynamicDataView();
 $total=$tickets->count();
 $page=($_GET['p'] && is_numeric($_GET['p']))?$_GET['p']:1;
@@ -98,6 +115,7 @@ $pageNav=new Pagenate($total, $page, PAGE_LIMIT);
 $qstr = '&amp;'. Http::build_query($qs);
 $qs += array('sort' => $_REQUEST['sort'], 'order' => $_REQUEST['order']);
 $pageNav->setURL('tickets.php', $qs);
+$tickets->filter(array('ticket_id__in' => $visibility));
 $pageNav->paginate($tickets);
 $showing =$total ? $pageNav->showing() : "";
 if(!$results_type)
@@ -108,14 +126,12 @@ $showing.=($status)?(' '.$results_type):' '.__('All Tickets');
 if($search)
     $showing=__('Search Results').": $showing";
 $negorder=$order=='-'?'ASC':'DESC'; //Negate the sorting
-$tickets->order_by($order.$order_by);
 $tickets->values(
     'ticket_id', 'number', 'created', 'isanswered', 'source', 'status_id',
     'status__state', 'status__name', 'cdata__subject', 'dept_id',
     'dept__name', 'dept__ispublic', 'user__default_email__address'
 );
 ?>
-
 <div class="row ">
 	<div class="col-md-12" >
 	<form action="tickets.php" method="get" id="ticketSearchForm">
@@ -160,7 +176,6 @@ $tickets->values(
 <div class="clearfix"></div>
 
 <div class="row">
-
 		<div class="col-xs-5 col-md-5">
 			<h2>
 				<a href="<?php echo Format::htmlchars($_SERVER['REQUEST_URI']); ?>">
@@ -170,25 +185,32 @@ $tickets->values(
 			</h2>
 		</div>
 		<div class="col-xs-7 col-md-7 text-right">
-			<h3 style="color: #337ab7;">
+		<h3 style="color: #337ab7;">
+		<?php if ($openTickets) { ?>
+			
 			<a class="action-button btn-lg <?php if ($mine != 0  && $status == 'open') echo 'active'; ?>"
 				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'open', 'my' => '1')); ?>">
-			<i class="icon-file-alt"></i>  <?php echo sprintf('%s (%d)', __('My Open'), $thisclient->getNumOpenTickets()); ?>
-			</a>     			
+			<i class="icon-file-alt"></i>
+			<?php echo _P('ticket-status', 'My Open'); if ($openTickets > 0) echo sprintf(' (%d)', $openTickets); ?>
+			</a>  
+<?php 
+}
+if ($closedTickets) {?>   			
 			 <span style="color:lightgray">|</span>
 			<a class="action-button btn-lg <?php if ($mine != 0  && $status == 'closed') echo 'active'; ?>"
 				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'closed', 'my' => '1')); ?>">
-			<i class="icon-file-text"></i>  <?php echo sprintf('%s (%d)', __('My Closed'), $thisclient->getNumClosedTickets()); ?>
-			</a>
 			
+			<?php echo __('My Closed'); if ($closedTickets > 0) echo sprintf(' (%d)', $closedTickets); ?>
+			</a>
+		<?php } ?>	
 			<a class="action-button btn-lg <?php if ($status == 'open' && $mine != 1) echo 'active'; ?>"
 				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'open', 'my' => '0')); ?>">
-			<i class="icon-file-alt"></i> <?php echo sprintf('%s (%d)', _P('ticket-status', 'All Open'), $thisclient->getNumOpenTickets()); ?>
+			<i class="icon-file-alt"></i> <?php echo sprintf('%s', _P('ticket-status', 'All Open'), $thisclient->getNumOpenTickets()); ?>
 			</a>
 			<span style="color:lightgray">|</span>
 			<a class="action-button btn-lg <?php if ($status == 'closed' && $mine != 1) echo 'active'; ?>"
 				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'closed', 'my' => '0')); ?>">
-			<i class="icon-file-text"></i> <?php echo sprintf('%s (%d)', __('All Closed'), $thisclient->getNumClosedTickets()); ?>
+			<i class="icon-file-text"></i> <?php echo sprintf('%s', __('All Closed'), $thisclient->getNumClosedTickets()); ?>
 			</a>
 			</h3>
 		</div>
@@ -245,7 +267,7 @@ $tickets->values(
                 <td class="text-nowrap">&nbsp;<?php echo Format::date($T['created']); ?></td>
                 <td class="text-nowrap">&nbsp;<?php echo $status; ?></td>
                 <td>
-                    <a class="truncate" href="tickets.php?id=<?php echo $T['ticket_id']; ?>"><?php echo $subject; ?></a>
+				 <a class="truncate" href="tickets.php?id=<?php echo $T['ticket_id']; ?>"><?php echo $subject; ?></a>
                 </td>
                 <td  class="hidden-xs">&nbsp;<span class="truncate"><?php echo $dept; ?></span></td>
             </tr>
@@ -262,4 +284,6 @@ if ($total) {
     echo '<div>&nbsp;'.__('Page').':'.$pageNav->getPageLinks().'&nbsp;</div>';
 }
 ?>
+
 </div>
+

@@ -1,17 +1,12 @@
 <?php
 //if(!defined('OSTCLIENTINC') || !$thisclient || !$ticket || !$ticket->checkUserAccess($thisclient)) die('Access Denied!');
-
 $info=($_POST && $errors)?Format::htmlchars($_POST):array();
-
 $dept = $ticket->getDept();
-
 if ($ticket->isClosed() && !$ticket->isReopenable())
     $warn = __('This ticket is marked as closed and cannot be reopened.');
-
 //Making sure we don't leak out internal dept names
 if(!$dept || !$dept->isPublic())
     $dept = $cfg->getDefaultDept();
-
 if ($thisclient && $thisclient->isGuest()
     && $cfg->isClientRegistrationEnabled()) { ?>
 <div class="row">
@@ -148,7 +143,6 @@ if ($thisclient && $thisclient->isGuest()
 		</div>	
 </div>
 <?php
-
 if ($thisclient->getId() == $ticket->getUserId()  ) { ?>
 
 <div class="row">
@@ -191,9 +185,7 @@ if ($thisclient->getId() == $ticket->getUserId()  ) { ?>
 </div>
 <?php
 } 
-
 else {
-
 ?>
 <div class="row">
 	<div class="col-md-12">

@@ -128,7 +128,7 @@ if($ticket) {
     }
     else
         $inc='view.inc.php';
-} elseif($thisclient->getNumTickets()) {
+} elseif($thisclient->getNumTickets($thisclient->canSeeOrgTickets())) {
     $inc='tickets.inc.php';
 } else {
     //$nav->setActiveNav('new');

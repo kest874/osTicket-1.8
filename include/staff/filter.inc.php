@@ -352,7 +352,7 @@ $info=Format::htmlchars(($errors && $_POST)?$_POST:$info);
        next++;
      });
 <?php if (!$info['rules']) { ?>
-       $('#add-rule').trigger('click').trigger('click');
+        $('#add-rule').trigger('click').trigger('click');
 <?php } ?>
    });
 </script>
