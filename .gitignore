@@ -3,6 +3,7 @@ php53.cgi
 include/ost-config.php
 setup/cli/modules/importer
 *.sw[a-z]
+*.log
 .DS_Store
 .vagrant
 ._.DS_Store
