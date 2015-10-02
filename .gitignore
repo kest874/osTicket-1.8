@@ -2,6 +2,8 @@
 php53.cgi
 include/ost-config.php
 setup/cli/modules/importer
+include/plugins
+phpinfo.php
 *.sw[a-z]
 *.log
 .DS_Store
