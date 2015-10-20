@@ -2913,7 +2913,13 @@ class FileUploadField extends FormField {
             Http::response(413, 'File is too large');
         if (!($F = AttachmentFile::upload($file)))
             Http::response(500, 'Unable to store file: '. $file['error']);
-        return $F->getId();
+
+        $id = $F->getId();
+
+        // This file is allowed for attachment in this session
+        $_SESSION[':uploadedFiles'][$id] = 1;
+
+        return $id;
     }
     /**
      * Called from FileUploadWidget::getValue() when manual upload is used
@@ -3870,19 +3876,34 @@ class FileUploadWidget extends Widget {
             return $ids;
         }
         // If no value was sent, assume an empty list
-        $base = parent::getValue();
-        if (!$base)
+        if (!($files = parent::getValue()))
             return array();
-        if (is_array($base)) {
-            foreach ($base as $info) {
-                @list($id, $name) = explode(',', $info, 2);
-                // Keep the values as the IDs
-                if ($name)
-                    $ids[$name] = $id;
-                else
-                    $ids[] = $id;
-            }
+
+        // Files uploaded here MUST have been uploaded by this user and
+        // identified in the session
+        $allowed = array();
+        // Files already attached to the field are allowed
+        foreach ($this->field->getFiles() as $f) {
+            $allowed[$f->id] = 1;
         }
+
+        // New files uploaded in this session are allowed
+        if (isset($_SESSION[':uploadedFiles']))
+            $allowed += $_SESSION[':uploadedFiles'];
+
+        // Parse the files and make sure it's allowed.
+        foreach ($files as $info) {
+            @list($id, $name) = explode(',', $info, 2);
+            if (!isset($allowed[$id]))
+                continue;
+
+            // Keep the values as the IDs
+            if ($name)
+                $ids[$name] = $id;
+            else
+                $ids[] = $id;
+        }
+
         return $ids;
     }
 }

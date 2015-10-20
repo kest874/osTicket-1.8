@@ -99,10 +99,10 @@ if  ($mine != 1) {
 
 // Perform basic search
 if ($settings['keywords']) {
-    $q = $settings['keywords'];
+    $q = trim($settings['keywords']);
     if (is_numeric($q)) {
         $tickets->filter(array('number__startswith'=>$q));
-    } else { //Deep search!
+    } elseif (strlen($q) > 2) { //Deep search!
         // Use the search engine to perform the search
         $tickets = $ost->searcher->find($q, $tickets);
     }
