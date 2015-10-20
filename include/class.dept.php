@@ -477,6 +477,10 @@ implements TemplateVariable {
             // XXX: This will upset the static $depts array
             $depts = array();
             $query = self::objects();
+			//Choose Child Departments (parent ID)
+			if (isset($criteria['CD']))
+                $query->filter(array(
+                            'pid' => ($criteria['CD'] )));
             if (isset($criteria['publiconly']))
                 $query->filter(array(
                             'ispublic' => ($criteria['publiconly'] ? 1 : 0)));

@@ -4,7 +4,10 @@ include/ost-config.php
 include/plugins
 include/plugins/updates.pem
 setup/cli/modules/importer
+include/plugins
+phpinfo.php
 *.sw[a-z]
+*.log
 .DS_Store
 .vagrant
 ._.DS_Store

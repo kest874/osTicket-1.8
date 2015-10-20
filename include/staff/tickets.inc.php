@@ -30,6 +30,8 @@ $sort_options = array(
     'closed' =>             __('Most Recently Closed'),
     'hot' =>                __('Longest Thread'),
     'relevance' =>          __('Relevance'),
+	'department' =>         __('Department'),
+	'status' =>             __('Status'),
 );
 $use_subquery = true;
 
@@ -43,14 +45,14 @@ case 'closed':
     $results_type=__('Closed Tickets');
     $showassigned=true; //closed by.
     $queue_sort_options = array('closed', 'priority,due', 'due',
-        'priority,updated', 'priority,created', 'answered', 'number', 'hot');
+        'priority,updated', 'priority,created', 'answered', 'number', 'hot','department','status');
     break;
 case 'overdue':
     $status='open';
     $results_type=__('Overdue Tickets');
     $tickets->filter(array('isoverdue'=>1));
     $queue_sort_options = array('priority,due', 'due', 'priority,updated',
-        'updated', 'answered', 'priority,created', 'number', 'hot');
+        'updated', 'answered', 'priority,created', 'number', 'hot','department','status');
     break;
 case 'assigned':
     $status='open';
@@ -62,7 +64,7 @@ case 'assigned':
     )));
     $queue_sort_options = array('updated', 'priority,updated',
         'priority,created', 'priority,due', 'due', 'answered', 'number',
-        'hot');
+        'hot','department','status');
     break;
 case 'answered':
     $status='open';
@@ -70,13 +72,13 @@ case 'answered':
     $results_type=__('Answered Tickets');
     $tickets->filter(array('isanswered'=>1));
     $queue_sort_options = array('answered', 'priority,updated', 'updated',
-        'priority,created', 'priority,due', 'due', 'number', 'hot');
+        'priority,created', 'priority,due', 'due', 'number', 'hot','department','status');
     break;
 default:
 case 'search':
     $queue_sort_options = array('priority,updated', 'priority,created',
         'priority,due', 'due', 'updated', 'answered',
-        'closed', 'number', 'hot');
+        'closed', 'number', 'hot','department','status');
     // Consider basic search
     if ($_REQUEST['query']) {
         $results_type=__('Search Results');
@@ -154,7 +156,7 @@ case 'open':
         $tickets->filter(array('isanswered'=>0));
     $queue_sort_options = array('priority,updated', 'updated',
         'priority,due', 'due', 'priority,created', 'answered', 'number',
-        'hot');
+        'hot','department','status');
     break;
 }
 
@@ -276,7 +278,14 @@ case 'hot':
 case 'relevance':
     $tickets->order_by(new SqlCode('__relevance__'), $orm_dir);
     break;
+	
+case 'department':
+    $tickets->order_by('dept__name', $orm_dir_r);
+break;
 
+case 'status':
+    $tickets->order_by('status__name', $orm_dir_r);
+break;
 default:
 case 'priority,updated':
     $tickets->order_by('cdata__priority__priority_urgency', $orm_dir_r);
@@ -386,7 +395,7 @@ return false;">
  <input type="hidden" name="do" id="action" value="" >
  <input type="hidden" name="status" value="<?php echo
  Format::htmlchars($_REQUEST['status'], true); ?>" >
- <table class="list" border="0" cellspacing="1" cellpadding="2" width="940">
+ <table class="list" border="0" cellspacing="1" cellpadding="2" width="100%">
     <thead>
         <tr>
             <?php if ($thisstaff->canManageTickets()) { ?>
@@ -394,9 +403,13 @@ return false;">
             <?php } ?>
 	        <th width="7.4%">
                 <?php echo __('Ticket'); ?></th>
-	        <th width="14.6%">
+			<th width="100">
+				<?php echo __('Department'); ?> </th>
+			<th width="70">
+                <?php echo __('Status'); ?></th>
+			<th width="100">
                 <?php echo $date_header ?: __('Date Created'); ?></th>
-	        <th width="29.8%">
+	        <th width="360">
                 <?php echo __('Subject'); ?></th>
             <th width="18.1%">
                 <?php echo __('From');?></th>
@@ -480,9 +493,14 @@ return false;">
                     href="tickets.php?id=<?php echo $T['ticket_id']; ?>"
                     data-preview="#tickets/<?php echo $T['ticket_id']; ?>/preview"
                     ><?php echo $tid; ?></a></td>
+					<!--Add Department-->
+					<td align="left" nowrap><?php echo $T['dept__name']; ?></td>
+					<!--Add status-->
+					<td align="left" nowrap><?php echo $T['status__name']; ?></td>
                 <td align="center" nowrap><?php echo Format::datetime($T[$date_col ?: 'lastupdate']) ?: $date_fallback; ?></td>
-                <td><div style="max-width: <?php
-                    $base = 280;
+                <td><a <?php if ($flag) { ?> class="Icon <?php echo $flag; ?>Ticket" title="<?php echo ucfirst($flag); ?> Ticket" <?php } ?>
+                    style="max-width: <?php
+                    $base = 360;
                     // Make room for the paperclip and some extra
                     if ($T['attachment_count']) $base -= 18;
                     // Assume about 8px per digit character
@@ -506,7 +524,7 @@ return false;">
                     if ($T['collab_count'])
                         echo '<span class="pull-right faded-more" data-toggle="tooltip" title="'
                             .$T['collab_count'].'"><i class="icon-group"></i></span>';
-                    ?><span class="truncate" style="max-width:<?php
+                    ?><span  style="max-width:<?php
                         echo $T['collab_count'] ? '150px' : '170px'; ?>"><?php
                     $un = new UsersName($T['user__name']);
                         echo Format::htmlchars($un);
@@ -523,7 +541,7 @@ return false;">
                 <?php
                 }
                 ?>
-                <td nowrap><span class="truncate" style="max-width: 169px"><?php
+                <td nowrap><span  style="max-width: 169px"><?php
                     echo Format::htmlchars($lc); ?></span></td>
             </tr>
             <?php
@@ -534,7 +552,7 @@ return false;">
     </tbody>
     <tfoot>
      <tr>
-        <td colspan="7">
+        <td colspan="9">
             <?php if($total && $thisstaff->canManageTickets()){ ?>
             <?php echo __('Select');?>:&nbsp;
             <a id="selectAll" href="#ckb"><?php echo __('All');?></a>&nbsp;&nbsp;
