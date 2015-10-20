@@ -1,6 +1,8 @@
 .htaccess
 php53.cgi
 include/ost-config.php
+include/plugins
+include/plugins/updates.pem
 setup/cli/modules/importer
 *.sw[a-z]
 .DS_Store
