@@ -457,14 +457,13 @@ return false;">
  <input type="hidden" name="do" id="action" value="" >
  <input type="hidden" name="status" value="<?php echo
  Format::htmlchars($_REQUEST['status'], true); ?>" >
- <table class="list" border="0" cellspacing="1" cellpadding="2" width="100%">
+ <table class="list" border="0" cellspacing="1" cellpadding="2" width="940">
     <thead>
         <tr>
             <?php
             if ($thisstaff->canManageTickets()) { ?>
 	        <th width="2%">&nbsp;</th>
             <?php } ?>
-
             <?php
             // Swap some columns based on the queue.
             if ($showassigned ) {
@@ -554,7 +553,7 @@ return false;">
                 <td align="center" nowrap><?php echo Format::datetime($T[$date_col ?: 'lastupdate']) ?: $date_fallback; ?></td>
                 <td><a <?php if ($flag) { ?> class="Icon <?php echo $flag; ?>Ticket" title="<?php echo ucfirst($flag); ?> Ticket" <?php } ?>
                     style="max-width: <?php
-                    $base = 360;
+                    $base = 280;
                     // Make room for the paperclip and some extra
                     if ($T['attachment_count']) $base -= 18;
                     // Assume about 8px per digit character
@@ -578,7 +577,7 @@ return false;">
                     if ($T['collab_count'])
                         echo '<span class="pull-right faded-more" data-toggle="tooltip" title="'
                             .$T['collab_count'].'"><i class="icon-group"></i></span>';
-                    ?><span  style="max-width:<?php
+                    ?><span class="truncate" style="max-width:<?php
                         echo $T['collab_count'] ? '150px' : '170px'; ?>"><?php
                     $un = new UsersName($T['user__name']);
                         echo Format::htmlchars($un);
@@ -595,7 +594,7 @@ return false;">
                 <?php
                 }
                 ?>
-                <td nowrap><span  style="max-width: 169px"><?php
+                <td nowrap><span class="truncate" style="max-width: 169px"><?php
                     echo Format::htmlchars($lc); ?></span></td>
             </tr>
             <?php
