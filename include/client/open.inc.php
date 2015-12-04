@@ -56,7 +56,7 @@ if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
 			</tbody>
 
 				<div class="form-group">
-				<label class="required" for="topicId"><?php echo __('Help Topic'); ?></label> <font class="error">*</font>
+				<label class="required" for="topicId"><?php echo __('Location'); ?></label> <font class="error">*</font>
 				
 					<select class="form-control" id="topicId" name="topicId" onchange="javascript:
 							var data = $(':input[name]', '#dynamic-form').serialize();
@@ -70,7 +70,7 @@ if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
 								  $(document.head).append(json.media);
 								}
 							  });">
-						<option value="" selected="selected">&mdash; <?php echo __('Select a Help Topic');?> &mdash;</option>
+						<option value="" selected="selected">&mdash; <?php echo __('Select a Location');?> &mdash;</option>
 						<?php
 						if($topics=Topic::getPublicHelpTopics()) {
 							foreach($topics as $id =>$name) {
