@@ -110,12 +110,12 @@ if ($settings['keywords']) {
 $tickets->distinct('ticket_id');
 TicketForm::ensureDynamicDataView();
 $total=$tickets->count();
+$tickets->filter(array('ticket_id__in' => $visibility));
 $page=($_GET['p'] && is_numeric($_GET['p']))?$_GET['p']:1;
 $pageNav=new Pagenate($total, $page, PAGE_LIMIT);
 $qstr = '&amp;'. Http::build_query($qs);
 $qs += array('sort' => $_REQUEST['sort'], 'order' => $_REQUEST['order']);
 $pageNav->setURL('tickets.php', $qs);
-$tickets->filter(array('ticket_id__in' => $visibility));
 $pageNav->paginate($tickets);
 $showing =$total ? $pageNav->showing() : "";
 if(!$results_type)
