@@ -43,7 +43,7 @@ if ($_POST)
         <tr><td style="padding:0;"></td><td style="padding:0;"></td></tr>
     </thead>
     <tbody>
-        <tr>
+        <tr id="open_ticket_userinformation">
             <th colspan="2">
                 <em><strong><?php echo __('User Information'); ?></strong>: </em>
                 <div class="error"><?php echo $errors['user']; ?></div>
@@ -118,19 +118,19 @@ if ($_POST)
         } ?>
     </tbody>
     <tbody>
-        <tr>
+        <tr id="open_ticket_informationoptions">
             <th colspan="2">
                 <em><strong><?php echo __('Ticket Information and Options');?></strong>:</em>
             </th>
         </tr>
-        <tr>
+        <tr style="display: none;">
             <td width="160" class="required">
                 <?php echo __('Ticket Source');?>:
             </td>
             <td>
                 <select name="source">
                     <?php
-                    $source = $info['source'] ?: 'Phone';
+                    $source = $info['source'] ?: 'Other';
                     foreach (Ticket::getSources() as $k => $v)
                         echo sprintf('<option value="%s" %s>%s</option>',
                                 $k,
@@ -143,7 +143,7 @@ if ($_POST)
         </tr>
         <tr>
             <td width="160" class="required">
-                <?php echo __('Help Topic'); ?>:
+                <?php echo __('Location'); ?>:
             </td>
             <td>
                 <select name="topicId" onchange="javascript:
@@ -163,7 +163,7 @@ if ($_POST)
                         if (count($topics) == 1)
                             $selected = 'selected="selected"';
                         else { ?>
-                        <option value="" selected >&mdash; <?php echo __('Select Help Topic'); ?> &mdash;</option>
+                        <option value="" selected >&mdash; <?php echo __('Select Location'); ?> &mdash;</option>
 <?php                   }
                         foreach($topics as $id =>$name) {
                             echo sprintf('<option value="%d" %s %s>%s</option>',
@@ -180,7 +180,7 @@ if ($_POST)
                 &nbsp;<font class="error"><b>*</b>&nbsp;<?php echo $errors['topicId']; ?></font>
             </td>
         </tr>
-        <tr>
+        <tr  style="display: none;">
             <td width="160">
                 <?php echo __('Department'); ?>:
             </td>
@@ -206,7 +206,7 @@ if ($_POST)
             </td>
         </tr>
 
-         <tr>
+         <tr  style="display: none;">
             <td width="160">
                 <?php echo __('SLA Plan');?>:
             </td>
@@ -247,7 +247,7 @@ if ($_POST)
 
         <?php
         if($thisstaff->hasPerm(TicketModel::PERM_ASSIGN, false)) { ?>
-        <tr>
+        <tr  style="display: none;">
             <td width="160"><?php echo __('Assign To');?>:</td>
             <td>
                 <select id="assignId" name="assignId">
@@ -290,7 +290,7 @@ if ($_POST)
         <?php
         //is the user allowed to post replies??
         if ($thisstaff->getRole()->hasPerm(TicketModel::PERM_REPLY)) { ?>
-        <tr>
+        <tr  id="open_ticket_response">
             <th colspan="2">
                 <em><strong><?php echo __('Response');?></strong>: <?php echo __('Optional response to the above issue.');?></em>
             </th>
@@ -382,7 +382,7 @@ print $response_form->getField('attachments')->render();
         <?php
         } //end canPostReply
         ?>
-        <tr>
+        <tr id="open_ticket_note">
             <th colspan="2">
                 <em><strong><?php echo __('Internal Note');?></strong>
                 <font class="error">&nbsp;<?php echo $errors['note']; ?></font></em>

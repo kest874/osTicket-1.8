@@ -357,8 +357,7 @@ class FA_AssignTeam extends TriggerAction {
     }
 
     function getConfigurationOptions() {
-        $choices = Team::getTeams();
-        return array(
+       return array(
             'team_id' => new ChoiceField(array(
                 'configuration' => array(
                     'prompt' => __('Unchanged'),
