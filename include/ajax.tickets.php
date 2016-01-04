@@ -276,8 +276,17 @@ class TicketsAjaxAPI extends AjaxController {
     }
 
     function manageForms($ticket_id) {
-        $forms = DynamicFormEntry::forTicket($ticket_id);
-        $info = array('action' => '#tickets/'.Format::htmlchars($ticket_id).'/forms/manage');
+        global $thisstaff;
+
+        if (!$thisstaff)
+            Http::response(403, "Login required");
+        elseif (!($ticket = Ticket::lookup($ticket_id)))
+            Http::response(404, "No such ticket");
+        elseif (!$ticket->checkStaffPerm($thisstaff, Ticket::PERM_EDIT))
+            Http::response(403, "Access Denied");
+
+        $forms = DynamicFormEntry::forTicket($ticket->getId());
+        $info = array('action' => '#tickets/'.$ticket->getId().'/forms/manage');
         include(STAFFINC_DIR . 'templates/form-manage.tmpl.php');
     }
 
@@ -288,7 +297,7 @@ class TicketsAjaxAPI extends AjaxController {
             Http::response(403, "Login required");
         elseif (!($ticket = Ticket::lookup($ticket_id)))
             Http::response(404, "No such ticket");
-        elseif (!$ticket->checkStaffPerm($thisstaff))
+        elseif (!$ticket->checkStaffPerm($thisstaff, Ticket::PERM_EDIT))
             Http::response(403, "Access Denied");
         elseif (!isset($_POST['forms']))
             Http::response(422, "Send updated forms list");
@@ -496,7 +505,7 @@ class TicketsAjaxAPI extends AjaxController {
                     __('This ticket'),
                     $assigned);
         } else {
-            $info['warn'] = sprintf(__('Are you sure you want to claim %s?'),
+            $info['warn'] = sprintf(__('Are you sure you want to CLAIM %s?'),
                     __('this ticket'));
         }
 
@@ -639,8 +648,9 @@ class TicketsAjaxAPI extends AjaxController {
                     $info[':action'] = '#tickets/mass/claim';
                     $info[':title'] = sprintf('Claim %s',
                             _N('selected ticket', 'selected tickets', $count));
-                    $info['warn'] = sprintf(__('Are you sure you want to claim %s?'),
-                                _N('selected ticket', 'selected tickets', $count));
+                    $info['warn'] = sprintf(
+                            __('Are you sure you want to CLAIM %s?'),
+                            _N('selected ticket', 'selected tickets', $count));
                     $verb = sprintf('%s, %s', __('Yes'), __('Claim'));
                     $id = sprintf('s%s', $thisstaff->getId());
                     $assignees = array($id => $thisstaff->getName());
@@ -1084,9 +1094,10 @@ class TicketsAjaxAPI extends AjaxController {
         $count = $_REQUEST['count'] ?:
             ($_REQUEST['tids'] ?  count($_REQUEST['tids']) : 0);
 
-        $info['title'] = sprintf(__('%1$s Tickets &mdash; %2$d selected'),
-                TicketStateField::getVerb($state),
-                 $count);
+        $info['title'] = sprintf(__('Change Status &mdash; %1$d %2$s selected'),
+                 $count,
+                 _N('ticket', 'tickets', $count)
+                 );
 
         if (!strcasecmp($state, 'deleted')) {
 

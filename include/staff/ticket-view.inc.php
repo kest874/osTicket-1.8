@@ -168,11 +168,15 @@ if($ticket->isOverdue())
                     <?php
                     }
                 } ?>
+                <?php
+                if ($role->hasPerm(Ticket::PERM_EDIT)) { ?>
                 <li><a href="#ajax.php/tickets/<?php echo $ticket->getId();
                     ?>/forms/manage" onclick="javascript:
                     $.dialog($(this).attr('href').substr(1), 201);
                     return false"
                     ><i class="icon-paste"></i> <?php echo __('Manage Forms'); ?></a></li>
+                <?php
+                } ?>
 
 <?php           if ($thisstaff->hasPerm(Email::PERM_BANLIST)) {
                      if(!$emailBanned) {?>
@@ -485,7 +489,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
         echo sprintf('#tickets/%d/tasks', $ticket->getId()); ?>"><?php
         echo __('Tasks');
         if ($ticket->getNumTasks())
-            echo sprintf('&nbsp;(%d)', $ticket->getNumTasks());
+            echo sprintf('&nbsp;(<span id="ticket-tasks-count">%d</span>)', $ticket->getNumTasks());
         ?></a></li>
 </ul>
 
