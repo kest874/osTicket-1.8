@@ -142,6 +142,7 @@ if ($thisclient && $thisclient->isGuest()
 	
 		</div>	
 </div>
+
 <?php
 if ($thisclient->getId() == $ticket->getUserId()  ) { ?>
 

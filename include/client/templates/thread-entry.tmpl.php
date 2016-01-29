@@ -1,5 +1,6 @@
 <?php
-$entryTypes = ThreadEntry::getTypes();
+global $cfg;
+$entryTypes = array('M'=>'message', 'R'=>'response', 'N'=>'note');
 $user = $entry->getUser() ?: $entry->getStaff();
 $name = $user ? $user->getName() : $entry->poster;
 $avatar = '';

@@ -23,7 +23,7 @@ include_once(INCLUDE_DIR.'class.user.php');
 include_once(INCLUDE_DIR.'class.auth.php');
 
 class Staff extends VerySimpleModel
-implements AuthenticatedUser, EmailContact, TemplateVariable {
+implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
 
     static $meta = array(
         'table' => STAFF_TABLE,
@@ -125,6 +125,18 @@ implements AuthenticatedUser, EmailContact, TemplateVariable {
         case 'phone':
             return Format::phone($this->ht['phone']);
         }
+    }
+
+    static function getSearchableFields() {
+        return array(
+            'email' => new TextboxField(array(
+                'label' => __('Email Address'),
+            )),
+        );
+    }
+
+    static function supportsCustomData() {
+        return false;
     }
 
     function getHashtable() {
@@ -413,6 +425,10 @@ implements AuthenticatedUser, EmailContact, TemplateVariable {
         }
     }
 
+    function usePrimaryRoleOnAssignment() {
+        return $this->getExtraAttr('def_assn_role', true);
+    }
+
     function getLanguage() {
         return (isset($this->lang)) ? $this->lang : false;
     }
@@ -437,8 +453,11 @@ implements AuthenticatedUser, EmailContact, TemplateVariable {
             if ($access = $this->dept_access->findFirst(array('dept_id' => $deptId)))
                 return $this->_roles[$deptId] = $access->role;
 
-            // View only access
-            return new Role(array());
+            if (!$this->usePrimaryRoleOnAssignment())
+                // View only access
+                return new Role(array());
+
+            // Fall through to primary role
         }
         // For the primary department, use the primary role
         return $this->role;
@@ -456,10 +475,10 @@ implements AuthenticatedUser, EmailContact, TemplateVariable {
     }
 
     function canManageTickets() {
-        return $this->hasPerm(TicketModel::PERM_DELETE, false)
-                || $this->hasPerm(TicketModel::PERM_TRANSFER, false)
-                || $this->hasPerm(TicketModel::PERM_ASSIGN, false)
-                || $this->hasPerm(TicketModel::PERM_CLOSE, false);
+        return $this->hasPerm(Ticket::PERM_DELETE, false)
+                || $this->hasPerm(Ticket::PERM_TRANSFER, false)
+                || $this->hasPerm(Ticket::PERM_ASSIGN, false)
+                || $this->hasPerm(Ticket::PERM_CLOSE, false);
     }
 
     function isManager() {
@@ -563,15 +582,17 @@ implements AuthenticatedUser, EmailContact, TemplateVariable {
         if (!isset($this->_extra) && isset($this->extra))
             $this->_extra = JsonDataParser::decode($this->extra);
 
-        return $attr ? (@$this->_extra[$attr] ?: $default) : $this->_extra;
+        return $attr
+            ? (isset($this->_extra[$attr]) ? $this->_extra[$attr] : $default)
+            : $this->_extra;
     }
 
     function setExtraAttr($attr, $value, $commit=true) {
         $this->getExtraAttr();
         $this->_extra[$attr] = $value;
+        $this->extra = JsonDataEncoder::encode($this->_extra);
 
         if ($commit) {
-            $this->extra = JsonDataEncoder::encode($this->_extra);
             $this->save();
         }
     }
@@ -801,13 +822,41 @@ implements AuthenticatedUser, EmailContact, TemplateVariable {
             ->values_flat('staff_id')->first();
         return $row ? $row[0] : 0;
     }
-
-    static function getIdByEmail($email) {
-        $row = static::objects()->filter(array('email' => $email))
-            ->values_flat('staff_id')->first();
+	
+	static function getUsernameById($id) {
+        $row = static::objects()->filter(array('staff_id' => $id))
+            ->values_flat('username')->first();
+        return $row ? $row[0] : 0;
+    }
+	static function getFirstNameById($id) {
+        $row = static::objects()->filter(array('staff_id' => $id))
+            ->values_flat('firstname')->first();
+        return $row ? $row[0] : 0;
+    }
+	
+	static function getLastNameById($id) {
+        $row = static::objects()->filter(array('staff_id' => $id))
+            ->values_flat('lastname')->first();
         return $row ? $row[0] : 0;
     }
 
+    static function getIdByEmail($email) {
+		$row = static::objects()->filter(array('email' => $email))
+            ->values_flat('staff_id')->first();
+		return $row ? $row[0] : 0;
+    }
+	
+	static function getEmailById($email) {
+		$row = static::objects()->filter(array('staff_id' => $email))
+            ->values_flat('email')->first();
+		return $row ? $row[0] : 0;
+    }
+	
+	static function getStaffUserId($userid){
+		
+		$staffemail = staff::getEmailById($userid);
+		return UserEmail::getIdByEmail($staffemail);
+	}
 
     static function create($vars=false) {
         $staff = parent::create($vars);
@@ -1011,6 +1060,8 @@ implements AuthenticatedUser, EmailContact, TemplateVariable {
             }
         }
         $this->updateAccess($access, $errors);
+        $this->setExtraAttr('def_assn_role',
+            isset($vars['assign_use_pri_role']), false);
 
         // Format team membership as [array(team_id, alerts?)]
         $teams = array();

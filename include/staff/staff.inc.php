@@ -65,10 +65,10 @@ else {
         <tr>
           <td class="required"><?php echo __('Name'); ?>:</td>
           <td>
-            <input type="text" size="20" maxlength="64" style="width: 145px" name="firstname"
+            <input type="text" size="20" maxlength="64" style="width: 145px" name="firstname" class="auto first"
               autofocus value="<?php echo Format::htmlchars($staff->firstname); ?>"
               placeholder="<?php echo __("First Name"); ?>" />
-            <input type="text" size="20" maxlength="64" style="width: 145px" name="lastname"
+            <input type="text" size="20" maxlength="64" style="width: 145px" name="lastname" class="auto last"
               value="<?php echo Format::htmlchars($staff->lastname); ?>"
               placeholder="<?php echo __("Last Name"); ?>" />
             <div class="error"><?php echo $errors['firstname']; ?></div>
@@ -78,7 +78,7 @@ else {
         <tr>
           <td class="required"><?php echo __('Email Address'); ?>:</td>
           <td>
-            <input type="email" size="40" maxlength="64" style="width: 300px" name="email"
+            <input type="email" size="40" maxlength="64" style="width: 300px" name="email" class="auto email"
               value="<?php echo Format::htmlchars($staff->email); ?>"
               placeholder="<?php echo __('e.g. me@mycompany.com'); ?>" />
             <div class="error"><?php echo $errors['email']; ?></div>
@@ -213,7 +213,7 @@ if (count($bks) > 1) {
     <table class="table two-column" width="940" border="0" cellspacing="0" cellpadding="2">
       <tbody>
         <tr class="header">
-          <th colspan="2">
+          <th colspan="3">
             <?php echo __('Primary Department and Role'); ?>
             <span class="error">*</span>
             <div><small><?php echo __(
@@ -249,6 +249,18 @@ if (count($bks) > 1) {
               <option value="0" data-quick-add>&mdash; <?php echo __('Add New');?> &mdash;</option>
             </select>
             <i class="offset help-tip icon-question-sign" href="#primary_role"></i>
+          </td>
+          <td>
+            <label class="inline checkbox">
+            <input type="checkbox" name="assign_use_pri_role" <?php
+                if ($staff->usePrimaryRoleOnAssignment())
+                    echo 'checked="checked"';
+                ?> />
+                <?php echo __('Fall back to primary role on assigned tickets'); ?>
+                <i class="icon-question-sign help-tip"
+                    href="#primary_role_on_assign"></i>
+            </label>
+
             <div class="error"><?php echo $errors['role_id']; ?></div>
           </td>
         </tr>
@@ -268,7 +280,8 @@ if (count($bks) > 1) {
               ?>
               <option value="0" data-quick-add>&mdash; <?php echo __('Add New');?> &mdash;</option>
             </select>
-            <span style="display:inline-block;width:20px"> </span>
+          </td>
+          <td>
             <label class="inline checkbox">
               <input type="checkbox" data-name="dept_access_alerts" value="1" />
               <?php echo __('Alerts'); ?>
@@ -280,7 +293,7 @@ if (count($bks) > 1) {
       </tbody>
       <tbody>
         <tr class="header">
-          <th colspan="2">
+          <th colspan="3">
             <?php echo __('Extended Access'); ?>
           </th>
         </tr>

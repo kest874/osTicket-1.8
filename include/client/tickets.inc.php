@@ -28,6 +28,7 @@ else {
     $openTickets = $thisclient->getNumOpenTickets($org_tickets);
     $closedTickets = $thisclient->getNumClosedTickets($org_tickets);
 }
+
 if (isset($_REQUEST['my'])) {
     $settings['my'] = $_REQUEST['my'];
 	
@@ -38,6 +39,7 @@ if (!isset($mine)) {
 };
 
 $tickets = Ticket::objects();
+
 $qs = array();
 $status=null;
 $sortOptions=array('id'=>'number', 'subject'=>'cdata__subject',
@@ -87,7 +89,6 @@ if ($thisclient->canSeeOrgTickets()) {
     , false);
 }
 
-
 if  ($mine != 1) {
 	$visibility = $basic_filter->copy()
     ->values_flat('ticket_id')
@@ -107,9 +108,9 @@ if ($settings['keywords']) {
         $tickets = $ost->searcher->find($q, $tickets);
     }
 }
+
 $tickets->distinct('ticket_id');
 TicketForm::ensureDynamicDataView();
-
 $tickets->filter(array('ticket_id__in' => $visibility));
 $total=$tickets->count();
 $page=($_GET['p'] && is_numeric($_GET['p']))?$_GET['p']:1;
@@ -133,6 +134,7 @@ $tickets->values(
     'dept__name', 'dept__ispublic', 'user__default_email__address'
 );
 ?>
+
 <div class="row ">
 	<div class="col-md-12" >
 	<form action="tickets.php" method="get" id="ticketSearchForm">
