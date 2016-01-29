@@ -1257,7 +1257,6 @@ implements RestrictedAccess, Threadable, Searchable {
             // Exclude the auto responding email just incase it's from staff member.
             if ($message instanceof ThreadEntry && $message->isAutoReply())
                 $sentlist[] = $this->getEmail();
-
             // Only alerts dept members if the ticket is NOT assigned.
             if ($cfg->alertDeptMembersONNewTicket() && !$this->isAssigned()) {
                 if ($members = $dept->getMembersForAlerts()->all())
@@ -2262,7 +2261,7 @@ implements RestrictedAccess, Threadable, Searchable {
         $this->setLastMessage($message);
 		
 		// Set Status to Responded
-		if ($this->getStatusId() != 10 && $this->getStatusId() != 9)
+		if ($this->getStatusId() !== 10 && $this->getStatusId() !== 9)
 		$this->setStatusId(7);	
 
         // Add email recipients as collaborators...
@@ -2493,7 +2492,8 @@ implements RestrictedAccess, Threadable, Searchable {
             $this->setStatus($vars['reply_status_id']);
         } else {
 			
-			if ($this->getStatusId() != 10 && $this->getStatusId() != 9)
+			if ($this->getStatusId() !== 10 && $this->getStatusId() !== 9 
+				&& $this->getStatusId() !== 3  && $this->getTopicId() !==12)
 			$this->setStatusId(6);			
 		}
 		
@@ -3448,7 +3448,7 @@ implements RestrictedAccess, Threadable, Searchable {
         if ($vars['assignId']) {
             $asnform = $ticket->getAssignmentForm(array('assignee' => $vars['assignId']));
             $ticket->assign($asnform, $vars['note']);
-			$statusId = 11;
+			$statusId = 11;	
         }
         else {
             // Auto assign staff or team - auto assignment based on filter
@@ -3472,8 +3472,13 @@ implements RestrictedAccess, Threadable, Searchable {
             if (!$ticket->setStatus($statusId, false, $errors, false)) {
                 // Tickets _must_ have a status. Forceably set one here
                 $ticket->setStatusId($cfg->getDefaultTicketStatusId());
-            }
-        }
+			   
+					
+				}
+			}
+			if ($statusId == 3){
+					 $ticket->setStaffId($thisstaff->getId());
+			}
 
         /**********   double check auto-response  ************/
         //Override auto responder if the FROM email is one of the internal emails...loop control.
@@ -3589,7 +3594,6 @@ implements RestrictedAccess, Threadable, Searchable {
             // $vars['cannedatachments'] contains the attachments placed on
             // the response form.
             $response = $ticket->postReply($vars, $errors, false);
-			$ticket->setStatusId(6);	
         }
 
         // Not assigned...save optional note if any
@@ -3695,6 +3699,33 @@ implements RestrictedAccess, Threadable, Searchable {
             return ROOT_PATH . sprintf('scp/tickets.php?id=%s', $id);
         }
     }
+	// Close tickets based on Ticket Auto-Close from config
+   function AutoClose() {
+	global $cfg;
+	
+	$grace = $cfg->getAutoCloseDuration();
+	$graceStatusId = $cfg->getAutoCloseStatusId();
+
+	if($graceStatusId != 0){ 
+
+		if($grace == 1){$plural = 'hour';} else {$plural = 'hours';}
+
+		// select all tickets marked as selected status from config page where updated is older than ($grace) hours ago
+		$sql  = 'SELECT ticket_id FROM ' .TICKET_TABLE.' ticket '
+			 .' INNER JOIN '.TICKET_STATUS_TABLE.' status ON (status.id=ticket.status_id AND status_id = '. $graceStatusId .') '
+			 .' AND TIME_TO_SEC(TIMEDIFF(NOW(),ticket.updated))>='.$grace.'*3600';
+			 
+			if(($res=db_query($sql)) && db_num_rows($res)) {
+		
+				while(list($id)=db_fetch_row($res)) {
+
+					if($ticket=Ticket::lookup($id)){ 
+					$ticket->setStatus('3', 'Ticket Closed by the SYSTEM after '.$grace.' '.$plural.' of no activity.',$errors, false);
+					}
+				}
+			}
+		}
+   }
 }
 RolePermission::register(/* @trans */ 'Tickets', Ticket::getPermissions(), true);
 
