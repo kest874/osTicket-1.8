@@ -389,7 +389,7 @@ implements Searchable {
 			if ($stafftoassign !== 0){
 				$object instanceof Ticket;
 				$object->assignToStaff($stafftoassign,null,$alert=true); 
-				$object->setStatusId(11);
+				//$object->setStatusId(11);
 			}
 		}
 		
@@ -421,8 +421,8 @@ implements Searchable {
 		$vars['thread-type'] = 'R';
 		$vars['role'] = 'M';
 		$object instanceof Ticket;
-		if ($currentstatus !== 9 && $currentstatus !== 10 && $currentstatus !== 3)
-			$object->setStatusId(6);
+		//if ($currentstatus !== 9 && $currentstatus !== 10 && $currentstatus !== 3)
+			//$object->setStatusId(6);
 		}
 
 		if ($assignToStaffId !== $vars['staffId'] && $C = $this->collaborators->filter(array(
@@ -432,8 +432,8 @@ implements Searchable {
 			$vars['thread-type'] = 'M';
 			$vars['flags'] = ThreadEntry::FLAG_COLLABORATOR;
 			$object instanceof Ticket;
-			if ($assignToStaffId !== null && $currentstatus !== 9 && $currentstatus !== 10)  
-				$object->setStatusId(7);
+			//if ($assignToStaffId !== null && $currentstatus !== 9 && $currentstatus !== 10)  
+				//$object->setStatusId(7);
 		}
 		
 		
@@ -461,16 +461,16 @@ implements Searchable {
 							);
 			$vars['system'] = 1;
 			$object instanceof Ticket;
-			if ($assignToStaffId !== null && $currentstatus !== 9 && $currentstatus !== 10)  
-				$object->setStatusId(7);
+			//if ($assignToStaffId !== null && $currentstatus !== 9 && $currentstatus !== 10)  
+				//$object->setStatusId(7);
 		}
 		
 		// Owner of the ticket
 		if ($vars['ownerId'] == $vars['userId']){ 
 			$vars['thread-type'] = 'M';
 			$object instanceof Ticket;
-			if ($assignToStaffId !== null && $currentstatus !== 9 && $currentstatus !== 10) 
-				$object->setStatusId(7);
+			//if ($assignToStaffId !== null && $currentstatus !== 9 && $currentstatus !== 10) 
+				//$object->setStatusId(7);
         }
 	
 		// Don't process the email -- it came FROM this system

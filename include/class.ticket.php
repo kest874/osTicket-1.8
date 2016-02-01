@@ -2091,7 +2091,7 @@ implements RestrictedAccess, Threadable, Searchable {
         } elseif ($dept->assignMembersOnly() && !$dept->isMember($assignee)) {
             $errors['err'] = __('Permission denied');
         }
-		$this->setStatusId(11);	
+		//$this->setStatusId(11);	
         if ($errors)
             return false;
 
@@ -2262,8 +2262,8 @@ implements RestrictedAccess, Threadable, Searchable {
         $this->setLastMessage($message);
 		
 		// Set Status to Responded
-		if ($this->getStatusId() !== 10 && $this->getStatusId() !== 9)
-		$this->setStatusId(7);	
+		//if ($this->getStatusId() !== 10 && $this->getStatusId() !== 9)
+		//$this->setStatusId(7);	
 
         // Add email recipients as collaborators...
 		
@@ -2493,9 +2493,9 @@ implements RestrictedAccess, Threadable, Searchable {
             $this->setStatus($vars['reply_status_id']);
         } else {
 			
-			if ($this->getStatusId() !== 10 && $this->getStatusId() !== 9 
-				&& $this->getStatusId() !== 3  && $this->getTopicId() !==12)
-			$this->setStatusId(6);			
+			//if ($this->getStatusId() !== 10 && $this->getStatusId() !== 9 
+			//	&& $this->getStatusId() !== 3  && $this->getTopicId() !==12)
+			//$this->setStatusId(6);			
 		}
 		
         // Claim on response bypasses the department assignment restrictions
@@ -3456,11 +3456,11 @@ implements RestrictedAccess, Threadable, Searchable {
             // rules. Both team and staff can be assigned
             if ($vars['staffId'])
                  $ticket->assignToStaff($vars['staffId'], false);
-				 $ticket->setStatusId(11);	
+				 //$ticket->setStatusId(11);	
             if ($vars['teamId'])
                 // No team alert if also assigned to an individual agent
                 $ticket->assignToTeam($vars['teamId'], false, !$vars['staffId']);
-				$ticket->setStatusId(11);
+				//$ticket->setStatusId(11);
         }
 
         // Update the estimated due date in the database
