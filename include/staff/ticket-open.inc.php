@@ -138,7 +138,7 @@ if ($_POST)
         </tr>
         <tr>
             <td width="160" class="required">
-                <?php echo __('Location'); ?>:
+                <?php echo __('Help Topic'); ?>:
             </td>
             <td>
                 <select name="topicId" onchange="javascript:
@@ -158,7 +158,7 @@ if ($_POST)
                         if (count($topics) == 1)
                             $selected = 'selected="selected"';
                         else { ?>
-                        <option value="" selected >&mdash; <?php echo __('Select Location'); ?> &mdash;</option>
+                        <option value="" selected >&mdash; <?php echo __('Select Help Topic'); ?> &mdash;</option>
 <?php                   }
                         foreach($topics as $id =>$name) {
                             echo sprintf('<option value="%d" %s %s>%s</option>',
