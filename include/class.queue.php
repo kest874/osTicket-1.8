@@ -1190,6 +1190,7 @@ extends QueueColumnFilter {
     static $desc = /* @trans */ "Date and Time";
 
     function filter($text, $row) {
+		if($text->value !=NULL)
         return $text->changeTo(Format::datetime($text->value));
     }
 }
