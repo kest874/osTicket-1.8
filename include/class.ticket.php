@@ -2879,6 +2879,14 @@ implements RestrictedAccess, Threadable, Searchable {
             elseif (!isset($vars['teamId']) && $code[0] == 't')
                 $vars['teamId'] = substr($code, 1);
         }
+
+        // Auto assignment to organization department
+        if (($org = $user->getOrganization())
+                && $org->autoAssignDepartment()
+                && ($code = $org->getDepartmentId())) {
+				$deptId = substr($code, 0);
+        }
+
         // Last minute checks
         $priority = $form->getAnswer('priority');
         if (!$priority || !$priority->getIdValue())

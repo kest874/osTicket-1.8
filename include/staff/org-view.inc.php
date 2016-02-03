@@ -1,6 +1,5 @@
 <?php
 if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path');
-
 ?>
 <table width="940" cellpadding="2" cellspacing="0" border="0">
     <tr>
@@ -56,6 +55,10 @@ if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path')
                 <tr>
                     <th><?php echo __('Account Manager'); ?>:</th>
                     <td><?php echo $org->getAccountManager(); ?>&nbsp;</td>
+                </tr>
+				<tr>
+                    <th><?php echo __('Department'); ?>:</th>
+                    <td><?php echo $org->getDepartmentName(); ?>&nbsp;</td>
                 </tr>
             </table>
         </td>
