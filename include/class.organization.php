@@ -36,12 +36,14 @@ class OrganizationModel extends VerySimpleModel {
                 ),
                 'list' => true,
             ),
+			
         ),
     );
 
     const COLLAB_ALL_MEMBERS =      0x0001;
     const COLLAB_PRIMARY_CONTACT =  0x0002;
-    const ASSIGN_AGENT_MANAGER =    0x0004;
+    const ASSIGN_AGENT_MANAGER =    0x0003;
+	const ASSIGN_DEPARTMENT =   	0x0004;
 
     const SHARE_PRIMARY_CONTACT =   0x0008;
     const SHARE_EVERYBODY =         0x0010;
@@ -69,6 +71,7 @@ class OrganizationModel extends VerySimpleModel {
     );
 
     var $_manager;
+	var $_department;
 
     function getId() {
         return $this->id;
@@ -89,10 +92,25 @@ class OrganizationModel extends VerySimpleModel {
         }
 
         return $this->_manager;
+    } 
+	
+	function getDepartmentName() {
+		
+        if (!isset($this->_department)) {
+				$this->_department = dept::lookup(substr($this->department,0));
+		}else{	
+				$this->_department = ''; // None.
+           }
+
+        return $this->_department;
     }
 
     function getAccountManagerId() {
         return $this->manager;
+    }
+
+	function getDepartmentId() {
+        return $this->department;
     }
 
     function autoAddCollabs() {
@@ -110,7 +128,11 @@ class OrganizationModel extends VerySimpleModel {
     function autoAssignAccountManager() {
         return $this->check(self::ASSIGN_AGENT_MANAGER);
     }
-
+	
+	function autoAssignDepartment() {
+        return $this->check(self::ASSIGN_DEPARTMENT);
+	}
+	
     function shareWithPrimaryContacts() {
         return $this->check(self::SHARE_PRIMARY_CONTACT);
     }
@@ -211,7 +233,6 @@ implements TemplateVariable, Searchable {
                 $this->_forms[] = $entry;
             }
         }
-
         return $this->_forms;
     }
 
@@ -225,6 +246,7 @@ implements TemplateVariable, Searchable {
                 'collab-all-flag' => Organization::COLLAB_ALL_MEMBERS,
                 'collab-pc-flag' => Organization::COLLAB_PRIMARY_CONTACT,
                 'assign-am-flag' => Organization::ASSIGN_AGENT_MANAGER,
+				'assign-d-flag' => Organization::ASSIGN_DEPARTMENT,
                 'sharing-primary' => Organization::SHARE_PRIMARY_CONTACT,
                 'sharing-all' => Organization::SHARE_EVERYBODY,
         ) as $ck=>$flag) {
@@ -330,6 +352,8 @@ implements TemplateVariable, Searchable {
             return new UserList($this->users);
         case 'manager':
             return $this->getAccountManager();
+		case 'department':
+            return $this->getDepartmentName();
         case 'contacts':
             return new UserList($this->users->filter(array(
                 'flags__hasbit' => User::PRIMARY_ORG_CONTACT
@@ -341,8 +365,10 @@ implements TemplateVariable, Searchable {
         $base = array(
             'contacts' => array('class' => 'UserList', 'desc' => __('Primary Contacts')),
             'manager' => __('Account Manager'),
+			'department' => __('Department'),
             'members' => array('class' => 'UserList', 'desc' => __('Organization Members')),
             'name' => __('Name'),
+			
         );
         $extra = VariableReplacer::compileFormScope(OrganizationForm::getInstance());
         return $base + $extra;
@@ -425,6 +451,7 @@ implements TemplateVariable, Searchable {
                 'collab-all-flag' => Organization::COLLAB_ALL_MEMBERS,
                 'collab-pc-flag' => Organization::COLLAB_PRIMARY_CONTACT,
                 'assign-am-flag' => Organization::ASSIGN_AGENT_MANAGER,
+				'assign-d-flag' => Organization::ASSIGN_DEPARTMENT
         ) as $ck=>$flag) {
             if ($vars[$ck])
                 $this->setStatus($flag);
@@ -443,6 +470,7 @@ implements TemplateVariable, Searchable {
         }
 
         // Set staff and primary contacts
+		$this->set('department', $vars['department']);
         $this->set('domain', $vars['domain']);
         $this->set('manager', $vars['manager'] ?: '');
         if ($vars['contacts'] && is_array($vars['contacts'])) {
