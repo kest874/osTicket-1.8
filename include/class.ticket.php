@@ -1258,6 +1258,7 @@ implements RestrictedAccess, Threadable, Searchable {
             // Exclude the auto responding email just incase it's from staff member.
             if ($message instanceof ThreadEntry && $message->isAutoReply())
                 $sentlist[] = $this->getEmail();
+
             // Only alerts dept members if the ticket is NOT assigned.
             if ($cfg->alertDeptMembersONNewTicket() && !$this->isAssigned()) {
                 if ($members = $dept->getMembersForAlerts()->all())
