@@ -29,6 +29,10 @@ class UsersAjaxAPI extends AjaxController {
             Http::response(400, __('Query argument is required'));
         }
 
+        $matches = array();
+        if (!$_REQUEST['q'])
+            return $this->json_encode($matches);
+
         $q = $_REQUEST['q'];
         $limit = isset($_REQUEST['limit']) ? (int) $_REQUEST['limit']:25;
         $users=array();
@@ -79,7 +83,7 @@ class UsersAjaxAPI extends AjaxController {
             // Omit already-imported remote users
             if ($emails = array_filter($emails)) {
                 $users->union(User::objects()
-                    ->values_flat('id', 'emails__address', 'name' )
+                    ->values_flat('id', 'name', 'default_email__address')
                     ->annotate(array('__relevance__' => new SqlCode(1)))
                     ->filter(array(
                         'emails__address__in' => $emails
@@ -87,7 +91,7 @@ class UsersAjaxAPI extends AjaxController {
             }
 
             foreach ($users as $U) {
-                list($id,$email,$name) = $U;
+                list($id, $name, $email) = $U;
                 foreach ($matches as $i=>$u) {
                     if ($u['email'] == $email) {
                         unset($matches[$i]);

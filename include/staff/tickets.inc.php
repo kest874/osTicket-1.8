@@ -191,6 +191,7 @@ case 'search':
     // Fall-through and show open tickets
 case 'open':
     $status='open';
+    $queue_name = $queue_name ?: 'open';
     $results_type=__('Open Tickets');
     if (!$cfg->showAnsweredTickets())
         $tickets->filter(array('isanswered'=>0));
@@ -275,7 +276,7 @@ case 'number':
     break;
 
 case 'priority,created':
-    $tickets->order_by(($sort_dir ? '-' : '') . 'cdata__priority__priority_urgency');
+    $tickets->order_by(($sort_dir ? '-' : '') . 'cdata__:priority__priority_urgency');
     // Fall through to columns for `created`
 case 'created':
     $queue_columns['date']['heading'] = __('Date Created');
@@ -285,7 +286,7 @@ case 'created':
     break;
 
 case 'priority,due':
-    $tickets->order_by('cdata__priority__priority_urgency', $orm_dir_r);
+    $tickets->order_by('cdata__:priority__priority_urgency', $orm_dir_r);
     // Fall through to add in due date filter
 case 'due':
     $queue_columns['date']['heading'] = __('Due Date');
@@ -342,7 +343,7 @@ default:
     }
 
 case 'priority,updated':
-    $tickets->order_by('cdata__priority__priority_urgency', $orm_dir_r);
+    $tickets->order_by('cdata__:priority__priority_urgency', $orm_dir_r);
     // Fall through for columns defined for `updated`
 case 'updated':
     $queue_columns['date']['heading'] = __('Last Updated');
@@ -373,7 +374,9 @@ TicketForm::ensureDynamicDataView();
 
 // Select pertinent columns
 // ------------------------------------------------------------
-$tickets->values('lock__staff_id', 'staff_id', 'isoverdue', 'team_id', 'ticket_id', 'number', 'cdata__subject', 'user__default_email__address', 'source', 'cdata__priority__priority_color', 'cdata__priority__priority_desc', 'status_id', 'status__name', 'status__state', 'dept_id', 'dept__name', 'user__name', 'lastupdate', 'isanswered', 'staff__firstname', 'staff__lastname', 'team__name');
+$tickets->values('lock__staff_id', 'staff_id', 'isoverdue', 'team_id',
+'ticket_id', 'number', 'cdata__subject', 'user__default_email__address',
+'source', 'cdata__:priority__priority_color', 'cdata__:priority__priority_desc', 'status_id', 'status__name', 'status__state', 'dept_id', 'dept__name', 'user__name', 'lastupdate', 'isanswered', 'staff__firstname', 'staff__lastname', 'team__name');
 
 // Add in annotations
 $tickets->annotate(array(
@@ -586,8 +589,9 @@ return false;">
                         $displaystatus="$displaystatus";
                     echo "<td nowrap><span class=\"truncate\" style=\"max-width: 169px\">$displaystatus</span></td>";
                 } else { ?>
-                <td class="nohover" align="center" style="background-color:<?php echo $T['cdata__priority__priority_color']; ?>;">
-                    <?php echo $T['cdata__priority__priority_desc']; ?></td>
+                <td class="nohover" align="center"
+                    style="background-color:<?php echo $T['cdata__:priority__priority_color']; ?>;">
+                    <?php echo $T['cdata__:priority__priority_desc']; ?></td>
                 <?php
                 }
                 ?>
