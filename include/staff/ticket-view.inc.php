@@ -399,10 +399,25 @@ if($ticket->isOverdue())
                 </tr>
                 <?php
                 } ?>
+                <!--<tr>
+                    <th><?php // echo __('SLA Plan');?>:</th>
+                    <td><?php //echo $sla?Format::htmlchars($sla->getName()):'<span class="faded">&mdash; '.__('None').' &mdash;</span>'; ?></td>
+                </tr>-->
+				<?php
+                if($ticket->isOpen()){ ?>
                 <tr>
-                    <th><?php echo __('SLA Plan');?>:</th>
-                    <td><?php echo $sla?Format::htmlchars($sla->getName()):'<span class="faded">&mdash; '.__('None').' &mdash;</span>'; ?></td>
+                    <th>&nbsp;</th>
+                    <td>&nbsp;</td>
                 </tr>
+                <?php
+                }else { ?>
+                <tr>
+                    <th><?php echo __('Due Date');?>:</th>
+                    <td><?php echo Format::datetime($ticket->getEstDueDate()) |'<span class="faded">&mdash; '.__('None').' &mdash;</span>'; ?></td>
+                </tr>
+                <?php
+                }
+                ?>
                 <?php
                 if($ticket->isOpen()){ ?>
                 <tr>
