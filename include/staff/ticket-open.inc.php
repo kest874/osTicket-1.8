@@ -179,9 +179,9 @@ if(!$user) {
                 &nbsp;<font class="error"><b>*</b>&nbsp;<?php echo $errors['topicId']; ?></font>
             </td>
         </tr>
-        <tr id="open_ticket_informationdata" style="display:none;">
+        <tr id="open_ticket_informationdata">
             <td width="160">
-                <?php echo __('Department'); ?>:
+                <?php echo __('AI Team'); ?>:
             </td>
             <td>
                 <select name="deptId">
