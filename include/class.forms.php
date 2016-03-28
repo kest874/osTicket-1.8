@@ -540,15 +540,19 @@ class FormField {
     static $more_types = array();
     static $uid = null;
 
+    function _uid() {
+        return ++self::$uid;
+    }
+
     function __construct($options=array()) {
         $this->ht = array_merge($this->ht, $options);
         if (!isset($this->ht['id']))
-            $this->ht['id'] = self::$uid++;
+            $this->ht['id'] = self::_uid();
     }
 
     function __clone() {
         $this->_widget = null;
-        $this->ht['id'] = self::$uid++;
+        $this->ht['id'] = self::_uid();
     }
 
     static function addFieldTypes($group, $callable) {
@@ -882,6 +886,10 @@ class FormField {
      */
     function searchable($value) {
         return Format::searchable($this->toString($value));
+    }
+
+    function getKeys($value) {
+        return $this->to_database($value);
     }
 
     /**
@@ -1321,6 +1329,10 @@ class TextboxField extends FormField {
             if (!call_user_func($func[0], $value))
                 $this->_errors[] = $error;
     }
+
+    function parse($value) {
+        return Format::striptags($value);
+    }
 }
 
 class PasswordField extends TextboxField {
@@ -1379,9 +1391,8 @@ class TextareaField extends FormField {
     }
 
     function searchable($value) {
-        $value = preg_replace(array('`<br(\s*)?/?>`i', '`</div>`i'), "\n", $value); //<?php
-        $value = Format::htmldecode(Format::striptags($value));
-        return Format::searchable($value);
+        $body = new HtmlThreadEntryBody($value);
+        return $body->getSearchable();
     }
 
     function export($value) {
@@ -1597,6 +1608,14 @@ class ChoiceField extends FormField {
         return (string) $value;
     }
 
+    function getKeys($value) {
+        if (!is_array($value))
+            $value = $this->getChoice($value);
+        if (is_array($value))
+            return implode(', ', array_keys($value));
+        return (string) $value;
+    }
+
     function whatChanged($before, $after) {
         $B = (array) $before;
         $A = (array) $after;
@@ -1743,14 +1762,14 @@ class DatetimeField extends FormField {
 
     function to_database($value) {
         // Store time in gmt time, unix epoch format
-        return (string) $value;
+        return date('Y-m-d H:i:s', $value);
     }
 
     function to_php($value) {
         if (!$value)
             return $value;
         else
-            return (int) $value;
+            return (int) strtotime($value);
     }
 
     function asVar($value, $id=false) {
@@ -1766,18 +1785,12 @@ class DatetimeField extends FormField {
         $config = $this->getConfiguration();
         // If GMT is set, convert to local time zone. Otherwise, leave
         // unchanged (default TZ is UTC)
+        if (!$value)
+            return '';
         if ($config['time'])
             return Format::datetime($value, false, !$config['gmt'] ? 'UTC' : false);
         else
             return Format::date($value, false, false, !$config['gmt'] ? 'UTC' : false);
-    }
-
-    function export($value) {
-        $config = $this->getConfiguration();
-        if (!$value)
-            return '';
-        else
-            return Format::date($value, false, 'y-MM-dd HH:mm:ss', !$config['gmt'] ? 'UTC' : false);
     }
 
     function getConfigurationOptions() {
@@ -1884,8 +1897,9 @@ class DatetimeField extends FormField {
 
     function getSearchQ($method, $value, $name=false) {
         $name = $name ?: $this->get('name');
+        $config = $this->getConfiguration();
         $value = is_int($value)
-            ? DateTime::createFromFormat('U', Misc::dbtime($value)) ?: $value
+            ? DateTime::createFromFormat('U', !$config['gmt'] ? Misc::gmtime($value) : $value) ?: $value
             : $value;
         switch ($method) {
         case 'equal':
@@ -1909,7 +1923,8 @@ class DatetimeField extends FormField {
         case 'between':
             foreach (array('left', 'right') as $side) {
                 $value[$side] = is_int($value[$side])
-                    ? DateTime::createFromFormat('U', Misc::dbtime($value[$side])) ?: $value[$side]
+                    ? DateTime::createFromFormat('U', !$config['gmt']
+                        ? Misc::gmtime($value[$side]) : $value[$side]) ?: $value[$side]
                     : $value[$side];
             }
             return new Q(array(
@@ -1917,14 +1932,16 @@ class DatetimeField extends FormField {
                 "{$name}__lte" => $value['right'],
             ));
         case 'ndaysago':
+            $now = Misc::gmtime();
             return new Q(array(
-                "{$name}__lt" => SqlFunction::NOW(),
-                "{$name}__gte" => SqlExpression::minus(SqlFunction::NOW(), SqlInterval::DAY($value['until'])),
+                "{$name}__lt" => $now,
+                "{$name}__gte" => SqlExpression::minus($now, SqlInterval::DAY($value['until'])),
             ));
         case 'ndays':
+            $now = Misc::gmtime();
             return new Q(array(
-                "{$name}__gt" => SqlFunction::NOW(),
-                "{$name}__lte" => SqlExpression::plus(SqlFunction::NOW(), SqlInterval::DAY($value['until'])),
+                "{$name}__gt" => $now,
+                "{$name}__lte" => SqlExpression::plus($now, SqlInterval::DAY($value['until'])),
             ));
         default:
             return parent::getSearchQ($method, $value, $name);
@@ -2002,7 +2019,7 @@ class ThreadEntryField extends FormField {
     function getConfiguration() {
         global $cfg;
         $config = parent::getConfiguration();
-        $config['html'] = (bool) $cfg->isRichTextEnabled();
+        $config['html'] = (bool) ($cfg && $cfg->isRichTextEnabled());
         return $config;
     }
 
@@ -2118,6 +2135,10 @@ class PriorityField extends ChoiceField {
         return null;
     }
 
+    function getKeys($value) {
+        return ($value instanceof Priority) ? array($value->getId()) : null;
+    }
+
     function getConfigurationOptions() {
         $choices = $this->getChoices();
         $choices[''] = __('System Default');
@@ -2153,8 +2174,8 @@ FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
 
 
 class DepartmentField extends ChoiceField {
-    function getWidget() {
-        $widget = parent::getWidget();
+    function getWidget($widgetClass=false) {
+        $widget = parent::getWidget($widgetClass);
         if ($widget->value instanceof Dept)
             $widget->value = $widget->value->getId();
         return $widget;
@@ -2164,7 +2185,7 @@ class DepartmentField extends ChoiceField {
         return true;
     }
 
-    function getChoices() {
+    function getChoices($verbose=false) {
         global $cfg;
 
         $choices = array();
@@ -2222,8 +2243,8 @@ class AssigneeField extends ChoiceField {
     var $_choices = null;
     var $_criteria = null;
 
-    function getWidget() {
-        $widget = parent::getWidget();
+    function getWidget($widgetClass=false) {
+        $widget = parent::getWidget($widgetClass);
         if (is_object($widget->value))
             $widget->value = $widget->value->getId();
         return $widget;
@@ -2248,7 +2269,7 @@ class AssigneeField extends ChoiceField {
         $this->_choices = $choices;
     }
 
-    function getChoices() {
+    function getChoices($verbose=false) {
         global $cfg;
 
         if (!isset($this->_choices)) {
@@ -2496,14 +2517,14 @@ class FileUploadField extends FormField {
         static $filetypes;
 
         if (!isset($filetypes)) {
-            if (function_exists('apc_fetch')) {
+            if (function_exists('apcu_fetch')) {
                 $key = md5(SECRET_SALT . GIT_VERSION . 'filetypes');
-                $filetypes = apc_fetch($key);
+                $filetypes = apcu_fetch($key);
             }
             if (!$filetypes)
                 $filetypes = YamlDataParser::load(INCLUDE_DIR . '/config/filetype.yaml');
             if ($key)
-                apc_store($key, $filetypes, 7200);
+                apcu_store($key, $filetypes, 7200);
         }
         return $filetypes;
     }
@@ -3058,7 +3079,7 @@ class TextboxWidget extends Widget {
 
 class TextboxSelectionWidget extends TextboxWidget {
     //TODO: Support multi-input e.g comma separated inputs
-    function render($options=array()) {
+    function render($options=array(), $extraConfig=array()) {
 
         if ($this->value && is_array($this->value))
             $this->value = current($this->value);
@@ -3715,10 +3736,27 @@ class FileUploadWidget extends Widget {
 
         // Files uploaded here MUST have been uploaded by this user and
         // identified in the session
-        $allowed = array();
-        // Files already attached to the field are allowed
-        foreach ($this->field->getFiles() as $f) {
-            $allowed[$f->id] = 1;
+        if ($files = parent::getValue()) {
+            $allowed = array();
+            // Files already attached to the field are allowed
+            foreach ($this->field->getFiles() as $F) {
+                // FIXME: This will need special porting in v1.10
+                $allowed[$F->id] = 1;
+            }
+            // New files uploaded in this session are allowed
+            if (isset($_SESSION[':uploadedFiles'])) {
+                $allowed += $_SESSION[':uploadedFiles'];
+            }
+
+            // Canned attachments initiated by this session
+            if (isset($_SESSION[':cannedFiles']))
+               $allowed += $_SESSION[':cannedFiles'];
+
+            foreach ($files as $i=>$F) {
+                if (!isset($allowed[$F])) {
+                    unset($files[$i]);
+                }
+            }
         }
 
         // New files uploaded in this session are allowed
@@ -4059,9 +4097,9 @@ class AssignmentForm extends Form {
             return $fields[$name];
     }
 
-    function isValid() {
+    function isValid($include=false) {
 
-        if (!parent::isValid() || !($f=$this->getField('assignee')))
+        if (!parent::isValid($include) || !($f=$this->getField('assignee')))
             return false;
 
         // Do additional assignment validation
@@ -4199,9 +4237,9 @@ class TransferForm extends Form {
         return $this->fields;
     }
 
-    function isValid() {
+    function isValid($include=false) {
 
-        if (!parent::isValid())
+        if (!parent::isValid($include))
             return false;
 
         // Do additional validations

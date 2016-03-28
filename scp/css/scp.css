@@ -381,7 +381,7 @@ a.emailSettings { background:url(../images/icons/emails.png) }
 a.emailDiagnostic { background:url(../images/icons/email_diagnostic.gif) }
 a.banList { background:url(../images/icons/ban_list.gif) }
 
-a.users { background:url(../images/icons/list_users.gif) }
+a.users { background:url(../images/icons/user.gif) }
 a.newuser { background:url(../images/icons/new_user.gif) }
 a.groups { background:url(../images/icons/list_groups.gif) }
 a.teams { background:url(../images/icons/teams.gif) }
@@ -435,12 +435,13 @@ a.Icon:hover {
 .Icon.lockedTicket { background:url(../images/icons/locked_ticket.gif) 0 0 no-repeat; }
 .Icon.editTicket { background-image: url(../images/icons/edit_ticket.png); }
 
+.Icon.staffAssigned { background-image: url(../images/icons/user.gif); }
+.Icon.teamAssigned { background-image: url(../images/icons/teams.png); }
 .Icon.newCategory { background-image: url(../images/icons/new_category.png); }
 .Icon.editCategory { background-image: url(../images/icons/edit_category.png); }
 .Icon.deleteCategory { background-image: url(../images/icons/delete_category.png); }
 .Icon.newFAQ { background-image: url(../images/icons/new_faq.png); }
 .Icon.newReply { background-image: url(../images/icons/new_reply.png); }
-
 .Icon.file { background-image: url(../images/icons/file.gif); }
 .Icon.refresh { background-image: url(../images/icons/refresh.gif); }
 .Icon.note {
@@ -946,6 +947,8 @@ a#post-note:hover {
 }
 img.avatar {
     border-radius: inherit;
+    vertical-align: middle;
+    margin-right: 5px;
 }
 .avatar > img.avatar {
     width: 100%;
@@ -2833,6 +2836,16 @@ input[type=checkbox] {
 }
 .vertical-pad {
   margin-top: 3px;
+}
+
+input, textarea {
+    padding: 3px 5px;
+    font-size: 0.95em;
+    font-family: inherit;
+    border-radius:4px;
+   -webkit-border-radius: 4px;
+   -moz-border-radius: 4px;
+    border: 1px solid #bbb;
 }
 
 small {

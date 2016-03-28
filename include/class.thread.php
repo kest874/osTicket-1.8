@@ -533,8 +533,8 @@ class Thread extends VerySimpleModel {
         return true;
     }
 
-    static function create($vars) {
-        $inst = parent::create($vars);
+    static function create($vars=false) {
+        $inst = new static($vars);
         $inst->created = SqlFunction::NOW();
         return $inst;
     }
@@ -604,6 +604,8 @@ implements TemplateVariable {
     var $_headers;
     var $_thread;
     var $_actions;
+    var $is_autoreply;
+    var $is_bounce;
 
     static protected $perms = array(
         self::PERM_EDIT => array(
@@ -966,7 +968,7 @@ implements TemplateVariable {
         else
             return false;
 
-        $att = Attachment::create(array(
+        $att = new Attachment(array(
             'type' => 'H',
             'object_id' => $this->getId(),
             'file_id' => $fileId,
@@ -1062,7 +1064,7 @@ implements TemplateVariable {
         if (!$id || !$mid)
             return false;
 
-        $this->email_info = ThreadEntryEmailInfo::create(array(
+        $this->email_info = new ThreadEntryEmailInfo(array(
             'thread_entry_id' => $id,
             'mid' => $mid,
         ));
@@ -1307,8 +1309,10 @@ implements TemplateVariable {
     }
 
     //new entry ... we're trusting the caller to check validity of the data.
-    static function create($vars, &$errors=array()) {
+    static function create($vars=false) {
         global $cfg;
+
+        assert(is_array($vars));
 
         //Must have...
         if (!$vars['threadId'] || !$vars['type'])
@@ -1352,7 +1356,7 @@ implements TemplateVariable {
         if ($poster && is_object($poster))
             $poster = (string) $poster;
 
-        $entry = parent::create(array(
+        $entry = new static(array(
             'created' => SqlFunction::NOW(),
             'type' => $vars['type'],
             'thread_id' => $vars['threadId'],
@@ -1563,7 +1567,7 @@ class ThreadEvent extends VerySimpleModel {
     const OVERDUE   = 'overdue';
     const REOPENED  = 'reopened';
     const STATUS    = 'status';
-    const TRANFERRED = 'transferred';
+    const TRANSFERRED = 'transferred';
     const VIEWED    = 'viewed';
 
     const MODE_STAFF = 1;
@@ -1696,7 +1700,7 @@ class ThreadEvent extends VerySimpleModel {
     }
 
     static function create($ht=false, $user=false) {
-        $inst = parent::create($ht);
+        $inst = new static($ht);
         $inst->timestamp = SqlFunction::NOW();
 
         global $thisstaff, $thisclient;
@@ -1714,7 +1718,7 @@ class ThreadEvent extends VerySimpleModel {
     }
 
     static function forTicket($ticket, $state, $user=false) {
-        $inst = static::create(array(
+        $inst = self::create(array(
             'staff_id' => $ticket->getStaffId(),
             'team_id' => $ticket->getTeamId(),
             'dept_id' => $ticket->getDeptId(),
@@ -2120,7 +2124,14 @@ class ThreadEntryBody /* extends SplString */ {
     }
 
     function getClean() {
-        return trim($this->body);
+        switch ($this->type) {
+        case 'html':
+            return trim($this->body, " <>br/\t\n\r") ? $this->body: '';
+        case 'text':
+            return trim($this->body) ? $this->body: '';
+        default:
+            return trim($this->body);
+        }
     }
 
     function __toString() {
@@ -2165,18 +2176,9 @@ class ThreadEntryBody /* extends SplString */ {
 
     static function clean($text, $format=null) {
         global $cfg;
-
-        if (!$format && $cfg)
-            $format = $cfg->isRichTextEnabled() ? 'html' : 'text';
-
-        switch ($format) {
-        case 'html':
-            return trim($text, " <>br/\t\n\r") ? $text : '';
-        case 'text':
-            return trim($text) ? $text : '';
-        default:
-            return $text;
-        }
+        $format = $format ?: ($cfg->isHtmlThreadEnabled() ? 'html' : 'text');
+        $body = static::fromFormattedText($text, $format);
+        return $body->getClean();
     }
 }
 
@@ -2186,8 +2188,7 @@ class TextThreadEntryBody extends ThreadEntryBody {
     }
 
     function getClean() {
-        return  Format::stripEmptyLines(
-                self::clean($this->body, $this->format));
+        return  Format::stripEmptyLines(parent::getClean());
     }
 
     function prepend($what) {
@@ -2234,7 +2235,7 @@ class HtmlThreadEntryBody extends ThreadEntryBody {
     }
 
     function getClean() {
-        return Format::sanitize(self::clean($this->body, $this->format));
+        return Format::sanitize(parent::getClean());
     }
 
     function getSearchable() {
@@ -2276,10 +2277,6 @@ class MessageThreadEntry extends ThreadEntry {
 
     function getSubject() {
         return $this->getTitle();
-    }
-
-    static function create($vars, &$errors=array()) {
-        return static::add($vars, $errors);
     }
 
     static function add($vars, &$errors=array()) {
@@ -2328,10 +2325,6 @@ class ResponseThreadEntry extends ThreadEntry {
         return $this->getStaff();
     }
 
-    static function create($vars, &$errors=array()) {
-        return static::add($vars, $errors);
-    }
-
     static function add($vars, &$errors=array()) {
 
         if (!$vars || !is_array($vars) || !$vars['threadId'])
@@ -2373,10 +2366,6 @@ class NoteThreadEntry extends ThreadEntry {
         return new ThreadActivity(
                 _S('New Internal Note'),
                 _S('New internal note posted'));
-    }
-
-    static function create($vars, &$errors) {
-        return self::add($vars, $errors);
     }
 
     static function add($vars, &$errors=array()) {
@@ -2516,7 +2505,7 @@ implements TemplateVariable {
 
         //Add ticket Id.
         $vars['threadId'] = $this->getId();
-        return NoteThreadEntry::create($vars, $errors);
+        return NoteThreadEntry::add($vars, $errors);
     }
 
     function addMessage($vars, &$errors) {
@@ -2524,7 +2513,7 @@ implements TemplateVariable {
         $vars['threadId'] = $this->getId();
         $vars['staffId'] = 0;
 
-        if (!($message = MessageThreadEntry::create($vars, $errors)))
+        if (!($message = MessageThreadEntry::add($vars, $errors)))
             return $message;
 
         $this->lastmessage = SqlFunction::NOW();
@@ -2537,7 +2526,7 @@ implements TemplateVariable {
         $vars['threadId'] = $this->getId();
         $vars['userId'] = 0;
 
-        if (!($resp = ResponseThreadEntry::create($vars, $errors)))
+        if (!($resp = ResponseThreadEntry::add($vars, $errors)))
             return $resp;
 
         $this->lastresponse = SqlFunction::NOW();
@@ -2591,8 +2580,9 @@ implements TemplateVariable {
 
 // Ticket thread class
 class TicketThread extends ObjectThread {
+    static function create($ticket=false) {
+        assert($ticket !== false);
 
-    static function create($ticket) {
         $id = is_object($ticket) ? $ticket->getId() : $ticket;
         $thread = parent::create(array(
                     'object_id' => $id,

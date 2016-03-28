@@ -180,9 +180,6 @@ class DynamicForm extends VerySimpleModel {
     function save($refetch=false) {
         if (count($this->dirty))
             $this->set('updated', new SqlFunction('NOW'));
-        // XXX: This should go to an update routine
-        if (isset($this->dirty['notes']))
-            $this->notes = Format::sanitize($this->notes);
         if ($rv = parent::save($refetch | $this->dirty))
             return $this->saveTranslations();
         return $rv;
@@ -198,7 +195,7 @@ class DynamicForm extends VerySimpleModel {
         return $this->save();
     }
 
-    function getExportableFields($exclude=array()) {
+    function getExportableFields($exclude=array(), $prefix='__') {
         $fields = array();
         foreach ($this->getFields() as $f) {
             // Ignore core fields
@@ -209,13 +206,14 @@ class DynamicForm extends VerySimpleModel {
             elseif (!$f->hasData() || $f->isPresentationOnly())
                 continue;
 
-            $fields['__field_'.$f->get('id')] = $f;
+            $name = $f->get('name') ?: ('field_'.$f->get('id'));
+            $fields[$prefix.$name] = $f;
         }
         return $fields;
     }
 
     static function create($ht=false) {
-        $inst = parent::create($ht);
+        $inst = new static($ht);
         $inst->set('created', new SqlFunction('NOW'));
         if (isset($ht['fields'])) {
             $inst->save();
@@ -320,8 +318,7 @@ class DynamicForm extends VerySimpleModel {
         $f = $answer->getField();
         $name = $f->get('name') ? $f->get('name')
             : 'field_'.$f->get('id');
-        $fields = sprintf('`%s`=', $name) . db_input(
-            implode(',', $answer->getSearchKeys()));
+        $fields = sprintf('`%s`=', $name) . db_input($answer->getSearchKeys());
         $sql = 'INSERT INTO `'.$cdata['table'].'` SET '.$fields
             . sprintf(', `%s`= %s',
                     $cdata['object_id'],
@@ -342,6 +339,10 @@ class DynamicForm extends VerySimpleModel {
             return TicketForm::updateDynamicDataView($answer, $data);
         case 'A':
             return TaskForm::updateDynamicDataView($answer, $data);
+        case 'U':
+            return UserForm::updateDynamicDataView($answer, $data);
+        case 'O':
+            return OrganizationForm::updateDynamicDataView($answer, $data);
         }
 
     }
@@ -355,6 +356,10 @@ class DynamicForm extends VerySimpleModel {
             return TicketForm::dropDynamicDataView(TicketForm::$cdata['table']);
         case 'A':
             return TaskForm::dropDynamicDataView(TaskForm::$cdata['table']);
+        case 'U':
+            return UserForm::dropDynamicDataView(UserForm::$cdata['table']);
+        case 'O':
+            return OrganizationForm::dropDynamicDataView(OrganizationForm::$cdata['table']);
         }
 
     }
@@ -406,6 +411,12 @@ class DynamicForm extends VerySimpleModel {
 class UserForm extends DynamicForm {
     static $instance;
     static $form;
+
+    static $cdata = array(
+            'table' => USER_CDATA_TABLE,
+            'object_id' => 'user_id',
+            'object_type' => ObjectModel::OBJECT_TYPE_USER,
+        );
 
     static function objects() {
         $os = parent::objects();
@@ -473,59 +484,6 @@ class TicketForm extends DynamicForm {
         return static::$instance;
     }
 
-    static function ensureDynamicDataView() {
-        $sql = 'SHOW TABLES LIKE \''.TABLE_PREFIX.'ticket__cdata\'';
-        if (!db_num_rows(db_query($sql)))
-            return static::buildDynamicDataView();
-    }
-
-    static function buildDynamicDataView() {
-        // create  table __cdata (primary key (ticket_id)) as select
-        // entry.object_id as ticket_id, MAX(IF(field.name = 'subject',
-        // ans.value, NULL)) as `subject`,MAX(IF(field.name = 'priority',
-        // ans.value, NULL)) as `priority_desc`,MAX(IF(field.name =
-        // 'priority', ans.value_id, NULL)) as `priority_id`
-        // FROM ost_form_entry entry LEFT JOIN ost_form_entry_values ans ON
-        // ans.entry_id = entry.id LEFT JOIN ost_form_field field ON
-        // field.id=ans.field_id
-        // where entry.object_type='T' group by entry.object_id;
-        $sql = 'CREATE TABLE IF NOT EXISTS `'.TABLE_PREFIX.'ticket__cdata` (PRIMARY KEY
-            (ticket_id)) DEFAULT CHARSET=utf8 AS '
-            . static::getCrossTabQuery('T', 'ticket_id');
-        db_query($sql);
-    }
-
-    static function dropDynamicDataView() {
-        db_query('DROP TABLE IF EXISTS `'.TABLE_PREFIX.'ticket__cdata`');
-    }
-
-    static function updateDynamicDataView($answer, $data) {
-        // TODO: Detect $data['dirty'] for value and value_id
-        // We're chiefly concerned with Ticket form answers
-        if (!($e = $answer->getEntry()) || $e->form->get('type') != 'T')
-            return;
-
-        // $record = array();
-        // $record[$f] = $answer->value'
-        // TicketFormData::objects()->filter(array('ticket_id'=>$a))
-        //      ->merge($record);
-        $sql = 'SHOW TABLES LIKE \''.TABLE_PREFIX.'ticket__cdata\'';
-        if (!db_num_rows(db_query($sql)))
-            return;
-
-        $f = $answer->getField();
-        if (!$f->getFormId())
-            return;
-
-        $name = $f->get('name') ?: ('field_'.$f->get('id'));
-        $fields = sprintf('`%s`=', $name) . db_input(
-            implode(',', $answer->getSearchKeys()));
-        $sql = 'INSERT INTO `'.TABLE_PREFIX.'ticket__cdata` SET '.$fields
-            .', `ticket_id`='.db_input($answer->getEntry()->get('object_id'))
-            .' ON DUPLICATE KEY UPDATE '.$fields;
-        if (!db_query($sql))
-            return self::dropDynamicDataView();
-    }
 }
 // Add fields from the standard ticket form to the ticket filterable fields
 Filter::addSupportedMatches(/* @trans */ 'Ticket Data', function() {
@@ -935,7 +893,7 @@ class DynamicFormField extends VerySimpleModel {
     }
 
     static function create($ht=false) {
-        $inst = parent::create($ht);
+        $inst = new static($ht);
         $inst->set('created', new SqlFunction('NOW'));
         if (isset($ht['configuration']))
             $inst->configuration = JsonDataEncoder::encode($ht['configuration']);
@@ -1327,7 +1285,7 @@ class DynamicFormEntry extends VerySimpleModel {
     }
 
     static function create($ht=false, $data=null) {
-        $inst = parent::create($ht);
+        $inst = new static($ht);
         $inst->set('created', new SqlFunction('NOW'));
         if ($data)
             $inst->setSource($data);
@@ -1336,7 +1294,7 @@ class DynamicFormEntry extends VerySimpleModel {
                 continue;
             if (!$impl->hasData() || !$impl->isStorable())
                 continue;
-            $a = DynamicFormEntryAnswer::create(
+            $a = new DynamicFormEntryAnswer(
                 array('field'=>$field, 'entry'=>$inst));
             $a->field->setAnswer($a);
             $inst->answers->add($a);
@@ -1428,14 +1386,7 @@ class DynamicFormEntryAnswer extends VerySimpleModel {
     }
 
     function getSearchKeys() {
-        $val = $this->getField()->to_php(
-            $this->get('value'), $this->get('value_id'));
-        if (is_array($val))
-            return array_keys($val);
-        elseif (is_object($val) && method_exists($val, 'getId'))
-            return array($val->getId());
-
-        return array($val);
+        return implode(',', (array) $this->getField()->getKeys($this->getValue()));
     }
 
     function asVar() {
@@ -1479,9 +1430,8 @@ class SelectionField extends FormField {
         return $this->_list;
     }
 
-    function getWidget() {
+    function getWidget($widgetClass=false) {
         $config = $this->getConfiguration();
-        $widgetClass = false;
         if ($config['widget'] == 'typeahead' && $config['multiselect'] == false)
             $widgetClass = 'TypeaheadSelectionWidget';
         elseif ($config['widget'] == 'textbox')
@@ -1553,6 +1503,14 @@ class SelectionField extends FormField {
         // Don't set the ID here as multiselect prevents using exactly one
         // ID value. Instead, stick with the JSON value only.
         return $value;
+    }
+
+    function getKeys($value) {
+        if (!is_array($value))
+            $value = $this->getChoice($value);
+        if (is_array($value))
+            return implode(', ', array_keys($value));
+        return (string) $value;
     }
 
     // PHP 5.4 Move this to a trait

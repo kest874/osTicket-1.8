@@ -60,7 +60,6 @@ implements TemplateVariable {
         ),
     );
 
-    var $page;
     var $_forms;
 
     const DISPLAY_DISABLED = 2;
@@ -278,7 +277,7 @@ implements TemplateVariable {
     /*** Static functions ***/
 
     static function create($vars=array()) {
-        $topic = parent::create($vars);
+        $topic = new static($vars);
         $topic->created = SqlFunction::NOW();
         return $topic;
     }
@@ -418,7 +417,6 @@ implements TemplateVariable {
         $this->priority_id = $vars['priority_id'] ?: 0;
         $this->status_id = $vars['status_id'] ?: 0;
         $this->sla_id = $vars['sla_id'] ?: 0;
-        $this->form_id = $vars['form_id'] ?: 0;
         $this->page_id = $vars['page_id'] ?: 0;
         $this->isactive = !!$vars['isactive'];
         $this->ispublic = !!$vars['ispublic'];
@@ -507,14 +505,15 @@ implements TemplateVariable {
                     // Don't add a form more than once
                     continue;
                 }
-                TopicFormModel::create(array(
+                $tf = new TopicFormModel(array(
                     'topic_id' => $this->getId(),
                     'form_id' => $id,
                     'sort' => $sort + 1,
                     'extra' => JsonDataEncoder::encode(
                         array('disable' => $find_disabled($form))
                     )
-                ))->save();
+                ));
+                $tf->save();
             }
         }
         return true;

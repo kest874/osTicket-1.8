@@ -31,7 +31,7 @@ class UserEmailModel extends VerySimpleModel {
     );
 
     function __toString() {
-        return $this->address;
+        return (string) $this->address;
     }
 }
 
@@ -180,20 +180,14 @@ RolePermission::register(/* @trans */ 'Users', UserModel::getPermissions());
 
 class UserCdata extends VerySimpleModel {
     static $meta = array(
-        'table' => 'user__cdata',
-        'view' => true,
+        'table' => USER_CDATA_TABLE,
         'pk' => array('user_id'),
+        'joins' => array(
+            'user' => array(
+                'constraint' => array('user_id' => 'UserModel.id'),
+            ),
+        ),
     );
-
-    static function getQuery($compiler) {
-        $form = UserForm::getUserForm();
-        $exclude = array('name', 'email');
-        return '('.$form->getCrossTabQuery($form->type, 'user_id', $exclude).')';
-    }
-
-    static function getSqlAddParams($compiler) {
-        return static::getQuery($compiler);
-    }
 }
 
 class User extends UserModel
@@ -212,7 +206,7 @@ implements TemplateVariable {
             elseif (!$name)
                 list($name) = explode('@', $vars['email'], 2);
 
-            $user = User::create(array(
+            $user = new User(array(
                 'name' => Format::htmldecode(Format::sanitize($name, false)),
                 'created' => new SqlFunction('NOW'),
                 'updated' => new SqlFunction('NOW'),
@@ -616,7 +610,7 @@ implements TemplateVariable {
     }
 
     function __toString() {
-        return $this->address;
+        return (string) $this->address;
     }
 
     function getVar($what) {
@@ -877,7 +871,7 @@ class UserEmail extends UserEmailModel {
     static function ensure($address) {
         $email = static::lookup(array('address'=>$address));
         if (!$email) {
-            $email = static::create(array('address'=>$address));
+            $email = new static(array('address'=>$address));
             $email->save();
         }
         return $email;
@@ -1057,7 +1051,7 @@ class UserAccount extends VerySimpleModel {
         $content = Page::lookupByType($template);
 
         if (!$email ||  !$content)
-            return new Error(sprintf(_S('%s: Unable to retrieve template'),
+            return new BaseError(sprintf(_S('%s: Unable to retrieve template'),
                 $template));
 
         $vars = array(
@@ -1152,7 +1146,7 @@ class UserAccount extends VerySimpleModel {
     }
 
     static function createForUser($user, $defaults=false) {
-        $acct = static::create(array('user_id'=>$user->getId()));
+        $acct = new static(array('user_id'=>$user->getId()));
         if ($defaults && is_array($defaults)) {
             foreach ($defaults as $k => $v)
                 $acct->set($k, $v);
@@ -1187,12 +1181,11 @@ class UserAccount extends VerySimpleModel {
 
         if ($errors) return false;
 
-        $account = UserAccount::create(array('user_id' => $user->getId()));
-        if (!$account)
-            return false;
-
-        $account->set('timezone', $vars['timezone']);
-        $account->set('backend', $vars['backend']);
+        $account = new UserAccount(array(
+            'user_id' => $user->getId(),
+            'timezone' => $vars['timezone'],
+            'backend' => $vars['backend'],
+        ));
 
         if ($vars['username'] && strcasecmp($vars['username'], $user->getEmail()))
             $account->set('username', $vars['username']);

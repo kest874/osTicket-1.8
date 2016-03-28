@@ -70,6 +70,10 @@ class OrganizationModel extends VerySimpleModel {
         return $this->name;
     }
 
+    function getNumUsers() {
+        return $this->users->count();
+    }
+
     function getAccountManager() {
         if (!isset($this->_manager)) {
             if ($this->manager[0] == 't')
@@ -145,18 +149,15 @@ RolePermission::register(/* @trans */ 'Organizations',
 
 class OrganizationCdata extends VerySimpleModel {
     static $meta = array(
-        'table' => 'org__cdata',
-        'view' => true,
+        'table' => ORGANIZATION_CDATA_TABLE,
         'pk' => array('org_id'),
+        'joins' => array(
+            'org' => array(
+                'constraint' => array('ord_id' => 'OrganizationModel.id'),
+            ),
+        ),
     );
-
-    function getQuery($compiler) {
-        $form = OrganizationForm::getDefaultForm();
-        $exclude = array('name');
-        return '('.$form->getCrossTabQuery($form->type, 'org_id', $exclude).')';
-    }
 }
-
 
 class Organization extends OrganizationModel
 implements TemplateVariable {
@@ -447,8 +448,9 @@ implements TemplateVariable {
 
     static function fromVars($vars) {
 
-        if (!($org = Organization::lookup(array('name' => $vars['name'])))) {
-            $org = Organization::create(array(
+        $vars['name'] = Format::striptags($vars['name']);
+        if (!($org = static::lookup(array('name' => $vars['name'])))) {
+            $org = static::create(array(
                 'name' => $vars['name'],
                 'updated' => new SqlFunction('NOW'),
             ));
@@ -473,7 +475,7 @@ implements TemplateVariable {
         // Make sure the name is not in-use
         if (($field=$form->getField('name'))
                 && $field->getClean()
-                && Organization::lookup(array('name' => $field->getClean()))) {
+                && static::lookup(array('name' => $field->getClean()))) {
             $field->addError(__('Organization with the same name already exists'));
             $valid = false;
         }
@@ -482,7 +484,7 @@ implements TemplateVariable {
     }
 
     static function create($vars=false) {
-        $org = parent::create($vars);
+        $org = new static($vars);
 
         $org->created = new SqlFunction('NOW');
         $org->setStatus(self::SHARE_PRIMARY_CONTACT);
@@ -492,7 +494,7 @@ implements TemplateVariable {
     // Custom create called by installer/upgrader to load initial data
     static function __create($ht, &$error=false) {
 
-        $org = Organization::create($ht);
+        $org = static::create($ht);
         // Add dynamic data (if any)
         if ($ht['fields']) {
             $org->save(true);
@@ -506,6 +508,12 @@ implements TemplateVariable {
 class OrganizationForm extends DynamicForm {
     static $instance;
     static $form;
+
+    static $cdata = array(
+            'table' => ORGANIZATION_CDATA_TABLE,
+            'object_id' => 'org_id',
+            'object_type' => ObjectModel::OBJECT_TYPE_ORG,
+        );
 
     static function objects() {
         $os = parent::objects();

@@ -142,7 +142,7 @@ if($_POST && !$errors):
             $vars = $_POST;
             $attachments = $note_form->getField('attachments')->getClean();
             $vars['cannedattachments'] = array_merge(
-                $vars['cannedattachments'] ?: array(), $attachments);
+            $vars['cannedattachments'] ?: array(), $attachments);
             $vars['note'] = ThreadEntryBody::clean($vars['note']);
 
             if ($cfg->getLockTime()) {
@@ -406,6 +406,7 @@ if($stats['overdue']) {
 
 if (isset($_SESSION['advsearch'])) {
     // XXX: De-duplicate and simplify this code
+    TicketForm::ensureDynamicDataView();
     $search = SavedSearch::create();
     $form = $search->getFormFromSession('advsearch');
     $tickets = TicketModel::objects();
