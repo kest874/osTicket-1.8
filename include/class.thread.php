@@ -1960,7 +1960,7 @@ class EditEvent extends ThreadEvent {
             foreach (array(
                 'topic_id' => array(__('Help Topic'), array('Topic', 'getTopicName')),
                 'sla_id' => array(__('SLA'), array('SLA', 'getSLAName')),
-                'duedate' => array(__('Duedate'), array('Format', 'date')),
+                'duedate' => array(__('Due Date'), array('Format', 'date')),
                 'user_id' => array(__('Ticket Owner'), array('User', 'getNameById')),
                 'source' => array(__('Source'), null)
             ) as $f => $info) {
@@ -2176,7 +2176,7 @@ class ThreadEntryBody /* extends SplString */ {
 
     static function clean($text, $format=null) {
         global $cfg;
-        $format = $format ?: ($cfg->isHtmlThreadEnabled() ? 'html' : 'text');
+        $format = $format ?: ($cfg->isRichTextEnabled() ? 'html' : 'text');
         $body = static::fromFormattedText($text, $format);
         return $body->getClean();
     }

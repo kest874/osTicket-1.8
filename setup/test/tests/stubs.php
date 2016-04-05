@@ -24,6 +24,7 @@ class mysqli_stmt {
     function fetch_field() {}
     function fetch_field_direct() {}
     function fetch_row() {}
+    function fetch_assoc() {}
     function result_metadata() {}
     function free() {}
 }
@@ -38,6 +39,7 @@ class ReflectionClass {
     function getMethods() {}
     function getConstants() {}
     function newInstanceArgs() {}
+    function newInstanceWithoutConstructor() {}
 }
 
 class DomNode {
@@ -140,6 +142,7 @@ class SqlExpression {
 }
 
 class SqlInterval {
+    static function SECOND() {}
     static function MINUTE() {}
     static function DAY() {}
 }

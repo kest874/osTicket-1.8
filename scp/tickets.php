@@ -1,19 +1,14 @@
 <?php
 /*************************************************************************
     tickets.php
-
     Handles all tickets related actions.
-
     Peter Rotich <peter@osticket.com>
     Copyright (c)  2006-2013 osTicket
     http://www.osticket.com
-
     Released under the GNU General Public License WITHOUT ANY WARRANTY.
     See LICENSE.TXT for details.
-
     vim: expandtab sw=4 ts=4 sts=4:
 **********************************************************************/
-
 require('staff.inc.php');
 require_once(INCLUDE_DIR.'class.ticket.php');
 require_once(INCLUDE_DIR.'class.dept.php');
@@ -22,7 +17,6 @@ require_once(INCLUDE_DIR.'class.canned.php');
 require_once(INCLUDE_DIR.'class.json.php');
 require_once(INCLUDE_DIR.'class.dynamic_forms.php');
 require_once(INCLUDE_DIR.'class.export.php');       // For paper sizes
-
 $page='';
 $ticket = $user = null; //clean start.
 $redirect = false;
@@ -37,7 +31,6 @@ if($_REQUEST['id'] || $_REQUEST['number']) {
         $ticket=null; //Clear ticket obj.
     }
 }
-
 if ($_REQUEST['uid']) {
     $user = User::lookup($_REQUEST['uid']);
 }
@@ -46,10 +39,8 @@ if (!$ticket) {
     $queue_name = strtolower($_GET['a'] ?: $_GET['status']); //Status is overloaded
     if (!$queue_name && isset($_SESSION[$queue_key]))
         $queue_name = $_SESSION[$queue_key];
-
     // Stash current queue view
     $_SESSION[$queue_key] = $queue_name;
-
     // Set queue as status
     if (@!isset($_REQUEST['advanced'])
             && @$_REQUEST['a'] != 'search'
@@ -57,7 +48,6 @@ if (!$ticket) {
             && $queue_name)
         $_GET['status'] = $_REQUEST['status'] = $queue_name;
 }
-
 // Configure form for file uploads
 $response_form = new SimpleForm(array(
     'attachments' => new FileUploadField(array('id'=>'attach',
@@ -69,10 +59,8 @@ $note_form = new SimpleForm(array(
         'name'=>'attach:note',
         'configuration' => array('extensions'=>'')))
 ));
-
 //At this stage we know the access status. we can process the post.
 if($_POST && !$errors):
-
     if($ticket && $ticket->getId()) {
         //More coffee please.
         $errors=array();
@@ -89,7 +77,6 @@ if($_POST && !$errors):
                 $vars['response'] = ThreadEntryBody::clean($vars['response']);
                 if(!$vars['response'])
                     $errors['response']=__('Response required');
-
                 if ($cfg->getLockTime()) {
                     if (!$lock) {
                         $errors['err'] = __('This action requires a lock. Please try again');
@@ -105,46 +92,40 @@ if($_POST && !$errors):
                         $errors['err'] = __('Your lock has expired. Please try again');
                     }
                 }
-
                 //Make sure the email is not banned
                 if(!$errors['err'] && Banlist::isBanned($ticket->getEmail()))
                     $errors['err']=__('Email is in banlist. Must be removed to reply.');
             }
-
             if(!$errors && ($response=$ticket->postReply($vars, $errors, $_POST['emailreply']))) {
                 $msg = sprintf(__('%s: Reply posted successfully'),
                         sprintf(__('Ticket #%s'),
                             sprintf('<a href="tickets.php?id=%d"><b>%s</b></a>',
                                 $ticket->getId(), $ticket->getNumber()))
                         );
-
                 // Clear attachment list
                 $response_form->setSource(array());
                 $response_form->getField('attachments')->reset();
-
                 // Remove staff's locks
                 $ticket->releaseLock($thisstaff->getId());
-
                 // Cleanup response draft for this user
                 Draft::deleteForNamespace(
                     'ticket.response.' . $ticket->getId(),
                     $thisstaff->getId());
-
                 // Go back to the ticket listing page on reply
                 $ticket = null;
                 $redirect = 'tickets.php';
-
             } elseif(!$errors['err']) {
-                $errors['err']=__('Unable to post the reply. Correct the errors below and try again!');
+                $errors['err']=sprintf('%s %s',
+                    __('Unable to post the reply.'),
+                    __('Correct any errors below and try again.'));
             }
             break;
         case 'postnote': /* Post Internal Note */
             $vars = $_POST;
             $attachments = $note_form->getField('attachments')->getClean();
             $vars['cannedattachments'] = array_merge(
-            $vars['cannedattachments'] ?: array(), $attachments);
+                $vars['cannedattachments'] ?: array(), $attachments);
             $vars['note'] = ThreadEntryBody::clean($vars['note']);
-
             if ($cfg->getLockTime()) {
                 if (!$lock) {
                     $errors['err'] = __('This action requires a lock. Please try again');
@@ -157,32 +138,27 @@ if($_POST && !$errors):
                     $errors['err'] = __('Your lock has expired. Please try again');
                 }
             }
-
             $wasOpen = ($ticket->isOpen());
             if(($note=$ticket->postNote($vars, $errors, $thisstaff))) {
-
                 $msg=__('Internal note posted successfully');
                 // Clear attachment list
                 $note_form->setSource(array());
                 $note_form->getField('attachments')->reset();
-
                 // Remove staff's locks
                 $ticket->releaseLock($thisstaff->getId());
-
                 if($wasOpen && $ticket->isClosed())
                     $ticket = null; //Going back to main listing.
                 else
                     // Ticket is still open -- clear draft for the note
                     Draft::deleteForNamespace('ticket.note.'.$ticket->getId(),
                         $thisstaff->getId());
-
                  $redirect = 'tickets.php';
             } else {
-
                 if(!$errors['err'])
                     $errors['err'] = __('Unable to post internal note - missing or invalid data.');
-
-                $errors['postnote'] = __('Unable to post the note. Correct the error(s) below and try again!');
+                $errors['postnote'] = sprintf('%s %s',
+                    __('Unable to post the note.'),
+                    __('Correct any errors below and try again.'));
             }
             break;
         case 'edit':
@@ -197,7 +173,9 @@ if($_POST && !$errors):
                 if(!$ticket->checkStaffPerm($thisstaff))
                     $ticket=null;
             } elseif(!$errors['err']) {
-                $errors['err']=__('Unable to update the ticket. Correct the errors below and try again!');
+                $errors['err']=sprintf(
+                    __('Unable to update %s. Correct any errors below and try again.'),
+                    __('ticket'));
             }
             break;
         case 'process':
@@ -303,22 +281,19 @@ if($_POST && !$errors):
             $errors['err']=__('Unknown action');
         endswitch;
     }elseif($_POST['a']) {
-
         switch($_POST['a']) {
             case 'open':
                 $ticket=null;
                 if (!$thisstaff ||
                         !$thisstaff->hasPerm(TicketModel::PERM_CREATE, false)) {
                      $errors['err'] = sprintf('%s %s',
-                             sprintf(__('You do not have permission %s.'),
+                             sprintf(__('You do not have permission %s'),
                                  __('to create tickets')),
                              __('Contact admin for such access'));
                 } else {
                     $vars = $_POST;
                     $vars['uid'] = $user? $user->getId() : 0;
-
                     $vars['cannedattachments'] = $response_form->getField('attachments')->getClean();
-
                     if(($ticket=Ticket::open($vars, $errors))) {
                         $msg=__('Ticket created successfully');
                         $_REQUEST['a']=null;
@@ -330,7 +305,9 @@ if($_POST && !$errors):
                         $response_form->getField('attachments')->reset();
                         unset($_SESSION[':form-data']);
                     } elseif(!$errors['err']) {
-                        $errors['err']=__('Unable to create the ticket. Correct the error(s) and try again');
+                        $errors['err']=sprintf('%s %s',
+                            __('Unable to create the ticket.'),
+                            __('Correct any errors below and try again.'));
                     }
                 }
                 break;
@@ -339,20 +316,16 @@ if($_POST && !$errors):
     if(!$errors)
         $thisstaff ->resetStats(); //We'll need to reflect any changes just made!
 endif;
-
 if ($redirect) {
     if ($msg)
         Messages::success($msg);
     Http::redirect($redirect);
 }
-
 /*... Quick stats ...*/
 $stats= $thisstaff->getTicketsStats();
-
 // Clear advanced search upon request
 if (isset($_GET['clear_filter']))
     unset($_SESSION['advsearch']);
-
 //Navigation
 $nav->setTabActive('tickets');
 $open_name = _P('queue-name',
@@ -365,16 +338,13 @@ if($cfg->showAnsweredTickets()) {
                             'iconclass'=>'Ticket'),
                         ((!$_REQUEST['status'] && !isset($_SESSION['advsearch'])) || $_REQUEST['status']=='open'));
 } else {
-
     if ($stats) {
-
         $nav->addSubMenu(array('desc'=>$open_name.' ('.number_format($stats['open']).')',
                                'title'=>__('Open Tickets'),
                                'href'=>'tickets.php?status=open',
                                'iconclass'=>'Ticket'),
                             ((!$_REQUEST['status'] && !isset($_SESSION['advsearch'])) || $_REQUEST['status']=='open'));
     }
-
     if($stats['answered']) {
         $nav->addSubMenu(array('desc'=>__('Answered').' ('.number_format($stats['answered']).')',
                                'title'=>__('Answered Tickets'),
@@ -383,27 +353,22 @@ if($cfg->showAnsweredTickets()) {
                             ($_REQUEST['status']=='answered'));
     }
 }
-
 if($stats['assigned']) {
-
     $nav->addSubMenu(array('desc'=>__('My Tickets').' ('.number_format($stats['assigned']).')',
                            'title'=>__('Assigned Tickets'),
                            'href'=>'tickets.php?status=assigned',
                            'iconclass'=>'assignedTickets'),
                         ($_REQUEST['status']=='assigned'));
 }
-
 if($stats['overdue']) {
     $nav->addSubMenu(array('desc'=>__('Overdue').' ('.number_format($stats['overdue']).')',
                            'title'=>__('Stale Tickets'),
                            'href'=>'tickets.php?status=overdue',
                            'iconclass'=>'overdueTickets'),
                         ($_REQUEST['status']=='overdue'));
-
     if(!$sysnotice && $stats['overdue']>10)
         $sysnotice=sprintf(__('%d overdue tickets!'),$stats['overdue']);
 }
-
 if (isset($_SESSION['advsearch'])) {
     // XXX: De-duplicate and simplify this code
     TicketForm::ensureDynamicDataView();
@@ -418,13 +383,11 @@ if (isset($_SESSION['advsearch'])) {
                            'iconclass'=>'Ticket'),
                         (!$_REQUEST['status'] || $_REQUEST['status']=='search'));
 }
-
 $nav->addSubMenu(array('desc' => __('Closed'),
                        'title'=>__('Closed Tickets'),
                        'href'=>'tickets.php?status=closed',
                        'iconclass'=>'closedTickets'),
                     ($_REQUEST['status']=='closed'));
-
 if ($thisstaff->hasPerm(TicketModel::PERM_CREATE, false)) {
     $nav->addSubMenu(array('desc'=>__('New Ticket'),
                            'title'=> __('Open a New Ticket'),
@@ -433,13 +396,10 @@ if ($thisstaff->hasPerm(TicketModel::PERM_CREATE, false)) {
                            'id' => 'new-ticket'),
                         ($_REQUEST['a']=='open'));
 }
-
-
 $ost->addExtraHeader('<script type="text/javascript" src="js/ticket.js"></script>');
 $ost->addExtraHeader('<script type="text/javascript" src="js/thread.js"></script>');
 $ost->addExtraHeader('<meta name="tip-namespace" content="tickets.queue" />',
     "$('#content').data('tipNamespace', 'tickets.queue');");
-
 if($ticket) {
     $ost->setPageTitle(sprintf(__('Ticket #%s'),$ticket->getNumber()));
     $nav->setActiveSubMenu(-1);
@@ -467,11 +427,9 @@ if($ticket) {
         elseif (!Export::saveTickets($query, "tickets-$ts.csv", 'csv'))
             $errors['err'] = __('Internal error: Unable to dump query results');
     }
-
     //Clear active submenu on search with no status
     if($_REQUEST['a']=='search' && !$_REQUEST['status'])
         $nav->setActiveSubMenu(-1);
-
     //set refresh rate if the user has it configured
     if(!$_POST && !$_REQUEST['a'] && ($min=(int)$thisstaff->getRefreshRate())) {
         $js = "+function(){ var qq = setInterval(function() { if ($.refreshTicketView === undefined) return; clearInterval(qq); $.refreshTicketView({$min}*60000); }, 200); }();";
@@ -479,7 +437,6 @@ if($ticket) {
             $js);
     }
 }
-
 require_once(STAFFINC_DIR.'header.inc.php');
 require_once(STAFFINC_DIR.$inc);
 print $response_form->getMedia();
