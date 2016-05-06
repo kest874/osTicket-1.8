@@ -39,7 +39,7 @@ class UsersAjaxAPI extends AjaxController {
         $emails=array();
         $matches = array();
 
-        if (strlen($q) < 3)
+        if (strlen($q) < 2)
             return $this->encode(array());
 
         if (!$type || !strcasecmp($type, 'remote')) {
@@ -58,15 +58,13 @@ class UsersAjaxAPI extends AjaxController {
         if (!$type || !strcasecmp($type, 'local')) {
 
             $users = User::objects()
-                ->values_flat('id', 'name', 'default_email__address')
+                ->values_flat('id', 'default_email__address', 'name')
                 ->limit($limit);
 
             if ($fulltext) {
                 global $ost;
-                $users = $ost->searcher->find($q, $users);
-                $users->order_by(new SqlCode('__relevance__'), QuerySet::DESC)
-                    ->distinct('id');
-
+                $users = $ost->searcher->find($q, $users, true);
+                
                 if (!count($emails) && !count($users) && preg_match('`\w$`u', $q)) {
                     // Do wildcard full-text search
                     $_REQUEST['q'] = $q."*";
@@ -83,7 +81,7 @@ class UsersAjaxAPI extends AjaxController {
             // Omit already-imported remote users
             if ($emails = array_filter($emails)) {
                 $users->union(User::objects()
-                    ->values_flat('id', 'name', 'default_email__address')
+                    ->values_flat('id', 'emails__address', 'name' )
                     ->annotate(array('__relevance__' => new SqlCode(1)))
                     ->filter(array(
                         'emails__address__in' => $emails

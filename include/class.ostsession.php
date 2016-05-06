@@ -174,7 +174,7 @@ extends VerySimpleModel {
 
 class DbSessionBackend
 extends SessionBackend {
-    var $data = null;
+	var $data = null;
 
     function read($id) {
         try {

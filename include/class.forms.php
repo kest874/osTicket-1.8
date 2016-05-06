@@ -46,8 +46,11 @@ class Form {
         $this->_source = ($source) ? $source : $_POST;
     }
 
-    function getId() {
-        return static::$id;
+    function getFormId() {
+        return @$this->id ?: static::$id;
+    }
+    function setId($id) {
+        $this->id = $id;
     }
 
     function data($source) {
@@ -210,7 +213,7 @@ class Form {
     function emitJavascript($options=array()) {
 
         // Check if we need to emit javascript
-        if (!($fid=$this->getId()))
+        if (!($fid=$this->getFormId()))
             return;
         ?>
         <script type="text/javascript">
@@ -431,7 +434,7 @@ implements FormRenderer {
 <?php         if ($label = $f->get('label')) { ?>
               <label class="<?php if ($f->isRequired()) echo 'required'; ?>"
                   for="<?php echo $f->getWidget()->id; ?>">
-                  <?php echo Format::htmlchars($label); ?>:
+                  <?php  echo Format::htmlchars($label); ?>:
                 <?php if ($f->isRequired()) { ?>
                 <span class="error">*</span>
                 <?php
@@ -997,7 +1000,54 @@ class FormField {
         return sprintf($desc, $name, $value);
     }
 
+    function addToQuery($query, $name=false) {
+        return $query->values($name ?: $this->get('name'));
+    }
+
+    /**
+     * Similary to to_php() and parse(), except a row from a queryset is
+     * passed. The value returned should be what would be retured from
+     * parse() or to_php()
+     */
+    function from_query($row, $name=false) {
+        return $row[$name ?: $this->get('name')];
+    }
+
+    /**
+     * If the field can be used in a quick filter. To be used, it should
+     * also implement getQuickFilterChoices() which should return a list of
+     * choices to appear in a quick filter drop-down
+     */
+    function supportsQuickFilter() {
+        return false;
+    }
+
+    /**
+     * Fetch a keyed array of quick filter choices. The keys should be
+     * passed later to ::applyQuickFilter() to apply the quick filter to a
+     * query. The values should be localized titles for the choices.
+     */
+    function getQuickFilterChoices() {
+        return array();
+    }
+
+    /**
+     * Apply a quick filter selection of this field to the query. The
+     * modified query should be returned. Optionally, the orm path / field
+     * name can be passed.
+     */
+    function applyQuickFilter($query, $choice, $name=false) {
+        return $query;
+    }
+
     function getLabel() { return $this->get('label'); }
+
+    function applyOrderBy($query, $reverse=false, $name=false) {
+        $col = $name ?: CustomQueue::getOrmPath($this->get('name'), $query);
+        if ($reverse)
+            $col = '-' . $col;
+        return $query->order_by($col);
+    }
 
     /**
      * getImpl
@@ -1041,12 +1091,25 @@ class FormField {
         $this->getWidget()->value = $value;
     }
 
+    /**
+     * Fetch a pseudo-random id for this form field. It is used when
+     * rendering the widget in the @name attribute emitted in the resulting
+     * HTML. The form element is based on the form id, field id and name,
+     * and the current user's session id. Therefor, the same form fields
+     * will yield differing names for different users. This is used to ward
+     * off bot attacks as it makes it very difficult to predict and
+     * correlate the form names to the data they represent.
+     */
     function getFormName() {
-        if (is_numeric($this->get('id')))
+        $default = $this->get('name') ?: $this->get('id');
+        if ($this->_form && is_numeric($fid = $this->_form->getFormId()))
+            return substr(md5(
+                session_id() . '-form-field-id-' . $fid . $default), -14);
+        elseif (is_numeric($this->get('id')))
             return substr(md5(
                 session_id() . '-field-id-'.$this->get('id')), -16);
-        else
-            return $this->get('name') ?: $this->get('id');
+
+        return $default;
     }
 
     function setForm($form) {
@@ -1140,6 +1203,9 @@ class FormField {
      * Returns true if the field/widget should be rendered as an entire
      * block in the target form.
      */
+	function ForceFullWidth(){
+		return false;
+	}
     function isBlockLevel() {
         return false;
     }
@@ -1170,17 +1236,6 @@ class FormField {
     }
     function getSubFields() {
         return null;
-    }
-
-    /**
-     * Indicates if the field provides for searching for something other
-     * than keywords. For instance, textbox fields can have hits by keyword
-     * searches alone, but selection fields should provide the option to
-     * match a specific value or set of values and therefore need to
-     * participate on any search builder.
-     */
-    function hasSpecialSearch() {
-        return true;
     }
 
     function getConfigurationForm($source=null) {
@@ -1291,10 +1346,6 @@ class TextboxField extends FormField {
         );
     }
 
-    function hasSpecialSearch() {
-        return false;
-    }
-
     function validateEntry($value) {
         parent::validateEntry($value);
         $config = $this->getConfiguration();
@@ -1378,10 +1429,6 @@ class TextareaField extends FormField {
         );
     }
 
-    function hasSpecialSearch() {
-        return false;
-    }
-
     function display($value) {
         $config = $this->getConfiguration();
         if ($config['html'])
@@ -1431,10 +1478,6 @@ class PhoneField extends FormField {
                     'us'=>__('United States')),
             )),
         );
-    }
-
-    function hasSpecialSearch() {
-        return false;
     }
 
     function validateEntry($value) {
@@ -1527,6 +1570,23 @@ class BooleanField extends FormField {
         default:
             return parent::getSearchQ($method, $value, $name);
         }
+    }
+
+    function supportsQuickFilter() {
+        return true;
+    }
+
+    function getQuickFilterChoices() {
+        return array(
+            true => __('Checked'),
+            false => __('Not Checked'),
+        );
+    }
+
+    function applyQuickFilter($query, $qf_value, $name=false) {
+        return $query->filter(array(
+            $name ?: $this->get('name') => (int) $qf_value,
+        ));
     }
 }
 
@@ -1755,6 +1815,20 @@ class ChoiceField extends FormField {
             return parent::describeSearchMethod($method);
         }
     }
+
+    function supportsQuickFilter() {
+        return true;
+    }
+
+    function getQuickFilterChoices() {
+        return $this->getChoices();
+    }
+
+    function applyQuickFilter($query, $qf_value, $name=false) {
+        return $query->filter(array(
+            $name ?: $this->get('name') => $qf_value,
+        ));
+    }
 }
 
 class DatetimeField extends FormField {
@@ -1772,6 +1846,10 @@ class DatetimeField extends FormField {
             return (int) strtotime($value);
     }
 
+    function from_query($row, $name=false) {
+        return strtotime(parent::from_query($row, $name));
+    }
+
     function asVar($value, $id=false) {
         if (!$value) return null;
         return new FormattedDate((int) $value, 'UTC', false, false);
@@ -1781,16 +1859,17 @@ class DatetimeField extends FormField {
     }
 
     function toString($value) {
-        global $cfg;
-        $config = $this->getConfiguration();
         // If GMT is set, convert to local time zone. Otherwise, leave
         // unchanged (default TZ is UTC)
+        $config = $this->getConfiguration();
+        $fromDb = @$config['fromdb'] ?: false;
+
         if (!$value)
             return '';
         if ($config['time'])
-            return Format::datetime($value, false, !$config['gmt'] ? 'UTC' : false);
+            return Format::datetime($value, $fromdb, !$config['gmt'] ? 'UTC' : false);
         else
-            return Format::date($value, false, false, !$config['gmt'] ? 'UTC' : false);
+            return Format::date($value, $fromdb, false, !$config['gmt'] ? 'UTC' : false);
     }
 
     function getConfigurationOptions() {
@@ -1987,8 +2066,12 @@ class SectionBreakField extends FormField {
         return false;
     }
 
+	function ForceFullWidth(){
+		return true;
+	}
+	
     function isBlockLevel() {
-        return true;
+        return false;
     }
 }
 
@@ -1998,16 +2081,15 @@ class ThreadEntryField extends FormField {
     function isChangeable() {
         return false;
     }
+	function ForceFullWidth(){
+		return false;
+	}
     function isBlockLevel() {
         return true;
     }
     function isPresentationOnly() {
         return true;
     }
-    function hasSpecialSearch() {
-        return false;
-    }
-
     function getMedia() {
         $config = $this->getConfiguration();
         $media = parent::getMedia() ?: array();
@@ -2115,11 +2197,14 @@ class PriorityField extends ChoiceField {
             : $prio;
     }
 
-    function display($prio) {
+    function display($prio, &$styles=null) {
         if (!$prio instanceof Priority)
             return parent::display($prio);
-        return sprintf('<span style="padding: 2px; background-color: %s">%s</span>',
-            $prio->getColor(), Format::htmlchars($prio->getDesc()));
+        if (is_array($styles))
+            $styles += array(
+                'background-color' => $prio->getColor()
+            );
+        return Format::htmlchars($prio->getDesc());
     }
 
     function toString($value) {
@@ -2164,6 +2249,20 @@ class PriorityField extends ChoiceField {
         if (!isset($config['default']))
             $config['default'] = $cfg->getDefaultPriorityId();
         return $config;
+    }
+
+    function applyOrderBy($query, $reverse=false, $name=false) {
+        if ($query->model == 'Ticket' && $name == 'cdata__priority') {
+            // Order by the priority urgency field
+            $col = 'cdata__:priority__priority_urgency';
+            $reverse = !$reverse;
+        }
+        else {
+            $col = $name ?: CustomQueue::getOrmPath($this->get('name'), $query);
+        }
+        if ($reverse)
+            $col = "-$col";
+        return $query->order_by($col);
     }
 }
 FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
@@ -2586,10 +2685,6 @@ class FileUploadField extends FormField {
         );
     }
 
-    function hasSpecialSearch() {
-        return false;
-    }
-
     /**
      * Called from the ajax handler for async uploads via web clients.
      */
@@ -2870,6 +2965,10 @@ class FileFieldAttachments {
     }
 }
 
+class ColorChoiceField extends FormField {
+    static $widget = 'ColorPickerWidget';
+}
+
 class InlineFormData extends ArrayObject {
     var $_form;
 
@@ -2933,6 +3032,8 @@ class InlineFormField extends FormField {
         $form = $this->get('form');
         if (is_array($form)) {
             $form = new SimpleForm($form, $data ?: $this->value ?: $this->getSource());
+            // Ensure unique, but predictable form and field IDs
+            $form->setId(sprintf('%u', crc32($this->get('name')) >> 1));
         }
         return $form;
     }
@@ -3065,7 +3166,7 @@ class TextboxWidget extends Widget {
         $placeholder = sprintf('placeholder="%s"', $this->field->getLocal('placeholder',
             $config['placeholder']));
         ?>
-        <input type="<?php echo $type; ?>"
+       <input type="<?php echo $type; ?>"
             id="<?php echo $this->id; ?>"
             <?php echo implode(' ', array_filter(array(
                 $size, $maxlength, $classes, $autocomplete, $disabled,
@@ -3797,6 +3898,10 @@ class FreeTextField extends FormField {
     function hasData() {
         return false;
     }
+	
+	function ForceFullWidth(){
+		return false;
+	}
 
     function isBlockLevel() {
         return true;
@@ -3855,7 +3960,7 @@ class FreeTextWidget extends Widget {
             echo Format::viewableImages($config['content']); ?></div>
         </div>
         <?php
-        if (($attachments=$this->field->getFiles())) { ?>
+        if (($attachments = $this->field->getFiles()) && count($attachments)) { ?>
             <section class="freetext-files">
             <div class="title"><?php echo __('Related Resources'); ?></div>
             <?php foreach ($attachments as $attach) { ?>
@@ -3870,6 +3975,27 @@ class FreeTextWidget extends Widget {
             <?php } ?>
         </section>
         <?php }
+    }
+}
+
+class ColorPickerWidget extends Widget {
+    static $media = array(
+        'css' => array(
+            'css/spectrum.css',
+        ),
+        'js' => array(
+            'js/spectrum.js',
+        ),
+    );
+
+    function render($options=array()) {
+        ?><input type="color"
+            id="<?php echo $this->id; ?>"
+            <?php echo implode(' ', array_filter(array(
+                $classes
+            ))); ?>
+            name="<?php echo $this->name; ?>"
+            value="<?php echo Format::htmlchars($this->value); ?>"/><?php
     }
 }
 
@@ -3965,7 +4091,7 @@ class VisibilityConstraint {
             else {
                 @list($f, $op) = self::splitFieldAndOp($c);
                 $field = $form->getField($f);
-                $wval = $field->getClean();
+                $wval = $field ? $field->getClean() : null;
                 switch ($op) {
                 case 'eq':
                 case null:

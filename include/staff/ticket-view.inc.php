@@ -8,6 +8,7 @@ if(!@$thisstaff->isStaff() || !$ticket->checkStaffPerm($thisstaff)) die('Access 
 //Re-use the post info on error...savekeyboards.org (Why keyboard? -> some people care about objects than users!!)
 $info=($_POST && $errors)?Format::input($_POST):array();
 
+					
 //Get the goodies.
 $dept  = $ticket->getDept();  //Dept
 $role  = $thisstaff->getRole($dept);
@@ -54,11 +55,17 @@ if($ticket->isOverdue())
 ?>
 <div>
     <div class="sticky bar">
-       <div class="content">
+	<div class="thread_content_top">
+       <div class="thread_content">
         <div class="pull-right flush-right">
-            <?php
+            
+			<a class="action-button pull-right" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Tickets'); ?>"
+				href="tickets.php<?php 
+				
+			 ?>"><i class="icon-list-alt"></i></a>
+			<?php
             if ($thisstaff->hasPerm(Email::PERM_BANLIST)
-                    || $role->hasPerm(TicketModel::PERM_EDIT)
+                    || $role->hasPerm(Ticket::PERM_EDIT)
                     || ($dept && $dept->isManager($thisstaff))) { ?>
             <span class="action-button pull-right" data-placement="bottom" data-dropdown="#action-dropdown-more" data-toggle="tooltip" title="<?php echo __('More');?>">
                 <i class="icon-caret-down pull-right"></i>
@@ -67,7 +74,7 @@ if($ticket->isOverdue())
             <?php
             }
 
-            if ($role->hasPerm(TicketModel::PERM_EDIT)) { ?>
+            if ($role->hasPerm(Ticket::PERM_EDIT)) { ?>
                 <span class="action-button pull-right"><a data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Edit'); ?>" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit"><i class="icon-edit"></i></a></span>
             <?php
             } ?>
@@ -85,7 +92,7 @@ if($ticket->isOverdue())
             </div>
             <?php
             // Transfer
-            if ($role->hasPerm(TicketModel::PERM_TRANSFER)) {?>
+            if ($role->hasPerm(Ticket::PERM_TRANSFER)) {?>
             <span class="action-button pull-right">
             <a class="ticket-action" id="ticket-transfer" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Transfer'); ?>"
                 data-redirect="tickets.php"
@@ -96,7 +103,7 @@ if($ticket->isOverdue())
 
             <?php
             // Assign
-            if ($ticket->isOpen() && $role->hasPerm(TicketModel::PERM_ASSIGN)) {?>
+            if ($ticket->isOpen() && $role->hasPerm(Ticket::PERM_ASSIGN)) {?>
             <span class="action-button pull-right"
                 data-dropdown="#action-dropdown-assign"
                 data-placement="bottom"
@@ -137,7 +144,7 @@ if($ticket->isOverdue())
             <div id="action-dropdown-more" class="action-dropdown anchor-right">
               <ul>
                 <?php
-                 if ($role->hasPerm(TicketModel::PERM_EDIT)) { ?>
+                 if ($role->hasPerm(Ticket::PERM_EDIT)) { ?>
                     <li><a class="change-user" href="#tickets/<?php
                     echo $ticket->getId(); ?>/change-user"><i class="icon-user"></i> <?php
                     echo __('Change Owner'); ?></a></li>
@@ -193,7 +200,7 @@ if($ticket->isOverdue())
                     <?php
                      }
                   }
-                  if ($role->hasPerm(TicketModel::PERM_DELETE)) {
+                  if ($role->hasPerm(Ticket::PERM_DELETE)) {
                      ?>
                     <li class="danger"><a class="ticket-action" href="#tickets/<?php
                     echo $ticket->getId(); ?>/status/delete"
@@ -203,9 +210,9 @@ if($ticket->isOverdue())
                  }
                 ?>
               </ul>
-            </div>
+			</div>
                 <?php
-                if ($role->hasPerm(TicketModel::PERM_REPLY)) { ?>
+                if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
                 <a href="#post-reply" class="post-response action-button"
                 data-placement="bottom" data-toggle="tooltip"
                 title="<?php echo __('Post Reply'); ?>"><i class="icon-mail-reply"></i></a>
@@ -223,7 +230,7 @@ if($ticket->isOverdue())
              title="<?php echo __('Reload'); ?>"><i class="icon-refresh"></i>
              <?php echo sprintf(__('Ticket #%s'), $ticket->getNumber()); ?></a>
             </h2>
-        </div>
+        </div></div>
     </div>
   </div>
 </div>
@@ -233,12 +240,13 @@ if($ticket->isOverdue())
         echo $subject_field->display($ticket->getSubject()); ?>
     </h3>
 </div>
-<table class="ticket_info" cellspacing="0" cellpadding="0" width="940" border="0">
+<div id="threaddata">
+<table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
     <tr>
         <td width="50%">
             <table border="0" cellspacing="" cellpadding="4" width="100%">
                 <tr>
-                    <th width="100"><?php echo __('Status');?>:</th>
+                    <th width="180"><?php echo __('Status');?>:</th>
                     <td><?php echo ($S = $ticket->getStatus()) ? $S->getLocalName() : ''; ?></td>
                 </tr>
                 <tr>
@@ -258,7 +266,7 @@ if($ticket->isOverdue())
         <td width="50%" style="vertical-align:top">
             <table border="0" cellspacing="" cellpadding="4" width="100%">
                 <tr>
-                    <th width="100"><?php echo __('User'); ?>:</th>
+                    <th width="180"><?php echo __('User'); ?>:</th>
                     <td><a href="#tickets/<?php echo $ticket->getId(); ?>/user"
                         onclick="javascript:
                             $.userLookup('ajax.php/tickets/<?php echo $ticket->getId(); ?>/user',
@@ -363,15 +371,15 @@ if($ticket->isOverdue())
         </td>
     </tr>
 </table>
-<br>
-<table class="ticket_info" cellspacing="0" cellpadding="0" width="940" border="0">
+
+<table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
     <tr>
         <td width="50%">
             <table cellspacing="0" cellpadding="4" width="100%" border="0">
                 <?php
                 if($ticket->isOpen()) { ?>
                 <tr>
-                    <th width="100"><?php echo __('Assigned To');?>:</th>
+                    <th width="180"><?php echo __('Assigned To');?>:</th>
                     <td>
                         <?php
                         if($ticket->isAssigned())
@@ -420,7 +428,7 @@ if($ticket->isOverdue())
         <td width="50%">
             <table cellspacing="0" cellpadding="4" width="100%" border="0">
                 <tr>
-                    <th width="100"><?php echo __('Help Topic');?>:</th>
+                    <th style="width:180px"><?php echo __('Help Topic');?>:</th>
                     <td><?php echo Format::htmlchars($ticket->getHelpTopic()); ?></td>
                 </tr>
                 <tr>
@@ -435,7 +443,7 @@ if($ticket->isOverdue())
         </td>
     </tr>
 </table>
-<br>
+
 <?php
 foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
     // Skip core fields shown earlier in the ticket view
@@ -455,19 +463,19 @@ foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
     if (count($displayed) == 0)
         continue;
     ?>
-    <table class="ticket_info custom-data" cellspacing="0" cellpadding="0" width="940" border="0">
-    <thead>
-        <th colspan="2"><?php echo Format::htmlchars($form->getTitle()); ?></th>
-    </thead>
+    <table class="ticket_info custom-data" cellspacing="0" cellpadding="0" width="100%" border="0">
+    <div style="display:none;">
+        <th colspan="2" style="display:none;"><?php echo Format::htmlchars($form->getTitle()); ?></th>
+    </div>
     <tbody>
 <?php
     foreach ($displayed as $stuff) {
         list($label, $v) = $stuff;
 ?>
         <tr>
-            <td width="200"><?php
+            <th width="180"><strong><?php
 echo Format::htmlchars($label);
-            ?>:</th>
+            ?>:</strong></th>
             <td><?php
 echo $v;
             ?></td>
@@ -476,7 +484,7 @@ echo $v;
     </tbody>
     </table>
 <?php } ?>
-<div class="clear"></div>
+
 
 <?php
 $tcount = $ticket->getThreadEntries($types)->count();
@@ -520,11 +528,10 @@ if ($errors['err'] && isset($_POST['a'])) {
 <?php
 } ?>
 
-<div class="sticky bar stop actions" id="response_options"
->
+<div class="sticky bar stop actions" id="response_options">
     <ul class="tabs" id="response-tabs">
         <?php
-        if ($role->hasPerm(TicketModel::PERM_REPLY)) { ?>
+        if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
         <li class="active <?php
             echo isset($errors['reply']) ? 'error' : ''; ?>"><a
             href="#reply" id="post-reply-tab"><?php echo __('Post Reply');?></a></li>
@@ -535,11 +542,12 @@ if ($errors['err'] && isset($_POST['a'])) {
             id="post-note-tab"><?php echo __('Post Internal Note');?></a></li>
     </ul>
     <?php
-    if ($role->hasPerm(TicketModel::PERM_REPLY)) { ?>
+    if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
     <form id="reply" class="tab_content spellcheck exclusive"
         data-lock-object-id="ticket/<?php echo $ticket->getId(); ?>"
         data-lock-id="<?php echo $mylock ? $mylock->getId() : ''; ?>"
-        action="tickets.php?id=<?php
+        action="tickets.php?<?php echo$qurl.$purl.$qfurl
+		?>&id=<?php
         echo $ticket->getId(); ?>#reply" name="reply" method="post" enctype="multipart/form-data">
         <?php csrf_token(); ?>
         <input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
@@ -694,7 +702,7 @@ if ($errors['err'] && isset($_POST['a'])) {
                 <td>
                     <?php
                     $outstanding = false;
-                    if ($role->hasPerm(TicketModel::PERM_CLOSE)
+                    if ($role->hasPerm(Ticket::PERM_CLOSE)
                             && is_string($warning=$ticket->isCloseable())) {
                         $outstanding =  true;
                         echo sprintf('<div class="warning-banner">%s</div>', $warning);
@@ -703,7 +711,7 @@ if ($errors['err'] && isset($_POST['a'])) {
                     <?php
                     $statusId = $info['reply_status_id'] ?: $ticket->getStatusId();
                     $states = array('open');
-                    if ($role->hasPerm(TicketModel::PERM_CLOSE) && !$outstanding)
+                    if ($role->hasPerm(Ticket::PERM_CLOSE) && !$outstanding)
                         $states = array_merge($states, array('closed'));
 
                     foreach (TicketStatusList::getStatuses(
@@ -735,7 +743,8 @@ if ($errors['err'] && isset($_POST['a'])) {
     <form id="note" class="hidden tab_content spellcheck exclusive"
         data-lock-object-id="ticket/<?php echo $ticket->getId(); ?>"
         data-lock-id="<?php echo $mylock ? $mylock->getId() : ''; ?>"
-        action="tickets.php?id=<?php echo $ticket->getId(); ?>#note"
+        action="tickets.php?<?php echo$qurl.$purl.$qfurl
+		?>&id=<?php echo $ticket->getId(); ?>#note"
         name="note" method="post" enctype="multipart/form-data">
         <?php csrf_token(); ?>
         <input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
@@ -792,7 +801,7 @@ if ($errors['err'] && isset($_POST['a'])) {
                         $statusId = $info['note_status_id'] ?: $ticket->getStatusId();
                         $states = array('open');
                         if ($ticket->isCloseable() === true
-                                && $role->hasPerm(TicketModel::PERM_CLOSE))
+                                && $role->hasPerm(Ticket::PERM_CLOSE))
                             $states = array_merge($states, array('closed'));
                         foreach (TicketStatusList::getStatuses(
                                     array('states' => $states)) as $s) {
@@ -817,14 +826,22 @@ if ($errors['err'] && isset($_POST['a'])) {
            <input class="" type="reset" value="<?php echo __('Reset');?>">
        </p>
    </form>
+   
+   </div>
  </div>
  </div>
 </div>
+
 <div style="display:none;" class="dialog" id="print-options">
     <h3><?php echo __('Ticket Print Options');?></h3>
     <a class="close" href=""><i class="icon-remove-circle"></i></a>
     <hr/>
-    <form action="tickets.php?id=<?php echo $ticket->getId(); ?>"
+    <form action="tickets.php?id=<?php echo $ticket->getId(); ?>
+	&queue=<?php 
+				if (isset($_REQUEST['queue'])) {
+					echo $_REQUEST['queue'];		}
+				
+			 ?>"
         method="post" id="print-form" name="print-form" target="_blank">
         <?php csrf_token(); ?>
         <input type="hidden" name="a" value="print">
