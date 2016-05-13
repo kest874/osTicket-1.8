@@ -148,8 +148,11 @@ implements Searchable {
         if (!$user)
             return null;
 		
+		if (($user->getId()) == 627)
+			return null;
+			
 		// If this is a staff member allow note collaborator.
-		if (Staff::getIdByEmail($user->getEmail()) !=0){
+		if (Staff::getIdByEmail($user->getEmail()) !=0 && $user->getId() !==627){
 				$vars['role'] = 'N';
 				$vars = array_merge(array(
 			    'threadId' => $this->getId(),
@@ -354,10 +357,7 @@ implements Searchable {
 		// Email commands #claim #close #note #assign:username
 		// Close if #close in subject
 		if($vars['subject'] && preg_match ('/#close/i', $vars['subject'])) {
-			$status = 'closed';
-			$comments = "Closed by {$staffname} via email.";
-			$object instanceof Ticket;
-			$object->setStatus($status,$comments);
+			$object->assignToStaff($vars['staffId'],null,$alert=false, false);
 			$vars['uid'] = $vars['staffId'];
 			$vars['reply_status_id'] = 3;
 			$vars['thread-type'] = 'R';
@@ -389,7 +389,6 @@ implements Searchable {
 			if ($stafftoassign !== 0){
 				$object instanceof Ticket;
 				$object->assignToStaff($stafftoassign,null,$alert=true); 
-				//$object->setStatusId(11);
 			}
 		}
 		
@@ -421,10 +420,8 @@ implements Searchable {
 		$vars['thread-type'] = 'R';
 		$vars['role'] = 'M';
 		$object instanceof Ticket;
-		//if ($currentstatus !== 9 && $currentstatus !== 10 && $currentstatus !== 3)
-			//$object->setStatusId(6);
 		}
-
+	
 		if ($assignToStaffId !== $vars['staffId'] && $C = $this->collaborators->filter(array(
             'user__emails__address' => $mailinfo['email']
         ))->first() && !preg_match ('/#note/i', $vars['subject'])){
@@ -432,16 +429,18 @@ implements Searchable {
 			$vars['thread-type'] = 'M';
 			$vars['flags'] = ThreadEntry::FLAG_COLLABORATOR;
 			$object instanceof Ticket;
-			//if ($assignToStaffId !== null && $currentstatus !== 9 && $currentstatus !== 10)  
-				//$object->setStatusId(7);
 		}
-		
-		
+
+		// Don't add Bomgar as a collaborator
+		if ($vars['staffId'] == 8){
+			$vars['thread-type'] = 'N';
+		}
+
 		if ($assignToStaffId !== $vars['staffId']  && $vars['staffId'] !== 0 
 		&& !$vars['thread-type']  ){ 
-			
+
 			$vars['thread-type'] = 'N';
-            $vars['flags'] = ThreadEntry::FLAG_COLLABORATOR;
+		    $vars['flags'] = ThreadEntry::FLAG_COLLABORATOR;
 			$info['threadId'] = $this->getId();
 			$info['userId'] = $vars['userId'];
 			$info['role'] = 'N';
@@ -461,16 +460,14 @@ implements Searchable {
 							);
 			$vars['system'] = 1;
 			$object instanceof Ticket;
-			//if ($assignToStaffId !== null && $currentstatus !== 9 && $currentstatus !== 10)  
-				//$object->setStatusId(7);
+		
 		}
 		
 		// Owner of the ticket
 		if ($vars['ownerId'] == $vars['userId']){ 
 			$vars['thread-type'] = 'M';
 			$object instanceof Ticket;
-			//if ($assignToStaffId !== null && $currentstatus !== 9 && $currentstatus !== 10) 
-				//$object->setStatusId(7);
+			
         }
 	
 		// Don't process the email -- it came FROM this system
@@ -657,8 +654,8 @@ implements Searchable {
         return true;
     }
 
-    static function create($vars) {
-        $inst = parent::create($vars);
+    static function create($vars=false) {
+        $inst = new static($vars);
         $inst->created = SqlFunction::NOW();
         return $inst;
     }
@@ -1063,7 +1060,6 @@ implements TemplateVariable {
 
     /* Emailed & API attachments handler */
     function importAttachment(&$attachment) {
-
         if(!$attachment || !is_array($attachment))
             return null;
 
@@ -1074,8 +1070,7 @@ implements TemplateVariable {
                 $error = sprintf(_S('Unable to import attachment - %s'),
                         $attachment['name']);
             //FIXME: logComment here
-            $this->getThread()->getObject()->logNote(
-                    _S('File Import Error'), $error, _S('SYSTEM'), false);
+           //$this->getThread()->getObject()->logNote(__('File Upload Error'), $error, 'SYSTEM', false);
         }
 
         return $A;
@@ -1100,7 +1095,7 @@ implements TemplateVariable {
         else
             return false;
 
-        $att = Attachment::create(array(
+        $att = new Attachment(array(
             'type' => 'H',
             'object_id' => $this->getId(),
             'file_id' => $fileId,
@@ -1196,7 +1191,7 @@ implements TemplateVariable {
         if (!$id || !$mid)
             return false;
 
-        $this->email_info = ThreadEntryEmailInfo::create(array(
+        $this->email_info = new ThreadEntryEmailInfo(array(
             'thread_entry_id' => $id,
             'mid' => $mid,
         ));
@@ -1460,8 +1455,10 @@ implements TemplateVariable {
     }
 
     //new entry ... we're trusting the caller to check validity of the data.
-    static function create($vars, &$errors=array()) {
+    static function create($vars=false) {
         global $cfg;
+
+        assert(is_array($vars));
 
         //Must have...
         if (!$vars['threadId'] || !$vars['type'])
@@ -1504,8 +1501,8 @@ implements TemplateVariable {
         $poster = $vars['poster'];
         if ($poster && is_object($poster))
             $poster = (string) $poster;
-		
-        $entry = parent::create(array(
+
+        $entry = new static(array(
             'created' => SqlFunction::NOW(),
             'type' => $vars['type'],
             'thread_id' => $vars['threadId'],
@@ -1720,7 +1717,7 @@ class ThreadEvent extends VerySimpleModel {
     const OVERDUE   = 'overdue';
     const REOPENED  = 'reopened';
     const STATUS    = 'status';
-    const TRANFERRED = 'transferred';
+    const TRANSFERRED = 'transferred';
     const VIEWED    = 'viewed';
 
     const MODE_STAFF = 1;
@@ -1853,7 +1850,7 @@ class ThreadEvent extends VerySimpleModel {
     }
 
     static function create($ht=false, $user=false) {
-        $inst = parent::create($ht);
+        $inst = new static($ht);
         $inst->timestamp = SqlFunction::NOW();
 
         global $thisstaff, $thisclient;
@@ -1871,7 +1868,7 @@ class ThreadEvent extends VerySimpleModel {
     }
 
     static function forTicket($ticket, $state, $user=false) {
-        $inst = static::create(array(
+        $inst = self::create(array(
             'staff_id' => $ticket->getStaffId(),
             'team_id' => $ticket->getTeamId(),
             'dept_id' => $ticket->getDeptId(),
@@ -2125,7 +2122,7 @@ class EditEvent extends ThreadEvent {
             foreach (array(
                 'topic_id' => array(__('Help Topic'), array('Topic', 'getTopicName')),
                 'sla_id' => array(__('SLA'), array('SLA', 'getSLAName')),
-                'duedate' => array(__('Duedate'), array('Format', 'date')),
+                'duedate' => array(__('Due Date'), array('Format', 'date')),
                 'user_id' => array(__('Ticket Owner'), array('User', 'getNameById')),
                 'source' => array(__('Source'), null)
             ) as $f => $info) {
@@ -2371,7 +2368,14 @@ class ThreadEntryBody /* extends SplString */ {
     }
 
     function getClean() {
-        return trim($this->body);
+        switch ($this->type) {
+        case 'html':
+            return trim($this->body, " <>br/\t\n\r") ? $this->body: '';
+        case 'text':
+            return trim($this->body) ? $this->body: '';
+        default:
+            return trim($this->body);
+        }
     }
 
     function __toString() {
@@ -2416,18 +2420,9 @@ class ThreadEntryBody /* extends SplString */ {
 
     static function clean($text, $format=null) {
         global $cfg;
-
-        if (!$format && $cfg)
-            $format = $cfg->isRichTextEnabled() ? 'html' : 'text';
-
-        switch ($format) {
-        case 'html':
-            return trim($text, " <>br/\t\n\r") ? $text : '';
-        case 'text':
-            return trim($text) ? $text : '';
-        default:
-            return $text;
-        }
+        $format = $format ?: ($cfg->isRichTextEnabled() ? 'html' : 'text');
+        $body = static::fromFormattedText($text, $format);
+        return $body->getClean();
     }
 }
 
@@ -2437,8 +2432,7 @@ class TextThreadEntryBody extends ThreadEntryBody {
     }
 
     function getClean() {
-        return  Format::stripEmptyLines(
-                self::clean($this->body, $this->format));
+        return  Format::stripEmptyLines(parent::getClean());
     }
 
     function prepend($what) {
@@ -2485,7 +2479,7 @@ class HtmlThreadEntryBody extends ThreadEntryBody {
     }
 
     function getClean() {
-        return Format::sanitize(self::clean($this->body, $this->format));
+        return Format::sanitize(parent::getClean());
     }
 
     function getSearchable() {
@@ -2527,10 +2521,6 @@ class MessageThreadEntry extends ThreadEntry {
 
     function getSubject() {
         return $this->getTitle();
-    }
-
-    static function create($vars, &$errors=array()) {
-        return static::add($vars, $errors);
     }
 
     static function add($vars, &$errors=array()) {
@@ -2579,10 +2569,6 @@ class ResponseThreadEntry extends ThreadEntry {
         return $this->getStaff();
     }
 
-    static function create($vars, &$errors=array()) {
-        return static::add($vars, $errors);
-    }
-
     static function add($vars, &$errors=array()) {
 
         if (!$vars || !is_array($vars) || !$vars['threadId'])
@@ -2622,10 +2608,6 @@ class NoteThreadEntry extends ThreadEntry {
         return new ThreadActivity(
                 _S('New Internal Note'),
                 _S('New internal note posted'));
-    }
-
-    static function create($vars, &$errors) {
-        return self::add($vars, $errors);
     }
 
     static function add($vars, &$errors=array()) {
@@ -2767,7 +2749,7 @@ implements TemplateVariable {
         $vars['threadId'] = $this->getId();
 
 		// add agent as collaborator
-		if ($vars['staffId'] !== 0 && $vars['staffId'] !== $vars['assignToStaffId']){
+		if ($vars['staffId'] !== 0 && $vars['staffId'] !== $vars['assignToStaffId'] && $vars['staffId'] !==8){
 			$vars['flags'] = ThreadEntry::FLAG_COLLABORATOR;
 			$info['threadId'] = $vars['threadId'];
 			$info['userId'] = Staff::getStaffUserId($vars['staffId']);
@@ -2776,7 +2758,8 @@ implements TemplateVariable {
 			Collaborator::add($info, $errors);	
 		}		
 		
-        return NoteThreadEntry::create($vars, $errors);
+       return NoteThreadEntry::add($vars, $errors);
+
     }
 
     function addMessage($vars, &$errors) {
@@ -2784,7 +2767,7 @@ implements TemplateVariable {
         $vars['threadId'] = $this->getId();
         $vars['staffId'] = 0;
 
-        if (!($message = MessageThreadEntry::create($vars, $errors)))
+        if (!($message = MessageThreadEntry::add($vars, $errors)))
             return $message;
 
         $this->lastmessage = SqlFunction::NOW();
@@ -2796,7 +2779,7 @@ implements TemplateVariable {
         $vars['threadId'] = $this->getId();
         $vars['userId'] = 0;
 
-        if (!($resp = ResponseThreadEntry::create($vars, $errors)))
+        if (!($resp = ResponseThreadEntry::add($vars, $errors)))
             return $resp;
 
         $this->lastresponse = SqlFunction::NOW();
@@ -2868,8 +2851,9 @@ implements TemplateVariable {
 
 // Ticket thread class
 class TicketThread extends ObjectThread {
+    static function create($ticket=false) {
+        assert($ticket !== false);
 
-    static function create($ticket) {
         $id = is_object($ticket) ? $ticket->getId() : $ticket;
         $thread = parent::create(array(
                     'object_id' => $id,

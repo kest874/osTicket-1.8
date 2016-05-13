@@ -504,10 +504,6 @@ implements TemplateVariable, Searchable {
             // XXX: This will upset the static $depts array
             $depts = array();
             $query = self::objects();
-			//Choose Child Departments (parent ID)
-			if (isset($criteria['CD']))
-                $query->filter(array(
-                            'pid' => ($criteria['CD'] )));
             if (isset($criteria['publiconly']))
                 $query->filter(array(
                             'ispublic' => ($criteria['publiconly'] ? 1 : 0)));
@@ -578,9 +574,8 @@ implements TemplateVariable, Searchable {
     }
 
     static function create($vars=false, &$errors=array()) {
-        $dept = parent::create($vars);
+        $dept = new static($vars);
         $dept->created = SqlFunction::NOW();
-
         return $dept;
     }
 
@@ -753,7 +748,7 @@ extends Form {
         return $clean;
     }
 
-    function render($staff=true) {
-        return parent::render($staff, false, array('template' => 'dynamic-form-simple.tmpl.php'));
+    function render($staff=true, $title=false, $options=array()) {
+        return parent::render($staff, $title, $options + array('template' => 'dynamic-form-simple.tmpl.php'));
     }
 }

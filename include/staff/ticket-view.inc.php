@@ -75,8 +75,7 @@ if($ticket->isOverdue())
             }
 
             if ($role->hasPerm(Ticket::PERM_EDIT)) { ?>
-                <a class="action-button pull-right" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Edit'); ?>"
-				href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit"><i class="icon-edit"></i></a>
+                <span class="action-button pull-right"><a data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Edit'); ?>" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit"><i class="icon-edit"></i></a></span>
             <?php
             } ?>
             <span class="action-button pull-right" data-placement="bottom" data-dropdown="#action-dropdown-print" data-toggle="tooltip" title="<?php echo __('Print'); ?>">
@@ -94,7 +93,8 @@ if($ticket->isOverdue())
             <?php
             // Transfer
             if ($role->hasPerm(Ticket::PERM_TRANSFER)) {?>
-            <a class="ticket-action action-button pull-right" data-placement="bottom"  data-toggle="tooltip"  title="<?php echo __('Transfer');?>" id="ticket-transfer"
+            <span class="action-button pull-right">
+            <a class="ticket-action" id="ticket-transfer" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Transfer'); ?>"
                 data-redirect="tickets.php"
                 href="#tickets/<?php echo $ticket->getId(); ?>/transfer"><i class="icon-share"></i></a>
             </span>
@@ -103,8 +103,13 @@ if($ticket->isOverdue())
 
             <?php
             // Assign
-            if ($role->hasPerm(Ticket::PERM_ASSIGN)) {?>
-            <span class="action-button pull-right"  data-placement="bottom" data-dropdown="#action-dropdown-assign" data-toggle="tooltip" title="<?php echo __('Assign'); ?>">
+            if ($ticket->isOpen() && $role->hasPerm(Ticket::PERM_ASSIGN)) {?>
+            <span class="action-button pull-right"
+                data-dropdown="#action-dropdown-assign"
+                data-placement="bottom"
+                data-toggle="tooltip"
+                title=" <?php echo $ticket->isAssigned() ? __('Assign') : __('Reassign'); ?>"
+                >
                 <i class="icon-caret-down pull-right"></i>
                 <a class="ticket-action" id="ticket-assign"
                     data-redirect="tickets.php"
@@ -399,25 +404,10 @@ if($ticket->isOverdue())
                 </tr>
                 <?php
                 } ?>
-                <!--<tr>
-                    <th><?php // echo __('SLA Plan');?>:</th>
-                    <td><?php //echo $sla?Format::htmlchars($sla->getName()):'<span class="faded">&mdash; '.__('None').' &mdash;</span>'; ?></td>
-                </tr>-->
-				<?php
-                if($ticket->isOpen()){ ?>
                 <tr>
-                    <th>&nbsp;</th>
-                    <td>&nbsp;</td>
+                    <th><?php echo __('SLA Plan');?>:</th>
+                    <td><?php echo $sla?Format::htmlchars($sla->getName()):'<span class="faded">&mdash; '.__('None').' &mdash;</span>'; ?></td>
                 </tr>
-                <?php
-                }else { ?>
-                <tr>
-                    <th><?php echo __('Due Date');?>:</th>
-                    <td><?php echo Format::datetime($ticket->getEstDueDate()) |'<span class="faded">&mdash; '.__('None').' &mdash;</span>'; ?></td>
-                </tr>
-                <?php
-                }
-                ?>
                 <?php
                 if($ticket->isOpen()){ ?>
                 <tr>
@@ -836,6 +826,7 @@ if ($errors['err'] && isset($_POST['a'])) {
            <input class="" type="reset" value="<?php echo __('Reset');?>">
        </p>
    </form>
+   
    </div>
  </div>
  </div>
@@ -922,7 +913,8 @@ if ($errors['err'] && isset($_POST['a'])) {
             '<b><span id="newuser">this guy</span></b>'); ?>
     </p>
     <p class="confirm-action" style="display:none;" id="delete-confirm">
-        <font color="red"><strong><?php echo __('Are you sure you want to DELETE this ticket?');?></strong></font>
+        <font color="red"><strong><?php echo sprintf(
+            __('Are you sure you want to DELETE %s?'), __('this ticket'));?></strong></font>
         <br><br><?php echo __('Deleted data CANNOT be recovered, including any associated attachments.');?>
     </p>
     <div><?php echo __('Please confirm to continue.');?></div>

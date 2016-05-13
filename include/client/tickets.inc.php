@@ -13,6 +13,7 @@ if (isset($_REQUEST['topic_id'])) {
 if (isset($_REQUEST['status'])) {
     $settings['status'] = $_REQUEST['status'];
 }
+
 $org_tickets = $thisclient->canSeeOrgTickets();
 if ($settings['keywords']) {
     // Don't show stat counts for searches
@@ -29,14 +30,6 @@ else {
     $closedTickets = $thisclient->getNumClosedTickets($org_tickets);
 }
 
-if (isset($_REQUEST['my'])) {
-    $settings['my'] = $_REQUEST['my'];
-	
-}
-$mine = $settings['my'];
-if (!isset($mine)) {
-    $mine=1;
-};
 
 $tickets = Ticket::objects();
 
@@ -59,6 +52,7 @@ $basic_filter = Ticket::objects();
 if ($settings['topic_id']) {
     $basic_filter = $basic_filter->filter(array('topic_id' => $settings['topic_id']));
 }
+
 if ($settings['status'])
     $status = strtolower($settings['status']);
     switch ($status) {
@@ -66,11 +60,11 @@ if ($settings['status'])
         $status = 'open';
     case 'open':
     case 'closed':
-		//$results_type = ($status == 'closed') ? __('Closed Tickets') : __('Open Tickets');
-		$results_type = ($status == 'closed') ? __('<span style="color:rgb(192, 80, 77)"><strong>All Closed </strong></span> Tickets') : __('<span style="color:rgb(192, 80, 77)"><strong> All Open </strong></span> Tickets');
+		$results_type = ($status == 'closed') ? __('Closed Tickets') : __('Open Tickets');
         $basic_filter->filter(array('status__state' => $status));
         break;
 }
+
 // Add visibility constraints — use a union query to use multiple indexes,
 // use UNION without "ALL" (false as second parameter to union()) to imply
 // unique values
@@ -81,20 +75,11 @@ $visibility = $basic_filter->copy()
         ->values_flat('ticket_id')
         ->filter(array('thread__collaborators__user_id' => $thisclient->getId()))
     , false);
-	
+
 if ($thisclient->canSeeOrgTickets()) {
     $visibility = $visibility->union(
         $basic_filter->copy()->values_flat('ticket_id')
             ->filter(array('user__org_id' => $thisclient->getOrgId()))
-    , false);
-}
-
-if  ($mine != 1) {
-	$visibility = $basic_filter->copy()
-    ->values_flat('ticket_id')
-		->union($basic_filter->copy()
-        ->values_flat('ticket_id')
-        ->filter(array('thread__collaborators__user_id' => $thisclient->getId()))
     , false);
 }
 
@@ -160,9 +145,8 @@ $tickets->values(
 				<option value="">&mdash; <?php echo __('All Help Topics');?> &mdash;</option>
 		<?php foreach (Topic::getHelpTopics(true) as $id=>$name) {
 				$count = $thisclient->getNumTopicTickets($id);
-				//Show all topics
-				//if ($count == 0)
-				//	continue;
+				if ($count == 0)
+					continue;
 		?>
 				<option value="<?php echo $id; ?>"i
 					<?php if ($settings['topic_id'] == $id) echo 'selected="selected"'; ?>
@@ -179,7 +163,8 @@ $tickets->values(
 <div class="clearfix"></div>
 
 <div class="row">
-		<div class="col-xs-5 col-md-5">
+
+		<div class="col-xs-6 col-md-6">
 			<h2>
 				<a href="<?php echo Format::htmlchars($_SERVER['REQUEST_URI']); ?>">
 				<i class="refresh icon-refresh"></i>
@@ -187,33 +172,21 @@ $tickets->values(
 				</a>
 			</h2>
 		</div>
-		<div class="col-xs-7 col-md-7 text-right">
-		<h3 style="color: #337ab7;">
-		<?php if ($openTickets) { ?>
+		<div class="col-xs-6 col-md-6 text-right">
+			<h3 style="color: #337ab7;">
 			
-			<a class="action-button btn-lg <?php if ($mine != 0  && $status == 'open') echo 'active'; ?>"
-				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'open', 'my' => '1')); ?>">
-			<i class="icon-file-alt"></i>
-			<?php echo _P('ticket-status', 'My Open'); if ($openTickets > 0) echo sprintf(' (%d)', $openTickets); ?>
-			</a>  
-<?php 
-}
-if ($closedTickets) {?>   			
-			 <span style="color:lightgray">|</span>
-			<a class="action-button btn-lg <?php if ($mine != 0  && $status == 'closed') echo 'active'; ?>"
-				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'closed', 'my' => '1')); ?>">
+			<a class="action-button btn-lg <?php if ($status == 'open') echo 'active'; ?>"
+				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'open')); ?>">
+			<i class="icon-file-alt"></i> <?php echo sprintf('%s (%d)', _P('ticket-status', 'Open'), $thisclient->getNumOpenTickets()); ?>
+			</a>
 			
-			<?php echo __('My Closed'); if ($closedTickets > 0) echo sprintf(' (%d)', $closedTickets); ?>
-			</a>
-		<?php } ?>	
-			<a class="action-button btn-lg <?php if ($status == 'open' && $mine != 1) echo 'active'; ?>"
-				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'open', 'my' => '0')); ?>">
-			<i class="icon-file-alt"></i> <?php echo sprintf('%s', _P('ticket-status', 'All Open'), $thisclient->getNumOpenTickets()); ?>
-			</a>
+	
 			<span style="color:lightgray">|</span>
-			<a class="action-button btn-lg <?php if ($status == 'closed' && $mine != 1) echo 'active'; ?>"
-				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'closed', 'my' => '0')); ?>">
-			<i class="icon-file-text"></i> <?php echo sprintf('%s', __('All Closed'), $thisclient->getNumClosedTickets()); ?>
+		
+			
+			<a class="action-button btn-lg <?php if ($status == 'closed') echo 'active'; ?>"
+				href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'closed')); ?>">
+			<i class="icon-file-text"></i> <?php echo sprintf('%s (%d)', __('Closed'), $thisclient->getNumClosedTickets()); ?>
 			</a>
 			</h3>
 		</div>
@@ -270,7 +243,7 @@ if ($closedTickets) {?>
                 <td class="text-nowrap">&nbsp;<?php echo Format::date($T['created']); ?></td>
                 <td class="text-nowrap">&nbsp;<?php echo $status; ?></td>
                 <td>
-				 <a class="truncate" href="tickets.php?id=<?php echo $T['ticket_id']; ?>"><?php echo $subject; ?></a>
+                    <div style="max-height: 1.2em; max-width: 320px;" class="link truncate" href="tickets.php?id=<?php echo $T['ticket_id']; ?>"><?php echo $subject; ?></div>
                 </td>
                 <td  class="hidden-xs">&nbsp;<span class="truncate"><?php echo $dept; ?></span></td>
             </tr>
@@ -287,6 +260,4 @@ if ($total) {
     echo '<div>&nbsp;'.__('Page').':'.$pageNav->getPageLinks().'&nbsp;</div>';
 }
 ?>
-
 </div>
-

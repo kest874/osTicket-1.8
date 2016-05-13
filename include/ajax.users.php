@@ -23,7 +23,7 @@ require_once INCLUDE_DIR.'class.note.php';
 class UsersAjaxAPI extends AjaxController {
 
     /* Assumes search by basic info for now */
-    function search($type = null, $fulltext=true) {
+    function search($type = null, $fulltext=false) {
 
         if(!isset($_REQUEST['q'])) {
             Http::response(400, __('Query argument is required'));
@@ -39,7 +39,7 @@ class UsersAjaxAPI extends AjaxController {
         $emails=array();
         $matches = array();
 
-        if (strlen($q) < 3)
+        if (strlen($q) < 2)
             return $this->encode(array());
 
         if (!$type || !strcasecmp($type, 'remote')) {
@@ -63,10 +63,8 @@ class UsersAjaxAPI extends AjaxController {
 
             if ($fulltext) {
                 global $ost;
-                $users = $ost->searcher->find($q, $users);
-                $users->order_by(new SqlCode('__relevance__'), QuerySet::DESC)
-                    ->distinct('id');
-
+                $users = $ost->searcher->find($q, $users, true);
+                
                 if (!count($emails) && !count($users) && preg_match('`\w$`u', $q)) {
                     // Do wildcard full-text search
                     $_REQUEST['q'] = $q."*";
@@ -83,7 +81,7 @@ class UsersAjaxAPI extends AjaxController {
             // Omit already-imported remote users
             if ($emails = array_filter($emails)) {
                 $users->union(User::objects()
-                    ->values_flat('id', 'name', 'default_email__address')
+                    ->values_flat('id', 'emails__address', 'name' )
                     ->annotate(array('__relevance__' => new SqlCode(1)))
                     ->filter(array(
                         'emails__address__in' => $emails
@@ -225,7 +223,8 @@ class UsersAjaxAPI extends AjaxController {
             if ($errors['err'])
                 $info['error'] = $errors['err'];
             else
-                $info['error'] = __('Unable to update account - try again!');
+                $info['error'] = __('Unable to update account.')
+                    .' '.__('Correct any errors below and try again.');
         }
 
         $info['_target'] = $target;
@@ -424,14 +423,14 @@ class UsersAjaxAPI extends AjaxController {
                 $form = OrganizationForm::getDefaultForm()->getForm($_POST);
                 if (!($org = Organization::fromForm($form)))
                     $info['error'] = __('Unable to create organization.')
-                        .' '.__('Correct error(s) below and try again.');
+                        .' '.__('Correct any errors below and try again.');
             }
 
             if ($org && $user->setOrganization($org))
                 Http::response(201, $org->to_json());
             elseif (! $info['error'])
                 $info['error'] = __('Unable to add user to organization.')
-                    .' '.__('Correct error(s) below and try again.');
+                    .' '.__('Correct any errors below and try again.');
 
         } elseif ($orgId)
             $org = Organization::lookup($orgId);
@@ -442,7 +441,7 @@ class UsersAjaxAPI extends AjaxController {
         }
 
         if ($org && $user->getOrgId() && $org->getId() != $user->getOrgId())
-            $info['warning'] = __("Are you sure you want to change user's organization?");
+            $info['warning'] = __("Are you sure you want to change the user's organization?");
 
         $tmpl = $tmpl ?: 'org-lookup.tmpl.php';
 

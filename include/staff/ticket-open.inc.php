@@ -133,9 +133,16 @@ if(!$user) {
             </td>
             <td>
                 <select name="source" class="requiredfield">
-                    <option value="Phone" ><?php echo __('Phone'); ?></option>
-                    <option value="Email" <?php echo ($info['source']=='Email')?'selected="selected"':''; ?>><?php echo __('Email'); ?></option>
-                    <option value="Other" selected="selected"><?php echo __('Other'); ?></option>
+                    <?php
+                    $source = $info['source'] ?: 'Phone';
+                    $sources = Ticket::getSources();
+                    unset($sources['Web'], $sources['API']);
+                    foreach ($sources as $k => $v)
+                        echo sprintf('<option value="%s" %s>%s</option>',
+                                $k,
+                                ($source == $k ) ? 'selected="selected"' : '',
+                                $v);
+                    ?>
                 </select>
                 &nbsp;<font class="error"><b>*</b>&nbsp;<?php echo $errors['source']; ?></font>
             </td>
@@ -179,9 +186,9 @@ if(!$user) {
                 &nbsp;<font class="error"><b>*</b>&nbsp;<?php echo $errors['topicId']; ?></font>
             </td>
         </tr>
-        <tr id="open_ticket_informationdata">
+        <tr id="open_ticket_informationdata" style="display:none;">
             <td width="160">
-                <?php echo __('AI Team'); ?>:
+                <?php echo __('Department'); ?>:
             </td>
             <td>
                 <select name="deptId">
@@ -204,8 +211,7 @@ if(!$user) {
                 &nbsp;<font class="error"><?php echo $errors['deptId']; ?></font>
             </td>
         </tr>
-
-         <tr  id="open_ticket_informationdata" style="display:none;">
+         <tr  id="open_ticket_informationdata">
             <td width="160">
                 <?php echo __('SLA Plan');?>:
             </td>
@@ -246,6 +252,7 @@ if(!$user) {
 
         <?php
         if($thisstaff->hasPerm(Ticket::PERM_ASSIGN, false)) { ?>
+
         <tr id="open_ticket_informationdata">
             <td width="160"><?php echo __('Assign To');?>:</td>
             <td>
@@ -376,10 +383,6 @@ if(!$user) {
                     </select>
                 </td>
             </tr>
-             
-            </tbody>
-			<tbody>
-            
         </tr>
         <?php
         } //end canPostReply

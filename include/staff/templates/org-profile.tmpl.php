@@ -82,39 +82,6 @@ if ($ticket && $ticket->getOwnerId() == $user->getId())
                     <?php echo __(
                     'Assign tickets from this organization to the <em>Account Manager</em>'); ?>
             </tr>
-			<tr>
-                <td width="180">
-                    <?php echo __('Department'); ?>:
-                </td>
-                <td>
-                    <select name="department">
-                        <option value="0" selected="selected">&mdash; <?php
-                            echo __('None'); ?> &mdash;</option><?php
-                        if ($depts=dept::getDepartments()) { ?>
-                            <optgroup label="<?php
-                                echo sprintf(__('AI Teams(%d)'), count($depts)); ?>">
-<?php                       foreach($depts as $id => $name) {
-                                $k = "$id";
-                                echo sprintf('<option value="%s" %s>%s</option>',
-                                    $k,(($info['department']==$k)?'selected="selected"':''),$name);
-                            }
-                            echo '</optgroup>';
-                        }
-
-                        ?>
-                    </select>
-                    <br/><span class="error"><?php echo $errors['manager']; ?></span>
-                </td>
-            </tr>
-			<tr>
-                <td width="180">
-                    <?php echo __('Auto-Assignment'); ?>:
-                </td>
-                <td>
-                    <input type="checkbox" name="assign-d-flag" value="1" <?php echo $info['assign-d-flag']?'checked="checked"':''; ?>>
-                    <?php echo __(
-                    'Assign tickets from this organization to the <em>Department</em>'); ?>
-            </tr>
             <tr>
                 <td width="180">
                     <?php echo __('Primary Contacts'); ?>:

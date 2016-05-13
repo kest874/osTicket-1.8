@@ -4,7 +4,8 @@ $entryTypes = array('M'=>'message', 'R'=>'response', 'N'=>'note');
 $user = $entry->getUser() ?: $entry->getStaff();
 $name = $user ? $user->getName() : $entry->poster;
 $avatar = '';
-
+if ($cfg->isAvatarsEnabled() && $user)
+    $avatar = $user->getAvatar();
 ?>
 
 <div class="thread-entry <?php echo $entryTypes[$entry->type]; ?> <?php if ($avatar) echo 'avatar'; ?>">
