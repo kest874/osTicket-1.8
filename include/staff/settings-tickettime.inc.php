@@ -27,15 +27,6 @@ if(!defined('OSTADMININC') || !$thisstaff || !$thisstaff->isAdmin() || !$config)
                 <i class="help-tip icon-question-sign" href="#client_time"></i>
             </td>
         </tr>
-        <tr>
-            <td width="180"><?php echo __('Total Ticket Time');?>:</td>
-            <td>
-                <input type="checkbox" name="istickettime" value="1" <?php echo $config['istickettime']?'checked="checked"':''; ?> >
-                <?php echo __('Enable Adding Time to Tickets via Actions'); ?>
-                &nbsp;<font class="error">&nbsp;<?php echo $errors['istickettime']; ?></font>
-                <i class="help-tip icon-question-sign" href="#total_time"></i>
-            </td>
-        </tr>
 		<tr>
             <td width="180"><?php echo __('Thread Ticket Time');?>:</td>
             <td>

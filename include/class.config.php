@@ -234,11 +234,6 @@ class OsticketConfig extends Config {
 		return ($this->get('isclienttime'));
 	}
 	
-	function isTicketTime() {
-		// determines if Ticket Time via Actions is Enabled
-		return ($this->get('istickettime'));
-	}
-	
 	function isThreadTime() {
 		// determines if Ticket Time via Threads is Enabled
 		return ($this->get('isthreadtime'));
@@ -1472,7 +1467,6 @@ class OsticketConfig extends Config {
 
         return $this->updateAll(array(
             'isclienttime'=>isset($vars['isclienttime'])?1:0,
-			'istickettime'=>isset($vars['istickettime'])?1:0,
 			'isthreadtime'=>isset($vars['isthreadtime'])?1:0,
 			'istickethardware'=>isset($vars['istickethardware'])?1:0,
 			'isthreadtimer'=>isset($vars['isthreadtimer'])?1:0,

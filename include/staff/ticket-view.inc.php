@@ -422,7 +422,7 @@ if($ticket->isOverdue())
 				<?php
                 // Strobe Technologies Ltd | 22/06/2016 | START - Show Total Time Spent in Ticket information.
                 // osTicket Version = v1.10-rc2
-                if ($cfg->isTicketTime() || $cfg->isThreadTime()) { ?>
+                if ($cfg->isThreadTime()) { ?>
                 <tr>
                     <th nowrap>Time Spent:</th>
                     <td><?php echo $ticket->getTimeSpent(); ?></td>
@@ -519,12 +519,6 @@ $tcount = $ticket->getThreadEntries($types)->count();
         <?php
         } ?>
         <li><a href="#note"><?php echo __('Post Internal Note');?></a></li>
-		<!-- Strobe Technologies Ltd  | 22/06/2016 | START - Add Time Tab to menu -->
-        <!-- osTicket Version = v1.10-rc2 -->
-        <?php if ($cfg->isTicketTime()) { ?>
-            <li><a id="time_tab" href="#time"><?php echo __('Add Time to Ticket'); ?></a></li>
-        <?php } ?>
-        <!-- Strobe Technologies Ltd  | 22/06/2016 | END - Add Time Tab to menu -->
     </ul>
     <?php
     if ($role->hasPerm(TicketModel::PERM_REPLY)) { ?>
@@ -881,74 +875,6 @@ $tcount = $ticket->getThreadEntries($types)->count();
            <input class="" type="reset" value="<?php echo __('Reset');?>">
        </p>
    </form>
-   
-   <!-- Strobe Technologies Ltd | 22/06/2016 | START - Add Time Tab Form -->
-    <!-- osTicket Version = v1.10-rc2 -->
-    <?php if ($cfg->isTicketTime()) { ?>
-    <form id="time" class="hidden tab_content" action="tickets.php?id=<?php echo $ticket->getId(); ?>#time" name="time" method="post" enctype="multipart/form-data">
-        <?php csrf_token(); ?>
-        <input type="hidden" name="ticket_id" value="<?php echo $ticket->getId(); ?>">
-        <input type="hidden" name="a" value="time">
-        <table width="100%" border="0" cellspacing="0" cellpadding="3">
-            <p  style="padding-left:100px;">Add Required time to ticket.</p>
-            <p>&nbsp;</p>
-            <table>
-                <tr>
-                    <td width="200px"><label for="current_time_spent"><strong>Current Time Spent:</strong></label></td>
-                    <td><?php echo $ticket->getTimeSpent().' ('.$ticket->getRealTimeSpent().')';
-                            // show the current time spent (if any) ?></td>
-                </tr>
-                <tr>
-                    <td width="200px"><label for="time_spent"><strong>Time Spent:</strong></label></td>
-                    <td><input type="text" name="time_spent" size="5" value="<?php if(isset($_POST['time_spent'])) echo $_POST['time_spent'];?>" />
-                        (Minutes)
-                    <i class="icon-play" title="Start / Resume timer"></i>
-                    <i class="icon-pause" title="Pause timer"></i>
-                    <i class="icon-undo" title="Reset timer to zero"></i>
-                        <span class="error"><?php echo $errors['time_spent']; ?></span></td>
-                </tr>
-                <!-- ghaber begins -->
-                <!-- Ability to open / close ticket while adding time -->
-                <!-- Contributed by @ghaber -->
-            <tr>
-                <td width="120">
-                    <label><?php echo __('Ticket Status');?>:</label>
-                </td>
-                <td>
-                    <div class="faded"></div>
-                    <select name="add_time_status_id">
-                        <?php
-                        $statusId = $info['add_time_status_id'] ?: $ticket->getStatusId();
-                        $states = array('open');
-                        if ($ticket->isCloseable() === true
-                                && $role->hasPerm(TicketModel::PERM_CLOSE))
-                            $states = array_merge($states, array('closed'));
-                        foreach (TicketStatusList::getStatuses(
-                                    array('states' => $states)) as $s) {
-                            if (!$s->isEnabled()) continue;
-                            $selected = $statusId == $s->getId();
-                            echo sprintf('<option value="%d" %s>%s%s</option>',
-                                    $s->getId(),
-                                    $selected ? 'selected="selected"' : '',
-                                    __($s->getName()),
-                                    $selected ? (' ('.__('current').')') : ''
-                                    );
-                        }
-                        ?>
-                    </select>
-                    &nbsp;<span class='error'>*&nbsp;<?php echo $errors['add_time_status_id']; ?></span>
-                </td>
-            </tr>
-            <!-- ghaber ends -->
-            </table>
-            <p  style="padding-left:165px;">
-                <input class="btn_sm" type="submit" value="<?php echo __('Add Time'); ?>">
-                <input class="btn_sm" type="reset" value="<?php echo __('Reset');?>">
-            </p>
-        </table>
-    </form>
-    <?php } ?>
-    <!-- Strobe Technologies Ltd | 22/06/2016 | END - Add Time Tab Form -->
 	
  </div>
  </div>

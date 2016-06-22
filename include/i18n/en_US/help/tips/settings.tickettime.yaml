@@ -19,13 +19,6 @@ client_time:
 		Enabling this option configures the clients
 		view of the ticket to display the total time
 		spent on a ticket.
-
-total_time:
-	title: Enable Adding Time to Tickets
-	content: >
-		By enabling this option you get an additional
-		tab appear within the ticket, so instead of adding
-		a reply / comment to the ticket you can now add time.
 		
 thread_time:
 	title: Enable Adding Time to Thread
