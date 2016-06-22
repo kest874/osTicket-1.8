@@ -721,10 +721,6 @@ $tcount = $ticket->getThreadEntries($types)->count();
                     <label><strong>Time Spent:</strong></label>
                 </td>
                 <td>
-                    <label for="current_time_spent"><strong>Current Time Spent:</strong></label>
-                    <?php echo $ticket->getTimeSpent().' ('.$ticket->getRealTimeSpent().')<br />';
-                    // show the current time spent (if any) ?>
-                    <label for="time_spent"><strong>Time Spent:</strong></label>
                     <input type="text" name="time_spent" size="5"
                     value="<?php if(isset($_POST['time_spent'])) echo $_POST['time_spent'];?>" />
                     (Minutes)
@@ -850,10 +846,6 @@ $tcount = $ticket->getThreadEntries($types)->count();
                     <label><strong>Time Spent:</strong></label>
                 </td>
                 <td>
-                    <label for="current_time_spent"><strong>Current Time Spent:</strong></label>
-                    <?php echo $ticket->getTimeSpent().' ('.$ticket->getRealTimeSpent().')<br />';
-                    // show the current time spent (if any) ?>
-                    <label for="time_spent"><strong>Time Spent:</strong></label>
                     <input type="text" name="time_spent" size="5"
                     value="<?php if(isset($_POST['time_spent'])) echo $_POST['time_spent'];?>" />
                     (Minutes)
