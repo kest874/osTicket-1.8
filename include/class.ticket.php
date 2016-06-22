@@ -151,7 +151,17 @@ class TicketModel extends VerySimpleModel {
 	// Strobe Technologies Ltd | 22/06/2016 | START - Variables and functions for recording and retrieving time spent
 	// osTicket Version = v1.10-rc2
 	function getTimeSpent(){
-        return $this->formatTime($this->time_spent);
+        $times = Ticket::objects()
+            ->filter(['ticket_id' => $this->getId()])
+            ->values('thread__entries__time_type')
+            ->annotate(['totaltime' => SqlAggregate::SUM('thread__entries__time_spent')]);
+        
+        $totals = 0;
+        foreach ($times as $T) {
+            $totals = $totals + $T['totaltime'];
+        }
+        
+        return $this->formatTime($totals);
     }
 	
     function getRealTimeSpent() {
@@ -183,7 +193,7 @@ class TicketModel extends VerySimpleModel {
 		return $formatted;
 	}
 	
-    function timeSpent($time){
+    /*function timeSpent($time){
         if(empty($time)){
 			$time = 0;
         }else{
@@ -195,7 +205,7 @@ class TicketModel extends VerySimpleModel {
         }
         $this->time_spent += $time;
         return $this->save();
-    } 
+    }*/ 
 
     function getTimeTotalsByType($billable=true, $typeid=false) {
         $times = Ticket::objects()

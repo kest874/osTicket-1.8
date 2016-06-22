@@ -162,13 +162,6 @@ if($_POST && !$errors):
                             sprintf('<a href="tickets.php?id=%d"><b>%s</b></a>',
                                 $ticket->getId(), $ticket->getNumber()))
                         );
-						
-				// Strobe Technologies Ltd | 22/06/2016 | START - Collect Total Spent from results
-				// osTicket Version = v1.10-rc2
-				if($_POST['time_spent']) {
-					$ticket->timeSpent($_POST['time_spent']);
-				}
-				// Strobe Technologies Ltd | 22/06/2016 | END - Collect Total Spent from results
 
                 // Clear attachment list
                 $response_form->setSource(array());
