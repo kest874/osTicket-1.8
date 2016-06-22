@@ -88,12 +88,6 @@ class TicketModel extends VerySimpleModel {
                 ),
                 'list' => true,
             ),
-            'hardware' => array(
-                'constraint' => array(
-                    'ticket_id' => 'TicketHardware.ticket_id'
-                ),
-                'list' => true,
-            ),
         )
     );
 
@@ -3604,63 +3598,5 @@ implements RestrictedAccess, Threadable {
     }
 }
 
-class TicketHardware
-extends VerySimpleModel {
-    static $meta = array(
-        'pk' => array('id'),
-        'table' => TICKET_HARDWARE_TABLE,
-    );
-}
 
-// Strobe Technologies Ltd | 22/06/2016 | START - Class for hardware
-// osTicket Versoin = v1.10-rc2
-class TicketHardwareForm
-extends AbstractForm {
-    function getTitle() {
-        return __('Add Hardware');
-    }
-
-    function buildFields() {
-        return array(
-            'description' => new TextareaField(array(
-                'label' => __('Hardware Description'),
-                'required' => true,
-                'configuration' => array(
-                    'html' => true,
-                ),
-            )),
-            'qty' => new Textboxfield(array(
-                'label' => __('Quantity'),
-                'required' => true,
-                'configuration' => array(
-                    'validator' => 'number',
-                ),
-                'validators' => function($v, $self) {
-                    if ($v === 0)
-                        $self->addError(__('Quantity cannot be zero'));
-                },
-                'layout' => new GridFluidCell(6),
-            )),
-            'unit_cost' => new Textboxfield(array(
-                'label' => __('Unit Cost (Ex VAT / Taxes)'),
-                'required' => true,
-                'configuration' => array(
-                    'validator' => 'number',
-                ),
-                'validators' => function($v, $self) {
-                    if ($v === 0)
-                        $self->addError(__('Why are you trying to log free hardware?'));
-                },
-                'layout' => new GridFluidCell(6),
-            )),
-        );
-    }
-
-    function getClean() {
-        $clean = parent::getClean();
-        $clean['total_cost'] = $clean['qty'] * $clean['unit_cost'];
-        return $clean;
-    }
-}
-// Strobe Technologies Ltd | 22/06/2016 | END - Class for hardware
 ?>

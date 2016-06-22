@@ -37,15 +37,6 @@ if(!defined('OSTADMININC') || !$thisstaff || !$thisstaff->isAdmin() || !$config)
             </td>
         </tr>
 		<tr>
-            <td width="180"><?php echo __('Ticket Hardware');?>:</td>
-            <td>
-                <input type="checkbox" name="istickethardware" value="1" <?php echo $config['istickethardware']?'checked="checked"':''; ?> >
-                <?php echo __('Enable Adding Hardware Purchases to Tickets'); ?>
-                &nbsp;<font class="error">&nbsp;<?php echo $errors['istickethardware']; ?></font>
-                <i class="help-tip icon-question-sign" href="#ticket_hardware"></i>
-            </td>
-        </tr>
-		<tr>
 			<th colspan="2">
 				<em><b><?php echo __('Thread Settings'); ?></b></em>
             </th>

@@ -142,13 +142,6 @@ if($ticket->isOverdue())
                 <?php
                  }
 				 
-				 // Strobe Technologies Ltd | 22/06/2016 | START - Ticket Hardware Menu
-                // osTicket Version = v1.10-rc2
-                if ($cfg->isTicketHardware()) { ?>
-                    <li><a class="no-pjax" target="_blank" href="tickets_hardware.php?id=<?php echo $ticket->getId(); ?>"><i class="icon-cog"></i> <?php
-                        echo __('Hardware'); ?></a></li>
-                <?php }
-                // Strobe Technologies Ltd | 22/06/2016 | END - Ticket Hardware Menu
 
                  if($ticket->isOpen() && ($dept && $dept->isManager($thisstaff))) {
 

@@ -105,36 +105,7 @@ if(!$errors) {
             echo '</tr>';
         }
 		?>
-	</table>
-	
-<?php if ($cfg->isTicketHardware()) { ?>	
-	<p>&nbsp;</p>
-	
-	<h2>Hardware Details</h2>
-	<table class="list" border="0" cellspacing="1" cellpadding="2" width="940">
-		<tr>
-			<th>Description</th>
-			<th>Qty</th>
-			<th>Unit Cost (Ex VAT / Taxes)</th>
-			<th>Total Cost (Ex VAT / Taxes)</th>
-		</tr>
-		<?php
-			$sql = 'SELECT * FROM `ost_ticket_hardware` WHERE `ticket_id` = ' . $TicketID;
-			$res = db_query($sql);
-			// Not Displaying bug
-			// Fix by DanoEasi
-			//while($row = db_fetch_array($res, MYSQL_ASSOC)) {
-			while($row = db_fetch_array($res, MYSQLI_ASSOC)) {
-				echo '<tr>';
-					echo "<td>" . $row['description'] . "</td>";
-					echo "<td>" . $row['qty'] . "</td>";
-					echo "<td>" . $row['unit_cost'] . "</td>";
-					echo "<td>" . $row['total_cost'] . "</td>";
-				echo '</tr>';
-			}
-		?>
-	</table>
-<?php } ?>
+	</table
 	
 <?php
 } else {
