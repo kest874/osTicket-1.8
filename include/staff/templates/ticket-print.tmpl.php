@@ -176,6 +176,12 @@ div.hr {
     <th><?php echo __('Last Message'); ?></th>
     <td><?php echo Format::datetime($ticket->getLastMessageDate()); ?></td>
 </tr>
+<!-- Strobe Technologies Ltd | 22/06/2016 | START - Add time to ticket PDF -->
+<tr>
+	<th><?php echo __('Time Spent'); ?></th>
+	<td><?php echo $ticket->getTimeSpent(); ?></td>
+</tr>
+<!-- Strobe Technologies Ltd | 22/06/2016 | END - Add time to ticket PDF -->
 </tbody>
 </table>
 

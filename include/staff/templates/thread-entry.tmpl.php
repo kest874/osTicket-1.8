@@ -62,6 +62,16 @@ if ($user)
         <span style="max-width:500px" class="faded title truncate"><?php
             echo $entry->title; ?></span>
         </span>
+<?php
+		// Strobe Technologies Ltd | 22/06/2016 | START - If statement testing if thread has time assigned to it and display it
+		if ($cfg->isThreadTime()) {
+			if ($entry->time_spent > 0) { ?>
+				<span style="display:inline-block">
+					<?php echo Ticket::formatTime($entry->time_spent) .' - '. Ticket::convTimeType($entry->time_type); ?>
+				</span>
+<?php		}
+		}
+// Strobe Technologies Ltd | 22/06/2016 | END - If statement testing if thread has time assigned to it and display it ?>
     </div>
     <div class="thread-body no-pjax">
         <div><?php echo $entry->getBody()->toHtml(); ?></div>

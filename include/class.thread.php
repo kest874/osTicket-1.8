@@ -1345,6 +1345,19 @@ implements TemplateVariable {
 
         if (!($body = $vars['body']->getClean()))
             $body = '-'; //Special tag used to signify empty message as stored.
+		
+		// Strobe Technologies Ltd | 22/06/2016 | START - Capture Posted time information
+        // osTicket Version = v1.10-rc2
+        $time_spent = $vars['time_spent'];
+        if ($time_spent && is_object($time_spent))
+            $time_spent = (float) $time_spent;
+        $time_type = $vars['time_type'];
+        if ($time_type && is_object($time_type))
+            $time_type = (int) $time_type;
+        $time_bill = $vars['time_bill'];
+        if ($time_bill && is_object($time_bill))
+            $time_bill = (int) $time_bill;
+        // Strobe Technologies Ltd | 22/06/2016 | END - Capture Posted time information
 
         $poster = $vars['poster'];
         if ($poster && is_object($poster))
@@ -1359,9 +1372,13 @@ implements TemplateVariable {
             'staff_id' => $vars['staffId'],
             'user_id' => $vars['userId'],
             'poster' => $poster,
+			'time_spent' => $time_spent,
+			'time_type' => $time_type,
+			'time_bill' => $time_bill,
             'source' => $vars['source'],
             'flags' => $vars['flags'] ?: 0,
         ));
+		// Strobe Technologies Ltd | 22/06/2016 | Added fields to create arrary above
 
         if ($entry->format == 'html')
             // The current codebase properly balances html

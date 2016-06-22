@@ -88,6 +88,12 @@ class TicketModel extends VerySimpleModel {
                 ),
                 'list' => true,
             ),
+            'hardware' => array(
+                'constraint' => array(
+                    'ticket_id' => 'TicketHardware.ticket_id'
+                ),
+                'list' => true,
+            ),
         )
     );
 
@@ -141,6 +147,74 @@ class TicketModel extends VerySimpleModel {
     function getId() {
         return $this->ticket_id;
     }
+	
+	// Strobe Technologies Ltd | 22/06/2016 | START - Variables and functions for recording and retrieving time spent
+	// osTicket Version = v1.10-rc2
+	function getTimeSpent(){
+        return $this->formatTime($this->time_spent);
+    }
+	
+    function getRealTimeSpent() {
+        return $this->time_spent;
+    }
+	
+	function convTimeSpent($time) {
+		return $this->formatTime($time);
+	}
+	
+	static function convTimeType($type) {
+        $typetext = DynamicListItem::lookup($type);
+		return $typetext->value;
+	}
+	
+	static function formatTime($time) {
+		//New format to store in mins contributed by @joshbmarshall
+		$hours = floor($time / 60);
+		$minutes = $time % 60;
+		$formatted = '';
+
+		if ($hours > 0) {
+            $formatted .= sprintf('%d %s', $hours, _N('Hour', 'Hours', $hours));
+		}
+		if ($minutes > 0) {
+            if ($formatted) $formatted .= ', ';
+            $formatted .= sprintf('%d %s', $minutes, _N('Minute', 'Minutes', $minutes));
+		}
+		return $formatted;
+	}
+	
+    function timeSpent($time){
+        if(empty($time)){
+			$time = 0;
+        }else{
+            if(!is_numeric($time)){
+				$time = 0;
+            }else{
+				$time = round($time,0);
+            }
+        }
+        $this->time_spent += $time;
+        return $this->save();
+    } 
+
+    function getTimeTotalsByType($billable=true, $typeid=false) {
+        $times = Ticket::objects()
+            ->filter(['ticket_id' => $this->getId()])
+            ->values('thread__entries__time_type')
+            ->annotate(['totaltime' => SqlAggregate::SUM('thread__entries__time_spent')]);
+
+        if ($typeid)
+            $times = $times->filter(['thread__entries__time_type' => $typeid]);
+        if ($billable)
+            $times = $times->filter(['thread__entries__time_bill' => 1]);
+
+        $totals = array();
+        foreach ($times as $T) {
+            $totals[$T['thread__entries__time_type']] = $T['totaltime'];
+        }
+        return $totals;
+    }
+	// Strobe Technologies Ltd | 22/06/2016 | END - Variables and functions for recording and retrieving time spent
 
     function getEffectiveDate() {
          return Format::datetime(max(
@@ -3519,4 +3593,64 @@ implements RestrictedAccess, Threadable {
         require STAFFINC_DIR.'templates/tickets-actions.tmpl.php';
     }
 }
+
+class TicketHardware
+extends VerySimpleModel {
+    static $meta = array(
+        'pk' => array('id'),
+        'table' => TICKET_HARDWARE_TABLE,
+    );
+}
+
+// Strobe Technologies Ltd | 22/06/2016 | START - Class for hardware
+// osTicket Versoin = v1.10-rc2
+class TicketHardwareForm
+extends AbstractForm {
+    function getTitle() {
+        return __('Add Hardware');
+    }
+
+    function buildFields() {
+        return array(
+            'description' => new TextareaField(array(
+                'label' => __('Hardware Description'),
+                'required' => true,
+                'configuration' => array(
+                    'html' => true,
+                ),
+            )),
+            'qty' => new Textboxfield(array(
+                'label' => __('Quantity'),
+                'required' => true,
+                'configuration' => array(
+                    'validator' => 'number',
+                ),
+                'validators' => function($v, $self) {
+                    if ($v === 0)
+                        $self->addError(__('Quantity cannot be zero'));
+                },
+                'layout' => new GridFluidCell(6),
+            )),
+            'unit_cost' => new Textboxfield(array(
+                'label' => __('Unit Cost (Ex VAT / Taxes)'),
+                'required' => true,
+                'configuration' => array(
+                    'validator' => 'number',
+                ),
+                'validators' => function($v, $self) {
+                    if ($v === 0)
+                        $self->addError(__('Why are you trying to log free hardware?'));
+                },
+                'layout' => new GridFluidCell(6),
+            )),
+        );
+    }
+
+    function getClean() {
+        $clean = parent::getClean();
+        $clean['total_cost'] = $clean['qty'] * $clean['unit_cost'];
+        return $clean;
+    }
+}
+// Strobe Technologies Ltd | 22/06/2016 | END - Class for hardware
 ?>

@@ -175,6 +175,13 @@ class OsticketConfig extends Config {
         'verify_email_addrs' => 1,
         'client_avatar' => 'gravatar.mm',
         'agent_avatar' => 'gravatar.mm',
+		'isclienttime' => 0,
+        'istickettime' => 0,
+        'isthreadtime' => 0,
+        'isthreadtimer' => 0,
+        'isthreadbill' => 0,
+        'isthreadbilldefault' => 0,
+        'istickethardware' => 0,
     );
 
     function OsticketConfig($section=null) {
@@ -219,6 +226,44 @@ class OsticketConfig extends Config {
         require_once(INCLUDE_DIR.'class.faq.php');
         return ($this->get('enable_kb') && FAQ::countPublishedFAQs());
     }
+	
+	// Strobe Technologies Ltd | 22/06/2016 | START - Checking to see if Time Spent parts are enabled
+	// osTicket Version = v1.10-rc2
+	function isClientTime() {
+		// determines if Client Time View is on or not
+		return ($this->get('isclienttime'));
+	}
+	
+	function isTicketTime() {
+		// determines if Ticket Time via Actions is Enabled
+		return ($this->get('istickettime'));
+	}
+	
+	function isThreadTime() {
+		// determines if Ticket Time via Threads is Enabled
+		return ($this->get('isthreadtime'));
+	}
+	
+	function isTicketHardware() {
+		// determines if Ticket Hardware is Enabled
+		return ($this->get('istickethardware'));
+	}
+	
+	function isThreadTimer() {
+		// determines if Ticket Thread Timer is Enabled
+		return ($this->get('isthreadtimer'));
+	}
+	
+	function isThreadBill() {
+		// determines if Ticket Thread Bill is Enabled
+		return ($this->get('isthreadbill'));
+	}
+	
+	function isThreadBillDefault() {
+		// determines if Ticket Thread Bill is Default
+		return ($this->get('isthreadbilldefault'));
+	}
+	// Strobe Technologies Ltd | 22/06/2016 | END - Checking to see if Time Spent parts are enabled
 
     function isCannedResponseEnabled() {
         return $this->get('enable_premade');
@@ -1036,6 +1081,9 @@ class OsticketConfig extends Config {
             case 'kb':
                 return $this->updateKBSettings($vars, $errors);
                 break;
+			case 'tickettime':
+				return $this->updateTimeSettings($vars, $errors);	// Strobe Technologies Ltd | 22/06/2016 | Adding update case check
+				break;	
             default:
                 $errors['err']=__('Unknown setting option. Get technical support.');
         }
@@ -1414,6 +1462,25 @@ class OsticketConfig extends Config {
             'enable_premade'=>isset($vars['enable_premade'])?1:0,
         ));
     }
+	
+	
+	// Strobe Technologies Ltd | 22/06/2016 | START - Update Time Settings Function
+	// osTicket Version = v1.10-rc2
+	function updateTimeSettings($vars, &$errors) {
+
+        if($errors) return false;
+
+        return $this->updateAll(array(
+            'isclienttime'=>isset($vars['isclienttime'])?1:0,
+			'istickettime'=>isset($vars['istickettime'])?1:0,
+			'isthreadtime'=>isset($vars['isthreadtime'])?1:0,
+			'istickethardware'=>isset($vars['istickethardware'])?1:0,
+			'isthreadtimer'=>isset($vars['isthreadtimer'])?1:0,
+			'isthreadbill'=>isset($vars['isthreadbill'])?1:0,
+			'isthreadbilldefault'=>isset($vars['isthreadbilldefault'])?1:0,
+        ));
+    }
+	// Strobe Technologies Ltd | 22/06/2016 | END - Update Time Settings Function
 
 
     function updateAlertsSettings($vars, &$errors) {
