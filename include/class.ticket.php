@@ -142,8 +142,6 @@ class TicketModel extends VerySimpleModel {
         return $this->ticket_id;
     }
 	
-	// Strobe Technologies Ltd | 22/06/2016 | START - Variables and functions for recording and retrieving time spent
-	// osTicket Version = v1.10-rc2
 	function getTimeSpent(){
         $times = Ticket::objects()
             ->filter(['ticket_id' => $this->getId()])
@@ -158,10 +156,6 @@ class TicketModel extends VerySimpleModel {
         return $this->formatTime($totals);
     }
 	
-    function getRealTimeSpent() {
-        return $this->time_spent;
-    }
-	
 	function convTimeSpent($time) {
 		return $this->formatTime($time);
 	}
@@ -172,7 +166,6 @@ class TicketModel extends VerySimpleModel {
 	}
 	
 	static function formatTime($time) {
-		//New format to store in mins contributed by @joshbmarshall
 		$hours = floor($time / 60);
 		$minutes = $time % 60;
 		$formatted = '';
@@ -186,20 +179,6 @@ class TicketModel extends VerySimpleModel {
 		}
 		return $formatted;
 	}
-	
-    /*function timeSpent($time){
-        if(empty($time)){
-			$time = 0;
-        }else{
-            if(!is_numeric($time)){
-				$time = 0;
-            }else{
-				$time = round($time,0);
-            }
-        }
-        $this->time_spent += $time;
-        return $this->save();
-    }*/ 
 
     function getTimeTotalsByType($billable=true, $typeid=false) {
         $times = Ticket::objects()
@@ -218,7 +197,6 @@ class TicketModel extends VerySimpleModel {
         }
         return $totals;
     }
-	// Strobe Technologies Ltd | 22/06/2016 | END - Variables and functions for recording and retrieving time spent
 
     function getEffectiveDate() {
          return Format::datetime(max(

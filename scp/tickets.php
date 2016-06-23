@@ -75,53 +75,6 @@ if($_POST && !$errors):
         $lock = $ticket->getLock(); //Ticket lock if any
         $role = $thisstaff->getRole($ticket->getDeptId());
         switch(strtolower($_POST['a'])):
-		// Strobe Technologies Ltd | 22/06/2016 | START - Add time case / switch
-		// osTicket Version = v1.10-rc2
-		case 'time':
-			if(!$_POST['time_spent'])
-				$errors['time_spent']=__('Time required');
-				
-			//Use locks to avoid double replies
-            if($lock && $lock->getStaffId()!=$thisstaff->getId())
-                $errors['err']=__('Action Denied. Ticket is locked by someone else!');
-			
-			//ghaber begins : Allow closing/opening ticket at the same time as adding time
-			// Functions to save open and close for adding time
-			// Contributed by @ghaber
-			$status=$ticket->getStatus(); 
-			$newstatus1=$_POST['add_time_status_id']; //Closed is 3 and open is 1, in numeric format
-			$newstatus2 = TicketStatus::lookup($newstatus1); // Transform status to 'open' or 'closed'
-			if($newstatus2 != $status) { //if they are different, then we make a status change
-				$ticket->setStatus($newstatus2);
-			}
-			//ghaber ends 
-			
-			//If no error...do the do.
-            $vars = $_POST;
-			
-			if(!$errors && ($response=$ticket->timeSpent($_POST['time_spent']))) {
-                $msg = sprintf(__('%s: Time posted successfully'),
-                        sprintf(__('Ticket #%s'),
-                            sprintf('<a href="tickets.php?id=%d"><b>%s</b></a>',
-                                $ticket->getId(), $ticket->getNumber()))
-                        );
-
-
-				if($_POST['time_spent']) {
-					$ticket->timeSpent($_POST['time_spent']);
-				}
-						
-                // Remove staff's locks
-                $ticket->releaseLock($thisstaff->getId());
-
-                // Go back to the ticket listing page on reply
-                $ticket = null;
-
-            } elseif(!$errors['err']) {
-                $errors['err']=__('Unable to post the time. Correct the errors below and try again!');
-            }
-			break;
-			// Strobe Technologies Ltd | 22/06/2016 | END - Add time case / switch
         case 'reply':
             if (!$role || !$role->hasPerm(TicketModel::PERM_REPLY)) {
                 $errors['err'] = __('Action denied. Contact admin for access');
@@ -203,13 +156,6 @@ if($_POST && !$errors):
 
             $wasOpen = ($ticket->isOpen());
             if(($note=$ticket->postNote($vars, $errors, $thisstaff))) {
-
-				// Strobe Technologies Ltd | 22/06/2016 | START - Collect Total Spent from results
-				// osTicket Version = v1.10-rc2
-				if($_POST['time_spent']) {
-					$ticket->timeSpent($_POST['time_spent']);
-				}
-				// Strobe Technologies Ltd | 22/06/2016 | END - Collect Total Spent from results
 			
                 $msg=__('Internal note posted successfully');
                 // Clear attachment list

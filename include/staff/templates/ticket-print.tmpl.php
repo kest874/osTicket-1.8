@@ -176,12 +176,10 @@ div.hr {
     <th><?php echo __('Last Message'); ?></th>
     <td><?php echo Format::datetime($ticket->getLastMessageDate()); ?></td>
 </tr>
-<!-- Strobe Technologies Ltd | 22/06/2016 | START - Add time to ticket PDF -->
 <tr>
 	<th><?php echo __('Time Spent'); ?></th>
 	<td><?php echo $ticket->getTimeSpent(); ?></td>
 </tr>
-<!-- Strobe Technologies Ltd | 22/06/2016 | END - Add time to ticket PDF -->
 </tbody>
 </table>
 
@@ -231,16 +229,13 @@ if ($thread = $ticket->getThreadEntries($types)) {
                         echo Format::datetime($entry->created);?></span>
                     <span style="padding:0 1em" class="faded title"><?php
                         echo Format::truncate($entry->title, 100); ?></span>
-                    <?php
-                    // Strobe Technologies Ltd | 22/06/2016 | START - If statement testing if thread has time assigned to it and display it
-                    if ($cfg->isThreadTime()) {
+                    <?php if ($cfg->isThreadTime()) {
                         if ($entry->time_spent > 0) { ?>
                             <span style="display:inline-block">
                                 <?php echo Ticket::formatTime($entry->time_spent) .' - '. Ticket::convTimeType($entry->time_type); ?>
                             </span>
-            <?php       }
-                    }
-                    // Strobe Technologies Ltd | 22/06/2016 | END - If statement testing if thread has time assigned to it and display it ?>
+                        <?php }
+                    } ?>
                 </td>
                 <td class="flush-right faded title" style="white-space:no-wrap">
                     <?php

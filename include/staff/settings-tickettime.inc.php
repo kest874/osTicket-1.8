@@ -1,5 +1,5 @@
 <?php
-// Strobe Technologies Ltd | 18/08/2015 | Ticket Time Menu allowing you to enable and disable options / views
+// Strobe Technologies Ltd | 22/06/2016 | Ticket Time Menu allowing you to enable and disable options / views
 
 if(!defined('OSTADMININC') || !$thisstaff || !$thisstaff->isAdmin() || !$config) die('Access Denied');
 ?>

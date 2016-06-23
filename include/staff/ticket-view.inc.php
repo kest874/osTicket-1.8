@@ -121,15 +121,12 @@ if($ticket->isOverdue())
                  class="icon-file-alt"></i> <?php echo __('Ticket Thread'); ?></a>
                  <li><a class="no-pjax" target="_blank" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=print&notes=1"><i
                  class="icon-file-text-alt"></i> <?php echo __('Thread + Internal Notes'); ?></a>
-				 <!-- Strobe Technologies Ltd | 22/06/2016 | START - Adds bill printing to print menu -->
-                 <!--- osTicket Version = v1.10-rc2 -->
                  <?php if ($cfg->isThreadTime()) { ?>
                     <li><a class="no-pjax" target="_blank" href="tickets_bill.php?id=<?php echo $ticket->getId(); ?>"><i
                     class="icon-file-alt"></i> <?php echo __('Bill / Invoice'); ?></a>
                     <li><a class="no-pjax" target="_blank" href="tickets_cost.php?id=<?php echo $ticket->getId(); ?>"><i
                     class="icon-file-text-alt"></i> <?php echo __('Billing Information'); ?></a>
                 <?php } ?>
-                 <!-- Strobe Technologies Ltd | 22/06/2016 | END - Adds bill printing to print menu -->
               </ul>
             </div>
             <div id="action-dropdown-more" class="action-dropdown anchor-right">
@@ -412,16 +409,12 @@ if($ticket->isOverdue())
                     <th nowrap><?php echo __('Last Response');?>:</th>
                     <td><?php echo Format::datetime($ticket->getLastRespDate()); ?></td>
                 </tr>
-				<?php
-                // Strobe Technologies Ltd | 22/06/2016 | START - Show Total Time Spent in Ticket information.
-                // osTicket Version = v1.10-rc2
-                if ($cfg->isThreadTime()) { ?>
+				<?php if ($cfg->isThreadTime()) { ?>
                 <tr>
                     <th nowrap>Time Spent:</th>
                     <td><?php echo $ticket->getTimeSpent(); ?></td>
                 </tr>
-                <?php }
-                // Strobe Technologies Ltd | 22/06/2016 | END - Show Total Time Spent in Ticket information. ?>
+                <?php } ?>
             </table>
         </td>
     </tr>
@@ -698,10 +691,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                     </select>
                 </td>
             </tr>
-			<?php
-            // Strobe Technologies Ltd | 22/06/2016 | START - Add Time Spent fields to Reply tab
-            // osTicket Version = v1.10-rc2
-            if ($cfg->isThreadTime()) {
+			<?php if ($cfg->isThreadTime()) {
             if($ticket->isOpen()) { ?>
             <tr>
                 <td width="120">
@@ -735,7 +725,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                     <?php } ?>
                 </td>
             </tr>
-            <?php }} // Strobe Technologies Ltd | 22/06/2016 | END - Add Time Spent fields to Reply tab ?>
+            <?php }} ?>
          </tbody>
         </table>
         <p  style="text-align:center;">
@@ -823,10 +813,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                     &nbsp;<span class='error'>*&nbsp;<?php echo $errors['note_status_id']; ?></span>
                 </td>
             </tr>
-			<?php
-            // Strobe Technologies Ltd | 22/06/2016 | START - Add Time Spent fields to Internal Note tab
-            // osTicket Version = v1.10-rc2
-            if ($cfg->isThreadTime()) {
+			<?php if ($cfg->isThreadTime()) {
             if($ticket->isOpen()) { ?>
             <tr>
                 <td width="120">
@@ -860,7 +847,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                     <?php } ?>
                 </td>
             </tr>
-            <?php }} // Strobe Technologies Ltd | 22/06/2016 | END - Add Time Spent fields to Internal Note tab ?>
+            <?php }} ?>
         </table>
 
        <p style="text-align:center;">
@@ -993,7 +980,6 @@ $(function() {
 });
 
 // Strobe Technologies Ltd | 22/06/2016 | START - Ticket Time Timer
-// osTicket Version = v1.10-rc2
 <?php if ($cfg->isThreadTimer()) { ?>
 $('input[name=time_spent]').val(0);        // sets default value to 0 minutes
 $('i.icon-play').hide();

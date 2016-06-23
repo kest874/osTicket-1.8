@@ -30,7 +30,6 @@ $sort_options = array(
     'closed' =>             __('Most Recently Closed'),
     'hot' =>                __('Longest Thread'),
     'relevance' =>          __('Relevance'),
-	'time_spent' =>         __('Time Spent'),
 );
 $use_subquery = true;
 

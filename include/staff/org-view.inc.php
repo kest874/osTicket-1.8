@@ -82,11 +82,8 @@ if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path')
     class="icon-list-alt"></i>&nbsp;<?php echo __('Tickets'); ?></a></li>
     <li><a href="#notes"><i
     class="icon-pushpin"></i>&nbsp;<?php echo __('Notes'); ?></a></li>
-	<!-- Strobe Technologies Ltd | 22/06/2016 | START - Billing Tab Menu -->
-	<!-- osTicket Version = v1.10-rc2 -->
 	<li><a href="#billing"><i
     class="icon-pushpin"></i>&nbsp;<?php echo __('Billing'); ?></a></li>
-	<!-- Strobe Technologies Ltd | 22/06/2016 | END - Billing Tab Menu -->
 </ul>
 <div id="orgtabs_container">
 <div class="tab_content" id="users">
@@ -107,8 +104,7 @@ $create_note_url = 'orgs/'.$org->getId().'/note';
 include STAFFINC_DIR . 'templates/notes.tmpl.php';
 ?>
 </div>
-<!-- Strobe Technologies Ltd | 22/06/2016 | START - Billing Tab -->
-<!-- osTicket Version = v1.10-rc2 -->
+
 <div class="hidden tab_content" id="billing">
 	<form action="org_bill.php" method="get">
 		<h2>Enter Billing Information</h2>
@@ -120,7 +116,7 @@ include STAFFINC_DIR . 'templates/notes.tmpl.php';
 		<?php echo '<input type="hidden" name="orgid" value="'.$org->getId().'">'; ?>
 	</form>
 </div>
-<!-- Strobe Technologies Ltd | 22/06/2016 | END - Billing Tab -->
+
 </div>
 
 <script type="text/javascript">
