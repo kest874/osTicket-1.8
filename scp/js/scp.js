@@ -163,8 +163,8 @@ var scp_prep = function() {
 
     $('form#save, form:has(table.list)').submit(function() {
         $(window).unbind('beforeunload');
-        $('#overlay, #loading').show();
-        return true;
+        $.toggleOverlay(true);
+        $('#loading').show();
      });
 
     $('select#tpl_options').change(function() {
@@ -407,9 +407,9 @@ var scp_prep = function() {
          visible = false;
 
      // Append scroll-up icon and set stop point for this sticky
-     $('.thread_content', $that)
-     .append($('<a class="only sticky scroll-up" href="#" data-stop='
-             + (placeholder.offset().top-75) +' ><i class="icon-chevron-up icon-large"></i></a>'));
+    // $('.thread_content', $that)
+    // .append($('<a class="only sticky scroll-up" href="#" data-stop='
+    //         + (placeholder.offset().top-75) +' ><i class="icon-chevron-up icon-large"></i></a>'));
 
      if (stop.length) {
        var onmove = function() {
@@ -1033,8 +1033,9 @@ $(document).on('click', 'a.collaborator, a.collaborators', function(e) {
     e.preventDefault();
     var url = 'ajax.php/'+$(this).attr('href').substr(1);
     $.dialog(url, 201, function (xhr) {
-       $('input#emailcollab').show();
-       $('#recipients').text(xhr.responseText);
+       var resp = $.parseJSON(xhr.responseText);
+       $('input#t'+resp.id+'-emailcollab').show();
+       $('#t'+resp.id+'-recipients').text(resp.text);
        $('.tip_box').remove();
     }, {
         onshow: function() { $('#user-search').focus(); }

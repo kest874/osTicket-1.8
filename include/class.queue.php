@@ -20,7 +20,7 @@ class CustomQueue extends VerySimpleModel {
         'table' => QUEUE_TABLE,
         'pk' => array('id'),
         'ordering' => array('sort'),
-        'select_related' => array('parent'),
+        'select_related' => array('parent', 'default_sort'),
         'joins' => array(
             'children' => array(
                 'reverse' => 'CustomQueue.parent',
@@ -33,6 +33,10 @@ class CustomQueue extends VerySimpleModel {
             'sorts' => array(
                 'reverse' => 'QueueSortGlue.queue',
                 'broker' => 'QueueSortListBroker',
+            ),
+            'default_sort' => array(
+                'constraint' => array('sort_id' => 'QueueSort.id'),
+                'null' => true,
             ),
             'parent' => array(
                 'constraint' => array(
@@ -48,12 +52,13 @@ class CustomQueue extends VerySimpleModel {
         )
     );
 
-    const FLAG_PUBLIC =         0x0001; // Shows up in e'eryone's saved searches
-    const FLAG_QUEUE =          0x0002; // Shows up in queue navigation
-    const FLAG_CONTAINER =      0x0004; // Container for other queues ('Open')
+    const FLAG_PUBLIC =           0x0001; // Shows up in e'eryone's saved searches
+    const FLAG_QUEUE =            0x0002; // Shows up in queue navigation
+    const FLAG_DISABLED =         0x0004; // NOT enabled
     const FLAG_INHERIT_CRITERIA = 0x0008; // Include criteria from parent
-    const FLAG_INHERIT_COLUMNS = 0x0010; // Inherit column layout from parent
-    const FLAG_INHERIT_SORTING = 0x0020; // Inherit advanced sorting from parent
+    const FLAG_INHERIT_COLUMNS =  0x0010; // Inherit column layout from parent
+    const FLAG_INHERIT_SORTING =  0x0020; // Inherit advanced sorting from parent
+    const FLAG_INHERIT_DEF_SORT = 0x0040; // Inherit default selected sort
 
     var $criteria;
 
@@ -293,7 +298,7 @@ class CustomQueue extends VerySimpleModel {
                 list($label, $field) = $F;
             }
             else {
-                $label = $F->get('label');
+                $label = $F->getLocal('label');
                 $field = $F;
             }
             $fields[$path] = array($label, $field);
@@ -313,7 +318,7 @@ class CustomQueue extends VerySimpleModel {
             foreach ($otherFields as $id=>$F) {
                 list($form, $field) = $F;
                 $label = sprintf("%s / %s",
-                    $form->getTitle(), $field->get('label'));
+                    $form->getTitle(), $field->getLocal('label'));
                 $fields["entries__answers!{$id}__value"] = array(
                     $label, $field);
             }
@@ -335,6 +340,19 @@ class CustomQueue extends VerySimpleModel {
                 }
             }
         }
+
+        // Sort the field listing by the (localized) label name
+        if (function_exists('collator_create')) {
+            $coll = Collator::create(Internationalization::getCurrentLanguage());
+            $keys = array_map(function($a) use ($coll) {
+                return $coll->getSortKey($a[0]);
+            }, $fields);
+        }
+        else {
+            // Fall back to 8-bit string sorting
+            $keys = array_map(function($a) { return $a[0]; }, $fields);
+        }
+        array_multisort($keys, $fields);
 
         return $fields;
     }
@@ -477,8 +495,7 @@ class CustomQueue extends VerySimpleModel {
         }
 
         // Use the columns of the "Open" queue as a default template
-        //if ($use_template && ($template = CustomQueue::lookup(1)))
-			$template = CustomQueue::lookup(1);
+        if ($use_template && ($template = CustomQueue::lookup(1)))
             return $template->getColumns();
 
         // Last resort — use standard columns
@@ -491,8 +508,13 @@ class CustomQueue extends VerySimpleModel {
                 "annotations" => '[{"c":"TicketSourceDecoration","p":"b"}]',
                 "conditions" => '[{"crit":["isanswered","set",null],"prop":{"font-weight":"bold"}}]',
             )),
+			QueueColumn::placeholder(array(
+                "heading" => "Plant",
+                "primary" => 'user__org__name',
+                "width" => 100,
+            )),
             QueueColumn::placeholder(array(
-                "heading" => "Created",
+                "heading" => "Opened",
                 "primary" => 'created',
                 "width" => 100,
             )),
@@ -509,13 +531,23 @@ class CustomQueue extends VerySimpleModel {
                 "primary" => 'user__name',
                 "width" => 150,
             )),
+			QueueColumn::placeholder(array(
+                "heading" => "Help Topic",
+                "primary" => 'topic_id',
+                "width" => 100,
+            )),
+			QueueColumn::placeholder(array(
+                "heading" => "Status",
+                "primary" => 'status__name',
+                "width" => 100,
+            )),
             QueueColumn::placeholder(array(
                 "heading" => "Priority",
                 "primary" => 'cdata__priority',
                 "width" => 120,
             )),
             QueueColumn::placeholder(array(
-                "heading" => "Assignee",
+                "heading" => "Assigned To",
                 "primary" => 'assignee',
                 "width" => 100,
             )),
@@ -537,8 +569,27 @@ class CustomQueue extends VerySimpleModel {
         return $this->sorts;
     }
 
+    function getDefaultSortId() {
+        if ($this->isDefaultSortInherited() && $this->parent
+            && ($sort_id = $this->parent->getDefaultSortId())
+        ) {
+            return $sort_id;
+        }
+        return $this->sort_id;
+    }
+
+    function getDefaultSort() {
+        if ($this->isDefaultSortInherited() && $this->parent
+            && ($sort = $this->parent->getDefaultSort())
+        ) {
+            return $sort;
+        }
+        return $this->default_sort;
+    }
+
     function getStatus() {
-        return 'bogus';
+        return $this->hasFlag(self::FLAG_DISABLED)
+            ? __('Disabled') : __('Active');
     }
 
     function getChildren() {
@@ -658,7 +709,7 @@ class CustomQueue extends VerySimpleModel {
                 $name = @static::getOrmPath($name, $qs);
 
                 if (preg_match('/__answers!\d+__/', $name)) {
-                    $qs->annotate(array($name2 => SqlAggregate::MAX($name)));
+                    $qs->annotate(array($name => SqlAggregate::MAX($name)));
                 }
 
                 // Fetch a criteria Q for the query
@@ -666,6 +717,16 @@ class CustomQueue extends VerySimpleModel {
                     if ($q = $field->getSearchQ($method, $value, $name))
                         $qs = $qs->filter($q);
             }
+        }
+
+
+        return $qs;
+    }
+
+    function applyDefaultSort($qs) {
+        // Apply default sort
+        if ($sorter = $this->getDefaultSort()) {
+            $qs = $sorter->applySort($qs, false, $this->getRoot());
         }
         return $qs;
     }
@@ -696,12 +757,16 @@ class CustomQueue extends VerySimpleModel {
         return $this->hasFlag(self::FLAG_INHERIT_SORTING);
     }
 
+    function isDefaultSortInherited() {
+        return $this->hasFlag(self::FLAG_INHERIT_DEF_SORT);
+    }
+
     function buildPath() {
         if (!$this->id)
             return;
 
-        $path = $this->parent ? $this->parent->getPath() : '';
-        return $path . "/{$this->id}";
+        $path = $this->parent ? $this->parent->buildPath() : '';
+        return rtrim($path, "/") . "/{$this->id}/";
     }
 
     function getFullName() {
@@ -733,6 +798,13 @@ class CustomQueue extends VerySimpleModel {
             : $this->clearFlag($flag);
     }
 
+    function disable() {
+        $this->setFlag(self::FLAG_DISABLED);
+    }
+
+    function enable() {
+        $this->clearFlag(self::FLAG_DISABLED);
+    }
 
     function update($vars, &$errors=array()) {
         // Set basic search information
@@ -744,8 +816,29 @@ class CustomQueue extends VerySimpleModel {
         if ($this->parent_id && !$this->parent)
             $errors['parent_id'] = __('Select a valid queue');
 
-        // Set basic queue information
+        // Try to avoid infinite recursion determining ancestry
+        if ($this->parent_id && isset($this->id)) {
+            $P = $this;
+            while ($P = $P->parent)
+                if ($P->parent_id == $this->id)
+                    $errors['parent_id'] = __('Cannot be a descendent of itself');
+        }
+
+        // Configure quick filter options
         $this->filter = $vars['filter'];
+        if ($vars['sort_id']) {
+            if ($vars['filter'] === '::') {
+                if (!$this->parent)
+                    $errors['filter'] = __('No parent selected');
+            }
+            elseif ($vars['filter'] && !array_key_exists($vars['filter'],
+                static::getSearchableFields($this->getRoot()))
+            ) {
+                $errors['filter'] = __('Select an item from the list');
+            }
+        }
+
+        // Set basic queue information
         $this->path = $this->buildPath();
         $this->setFlag(self::FLAG_INHERIT_CRITERIA,
             $this->parent_id > 0 && isset($vars['inherit']));
@@ -794,28 +887,53 @@ class CustomQueue extends VerySimpleModel {
 
         // Update advanced sorting options for the queue
         if (isset($vars['sorts']) && !$this->hasFlag(self::FLAG_INHERIT_SORTING)) {
-            $new = $vars['sorts'];
-            $order = array_keys($new);
+
+            $new = $order = $vars['sorts'];
             foreach ($this->sorts as $sort) {
                 $key = $sort->sort_id;
-                if (!in_array($key, $vars['sorts'])) {
+                $idx = array_search($key, $vars['sorts']);
+                if (false === $idx) {
                     $this->sorts->remove($sort);
-                    continue;
                 }
-                $sort->set('sort', array_search($key, $order));
-                unset($new[$key]);
+                else {
+                    $sort->set('sort', $idx);
+                    unset($new[$idx]);
+                }
             }
             // Add new columns
             foreach ($new as $id) {
+                if (!$sort = QueueSort::lookup($id))
+                    continue;
                 $glue = new QueueSortGlue(array(
                     'sort_id' => $id,
+                    'queue' => $this,
                     'sort' => array_search($id, $order),
                 ));
-                $glue->queue = $this;
-                $this->sorts->add(QueueSort::lookup($id), $glue);
+                $this->sorts->add($sort, $glue);
             }
             // Re-sort the in-memory columns array
             $this->sorts->sort(function($c) { return $c->sort; });
+        }
+
+        if (!count($this->sorts) && $this->parent) {
+            // No sorting -- imply sorting inheritance
+            $this->setFlag(self::FLAG_INHERIT_SORTING);
+        }
+
+        // Configure default sorting
+        $this->setFlag(self::FLAG_INHERIT_DEF_SORT,
+            $this->parent && $vars['sort_id'] === '::');
+        if ($vars['sort_id']) {
+            if ($vars['sort_id'] === '::') {
+                if (!$this->parent)
+                    $errors['sort_id'] = __('No parent selected');
+            }
+            elseif ($qs = QueueSort::lookup($vars['sort_id'])) {
+                $this->sort_id = $vars['sort_id'];
+            }
+            else {
+                $errors['sort_id'] = __('Select an item from the list');
+            }
         }
 
         // TODO: Move this to SavedSearch::update() and adjust
@@ -833,16 +951,28 @@ class CustomQueue extends VerySimpleModel {
     }
 
     function save($refetch=false) {
-        $wasnew = !isset($this->id);
+        $nopath = !isset($this->path);
+        $path_changed = isset($this->dirty['parent_id']);
 
         if ($this->dirty)
             $this->updated = SqlFunction::NOW();
         if (!($rv = parent::save($refetch || $this->dirty)))
             return $rv;
 
-        if ($wasnew) {
+        if ($nopath) {
             $this->path = $this->buildPath();
             $this->save();
+        }
+        if ($path_changed) {
+            $this->children->reset();
+            $move_children = function($q) use (&$move_children) {
+                foreach ($q->children as $qq) {
+                    $qq->path = $qq->buildPath();
+                    $qq->save();
+                    $move_children($qq);
+                }
+            };
+            $move_children($this);
         }
         return $this->columns->saveAll()
             && $this->sorts->saveAll();
@@ -1300,7 +1430,7 @@ class QueueColumnCondition {
     }
 
     function getShortHash() {
-        return substr(base64_encode($this->getHash(true)), -10);
+        return substr(base64_encode($this->getHash(true)), 0, 7);
     }
 
     static function getUid() {
@@ -1610,7 +1740,7 @@ extends VerySimpleModel {
     }
 
     function applySort($query, $reverse=false) {
-        $fields = CustomQueue::getSearchableFields($root ?: $this->getQueue()->getRoot());
+        $fields = CustomQueue::getSearchableFields($this->getQueue()->getRoot());
         if ($primary = $fields[$this->primary]) {
             list(,$field) = $primary;
             $query = $field->applyOrderBy($query, $reverse,
@@ -1860,7 +1990,7 @@ extends VerySimpleModel {
 
     static function forQueue(CustomQueue $queue) {
         return static::objects()->filter([
-            'root' => $queue->getRoot(),
+            'root' => $queue->root ?: 'T',
         ]);
     }
 
@@ -2007,6 +2137,7 @@ extends QueueColumnFilter {
         static $fields = array(
             'link:ticket'   => 'ticket_id',
             'link:ticketP'  => 'ticket_id',
+			'link:ticketTP'  => 'ticket_id',
             'link:user'     => 'user_id',
             'link:org'      => 'user__org_id',
         );
@@ -2057,6 +2188,19 @@ extends TicketLinkFilter {
     }
 }
 QueueColumnFilter::register('TicketLinkWithPreviewFilter', __('Link'));
+
+class TicketLinkWithThreadPreviewFilter
+extends TicketLinkFilter {
+    static $id = 'link:ticketTP';
+    static $desc = /* @trans */ "Ticket Link with Thread Preview";
+
+    function filter($text, $row) {
+        $link = $this->getLink($row);
+        return sprintf('<a style="display: inline" class="preview" data-preview="#tickets/%d/threadpreview" href="%s">%s</a>',
+            $row['ticket_id'], $link, $text);
+    }
+}
+QueueColumnFilter::register('TicketLinkWithThreadPreviewFilter', __('Link'));
 
 class DateTimeFilter
 extends QueueColumnFilter {
@@ -2134,7 +2278,7 @@ extends AbstractForm {
 class QueueSortDataConfigForm
 extends AbstractForm {
     function getInstructions() {
-        return __('Add, and remove the fields in this list using the options below. Sorting is priortized in ascending order.');
+        return __('Add, and remove the fields in this list using the options below. Sorting can be performed on any field, whether displayed in the queue or not.');
     }
 
     function buildFields() {

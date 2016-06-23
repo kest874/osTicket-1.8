@@ -38,10 +38,6 @@ if($_REQUEST['id'] || $_REQUEST['number']) {
     }
 }
 
-if ($_REQUEST['uid']) {
-     $user = User::lookup($_REQUEST['uid']);
- }
- 
 if (!$ticket) {
     // Display a ticket queue. Decide the contents
     $queue_id = null;
@@ -80,12 +76,12 @@ if (!$ticket) {
         $key = substr(md5($_GET['query']), -10);
         if ($_GET['search-type'] == 'typeahead') {
             // Use a faster index
-            $criteria = ['user__emails__address', 'equal', $_GET['query']];
-        }
+			$criteria = ['user__emails__address', 'equal', $_GET['query']];
+		}
         else {
             $criteria = [':keywords', null, $_GET['query']];
         }
-        $_SESSION['advsearch'][$key] = [$criteria];
+		$_SESSION['advsearch'][$key] = [$criteria];
         $queue_id = "adhoc,{$key}";
     }
 
@@ -395,7 +391,9 @@ if($_POST && !$errors):
                              __('Contact admin for such access'));
                 } else {
                     $vars = $_POST;
-                    $vars['uid'] = $user? $user->getId() : 0;
+
+                    if ($vars['uid'] && (!User::lookup($vars['uid'])))
+                        $vars['uid'] = 0;
 
                     $vars['cannedattachments'] = $response_form->getField('attachments')->getClean();
 
@@ -445,7 +443,8 @@ $queues = CustomQueue::queues()
         'flags__hasbit' => CustomQueue::FLAG_PUBLIC,
         'staff_id' => $thisstaff->getId(),
     )))
-    ->all();
+    ->exclude(['flags__hasbit' => CustomQueue::FLAG_DISABLED])
+    ->getIterator();
 
 // Start with all the top-level (container) queues
 foreach ($queues->findAll(array('parent_id' => 0))
@@ -465,7 +464,7 @@ $nav->addSubMenu(function() use ($queue) {
     // A queue is selected if it is the one being displayed. It is
     // "child" selected if its ID is in the path of the one selected
     $child_selected = $queue instanceof SavedSearch;
-    $searches = SavedSearch::forStaff($thisstaff)->all();
+    $searches = SavedSearch::forStaff($thisstaff)->getIterator();
 
     include STAFFINC_DIR . 'templates/queue-savedsearches-nav.tmpl.php';
 });
@@ -491,7 +490,7 @@ if($ticket) {
     $inc = 'ticket-view.inc.php';
     if ($_REQUEST['a']=='edit'
             && $ticket->checkStaffPerm($thisstaff, Ticket::PERM_EDIT)) {
-        $inc = 'ticket-edit.inc.php';
+        $inc = 'ticket-view.inc.php';
         if (!$forms) $forms=DynamicFormEntry::forTicket($ticket->getId());
         // Auto add new fields to the entries
         foreach ($forms as $f) {

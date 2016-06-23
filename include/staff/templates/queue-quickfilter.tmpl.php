@@ -9,6 +9,7 @@ if (!$queue || !$queue->filter)
     return;
 
 $param = $param ?: 'filter';
+
 $quick_filter = $quick_filter ?: $_SESSION['qfilter'];
 $_SESSION['qfilter'] = $quick_filter;
 
