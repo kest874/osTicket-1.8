@@ -25,9 +25,9 @@ if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
 if ($_POST)
     $info['duedate'] = Format::date(strtotime($info['duedate']), false, false, 'UTC');
 
-//if(!$user) {
-//  $user = User::lookupByemail($thisstaff->getEmail());
- //}
+if(!$user) {
+  $user = User::lookupByemail($thisstaff->getEmail());
+}
 ?>
 <form action="tickets.php?a=open" method="post" id="save"  enctype="multipart/form-data" class="ticket_open_content">
  <?php csrf_token(); ?>
@@ -114,7 +114,7 @@ if ($_POST)
         <tr  id="open_ticket_userdata">
             <td width="160"><strong><?php echo __('Ticket Notice'); ?>:</strong></td>
             <td>
-            <input type="checkbox" name="alertuser" <?php echo (!$errors || $info['alertuser'])? 'checked="checked"': ''; ?>><?php
+            <input type="checkbox" name="alertuser" <?php echo (!$errors || $info['alertuser'])? '': ''; ?>><?php
                 echo __('Send alert to user.'); ?>
             </td>
         </tr>
@@ -127,8 +127,8 @@ if ($_POST)
                 <em><strong><?php echo __('Ticket Information');?></strong>:</em>
             </th>
         </tr>
-        <tr id="open_ticket_informationdata">
-            <td width="160" class="required">
+        <tr id="open_ticket_informationdata" style="display: none;">
+            <td width="160" class="required" >
                 <?php echo __('Ticket Source');?>:
             </td>
             <td>

@@ -355,6 +355,7 @@ div#msg_warning {
 #sub_nav > ul {
     margin-top: 0;
 }
+
 #customQ_nav {
     clear:both;
     margin:0;
@@ -1709,8 +1710,9 @@ tr#open_ticket_userdata td{
  }
 .open_ticket_dynamic-form{
 	padding-left: 15px;
-	
-}tr#edit_ticket_note th{
+}
+
+tr#edit_ticket_note th{
 	padding-top: 10px;
 	padding-left: 10px;
 	padding-bottom: 10px;
@@ -1762,8 +1764,39 @@ form#save.ticket_edit_content>table.ticket_edit>tbody>tr#open_ticket_dynamicform
 }
 form#save.ticket_edit_content>table.ticket_edit>tbody>tr#df>td{
 	display: none;
-	
 }
+
+tr#edit_ticket_note th{
+	padding-top: 10px;
+	padding-left: 10px;
+	padding-bottom: 10px;
+ 	background-color: rgb(255, 255, 238);;	
+	text-align: left;
+	border-top: 1px solid #999;
+	border-bottom: 1px solid #999;
+	border-left: 0px solid #999;
+	border-r: 0px solid #999;
+ 	
+ }
+
+form#save.ticket_edit_content>table.ticket_edit>tbody>tr>th{
+	padding-top: 10px;
+	padding-left: 10px;
+	padding-bottom: 10px;
+	background-color:#FFF;
+	text-align: left;
+	border-top: 1px solid #999;
+	border-left: 0px solid #999;
+	border-right: 0px solid #999;
+	border-bottom: 1px solid #999;
+	margin-left: auto;
+	margin-left: right;	
+}
+
+form#save.ticket_edit_content>table.ticket_edit>tbody>tr>th>em>div.pull-right>i.icon-sort{
+	display: none;
+}
+
 table.ticket_info.custom-data>thead>tr>th{
 	
 }

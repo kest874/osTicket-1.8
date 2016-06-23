@@ -77,8 +77,7 @@ if (!$ticket) {
         if ($_GET['search-type'] == 'typeahead') {
             // Use a faster index
 			$criteria = ['user__emails__address', 'equal', $_GET['query']];
-			
-        }
+		}
         else {
             $criteria = [':keywords', null, $_GET['query']];
         }
@@ -469,7 +468,6 @@ $nav->addSubMenu(function() use ($queue) {
 
     include STAFFINC_DIR . 'templates/queue-savedsearches-nav.tmpl.php';
 });
-
 
 if ($thisstaff->hasPerm(Ticket::PERM_CREATE, false)) {
     $nav->addSubMenu(array('desc'=>__('New Ticket'),

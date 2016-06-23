@@ -419,8 +419,8 @@ position: static;
 }
 
 a.action-button.btn-lg.active{
-  color: #23527c;
-  text-decoration: underline;
+  color:rgb(192, 80, 77);
+  /*text-decoration: underline;*/
  	
 }
 /* Ticket icons */
