@@ -18,11 +18,11 @@ elseif($ticket->isOverdue())
 
 echo sprintf(
         '<div style="min-width:400px; padding: 2px 2px 0 5px;" id="t%s"> 
-         <h2>'.__('<a href="%s">Ticket #%s').': %s</a></h2>',
-         $ticket->getNumber(),
-         Ticket::getLink( $ticket->getId()),
-         $ticket->getNumber(),
-         Format::htmlchars($ticket->getSubject()));
+        <h2>'.__('<a href="%s">Ticket #%s').': %s</a></h2>',
+        $ticket->getNumber(),
+        Ticket::getLink( $ticket->getId()),
+        $ticket->getNumber(),
+        Format::htmlchars($ticket->getSubject()));
 
 if($error)
     echo sprintf('<div id="msg_error">%s</div>',$error);
