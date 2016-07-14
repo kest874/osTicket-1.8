@@ -1042,9 +1042,19 @@ implements TemplateVariable {
                         _S($error_descriptions[$error]));
                 }
                 // No need to log the missing-file error number
-                if ($error != UPLOAD_ERR_NO_FILE)
-                    $this->getThread()->getObject()->logNote(
-                        _S('File Import Error'), $error, _S('SYSTEM'), false);
+                
+                if ($error != UPLOAD_ERR_NO_FILE
+                    && ($thread = $this->getThread())
+                ) {
+                    // Log to the thread directly, since alerts should be
+                    // suppressed and this is defintely a system message
+                    $thread->addNote(array(
+                        'title' => _S('File Import Error'),
+                        'note' => new TextThreadEntryBody($error),
+                        'poster' => 'SYSTEM',
+                        'staffId' => 0,
+                    ));
+                }
                 continue;
             }
 
@@ -2722,7 +2732,7 @@ implements TemplateVariable {
         ));
     }
 
-    function addNote($vars, &$errors) {
+    function addNote($vars, &$errors=array()) {
 
         //Add ticket Id.
         $vars['threadId'] = $this->getId();
