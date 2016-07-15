@@ -13,6 +13,8 @@
 
     vim: expandtab sw=4 ts=4 sts=4:
 **********************************************************************/
+header("Location: https://suggestions.nasg.net/scp");
+
 require('client.inc.php');
 
 require_once INCLUDE_DIR . 'class.page.php';
