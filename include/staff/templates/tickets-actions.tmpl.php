@@ -1,11 +1,43 @@
 <?php
 // Tickets mass actions based on logged in agent
-
 // Status change
 if ($agent->canManageTickets())
     echo TicketStatus::status_options();
+// Mass Priority Change
+if ($agent->hasPerm(Ticket::PERM_EDIT, false)) {?>
+<span
+    class="action-button" data-placement="bottom"
+    data-dropdown="#action-dropdown-change-priority" data-toggle="tooltip" title=" <?php
+    echo __('Change Priority'); ?>">
+    <i class="icon-caret-down pull-right"></i>
+    <a class="tickets-action" id="tickets-assign"
+        href="#tickets/mass/priority"><i class="icon-exclamation"></i></a>
+</span>
+
+<div id="action-dropdown-change-priority" class="action-dropdown anchor-right">
+  <ul>
+<?php foreach (Priority::getPriorities() as $Pid => $Pname) { ?>
+     <li><a class="no-pjax tickets-action"
+        href="#tickets/mass/priority/<?php echo $Pid; ?>"><i
+        class="icon-level-up"></i> <?php echo $Pname; ?></a>
+<?php } ?>
+  </ul>
+</div>
+<?php } ?>
 
 
+<?php
+// Mass Topic Change
+if ($agent->hasPerm(Ticket::PERM_EDIT, false)) {?>
+<span class="red button action-button">
+ <a class="tickets-action" id="tickets-helptopic" data-placement="bottom"
+    data-toggle="tooltip" title="<?php echo __('Change Help Topic'); ?>"
+   href="#tickets/mass/topic"><i class="icon-bookmark"></i></a>
+</span>
+
+<?php } ?>
+
+<?php
 // Mass Claim/Assignment
 if ($agent->hasPerm(Ticket::PERM_ASSIGN, false)) {?>
 <span
@@ -31,18 +63,15 @@ if ($agent->hasPerm(Ticket::PERM_ASSIGN, false)) {?>
 </div>
 <?php
 }
-
 // Mass Transfer
 if ($agent->hasPerm(Ticket::PERM_TRANSFER, false)) {?>
-<span class="action-button">
+<span class="action-button hidden">
  <a class="tickets-action" id="tickets-transfer" data-placement="bottom"
     data-toggle="tooltip" title="<?php echo __('Transfer'); ?>"
     href="#tickets/mass/transfer"><i class="icon-share"></i></a>
 </span>
 <?php
 }
-
-
 // Mass Delete
 if ($agent->hasPerm(Ticket::PERM_DELETE, false)) {?>
 <span class="red button action-button">
@@ -52,11 +81,9 @@ if ($agent->hasPerm(Ticket::PERM_DELETE, false)) {?>
 </span>
 <?php
 }
-
 ?>
 <script type="text/javascript">
 $(function() {
-
     $(document).off('.tickets');
     $(document).on('click.tickets', 'a.tickets-action', function(e) {
         e.preventDefault();

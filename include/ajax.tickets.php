@@ -306,7 +306,7 @@ class TicketsAjaxAPI extends AjaxController {
             Http::response(404, 'No such premade reply');
         return $canned->getFormattedResponse($format, $varReplacer);
     }
-    function transfer($tid) {
+        function transfer($tid) {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid)))
             Http::response(404, __('No such ticket'));
@@ -340,6 +340,7 @@ class TicketsAjaxAPI extends AjaxController {
         $info['dept_id'] = $info['dept_id'] ?: $ticket->getDeptId();
         include STAFFINC_DIR . 'templates/transfer.tmpl.php';
     }
+   
     function assign($tid, $target=null) {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid)))
@@ -458,6 +459,12 @@ class TicketsAjaxAPI extends AjaxController {
                     ),
                 'close' => array(
                     'verbed' => __('closed'),
+                    ),
+                'priority' => array(
+                    'verbed' => __('changed priority'),
+                    ),
+                'topic' => array(
+                    'verbed' => __('changed topic'),
                     ),
                 );
         if (!isset($actions[$action]))
@@ -638,6 +645,77 @@ class TicketsAjaxAPI extends AjaxController {
                 }
             }
             break;
+    
+            case 'priority':
+                $inc = 'delete.tmpl.php';
+                $info[':action'] = "#tickets/mass/priority/{$w}";
+                $verb = __('Update');
+                $info[':title'] = sprintf('Change Priority On %s',
+                        _N('selected ticket', 'selected tickets', $count));
+    
+                $info[':placeholder'] = sprintf(__(
+                            'Optional reason for changing priority on %s'),
+                        _N('selected ticket', 'selected tickets', $count));
+    
+                if (!($P = Priority::lookup($w)))
+                    Http::response(422, 'No such priority');
+    
+                // Generic permission check.
+                if (!$thisstaff->hasPerm(Ticket::PERM_EDIT, false))
+                    $errors['err'] = sprintf(
+                            __('You do not have permission %s'),
+                            __('to edit tickets'));
+    
+                if ($_POST && !$errors) {
+                    foreach (Ticket::objects()
+                        ->filter(['ticket_id__in' => $_POST['tids']])
+                    as $ticket) {
+                        if (!$thisstaff->getRole($ticket->dept_id)->hasPerm(Ticket::PERM_EDIT))
+                            continue;
+    
+                        if ($_POST['comments'])
+                            $ticket->logNote(null, $_POST['comments'],
+                                $thisstaff);
+    
+                        $entries = DynamicFormEntry::forTicket($ticket->getId());
+                        foreach ($entries as $E) {
+                            if ($E->form->type !== 'T')
+                                continue;
+                            $E->setAnswer('priority', null, $P->priority_id);
+                            if ($E->save())
+                                $i++;
+                        }
+                    }
+                }
+                break;
+
+                case 'topic':
+                $inc = 'topic.tmpl.php';
+                $info[':action'] = '#tickets/mass/topic';
+                $info[':title'] = sprintf('Change Help Topic On %s',
+                    _N('selected ticket', 'selected tickets', $count));
+                $form = TopicForm::instantiate($_POST);
+               
+                if ($_POST && $form->isValid()) {
+                    foreach ($_POST['tids'] as $tid) {
+                        if (($t=Ticket::lookup($tid))
+                                // Make sure the agent is allowed to
+                                // access and set the help topic.
+                                && $t->checkStaffPerm($thisstaff, Ticket::PERM_EDIT)
+                                // Set the help topic
+                                && $t->topic($form, $e)
+                                )
+                            $i++; 
+                    }
+                    if (!$i) {
+                        $info['error'] = sprintf(
+                                __('Unable to %1$s %2$s'),
+                                __('topic'),
+                                _N('selected ticket', 'selected tickets', $count));
+                    }
+                }
+                break;
+                                                    
         default:
             Http::response(404, __('Unknown action'));
         }
