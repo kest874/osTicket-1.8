@@ -39,7 +39,7 @@ if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path')
         <td width="50%">
             <table border="0" cellspacing="" cellpadding="4" width="100%">
                 <tr>
-                    <th width="150"><?php echo __('Name'); ?>:</th>
+                    <th width="200"><?php echo __('Name'); ?>:</th>
                     <td>
 <?php if ($thisstaff->hasPerm(Organization::PERM_EDIT)) { ?>
                     <b><a href="#orgs/<?php echo $org->getId();
@@ -53,11 +53,11 @@ if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path')
                     </td>
                 </tr>
                 <tr>
-                    <th><?php echo __('Account Manager'); ?>:</th>
+                    <th><?php echo __('Auto Assign to Members of'); ?>:</th>
                     <td><?php echo $org->getAccountManager(); ?>&nbsp;</td>
                 </tr>
 				<tr>
-                    <th><?php echo __('Department'); ?>:</th>
+                    <th><?php echo __('AI Team to Auto Assign'); ?>:</th>
                     <td><?php echo $org->getDepartmentName(); ?>&nbsp;</td>
                 </tr>
             </table>
