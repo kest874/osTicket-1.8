@@ -428,7 +428,7 @@ implements FormRenderer {
           ?>
           <td class="cell" <?php echo Format::array_implode('=', ' ', array_filter($attrs)); ?>
               data-field-id="<?php echo $f->get('id'); ?>">
-              <fieldset class="field <?php if (!$f->isVisible()) echo 'hidden'; ?>"
+              <fieldset class="field <?php if (!$f->isVisible()) echo 'hidden'; ?>"  
                 id="field<?php echo $f->getWidget()->id; ?>"
                 data-field-id="<?php echo $f->get('id'); ?>">
 <?php         if ($label = $f->get('label')) { ?>
@@ -3202,7 +3202,7 @@ class TextboxWidget extends Widget {
             $autocomplete = 'autocomplete="'.($config['autocomplete']?'on':'off').'"';
         if (isset($config['autofocus']))
             $autofocus = 'autofocus';
-        if (isset($config['disabled']))
+        if (isset($config['disabled'])|| isset($options['disabled']))
             $disabled = 'disabled="disabled"';
         if (isset($config['translatable']) && $config['translatable'])
             $translatable = 'data-translate-tag="'.$config['translatable'].'"';
@@ -3348,6 +3348,9 @@ class ChoicesWidget extends Widget {
     function render($options=array()) {
 
         $mode = null;
+        if (isset($options['disabled']))
+            $disabled = 'disabled="disabled"';
+        
         if (isset($options['mode']))
             $mode = $options['mode'];
         elseif (isset($this->field->options['render_mode']))
@@ -3399,7 +3402,7 @@ class ChoicesWidget extends Widget {
         if (isset($config['classes']))
             $classes = 'class="'.$config['classes'].'"';
         ?>
-        <select name="<?php echo $this->name; ?>[]"
+        <select <?php echo $disabled ?> name="<?php echo $this->name; ?>[]"
             <?php echo implode(' ', array_filter(array($classes))); ?>
             id="<?php echo $this->id; ?>"
             <?php if (isset($config['data']))
@@ -3617,6 +3620,8 @@ class CheckboxWidget extends Widget {
     }
 
     function render($options=array()) {
+        if (isset($options['disabled']))
+            $disabled = 'disabled="disabled"';
         $config = $this->field->getConfiguration();
         if (!isset($this->value))
             $this->value = $this->field->get('default');
@@ -3625,7 +3630,7 @@ class CheckboxWidget extends Widget {
             $classes = array_merge($classes, (array) $config['classes']);
         ?>
         <label class="<?php echo implode(' ', $classes); ?>">
-        <input id="<?php echo $this->id; ?>"
+        <input <?php echo $disabled ?> id="<?php echo $this->id; ?>"
             type="checkbox" name="<?php echo $this->name; ?>[]" <?php
             if ($this->value) echo 'checked="checked"'; ?> value="<?php
             echo $this->field->get('id'); ?>"/>

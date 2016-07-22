@@ -42,23 +42,20 @@ if ($ticket && $ticket->getOwnerId() == $user->getId())
     <table style="width:100%">
         <tbody>
             <tr>
+                <td colspan ="2" >
+                <hr >
+                AI Team must be chosen here for automatic assignment:
+                <hr>
+                </td>
+            </tr>
+            <tr>
                 <td width="180">
-                    <?php echo __('Account Manager'); ?>:
+                    <?php echo __('Department'); ?>:
                 </td>
                 <td>
-                    <select name="manager">
+                    <select name="manager" style="background-color: #faffbd;">
                         <option value="0" selected="selected">&mdash; <?php
                             echo __('None'); ?> &mdash;</option><?php
-                        if ($users=Staff::getAvailableStaffMembers()) { ?>
-                            <optgroup label="<?php
-                                echo sprintf(__('Agents (%d)'), count($users)); ?>">
-<?php                       foreach($users as $id => $name) {
-                                $k = "s$id";
-                                echo sprintf('<option value="%s" %s>%s</option>',
-                                    $k,(($info['manager']==$k)?'selected="selected"':''),$name);
-                            }
-                            echo '</optgroup>';
-                        }
 
                         if ($teams=Team::getActiveTeams()) { ?>
                             <optgroup label="<?php echo sprintf(__('Teams (%d)'), count($teams)); ?>">
@@ -80,14 +77,14 @@ if ($ticket && $ticket->getOwnerId() == $user->getId())
                 <td>
                     <input type="checkbox" name="assign-am-flag" value="1" <?php echo $info['assign-am-flag']?'checked="checked"':''; ?>>
                     <?php echo __(
-                    'Assign tickets from this organization to the <em>Account Manager</em>'); ?>
+                    'Assign tickets from this AI Team to the <em>AI Team Members</em>'); ?>
             </tr>
 			<tr>
                 <td width="180">
                     <?php echo __('Department'); ?>:
                 </td>
                 <td>
-                    <select name="department">
+                    <select name="department" style="background-color: #faffbd;">
                         <option value="0" selected="selected">&mdash; <?php
                             echo __('None'); ?> &mdash;</option><?php
                         if ($depts=dept::getDepartments()) { ?>
@@ -113,7 +110,12 @@ if ($ticket && $ticket->getOwnerId() == $user->getId())
                 <td>
                     <input type="checkbox" name="assign-d-flag" value="1" <?php echo $info['assign-d-flag']?'checked="checked"':''; ?>>
                     <?php echo __(
-                    'Assign tickets from this organization to the <em>Department</em>'); ?>
+                    'Assign tickets from this AI Team to the <em>AI Team</em>'); ?>
+            </tr>
+                        <tr>
+                <td colspan="2">
+                   <hr>
+                </td>
             </tr>
             <tr>
                 <td width="180">

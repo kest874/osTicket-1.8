@@ -8,23 +8,23 @@ $view_all_tickets = $queue->ignoreVisibilityConstraints();
 
 // Impose visibility constraints
 // ------------------------------------------------------------
-if (!$view_all_tickets) {
-    // -- Open and assigned to me
-    $assigned = Q::any(array(
-        'staff_id' => $thisstaff->getId(),
-    ));
-    // -- Open and assigned to a team of mine
-    if ($teams = array_filter($thisstaff->getTeams()))
-        $assigned->add(array('team_id__in' => $teams));
+// if (!$view_all_tickets) {
+    // // -- Open and assigned to me
+    // $assigned = Q::any(array(
+        // 'staff_id' => $thisstaff->getId(),
+    // ));
+    // // -- Open and assigned to a team of mine
+    // if ($teams = array_filter($thisstaff->getTeams()))
+        // $assigned->add(array('team_id__in' => $teams));
 
-    $visibility = Q::any(new Q(array('status__state'=>'open', $assigned)));
+    // $visibility = Q::any(new Q(array('status__state'=>'open', $assigned)));
 
-    // -- Routed to a department of mine
-    if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
-        $visibility->add(array('dept_id__in' => $depts));
+    // // -- Routed to a department of mine
+    // if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
+        // $visibility->add(array('dept_id__in' => $depts));
 
-    $tickets->filter($visibility);
-}
+    // $tickets->filter($visibility);
+// }
 
 // Make sure the cdata materialized view is available
 TicketForm::ensureDynamicDataView();

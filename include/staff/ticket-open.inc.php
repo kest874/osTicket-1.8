@@ -28,6 +28,7 @@ if ($_POST)
 if(!$user) {
   $user = User::lookupByemail($thisstaff->getEmail());
 }
+
 ?>
 <form action="tickets.php?a=open" method="post" id="save"  enctype="multipart/form-data" class="ticket_open_content">
  <?php csrf_token(); ?>
@@ -211,7 +212,7 @@ if(!$user) {
                 &nbsp;<font class="error"><?php echo $errors['deptId']; ?></font>
             </td>
         </tr>
-         <tr  id="open_ticket_informationdata">
+         <tr  id="open_ticket_informationdata"  style="display:none;">
             <td width="160">
                 <?php echo __('SLA Plan');?>:
             </td>
@@ -256,18 +257,8 @@ if(!$user) {
             <td width="160"><?php echo __('Assign To');?>:</td>
             <td>
                 <select id="assignId" name="assignId">
-                    <option value="0" selected="selected">&mdash; <?php echo __('Select an Agent OR a Team');?> &mdash;</option>
+                    <option value="0" selected="selected">&mdash; <?php echo __('Select an Team OR a Associate');?> &mdash;</option>
                     <?php
-                    if(($users=Staff::getAvailableStaffMembers())) {
-                        echo '<OPTGROUP label="'.sprintf(__('Agents (%d)'), count($users)).'">';
-                        foreach($users as $id => $name) {
-                            $k="s$id";
-                            echo sprintf('<option value="%s" %s>%s</option>',
-                                        $k,(($info['assignId']==$k)?'selected="selected"':''),$name);
-                        }
-                        echo '</OPTGROUP>';
-                    }
-
                     if(($teams=Team::getActiveTeams())) {
                         echo '<OPTGROUP label="'.sprintf(__('Teams (%d)'), count($teams)).'">';
                         foreach($teams as $id => $name) {
@@ -277,9 +268,20 @@ if(!$user) {
                         }
                         echo '</OPTGROUP>';
                     }
+                    
+                    if(($users=Staff::getAvailableStaffMembers())) {
+                        echo '<OPTGROUP label="'.sprintf(__('Associates (%d)'), count($users)).'">';
+                        foreach($users as $id => $name) {
+                            $k="s$id";
+                            echo sprintf('<option value="%s" %s>%s</option>',
+                                        $k,(($info['assignId']==$k)?'selected="selected"':''),$name);
+                        }
+                        echo '</OPTGROUP>';
+                    }
                     ?>
-                </select>&nbsp;<span class='error'>&nbsp;<?php echo $errors['assignId']; ?></span>
-            </td>
+                </select>&nbsp;
+                <font class='error'>&nbsp;<?php echo $errors['assignId']; ?></font> <em>Will be selected automatically if not specified</em><br>
+                </td>
         </tr>
         <?php } ?>
         </tbody>

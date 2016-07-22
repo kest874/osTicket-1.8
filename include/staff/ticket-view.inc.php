@@ -3,7 +3,8 @@
 if(!defined('OSTSCPINC') || !$thisstaff || !is_object($ticket) || !$ticket->getId()) die('Invalid path');
 
 //Make sure the staff is allowed to access the page.
-if(!@$thisstaff->isStaff() || !$ticket->checkStaffPerm($thisstaff)) die('Access Denied');
+//if(!@$thisstaff->isStaff() || !$ticket->checkStaffPerm($thisstaff)) die('Access Denied');
+if(!@$thisstaff->isStaff()) die('Access Denied');
 
 //Re-use the post info on error...savekeyboards.org (Why keyboard? -> some people care about objects than users!!)
 $info=($_POST && $errors)?Format::input($_POST):array();
@@ -71,27 +72,32 @@ if($ticket->isOverdue())
 					<a href="#post-note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Post Internal Note'); ?>">
 					<i class="icon-edit"></i></a>
                 </span>
-			<?php	
+			<?php
+            if ($ticket->checkStaffPerm($thisstaff)){
 				if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
 				<span class="action-button pull-right">
 					<a href="#post-reply" class="post-response" id="post-reply" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Post Reply'); ?>">
 					<i class="icon-mail-reply"></i></a>
 				</span>
-			 
-            <?php } 
-			// Status change options
+           
+                <?php }} 
+                if ($ticket->checkStaffPerm($thisstaff)){
+                // Status change options
                 echo TicketStatus::status_options();
+                }
                 ?>
 			
 			<?php
-            if ($thisstaff->hasPerm(Email::PERM_BANLIST)
-                    || $role->hasPerm(Ticket::PERM_EDIT)
-                    || ($dept && $dept->isManager($thisstaff))) { ?>
-            <span class="action-button pull-right" data-placement="bottom" data-dropdown="#action-dropdown-more" data-toggle="tooltip" title="<?php echo __('More');?>">
-                <i class="icon-caret-down pull-right"></i>
-                <span ><i class="icon-cog"></i></span>
-            </span>
-            <?php
+            if ($ticket->checkStaffPerm($thisstaff)){
+                if ($thisstaff->hasPerm(Email::PERM_BANLIST)
+                        || $role->hasPerm(Ticket::PERM_EDIT)
+                        || ($dept && $dept->isManager($thisstaff))) { ?>
+                <span class="action-button pull-right" data-placement="bottom" data-dropdown="#action-dropdown-more" data-toggle="tooltip" title="<?php echo __('More');?>">
+                    <i class="icon-caret-down pull-right"></i>
+                    <span ><i class="icon-cog"></i></span>
+                </span>
+                <?php
+                }
             }
 			?>
            
@@ -109,6 +115,7 @@ if($ticket->isOverdue())
             </div>
             <?php
             // Transfer
+            if ($ticket->checkStaffPerm($thisstaff)){ 
             if ($role->hasPerm(Ticket::PERM_TRANSFER)) {?>
             <span class="action-button pull-right">
             <a class="ticket-action" id="ticket-transfer" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Transfer'); ?>"
@@ -116,10 +123,11 @@ if($ticket->isOverdue())
                 href="#tickets/<?php echo $ticket->getId(); ?>/transfer"><i class="icon-share"></i></a>
             </span>
             <?php
-            } ?>
+            } }?>
 
             <?php
             // Assign
+            if ($ticket->checkStaffPerm($thisstaff)){
             if ($ticket->isOpen() && $role->hasPerm(Ticket::PERM_ASSIGN)) {?>
             <span class="action-button pull-right"
                 data-dropdown="#action-dropdown-assign"
@@ -157,7 +165,7 @@ if($ticket->isOverdue())
               </ul>
             </div>
             <?php
-            } ?>
+            }} if ($role->hasPerm(Ticket::PERM_EDIT)){?>
             <div id="action-dropdown-more" class="action-dropdown anchor-right">
               <ul>
                 <?php
@@ -192,9 +200,7 @@ if($ticket->isOverdue())
                     <?php
                     }
                 } ?>
-                <?php
-                if ($role->hasPerm(Ticket::PERM_EDIT)) { ?>
-                <li><a href="#ajax.php/tickets/<?php echo $ticket->getId();
+                    <li><a href="#ajax.php/tickets/<?php echo $ticket->getId();
                     ?>/forms/manage" onclick="javascript:
                     $.dialog($(this).attr('href').substr(1), 201);
                     return false"
@@ -223,12 +229,12 @@ if($ticket->isOverdue())
                     echo $ticket->getId(); ?>/status/delete"
                     data-redirect="tickets.php"><i class="icon-trash"></i> <?php
                     echo __('Delete Ticket'); ?></a></li>
-                <?php
-                 }
-                ?>
+
               </ul>
 			</div>
-                
+           <?php
+            }
+           ?>
            </div>
         <div class="flush-left">
              <h2><a href="tickets.php?id=<?php echo $ticket->getId(); ?>"
@@ -418,7 +424,7 @@ if($ticket->isOverdue())
 						<?php echo __('Ticket Source');?>:
 					</th>
 					<td >
-						<select name="source" class="requiredfield">
+						<select name="source" class="requiredfield" <?php if (!$ticket->checkStaffPerm($thisstaff)){ echo " disabled ";} ?>>
 							<option value="" selected >&mdash; <?php
 								echo __('Select Source');?> &mdash;</option>
 							<?php
@@ -440,7 +446,7 @@ if($ticket->isOverdue())
 					</th>
 					<td>
 					<?php $id = $ticket->getSLAId() ?>
-						<select name="slaId">
+						<select name="slaId"  <?php if (!$ticket->checkStaffPerm($thisstaff)) { echo " disabled ";} ?>>
 							<option value="0" selected="selected" >&mdash; <?php echo __('None');?> &mdash;</option>
 							<?php
 							if($slas=SLA::getSLAs()) {
@@ -460,14 +466,16 @@ if($ticket->isOverdue())
                 <tr>
                     <th width="180"><?php echo __('Due Date');?>:</th>
                     <td>
-						<input class="dp" id="duedate" name="duedate" value="<?php echo Format::date($ticket->getEstDueDate()); ?>" size="12" autocomplete=OFF>
+						<input <?php if ($ticket->checkStaffPerm($thisstaff)){ echo ' class="dp" ';} ?> id="duedate" name="duedate" value="<?php echo Format::date($ticket->getEstDueDate()); ?>" size="12" autocomplete=OFF  
+                        <?php if (!$ticket->checkStaffPerm($thisstaff)){ echo " disabled ";} ?>>
 						&nbsp;&nbsp;
 						<?php
-						$min=$hr=null;
-						if(Format::time($ticket->getEstDueDate()))
+						 if ($ticket->checkStaffPerm($thisstaff)){
+                            $min=$hr=null;
+                            if(Format::time($ticket->getEstDueDate()))
 							list($hr, $min)=explode(':', Format::time($ticket->getEstDueDate()));
-
-						echo Misc::timeDropdown($hr, $min, 'time');
+                            echo Misc::timeDropdown($hr, $min, 'time');
+                        }
 						?>
 						&nbsp;<font class="error">&nbsp;<?php echo $errors['duedate']; ?>&nbsp;<?php echo $errors['time']; ?></font>
 						<em><?php echo __('Time is based on your time zone');?>
@@ -489,7 +497,7 @@ if($ticket->isOverdue())
 					</th>
 					<td>
 						<?php $id = $ticket->getHelpTopicId(); ?>
-							<select name="topicId"  class="requiredfield">
+							<select name="topicId"  class="requiredfield" <?php if (!$ticket->checkStaffPerm($thisstaff)){ echo " disabled ";} ?>>
 								<option value="" selected >&mdash; <?php echo __('Select Help Topic');?> &mdash;</option>
 								<?php
 								if($topics=Topic::getHelpTopics()) {
@@ -511,8 +519,12 @@ if($ticket->isOverdue())
 				<tr>
               		<td>
 						<?php 
-							foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
+                            foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
+                                if ($ticket->checkStaffPerm($thisstaff)){
 								$form->render(true, false, array('mode'=>'edit','width'=>140,'entry'=>$form));
+                                } else {
+                                $form->render(true, false, array('mode'=>'edit','width'=>140,'disabled'=>1,'entry'=>$form));    
+                                }
 						} ?>
 					</td>
 				</tr>
@@ -520,16 +532,17 @@ if($ticket->isOverdue())
 		</td>
 	</tr>
 	</table>
+    <?php if ($ticket->checkStaffPerm($thisstaff)){ ?> 
 	<table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" style="border-top:1px solid #dddddd;">
 	<tr>
 		<td align="center" colspan="2">
-		
 			<input type="submit" name="submit" value="<?php echo __('Save');?>">
 			<input type="reset"  name="reset"  value="<?php echo __('Reset');?>">
-    <input type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick='window.location.href="tickets.php?id=<?php echo $ticket->getId(); ?>"'>
+            <input type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick='window.location.href="tickets.php?id=<?php echo $ticket->getId(); ?>"'>
 		</td>
 	</tr>
-</table>
+    </table>
+    <?php } ?>
 </form>
 
 
@@ -578,7 +591,8 @@ if ($errors['err'] && isset($_POST['a'])) {
 <div class="sticky bar stop actions" id="response_options">
     <ul class="tabs" id="response-tabs">
         <?php
-        if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
+        
+        if ($ticket->checkStaffPerm($thisstaff)){ ?>
         <li class="active <?php
             echo isset($errors['reply']) ? 'error' : ''; ?>"><a
             href="#reply" id="post-reply-tab"><?php echo __('Post Reply');?></a></li>
@@ -589,6 +603,7 @@ if ($errors['err'] && isset($_POST['a'])) {
             id="post-note-tab"><?php echo __('Post Internal Note');?></a></li>
     </ul>
     <?php
+    
     if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
     <form id="reply" class="tab_content spellcheck exclusive"
         data-lock-object-id="ticket/<?php echo $ticket->getId(); ?>"
@@ -788,7 +803,8 @@ if ($errors['err'] && isset($_POST['a'])) {
     </form>
     <?php
     } ?>
-    <form id="note" class="hidden tab_content spellcheck exclusive"
+    
+    <form id="note" class=" <?php if ($role->hasPerm(Ticket::PERM_EDIT)){ echo "hidden"; }?> tab_content spellcheck exclusive"
         data-lock-object-id="ticket/<?php echo $ticket->getId(); ?>"
         data-lock-id="<?php echo $mylock ? $mylock->getId() : ''; ?>"
         action="tickets.php?<?php echo$qurl.$purl.$qfurl
@@ -838,6 +854,7 @@ if ($errors['err'] && isset($_POST['a'])) {
                 </td>
             </tr>
             <tr><td colspan="2">&nbsp;</td></tr>
+            <?php if ($ticket->checkStaffPerm($thisstaff)) {?>
             <tr>
                 <td width="120">
                     <label><?php echo __('Ticket Status');?>:</label>
@@ -867,6 +884,7 @@ if ($errors['err'] && isset($_POST['a'])) {
                     &nbsp;<span class='error'>*&nbsp;<?php echo $errors['note_status_id']; ?></span>
                 </td>
             </tr>
+            <?php } ?>
         </table>
 
        <p style="text-align:center;">
