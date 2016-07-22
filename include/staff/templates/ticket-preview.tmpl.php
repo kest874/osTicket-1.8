@@ -157,19 +157,19 @@ $options[]=array('action'=>sprintf(__('Thread (%d)'),$ticket->getThreadCount()),
 if($ticket->getNumNotes())
     $options[]=array('action'=>sprintf(__('Notes (%d)'),$ticket->getNumNotes()),'url'=>"tickets.php?id=$tid#notes");
 
-if($ticket->isOpen())
-    $options[]=array('action'=>__('Reply'),'url'=>"tickets.php?id=$tid#reply");
+// if($ticket->isOpen())
+    // $options[]=array('action'=>__('Reply'),'url'=>"tickets.php?id=$tid#reply");
 
-if ($role->hasPerm(Ticket::PERM_ASSIGN))
-    $options[]=array('action'=>($ticket->isAssigned()?__('Reassign'):__('Assign')),'url'=>"tickets.php?id=$tid#assign");
+// if ($role->hasPerm(Ticket::PERM_ASSIGN))
+    // $options[]=array('action'=>($ticket->isAssigned()?__('Reassign'):__('Assign')),'url'=>"tickets.php?id=$tid#assign");
 
-if ($role->hasPerm(Ticket::PERM_TRANSFER))
-    $options[]=array('action'=>__('Transfer'),'url'=>"tickets.php?id=$tid#transfer");
+// if ($role->hasPerm(Ticket::PERM_TRANSFER))
+    // $options[]=array('action'=>__('Transfer'),'url'=>"tickets.php?id=$tid#transfer");
 
-$options[]=array('action'=>__('Post Note'),'url'=>"tickets.php?id=$tid#note");
+// $options[]=array('action'=>__('Post Note'),'url'=>"tickets.php?id=$tid#note");
 
-if ($role->hasPerm(Ticket::PERM_EDIT))
-    $options[]=array('action'=>__('Edit Ticket'),'url'=>"tickets.php?id=$tid&a=edit");
+// if ($role->hasPerm(Ticket::PERM_EDIT))
+ //   $options[]=array('action'=>__('Edit Ticket'),'url'=>"tickets.php?id=$tid&a=edit");
 
 if($options) {
     echo '<ul class="tip_menu">';
