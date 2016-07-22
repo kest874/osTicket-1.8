@@ -252,6 +252,10 @@ if($ticket->isOverdue())
     </h3>
 </div>
 <div id="threaddata">
+<?php If  (!$ticket->checkStaffPerm($thisstaff)) { ?>
+            <div class="permissions-error"><?php echo "This another Team's improvment (view only)."; ?></div>
+             <?php
+            }?>
 <table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
     <tr>
         <td width="50%">
