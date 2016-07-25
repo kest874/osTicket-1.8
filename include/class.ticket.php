@@ -2939,23 +2939,23 @@ implements RestrictedAccess, Threadable, Searchable {
         // Start tracking ticket lifecycle events (created should come first!)
         $ticket->logEvent('created', null, $thisstaff ?: $user);
         // Add organizational collaborators
-        if ($org && $org->autoAddCollabs()) {
-            $pris = $org->autoAddPrimaryContactsAsCollabs();
-            $members = $org->autoAddMembersAsCollabs();
-            $settings = array('isactive' => true);
-            $collabs = array();
-            foreach ($org->allMembers() as $u) {
-                if ($members || ($pris && $u->isPrimaryContact())) {
-                    if ($c = $ticket->addCollaborator($u, $settings, $errors)) {
-                        $collabs[] = (string) $c;
-                    }
-                }
-            }
+        // if ($org && $org->autoAddCollabs()) {
+            // $pris = $org->autoAddPrimaryContactsAsCollabs();
+            // $members = $org->autoAddMembersAsCollabs();
+            // $settings = array('isactive' => true);
+            // $collabs = array();
+            // foreach ($org->allMembers() as $u) {
+                // if ($members || ($pris && $u->isPrimaryContact())) {
+                    // if ($c = $ticket->addCollaborator($u, $settings, $errors)) {
+                        // $collabs[] = (string) $c;
+                    // }
+                // }
+            // }
             //TODO: Can collaborators add others?
-            if ($collabs) {
-                $ticket->logEvent('collab', array('org' => $org->getId()));
-            }
-        }
+            // if ($collabs) {
+                // $ticket->logEvent('collab', array('org' => $org->getId()));
+            // }
+        // }
         //post the message.
         $vars['title'] = $vars['subject']; //Use the initial subject as title of the post.
         $vars['userId'] = $ticket->getUserId();
