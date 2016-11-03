@@ -442,6 +442,7 @@ $(function() {
         property: "/bin/true"
     });
 
+
    <?php
     // Popup user lookup on the initial page load (not post) if we don't have a
     // user selected

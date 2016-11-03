@@ -422,9 +422,10 @@ class VerySimpleModel {
     }
 
     function __isset($field) {
-        return array_key_exists($field, $this->ht)
+        return ($this->ht && array_key_exists($field, $this->ht))
             || isset(static::$meta['joins'][$field]);
     }
+
     function __unset($field) {
         if ($this->__isset($field))
             unset($this->ht[$field]);
@@ -1503,6 +1504,16 @@ class QuerySet implements IteratorAggregate, ArrayAccess, Serializable, Countabl
         unset($this->total);
     }
 
+    function __call($name, $args) {
+
+        if (!is_callable(array($this->getIterator(), $name)))
+            throw new OrmException('Call to undefined method QuerySet::'.$name);
+
+        return $args
+            ? call_user_func_array(array($this->getIterator(), $name), $args)
+            : call_user_func(array($this->getIterator(), $name));
+    }
+
     // IteratorAggregate interface
     function getIterator($iterator=false) {
         if (!isset($this->_iterator)) {
@@ -1652,6 +1663,13 @@ implements ArrayAccess {
         }
     }
 
+    function reset() {
+        $this->eoi = false;
+        $this->cache = array();
+        // XXX: Should the inner be recreated to refetch?
+        $this->inner->rewind();
+    }
+
     function asArray() {
         $this->fillTo(PHP_INT_MAX);
         return $this->getCache();
@@ -1659,13 +1677,6 @@ implements ArrayAccess {
 
     function getCache() {
         return $this->storage;
-    }
-
-    function reset() {
-        $this->eoi = false;
-        $this->storage = array();
-        // XXX: Should the inner be recreated to refetch?
-        $this->inner->rewind();
     }
 
     function getIterator() {
@@ -3346,12 +3357,11 @@ class MySqlPreparedExecutor {
             case is_int($p):
             case is_float($p):
                 return $p;
-
             case $p instanceof DateTime:
                 $p = $p->format('Y-m-d H:i:s');
             default:
-                return db_real_escape($p, true);
-            }
+                return db_real_escape((string) $p, true);
+           }
         }, $this->sql);
     }
 }

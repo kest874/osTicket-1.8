@@ -10,7 +10,8 @@ if ($_POST)
     // timezone)
     $info['duedate'] = Format::date(strtotime($info['duedate']), false, false, 'UTC');
 ?>
-<form action="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit" method="post" id="save"  enctype="multipart/form-data" class="ticket_edit_content">
+
+<form action="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit" method="post" class="save"  enctype="multipart/form-data">
     <?php csrf_token(); ?>
     <input type="hidden" name="do" value="update">
     <input type="hidden" name="a" value="edit">
@@ -105,7 +106,7 @@ if ($_POST)
                 &nbsp;<font class="error"><b>*</b>&nbsp;<?php echo $errors['topicId']; ?></font>
             </td>
         </tr>
-        <tr id="open_ticket_informationdata">
+        <tr id="open_ticket_informationdata" style="display:none;">
             <td width="160">
                 <?php echo __('SLA Plan');?>:
             </td>

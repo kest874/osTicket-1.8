@@ -406,8 +406,14 @@ if($ticket->isOverdue())
                     <td><?php echo Format::datetime($ticket->getLastMsgDate()); ?></td>
                 </tr>
                 <tr>
-                    <th nowrap><?php echo __('Last Response');?>:</th>
-                    <td><?php echo Format::datetime($ticket->getLastRespDate()); ?></td>
+                    <th><?php echo __('Source'); ?>:</th>
+                    <td><?php
+                        echo Format::htmlchars($ticket->getSource());
+
+                        if (!strcasecmp($ticket->getSource(), 'Web') && $ticket->getIP())
+                            echo '&nbsp;&nbsp; <span class="faded">('.Format::htmlchars($ticket->getIP()).')</span>';
+                        ?>
+                    </td>
                 </tr>
             </table>
         </td>
@@ -444,7 +450,7 @@ if($ticket->isOverdue())
 						&nbsp;<font class="error"><b>*</b>&nbsp;<?php echo $errors['source']; ?></font>
 					</td>
 				</tr> 
-                <tr>
+                <tr style="display:none;">
 					<th width="180">
 						<?php echo __('SLA Plan');?>:
 					</th>
@@ -607,9 +613,9 @@ if ($errors['err'] && isset($_POST['a'])) {
             id="post-note-tab"><?php echo __('Post Internal Note');?></a></li>
     </ul>
     <?php
-    
+
     if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
-    <form id="reply" class="tab_content spellcheck exclusive"
+    <form id="reply" class="tab_content spellcheck exclusive save"
         data-lock-object-id="ticket/<?php echo $ticket->getId(); ?>"
         data-lock-id="<?php echo $mylock ? $mylock->getId() : ''; ?>"
         action="tickets.php?<?php echo$qurl.$purl.$qfurl
@@ -807,8 +813,7 @@ if ($errors['err'] && isset($_POST['a'])) {
     </form>
     <?php
     } ?>
-    
-    <form id="note" class=" <?php if ($role->hasPerm(Ticket::PERM_EDIT)){ echo "hidden"; }?> tab_content spellcheck exclusive"
+    <form id="note" class="hidden tab_content spellcheck exclusive save"
         data-lock-object-id="ticket/<?php echo $ticket->getId(); ?>"
         data-lock-id="<?php echo $mylock ? $mylock->getId() : ''; ?>"
         action="tickets.php?<?php echo$qurl.$purl.$qfurl
