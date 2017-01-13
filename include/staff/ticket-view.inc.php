@@ -127,7 +127,9 @@ if($ticket->isOverdue())
 
             <?php
             // Assign
+
             if ($ticket->checkStaffPerm($thisstaff)){
+
             if ($ticket->isOpen() && $role->hasPerm(Ticket::PERM_ASSIGN)) {?>
             <span class="action-button pull-right"
                 data-dropdown="#action-dropdown-assign"
