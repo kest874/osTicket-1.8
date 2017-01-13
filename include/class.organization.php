@@ -36,7 +36,6 @@ class OrganizationModel extends VerySimpleModel {
                 ),
                 'list' => true,
             ),
-			
         ),
     );
 

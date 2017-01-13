@@ -171,6 +171,7 @@ if($ticket->getNumNotes())
 // if ($role->hasPerm(Ticket::PERM_EDIT))
  //   $options[]=array('action'=>__('Edit Ticket'),'url'=>"tickets.php?id=$tid&a=edit");
 
+
 if($options) {
     echo '<ul class="tip_menu">';
     foreach($options as $option)

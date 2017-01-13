@@ -123,9 +123,13 @@ background: url('../images/icons/alert.png') 10px 50% no-repeat #ffffdd;
 border-radius: 5px;
 }
 div#msg_warning {
-    width: 910px;
-	border-radius: 5px;
+    border-radius: 5px;
 }
+
+div#ticket_thread.tab_content div#msg_warning{
+    width: 910px; 
+}
+
 #msg_error,
 .error-banner { margin: 0; padding: 5px 10px 5px 36px; margin-bottom: 10px; border: 1px solid #a00; background: url('../images/icons/error.png') 10px 50% no-repeat #fff0f0; }
 
@@ -333,29 +337,8 @@ div#msg_warning {
 #sub_nav {
     background:#f7f7f7;
     border-bottom:1px solid #bebebe;
-    padding: 2px 2px;
+    padding: 2px 20px;
 }
-#customQ_nav {
-    clear:both;
-    margin:0;
-    padding:0;
-    line-height:26px;
-}
-
-#sub_nav > ul {
-    margin-top: 0;
-}
-#customQ_nav {
-    clear:both;
-    margin:0;
-    padding:0;
-    line-height:26px;
-}
-
-#sub_nav > ul {
-    margin-top: 0;
-}
-
 #customQ_nav {
     clear:both;
     margin:0;
@@ -403,17 +386,11 @@ div#msg_warning {
     color:#E65524;
     text-decoration: none;
 }
-#new-ticket{
-	color:black !important;
-	
-}	
+
 #sub_nav a.active, #sub_nav li.active > a,
 #customQ_nav .jb-overflowmenu-menu li.active.item > a {
     font-weight:bold;
-	color:#184E81;
 }
-
-	
 
 #sub_nav li.child.active > a {
     font-weight: 500;
@@ -459,7 +436,7 @@ div#msg_warning {
     text-transform:capitalize;
 }
 .customQ-dropdown a.truncate {
-    min-width: 140px;
+    min-width: 190px;
 }
 
 .customQ-dropdown ul li {
@@ -808,7 +785,6 @@ div#msg_warning {
     top: 0;
     border-bottom: 1px solid #bebebe;
     border-left:1px solid #bebebe;
-    border-right: 1px solid #aaa;
     background-color: #eee;
 }
 
@@ -824,6 +800,7 @@ div#msg_warning {
     color:#666;
     padding:9px;
     background-color:#eee;
+    border-right: 1px solid #aaa;
 }
 .jb-overflowmenu .jb-overflowmenu-container > a.jb-overflowmenu-menu-secondary-handle:hover {
     color:#000;
@@ -1406,16 +1383,15 @@ input[type=text], input[type=password], textarea, input {
     color:#f00;
 }
 
-.permissions-error {
-   color: #FFF;
-   background-color: #f00;
-   padding-top: 5px;
-   padding-bottom: 5px;
-   text-align: center;
-   font-weight: bold;
-}   
-
-
+.help-topic-error {
+    color: #FFF;
+    background-color: #f00;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: center;
+    font-weight: bold;
+    
+}
 .form_table .error input {
     border:1px solid #f00;
 }
@@ -1431,6 +1407,15 @@ input[type=text], input[type=password], textarea, input {
 div.section-break h3 {
     margin: 0;
     padding: 0;
+}
+
+.permissions-error {
+    color: #FFF;
+    background-color: #f00;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: center;
+    font-weight: bold;
 }
 
 .form_table th h4 {
@@ -1507,6 +1492,7 @@ h3 {
     padding:5px 0;
     color:#444;
 }
+
 .thread_content_top{
 	padding-bottom: 8px;
     background: white;
@@ -1720,9 +1706,8 @@ tr#open_ticket_userdata td{
  }
 .open_ticket_dynamic-form{
 	padding-left: 15px;
-}
-
-tr#edit_ticket_note th{
+	
+}tr#edit_ticket_note th{
 	padding-top: 10px;
 	padding-left: 10px;
 	padding-bottom: 10px;
@@ -1774,39 +1759,8 @@ form#save.ticket_edit_content>table.ticket_edit>tbody>tr#open_ticket_dynamicform
 }
 form#save.ticket_edit_content>table.ticket_edit>tbody>tr#df>td{
 	display: none;
+	
 }
-
-tr#edit_ticket_note th{
-	padding-top: 10px;
-	padding-left: 10px;
-	padding-bottom: 10px;
- 	background-color: rgb(255, 255, 238);;	
-	text-align: left;
-	border-top: 1px solid #999;
-	border-bottom: 1px solid #999;
-	border-left: 0px solid #999;
-	border-r: 0px solid #999;
- 	
- }
-
-form#save.ticket_edit_content>table.ticket_edit>tbody>tr>th{
-	padding-top: 10px;
-	padding-left: 10px;
-	padding-bottom: 10px;
-	background-color:#FFF;
-	text-align: left;
-	border-top: 1px solid #999;
-	border-left: 0px solid #999;
-	border-right: 0px solid #999;
-	border-bottom: 1px solid #999;
-	margin-left: auto;
-	margin-left: right;	
-}
-
-form#save.ticket_edit_content>table.ticket_edit>tbody>tr>th>em>div.pull-right>i.icon-sort{
-	display: none;
-}
-
 table.ticket_info.custom-data>thead>tr>th{
 	
 }
@@ -1939,6 +1893,7 @@ h2 .reload {
     margin-left: -60px;
     display:inline-block;
     width:48px;
+    max-height:48px;
     height:auto;
 }
 .thread-entry.system {
@@ -1957,7 +1912,9 @@ img.avatar {
     margin-right: 5px;
 }
 .avatar > img.avatar {
-    width: 100%;
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
     height: auto;
 }
 .thread-entry .header {
@@ -2102,8 +2059,10 @@ ul.tabs {
     margin:0;
     text-align:left;
     height:29px;
+    width: auto;
     border-top:1px solid #aaa;
 	border-bottom:1px solid #aaa;
+    border-color: #aaa;
     background:#eef3f8;
     position: relative;
     box-shadow: inset 0 -5px 10px -9px rgba(0,0,0,0.3);
@@ -2967,15 +2926,7 @@ select + .button {
   display: inline-block;
   margin-right: 5px;
 }
-.input.attached.focus {
-  outline-offset: -2px;
-  outline-style: auto;
-  outline-width: 5px;
-  outline-color: -webkit-focus-ring-color;
-}
-.input.attached input:focus {
-  outline-style: none;
-}
+
 .input.attached input {
   height: 24px;
   box-sizing: border-box;
@@ -3689,7 +3640,7 @@ td.indented {
     margin-left: 0;
 }
 
-.sticky.bar.fixed {
+.thread.sticky.bar.fixed {
 	background: #eee;
 	position: fixed;
 	top: 0;
@@ -3700,6 +3651,22 @@ td.indented {
 	padding-left: 20px;
 	padding-top: 10px;
 	padding-bottom: 0px;
+	padding-right: 20px;
+	box-sizing: border-box;
+	box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+
+.sticky.bar.fixed {
+	background: #eee;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 6;
+	width: 100%;
+	/*background-color: rgba(255,255,255,0.95);*/
+	padding-left: 20px;
+	padding-top: 10px;
+	padding-bottom: 8px;
 	padding-right: 20px;
 	box-sizing: border-box;
 	box-shadow: 0 3px 10px rgba(0,0,0,0.3);
@@ -4197,9 +4164,30 @@ a.attachment {
 .conditions .condition + .condition {
     margin-top: 10px;
 }
+img.avatar + img.avatar {
+    margin-left: -14px;
+    z-index: 1;
+    transition: margin-left 0.1s linear;
+}
+.avatar.group:hover > img.avatar + img.avatar {
+    margin-left: -4px;
+}
+.avatar.group {
+    position: relative;
+    z-index: 1;
+    transition: margin-right 0.1s linear;
+}
+
+.avatar.group.\32:hover { margin-right: -10px; }
+.avatar.group.\33:hover { margin-right: -20px; }
+.avatar.group.\34:hover { margin-right: -30px; }
+.avatar.group.\35:hover { margin-right: -40px; }
+.avatar.group.\36:hover { margin-right: -50px; }
+.avatar.group.\37:hover { margin-right: -60px; }
+.avatar.group.\38:hover { margin-right: -70px; }
+.avatar.group.\39:hover { margin-right: -80px; }
 
 /* FIXME: Drop this with select2 4.0.1
  * Fixes a rendering issue on Safari
  */
 .select2-search__field{-webkit-appearance: textfield;}
-

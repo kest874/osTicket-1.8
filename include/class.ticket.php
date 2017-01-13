@@ -96,6 +96,7 @@ implements RestrictedAccess, Threadable, Searchable {
     const PERM_REPLY    = 'ticket.reply';
     const PERM_CLOSE    = 'ticket.close';
     const PERM_DELETE   = 'ticket.delete';
+
     static protected $perms = array(
             self::PERM_CREATE => array(
                 'title' =>
@@ -146,6 +147,7 @@ implements RestrictedAccess, Threadable, Searchable {
             'Other' =>
             /* @trans */ 'Other',
             );
+
     var $lastMsgId;
     var $last_message;
     var $owner;     // TicketOwner
@@ -155,6 +157,7 @@ implements RestrictedAccess, Threadable, Searchable {
     var $active_collaborators;
     var $recipients;
     var $lastrespondent;
+
     function loadDynamicData($force=false) {
         if (!isset($this->_answers) || $force) {
             $this->_answers = array();
@@ -406,6 +409,7 @@ implements RestrictedAccess, Threadable, Searchable {
     }
     function getPriorityId() {
         global $cfg;
+
         if (($a = $this->getAnswer('priority'))
             && ($b = $a->getValue())
         ) {
@@ -1588,6 +1592,7 @@ implements RestrictedAccess, Threadable, Searchable {
         $extra = VariableReplacer::compileFormScope(TicketForm::getInstance());
         return $base + $extra;
     }
+
     // Searchable interface
     static function getSearchableFields() {
         $base = array(
@@ -1655,9 +1660,11 @@ implements RestrictedAccess, Threadable, Searchable {
         }
         return $base;
     }
+
     static function supportsCustomData() {
         return true;
     }
+
     //Replace base variables.
     function replaceVars($input, $vars = array()) {
         global $ost;
@@ -3185,13 +3192,16 @@ implements RestrictedAccess, Threadable, Searchable {
             return;
         require STAFFINC_DIR.'templates/tickets-actions.tmpl.php';
     }
+
     static function getLink($id) {
         global $thisstaff;
+
         switch (true) {
         case ($thisstaff instanceof Staff):
             return ROOT_PATH . sprintf('scp/tickets.php?id=%s', $id);
         }
     }
+
 	// Close tickets based on Ticket Auto-Close from config
    function AutoClose() {
 	global $cfg;
@@ -3218,14 +3228,17 @@ implements RestrictedAccess, Threadable, Searchable {
     static function getPermissions() {
         return self::$perms;
     }
+
     static function getSources() {
         static $translated = false;
         if (!$translated) {
             foreach (static::$sources as $k=>$v)
                 static::$sources[$k] = __($v);
         }
+
         return static::$sources;
     }
+
     static function registerCustomData(DynamicForm $form) {
         if (!isset(static::$meta['joins']['cdata+'.$form->id])) {
             $cdata_class = <<<EOF
@@ -3271,6 +3284,7 @@ EOF;
     }
 }
 RolePermission::register(/* @trans */ 'Tickets', Ticket::getPermissions(), true);
+
 class TicketCData extends VerySimpleModel {
     static $meta = array(
         'pk' => array('ticket_id'),

@@ -257,7 +257,7 @@ if(!$user) {
             <td width="160"><?php echo __('Assign To');?>:</td>
             <td>
                 <select id="assignId" name="assignId">
-                    <option value="0" selected="selected">&mdash; <?php echo __('Select an Team OR a Associate');?> &mdash;</option>
+                    <option value="0" selected="selected">&mdash; <?php echo __('Select a Team');?> &mdash;</option>
                     <?php
                     if(($teams=Team::getActiveTeams())) {
                         echo '<OPTGROUP label="'.sprintf(__('Teams (%d)'), count($teams)).'">';
@@ -269,16 +269,7 @@ if(!$user) {
                         echo '</OPTGROUP>';
                     }
                     
-                    if(($users=Staff::getAvailableStaffMembers())) {
-                        echo '<OPTGROUP label="'.sprintf(__('Associates (%d)'), count($users)).'">';
-                        foreach($users as $id => $name) {
-                            $k="s$id";
-                            echo sprintf('<option value="%s" %s>%s</option>',
-                                        $k,(($info['assignId']==$k)?'selected="selected"':''),$name);
-                        }
-                        echo '</OPTGROUP>';
-                    }
-                    ?>
+                   ?>
                 </select>&nbsp;
                 <font class='error'>&nbsp;<?php echo $errors['assignId']; ?></font> <em>Will be selected automatically if not specified</em><br>
                 </td>
