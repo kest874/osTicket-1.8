@@ -859,6 +859,12 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
             ->values_flat('email')->first();
 		return $row ? $row[0] : 0;
     }
+    
+    static function getDeptById($id) {
+		$row = static::objects()->filter(array('staff_id' => $id))
+            ->values_flat('dept_id')->first();
+        return $row ? $row[0] : 0;
+    }
 	
 	static function getStaffUserId($userid){
 		

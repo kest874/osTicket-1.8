@@ -2942,7 +2942,9 @@ implements RestrictedAccess, Threadable, Searchable {
         $priority = $form->getAnswer('priority');
         if (!$priority || !$priority->getIdValue())
             $form->setAnswer('priority', null, $cfg->getDefaultPriorityId());
-        $deptId = $deptId ?: $cfg->getDefaultDeptId();
+        $deptId = $deptId ?: $deptId = $deptId ?: $deptId = $thisstaff->getDeptById($thisstaff->getId());
+
+        ;
         $statusId = $statusId ?: $cfg->getDefaultTicketStatusId();
         $topicId = isset($topic) ? $topic->getId() : 0;
         $ipaddress = $vars['ip'] ?: $_SERVER['REMOTE_ADDR'];
@@ -2955,6 +2957,7 @@ implements RestrictedAccess, Threadable, Searchable {
             'number' => $number,
             'user' => $user,
             'dept_id' => $deptId,
+            'team_id' => $teamId,
             'topic_id' => $topicId,
             'ip_address' => $ipaddress,
             'source' => $source,
