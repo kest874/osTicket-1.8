@@ -532,8 +532,7 @@ implements TemplateVariable, Searchable {
             // XXX: This will upset the static $depts array
             $depts = array();
             $query = self::objects();
-            
-            var_dump($criteria);
+        
             if (isset($criteria['publiconly']))
                 $query->filter(array(
                             'ispublic' => ($criteria['publiconly'] ? 1 : 0)));
