@@ -34,7 +34,7 @@ class TaskModel extends VerySimpleModel {
                 'null' => true,
             ),
             'team' => array(
-                'constraint' => array('team_id' => 'Team.team_id'),
+                'constraint' => array('team_id' => 'Dept.id'),
                 'null' => true,
             ),
             'thread' => array(
@@ -1383,7 +1383,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
                     .') ');
         $where2 = '';
 
-        if(($teams=$staff->getTeams()))
+        if(($teams=$staff->getDepartments()))
             $where[] = ' ( task.team_id IN('.implode(',', db_input(array_filter($teams)))
                         .') AND '
                         .sprintf('task.flags & %d != 0 ', TaskModel::ISOPEN)

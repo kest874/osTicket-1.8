@@ -16,7 +16,6 @@
 include_once(INCLUDE_DIR.'class.ticket.php');
 include_once(INCLUDE_DIR.'class.dept.php');
 include_once(INCLUDE_DIR.'class.error.php');
-include_once(INCLUDE_DIR.'class.team.php');
 include_once(INCLUDE_DIR.'class.role.php');
 include_once(INCLUDE_DIR.'class.passwd.php');
 include_once(INCLUDE_DIR.'class.user.php');
@@ -38,9 +37,6 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
             'dept_access' => array(
                 'reverse' => 'StaffDeptAccess.staff',
             ),
-            'teams' => array(
-                'reverse' => 'TeamMember.staff',
-            ),
         ),
     );
 
@@ -50,7 +46,6 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
     var $_extra;
     var $passwd_change;
     var $_roles = null;
-    var $_teams = null;
     var $_config = null;
     var $_perm;
 
@@ -141,7 +136,6 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
 
     function getHashtable() {
         $base = $this->ht;
-        unset($base['teams']);
         unset($base['dept_access']);
 
         if ($this->getConfig())
@@ -339,6 +333,20 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         return $this->change_passwd;
     }
 
+    function getDepartmentMembershipIds() {
+                         
+            $sql=' SELECT dept_id FROM '.STAFF_TABLE. ' WHERE staff_id='.db_input($this->getId())
+                .' union '
+                .' SELECT dept_id FROM '.STAFF_DEPT_TABLE. ' WHERE staff_id='.db_input($this->getId());
+            
+            $depts = array();
+            if (($res=db_query($sql)) && db_num_rows($res)) {
+                while(list($id)=db_fetch_row($res))
+                    $depts[] = $id;
+            }
+            return $depts;
+    }
+
     function getDepartments() {
         // TODO: Cache this in the agent's session as it is unlikely to
         //       change while logged in
@@ -386,7 +394,7 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
     }
 
     function getDepts() {
-        return $this->getDepartments();
+        return $this->getDepartmentMembershipIds();
     }
 
     function getManagedDepartments() {
@@ -517,11 +525,8 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         return $this->isadmin;
     }
 
-    function isTeamMember($teamId) {
-        return ($teamId && in_array($teamId, $this->getTeams()));
-    }
-
     function canAccessDept($deptId) {
+        
         return ($deptId && in_array($deptId, $this->getDepts()) && !$this->isAccessLimited());
     }
 
@@ -529,16 +534,6 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         return $this->show_assigned_tickets;
     }
 
-    function getTeams() {
-
-        if (!isset($this->_teams)) {
-            $this->_teams = array();
-            foreach ($this->teams as $team)
-                 $this->_teams[] = $team->team_id;
-        }
-
-        return $this->_teams;
-    }
     /* stats */
 
     function resetStats() {
@@ -624,7 +619,7 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
 
         $vars['firstname']=Format::striptags($vars['firstname']);
         $vars['lastname']=Format::striptags($vars['lastname']);
-
+                
         if (isset($this->staff_id) && $this->getId() != $vars['id'])
             $errors['err']=__('Internal error occurred');
 
@@ -664,6 +659,7 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
             }
         }
 
+        $this->name = $vars['firstname'].' '.$vars['lastname'];
         $this->firstname = $vars['firstname'];
         $this->lastname = $vars['lastname'];
         $this->email = $vars['email'];
@@ -705,33 +701,6 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         return $this->save();
     }
 
-    function updateTeams($membership, &$errors) {
-        $dropped = array();
-        foreach ($this->teams as $TM)
-            $dropped[$TM->team_id] = 1;
-
-        reset($membership);
-        while(list(, list($team_id, $alerts)) = each($membership)) {
-            $member = $this->teams->findFirst(array('team_id' => $team_id));
-            if (!$member) {
-                $this->teams->add($member = new TeamMember(array(
-                    'team_id' => $team_id,
-                )));
-            }
-            $member->setAlerts($alerts);
-            if (!$errors)
-                $member->save();
-            unset($dropped[$member->team_id]);
-        }
-        if (!$errors && $dropped) {
-            $member = $this->teams
-                ->filter(array('team_id__in' => array_keys($dropped)))
-                ->delete();
-            $this->teams->reset();
-        }
-        return true;
-    }
-
     function delete() {
         global $thisstaff;
 
@@ -754,11 +723,6 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
                 'staff_id' => 0,
                 'poster' => $this->getName()->getOriginal(),
             ));
-
-        // Cleanup Team membership table.
-        TeamMember::objects()
-            ->filter(array('staff_id'=>$this->getId()))
-            ->delete();
 
         // Cleanup staff dept access
         StaffDeptAccess::objects()
@@ -848,6 +812,10 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         return $row ? $row[0] : 0;
     }
 
+    static function getFullNameById($id) {
+        
+        return staff::getLastNameById($id).", ".staff::getFirstNameById($id);
+    }
     static function getIdByEmail($email) {
 		$row = static::objects()->filter(array('email' => $email))
             ->values_flat('staff_id')->first();
@@ -865,7 +833,8 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
             ->values_flat('dept_id')->first();
         return $row ? $row[0] : 0;
     }
-	
+       
+
 	static function getStaffUserId($userid){
 		
 		$staffemail = staff::getEmailById($userid);
@@ -1044,7 +1013,8 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
             $errors['mobile']=__('Valid phone number is required');
 
         if(!$vars['dept_id'])
-            $errors['dept_id']=__('Department is required');
+            $errors['dept_id']=__('Primary Department is required');
+   
         if(!$vars['role_id'])
             $errors['role_id']=__('Role for primary department is required');
 
@@ -1064,7 +1034,7 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
 
         // Update some things for ::updateAccess to inspect
         $this->setDepartmentId($vars['dept_id']);
-
+ 
         // Format access update as [array(dept_id, role_id, alerts?)]
         $access = array();
         if (isset($vars['dept_access'])) {
@@ -1077,14 +1047,6 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         $this->setExtraAttr('def_assn_role',
             isset($vars['assign_use_pri_role']), false);
 
-        // Format team membership as [array(team_id, alerts?)]
-        $teams = array();
-        if (isset($vars['teams'])) {
-            foreach (@$vars['teams'] as $team_id) {
-                $teams[] = array($team_id, @$vars['team_alerts'][$team_id]);
-            }
-        }
-        $this->updateTeams($teams, $errors);
 
         // Update the local permissions
         $this->updatePerms($vars['perms'], $errors);
@@ -1104,6 +1066,7 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         $this->phone_ext = $vars['phone_ext'];
         $this->mobile = Format::phone($vars['mobile']);
         $this->notes = Format::sanitize($vars['notes']);
+        $this->name = $vars['firstname'].' '.$vars['lastname'];
 
         if ($errors)
             return false;

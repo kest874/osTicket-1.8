@@ -18,7 +18,7 @@ require_once INCLUDE_DIR . 'class.orm.php';
 require_once INCLUDE_DIR . 'class.util.php';
 require_once INCLUDE_DIR . 'class.variable.php';
 require_once INCLUDE_DIR . 'class.search.php';
-require_once INCLUDE_DIR . 'class.organization.php';
+// require_once INCLUDE_DIR . 'class.organization.php';
 
 class UserEmailModel extends VerySimpleModel {
     static $meta = array(
@@ -39,34 +39,34 @@ class UserEmailModel extends VerySimpleModel {
 
 class UserModel extends VerySimpleModel {
     static $meta = array(
-        'table' => USER_TABLE,
-        'pk' => array('id'),
+        'table' => STAFF_TABLE,
+        'pk' => array('staff_id'),
         'select_related' => array('default_email', 'org', 'account'),
         'joins' => array(
-            'emails' => array(
-                'reverse' => 'UserEmailModel.user',
-            ),
+            // 'emails' => array(
+                // 'reverse' => 'UserEmailModel.user',
+            // ),
             'tickets' => array(
                 'null' => true,
                 'reverse' => 'Ticket.user',
             ),
-            'account' => array(
-                'list' => false,
-                'null' => true,
-                'reverse' => 'ClientAccount.user',
-            ),
-            'org' => array(
-                'null' => true,
-                'constraint' => array('org_id' => 'Organization.id')
-            ),
+            // 'account' => array(
+                // 'list' => false,
+                // 'null' => true,
+                // 'reverse' => 'ClientAccount.user',
+            // ),
+            // 'org' => array(
+                // 'null' => true,
+                // 'constraint' => array('org_id' => 'Organization.id')
+            // ),
             'default_email' => array(
-                'null' => true,
-                'constraint' => array('default_email_id' => 'UserEmailModel.id')
+                 'null' => true,
+                 'constraint' => array('email' => 'staff.email')
             ),
-            'cdata' => array(
-                'constraint' => array('id' => 'UserCdata.user_id'),
-                'null' => true,
-            ),
+            // 'cdata' => array(
+                // 'constraint' => array('id' => 'UserCdata.user_id'),
+                // 'null' => true,
+            // ),
             'entries' => array(
                 'constraint' => array(
                     'id' => 'DynamicFormEntry.object_id',
@@ -122,7 +122,7 @@ class UserModel extends VerySimpleModel {
     }
 
     function getDefaultEmail() {
-        return $this->default_email;
+        return $this->email;
     }
 
     function hasAccount() {
@@ -130,24 +130,6 @@ class UserModel extends VerySimpleModel {
     }
     function getAccount() {
         return $this->account;
-    }
-
-    function getOrgId() {
-         return $this->get('org_id');
-    }
-
-    function getOrganization() {
-        return $this->org;
-    }
-
-    function setOrganization($org, $save=true) {
-
-        $this->set('org', $org);
-
-        if ($save)
-            $this->save();
-
-        return true;
     }
 
     protected function hasStatus($flag) {
@@ -267,7 +249,7 @@ implements TemplateVariable, Searchable {
     }
 
     function getEmail() {
-        return new EmailAddress($this->default_email->address);
+        return new EmailAddress($this->default_email->email);
     }
 
     function getAvatar($size=null) {
@@ -395,7 +377,7 @@ implements TemplateVariable, Searchable {
 
     function getDynamicData($create=true) {
         if (!isset($this->_entries)) {
-            $this->_entries = DynamicFormEntry::forObject($this->id, 'U')->all();
+            $this->_entries = DynamicFormEntry::forObject($this->staff_id, 'U')->all(); 
             if (!$this->_entries && $create) {
                 $g = UserForm::getNewInstance();
                 $g->setClientId($this->id);
@@ -642,11 +624,11 @@ implements TemplateVariable {
     var $address;
 
     function __construct($address) {
-        $this->address = $address;
+        $this->email = $address;
     }
 
     function __toString() {
-        return (string) $this->address;
+        return (string) $this->email;
     }
 
     function getVar($what) {

@@ -25,10 +25,6 @@ if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
 if ($_POST)
     $info['duedate'] = Format::date(strtotime($info['duedate']), false, false, 'UTC');
 
-if(!$user) {
-  $user = User::lookupByemail($thisstaff->getEmail());
-}
-
 ?>
 <form action="tickets.php?a=open" method="post" id="save"  enctype="multipart/form-data" class="ticket_open_content">
  <?php csrf_token(); ?>
@@ -54,61 +50,27 @@ if(!$user) {
                 <div class="error"><?php echo $errors['user']; ?></div>
             </th>
         </tr>
-        <?php
-        if ($user) { ?>
-        <tr id="open_ticket_userdata"><td><strong><?php echo __('User'); ?>:</strong></td><td>
-            <div id="user-info">
-                <input type="hidden" name="uid" id="uid" value="<?php echo $user->getId(); ?>" />
-            <a href="#" onclick="javascript:
-                $.userLookup('ajax.php/users/<?php echo $user->getId(); ?>/edit',
-                        function (user) {
-                            $('#user-name').text(user.name);
-                            $('#user-email').text(user.email);
-                        });
-                return false;
-                "><i class="icon-user"></i>
-                <span id="user-name"><?php echo Format::htmlchars($user->getName()); ?></span>
-                &lt;<span id="user-email"><?php echo $user->getEmail(); ?></span>&gt;
-                </a>
-                <a class="inline button" style="overflow:inherit" href="#"
-                    onclick="javascript:
-                        $.userLookup('ajax.php/users/select/'+$('input#uid').val(),
-                            function(user) {
-                                $('input#uid').val(user.id);
-                                $('#user-name').text(user.name);
-                                $('#user-email').text('<'+user.email+'>');
-                        });
-                        return false;
-                    "><i class="icon-retweet"></i> <?php echo __('Change'); ?></a>
-            </div>
-        </td></tr>
-        <?php
-        } else { //Fallback: Just ask for email and name
-            ?>
-        <tr id="open_ticket_userdata">
-            <td style="min-width:120px;" width="160" class="required"> <br><?php echo __('Email Address'); ?>: </td>
+        <tr id="open_ticket_userdata"><td><strong><?php echo __('Submitter'); ?>:</strong>
+            
             <td>
-                <div class="attached input">
-                   <input type="text" size=45 name="email" id="user-email" class="attached requiredfield""
-                        autocomplete="off" autocorrect="off" value="<?php echo $info['email']; ?>" /> </span>
-                <a href="?a=open&amp;uid={id}" data-dialog="ajax.php/users/lookup/form"
-                    class="attached button requiredfield"><i class="icon-search requiredfield"></i></a>
-                </div>
-                <span class="error">*</span>
-                <div class="error"><?php echo $errors['email']; ?></div>
+                <select id="uid" name="uid">
+                    
+                    <?php
+                    $associate = $thisstaff->GetId();
+                    
+                    if(($users=Staff::getAvailableStaffMembers())) {
+                        
+                        foreach ($users as $k => $v)
+                        echo sprintf('<option value="%s" %s>%s</option>',
+                                $k,
+                                ($associate == $k ) ? 'selected="selected"' : '',
+                                $v);
+                    
+                        }
+                     ?>
+                </select>&nbsp;<span class='error'>&nbsp;<?php echo $errors['submitter']; ?></span>
             </td>
         </tr>
-        <tr id="open_ticket_userdata">
-            <td style="min-width:120px;" width="160" class="required"> <?php echo __('Full Name'); ?>: </td>
-            <td>
-                <span style="display:inline-block;">
-                    <input type="text" size=45 name="name" id="user-name" class="requiredfield" style="height: 15px;" value="<?php echo $info['name']; ?>" /> </span>
-                <span class="error">*</span>
-                <div class="error"><?php echo $errors['name']; ?></div>
-            </td>
-        </tr>
-        <?php
-        } ?>
 
         <?php
         if($cfg->notifyONNewStaffTicket()) {  ?>
@@ -187,31 +149,7 @@ if(!$user) {
                 &nbsp;<font class="error"><b>*</b>&nbsp;<?php echo $errors['topicId']; ?></font>
             </td>
         </tr>
-        <tr id="open_ticket_informationdata" style="display:none;">
-            <td width="160">
-                <?php echo __('Department'); ?>:
-            </td>
-            <td>
-                <select name="deptId">
-                    <option value="" selected >&mdash; <?php echo __('Select Department'); ?>&mdash;</option>
-                    <?php
-                    if($depts=Dept::getDepartments(array('dept_id' => $thisstaff->getDepts()))) {
-                        foreach($depts as $id =>$name) {
-                            if (!($role = $thisstaff->getRole($id))
-                                || !$role->hasPerm(Ticket::PERM_CREATE)
-                            ) {
-                                // No access to create tickets in this dept
-                                continue;
-                            }
-                            echo sprintf('<option value="%d" %s>%s</option>',
-                                    $id, ($info['deptId']==$id)?'selected="selected"':'',$name);
-                        }
-                    }
-                    ?>
-                </select>
-                &nbsp;<font class="error"><?php echo $errors['deptId']; ?></font>
-            </td>
-        </tr>
+
          <tr  id="open_ticket_informationdata"  style="display:none;">
             <td width="160">
                 <?php echo __('SLA Plan');?>:
@@ -250,8 +188,34 @@ if(!$user) {
                 <em><?php echo __('Time is based on your time zone');?> (GMT <?php echo Format::date(false, false, 'ZZZ'); ?>)</em>
             </td>
         </tr>
-
+            <tr  id="open_ticket_informationdata"  style="display:none;">
+            <td width="160">
+                <?php echo __('Department'); ?>:
+            </td>
+            <td>
+                <select name="assignId">
+                    <option value="" selected >&mdash; <?php echo __('Select Department'); ?>&mdash;</option>
+                    <?php
+                    if($depts=Dept::getDepartments(array('dept_id' => $thisstaff->getDepts()))) {
+                        foreach($depts as $id =>$name) {
+                            if (!($role = $thisstaff->getRole($id))
+                                || !$role->hasPerm(Ticket::PERM_CREATE)
+                            ) {
+                                // No access to create tickets in this dept
+                                continue;
+                            }
+                            echo sprintf('<option value="%d" %s>%s</option>',
+                                    $id, ($info['deptId']==$id)?'selected="selected"':'',$name);
+                        }
+                    }
+                    ?>
+                </select>
+                &nbsp;<font class="error"><?php echo $errors['deptId']; ?></font>
+            </td>
+        </tr>
         <?php
+        $info['assignId'] = 't'.$thisstaff->getDeptById($thisstaff->GetId());
+        
         if($thisstaff->hasPerm(Ticket::PERM_ASSIGN, false)) { ?>
         <tr id="open_ticket_informationdata">
             <td width="160"><?php echo __('Assign To');?>:</td>
@@ -259,7 +223,9 @@ if(!$user) {
                 <select id="assignId" name="assignId">
                     <option value="0" selected="selected">&mdash; <?php echo __('Select a Team');?> &mdash;</option>
                     <?php
-                    if(($teams=Team::getActiveTeams())) {
+                    
+                    
+                    if(($teams=Dept::getDepartments(array('dept_id' => $thisstaff->getDepts())))) {
                         echo '<OPTGROUP label="'.sprintf(__('Teams (%d)'), count($teams)).'">';
                         foreach($teams as $id => $name) {
                             $k="t$id";
@@ -271,10 +237,12 @@ if(!$user) {
                     
                    ?>
                 </select>&nbsp;
-                <font class='error'>&nbsp;<?php echo $errors['assignId']; ?></font> <em>Will be selected automatically if not specified</em><br>
+                <font class='error'>&nbsp;<?php echo $errors['assignId']; ?></font> <em>Assign the team that should work on this</em><br>
                 </td>
         </tr>
         <?php } ?>
+        
+        
         </tbody>
         <tbody id="dynamic-form">
         <?php
@@ -283,11 +251,13 @@ if(!$user) {
                 include(STAFFINC_DIR .  'templates/dynamic-form.tmpl.php');
             }
         ?>
-        </tbody>
+        
+        
         <tbody>
         <?php
         //is the user allowed to post replies??
         if ($thisstaff->getRole()->hasPerm(Ticket::PERM_REPLY)) { ?>
+        
         <tr id="open_ticket_response">
             <th colspan="2">
                 <em><strong><?php echo __('Response');?></strong>: <?php echo __('Optional response to the above issue.');?></em>
@@ -376,6 +346,7 @@ if(!$user) {
                 </td>
             </tr>
         </tr>
+        
         <?php
         } //end canPostReply
         ?>
@@ -413,38 +384,3 @@ if(!$user) {
     ">
 </p>
 </form>
-<script type="text/javascript">
-$(function() {
-    $('input#user-email').typeahead({
-        source: function (typeahead, query) {
-            $.ajax({
-                url: "ajax.php/users?q="+query,
-                dataType: 'json',
-                success: function (data) {
-                    typeahead.process(data);
-                }
-            });
-        },
-        onselect: function (obj) {
-            $('#uid').val(obj.id);
-            $('#user-name').val(obj.name);
-            $('#user-email').val(obj.email);
-        },
-        property: "/bin/true"
-    });
-
-
-   <?php
-    // Popup user lookup on the initial page load (not post) if we don't have a
-    // user selected
-    if (!$_POST && !$user) {?>
-    setTimeout(function() {
-      $.userLookup('ajax.php/users/lookup/form', function (user) {
-        window.location.href = window.location.href+'&uid='+user.id;
-      });
-    }, 100);
-    <?php
-    } ?>
-});
-</script>
-

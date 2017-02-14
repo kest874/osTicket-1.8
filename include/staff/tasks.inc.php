@@ -135,7 +135,7 @@ $visibility = array(
 if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
     $visibility[] = new Q(array('dept_id__in' => $depts));
 // -- Open and assigned to a team of mine
-if (($teams = $thisstaff->getTeams()) && count(array_filter($teams)))
+if (($teams = $thisstaff->getDepartments()) && count(array_filter($teams)))
     $visibility[] = new Q(array(
         'team_id__in' => array_filter($teams),
         'flags__hasbit' => TaskModel::ISOPEN

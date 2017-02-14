@@ -3109,7 +3109,7 @@ class MySqlCompiler extends SqlCompiler {
             $sql .= ' LOCK IN SHARE MODE';
             break;
         }
-
+        //var_dump($sql);
         return new MysqlExecutor($sql, $this->params, $fieldMap);
     }
 
@@ -3394,7 +3394,7 @@ class MySqlExecutor
 extends MySqlPreparedExecutor {
     function execute() {
         $sql = $this->__toString();
-		if (!($this->stmt = db_query($sql, true, !$this->unbuffered)))
+        if (!($this->stmt = db_query($sql, true, !$this->unbuffered)))
             throw new InconsistentModelException(
                 'Unable to prepare query: '.db_error().' '.$sql);
         // mysqli_query() return TRUE for UPDATE queries and friends

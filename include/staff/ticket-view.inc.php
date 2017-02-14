@@ -18,6 +18,7 @@ $user  = $ticket->getOwner(); //Ticket User (EndUser)
 $team  = $ticket->getTeam();  //Assigned team.
 $sla   = $ticket->getSLA();
 $lock  = $ticket->getLock();  //Ticket lock obj
+
 if (!$lock && $cfg->getTicketLockMode() == Lock::MODE_ON_VIEW)
     $lock = $ticket->acquireLock($thisstaff->getId());
 $mylock = ($lock && $lock->getStaffId() == $thisstaff->getId()) ? $lock : null;
@@ -30,7 +31,7 @@ if ($ticket->isClosed() && !$ticket->isReopenable())
             $ticket->getStatus());
 elseif ($ticket->isAssigned()
         && (($staff && $staff->getId()!=$thisstaff->getId())
-            || ($team && !$team->hasMember($thisstaff))
+            || ($team && !$team->isMember($thisstaff))
         ))
     $warn.= sprintf('&nbsp;&nbsp;<span class="Icon assignedTicket">%s</span>',
             sprintf(__('Ticket is assigned to %s'),
@@ -49,10 +50,9 @@ if (!$errors['err']) {
 }
 
 $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
-
+                            
 if($ticket->isOverdue())
     $warn.='&nbsp;&nbsp;<span class="Icon overdueTicket">'.__('Marked overdue!').'</span>';
-
 ?>
 <div>
     <div class="sticky bar">
@@ -127,47 +127,16 @@ if($ticket->isOverdue())
 
             <?php
             // Assign
-
-            if ($ticket->checkStaffPerm($thisstaff)){
-
-            if ($ticket->isOpen() && $role->hasPerm(Ticket::PERM_ASSIGN)) {?>
-            <span class="action-button pull-right"
-                data-dropdown="#action-dropdown-assign"
-                data-placement="bottom"
-                data-toggle="tooltip"
-                title=" <?php echo $ticket->isAssigned() ? __('Assign') : __('Reassign'); ?>"
-                >
-                <i class="icon-caret-down pull-right"></i>
-                <a class="ticket-action" id="ticket-assign"
-                    data-redirect="tickets.php"
-                    href="#tickets/<?php echo $ticket->getId(); ?>/assign"><i class="icon-user"></i></a>
+            
+            if ($ticket->checkStaffPerm($thisstaff)){ 
+            if ($role->hasPerm(Ticket::PERM_ASSIGN)) {?>
+            <span class="action-button pull-right">
+            <a class="ticket-action" id="ticket-transfer" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Assign'); ?>"
+                data-redirect="tickets.php"
+                href="#tickets/<?php echo $ticket->getId(); ?>/assign/teams"><i class="icon-group"></i></a>
             </span>
-            <div id="action-dropdown-assign" class="action-dropdown anchor-right">
-              <ul>
-                <?php
-                // Agent can claim team assigned ticket
-                if (!$ticket->getStaff()
-                        && (!$dept->assignMembersOnly()
-                            || $dept->isMember($thisstaff))
-                        ) { ?>
-                 <li><a class="no-pjax ticket-action"
-                    data-redirect="tickets.php"
-                    href="#tickets/<?php echo $ticket->getId(); ?>/claim"><i
-                    class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
-                <?php
-                } ?>
-                 <li><a class="no-pjax ticket-action"
-                    data-redirect="tickets.php"
-                    href="#tickets/<?php echo $ticket->getId(); ?>/assign/agents"><i
-                    class="icon-user"></i> <?php echo __('Agent'); ?></a>
-                 <li><a class="no-pjax ticket-action"
-                    data-redirect="tickets.php"
-                    href="#tickets/<?php echo $ticket->getId(); ?>/assign/teams"><i
-                    class="icon-group"></i> <?php echo __('Team'); ?></a>
-              </ul>
-            </div>
             <?php
-            }} if ($role->hasPerm(Ticket::PERM_EDIT)){?>
+            } } if ($role->hasPerm(Ticket::PERM_EDIT)){?>
             <div id="action-dropdown-more" class="action-dropdown anchor-right">
               <ul>
                 <?php
@@ -258,6 +227,8 @@ if($ticket->isOverdue())
             <div class="permissions-error"><?php echo "This another Team's improvment (view only)."; ?></div>
              <?php
             }?>
+            
+<form action="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit" method="post" id="save"  enctype="multipart/form-data" >
 <table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
     <tr>
         <td width="50%">
@@ -311,97 +282,27 @@ if($ticket->isOverdue())
         <td width="50%" style="vertical-align:top">
             <table border="0" cellspacing="" cellpadding="4" width="100%">
                 <tr>
-                    <th width="180"><?php echo __('User'); ?>:</th>
-                    <td><a href="#tickets/<?php echo $ticket->getId(); ?>/user"
-                        onclick="javascript:
-                            $.userLookup('ajax.php/tickets/<?php echo $ticket->getId(); ?>/user',
-                                    function (user) {
-                                        $('#user-'+user.id+'-name').text(user.name);
-                                        $('#user-'+user.id+'-email').text(user.email);
-                                        $('#user-'+user.id+'-phone').text(user.phone);
-                                        $('select#emailreply option[value=1]').text(user.name+' <'+user.email+'>');
-                                    });
-                            return false;
-                            "><i class="icon-user"></i> <span id="user-<?php echo $ticket->getOwnerId(); ?>-name"
-                            ><?php echo Format::htmlchars($ticket->getName());
-                        ?></span></a>
-                        <?php
-                        if ($user) { ?>
-                            <a href="tickets.php?<?php echo Http::build_query(array(
-                                'status'=>'open', 'a'=>'search', 'uid'=> $user->getId()
-                            )); ?>" title="<?php echo __('Related Tickets'); ?>"
-                            data-dropdown="#action-dropdown-stats">
-                            (<b><?php echo $user->getNumTickets(); ?></b>)
-                            </a>
-                            <div id="action-dropdown-stats" class="action-dropdown anchor-right">
-                                <ul>
-                                    <?php
-                                    if(($open=$user->getNumOpenTickets()))
-                                        echo sprintf('<li><a href="tickets.php?a=search&status=open&uid=%s"><i class="icon-folder-open-alt icon-fixed-width"></i> %s</a></li>',
-                                                $user->getId(), sprintf(_N('%d Open Ticket', '%d Open Tickets', $open), $open));
-
-                                    if(($closed=$user->getNumClosedTickets()))
-                                        echo sprintf('<li><a href="tickets.php?a=search&status=closed&uid=%d"><i
-                                                class="icon-folder-close-alt icon-fixed-width"></i> %s</a></li>',
-                                                $user->getId(), sprintf(_N('%d Closed Ticket', '%d Closed Tickets', $closed), $closed));
-                                    ?>
-                                    <li><a href="tickets.php?a=search&uid=<?php echo $ticket->getOwnerId(); ?>"><i class="icon-double-angle-right icon-fixed-width"></i> <?php echo __('All Tickets'); ?></a></li>
-<?php   if ($thisstaff->hasPerm(User::PERM_DIRECTORY)) { ?>
-                                    <li><a href="users.php?id=<?php echo
-                                    $user->getId(); ?>"><i class="icon-user
-                                    icon-fixed-width"></i> <?php echo __('Manage User'); ?></a></li>
-<?php   } ?>
-                                </ul>
-                            </div>
-<?php                   } # end if ($user) ?>
-                    </td>
+                    <th width="180"><?php echo __('Submitter'); ?>:</th>
+                    
+                   <td> <select id="user_id" name="user_id"  class="requiredfield">
+                    
+                    <?php
+                    $associate = $ticket->GetOwnerId();
+                    
+                    if(($users=Staff::getAvailableStaffMembers())) {
+                        
+                        foreach ($users as $k => $v)
+                        echo sprintf('<option value="%s" %s>%s</option>',
+                                $k,
+                                ($associate == $k ) ? 'selected="selected"' : '',
+                                $v);
+                    
+                        }
+                     ?>
+                </select>&nbsp;<span class='error'><b>*</b>&nbsp;<?php echo $errors['submitter']; ?></span>
+                
+                </td>
                 </tr>
-                <tr>
-                    <th><?php echo __('Email'); ?>:</th>
-                    <td>
-                        <span id="user-<?php echo $ticket->getOwnerId(); ?>-email"><?php echo $ticket->getEmail(); ?></span>
-                    </td>
-                </tr>
-<?php   if ($user->getOrganization()) { ?>
-                <tr>
-                    <th><?php echo __('Organization'); ?>:</th>
-                    <td><i class="icon-building"></i>
-                    <?php echo Format::htmlchars($user->getOrganization()->getName()); ?>
-                        <a href="tickets.php?<?php echo Http::build_query(array(
-                            'status'=>'open', 'a'=>'search', 'orgid'=> $user->getOrgId()
-                        )); ?>" title="<?php echo __('Related Tickets'); ?>"
-                        data-dropdown="#action-dropdown-org-stats">
-                        (<b><?php echo $user->getNumOrganizationTickets(); ?></b>)
-                        </a>
-                            <div id="action-dropdown-org-stats" class="action-dropdown anchor-right">
-                                <ul>
-<?php   if ($open = $user->getNumOpenOrganizationTickets()) { ?>
-                                    <li><a href="tickets.php?<?php echo Http::build_query(array(
-                                        'a' => 'search', 'status' => 'open', 'orgid' => $user->getOrgId()
-                                    )); ?>"><i class="icon-folder-open-alt icon-fixed-width"></i>
-                                    <?php echo sprintf(_N('%d Open Ticket', '%d Open Tickets', $open), $open); ?>
-                                    </a></li>
-<?php   }
-        if ($closed = $user->getNumClosedOrganizationTickets()) { ?>
-                                    <li><a href="tickets.php?<?php echo Http::build_query(array(
-                                        'a' => 'search', 'status' => 'closed', 'orgid' => $user->getOrgId()
-                                    )); ?>"><i class="icon-folder-close-alt icon-fixed-width"></i>
-                                    <?php echo sprintf(_N('%d Closed Ticket', '%d Closed Tickets', $closed), $closed); ?>
-                                    </a></li>
-                                    <li><a href="tickets.php?<?php echo Http::build_query(array(
-                                        'a' => 'search', 'orgid' => $user->getOrgId()
-                                    )); ?>"><i class="icon-double-angle-right icon-fixed-width"></i> <?php echo __('All Tickets'); ?></a></li>
-<?php   }
-        if ($thisstaff->hasPerm(User::PERM_DIRECTORY)) { ?>
-                                    <li><a href="orgs.php?id=<?php echo $user->getOrgId(); ?>"><i
-                                        class="icon-building icon-fixed-width"></i> <?php
-                                        echo __('Manage Organization'); ?></a></li>
-<?php   } ?>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-<?php   } # end if (user->org) ?>
                <tr><td></td></tr>
 			                   <tr>
                     <th nowrap><?php echo __('Last Message');?>:</th>
@@ -422,7 +323,7 @@ if($ticket->isOverdue())
     </tr>
 </table>
 
-<form action="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit" method="post" id="save"  enctype="multipart/form-data" >
+
 				<?php csrf_token(); ?>
 				<input type="hidden" name="do" value="update">
 				<input type="hidden" name="a" value="edit">

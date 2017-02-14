@@ -4,8 +4,8 @@
 //      render the full page
 
 // For searches, some staff members may be able to see everything
-$view_all_tickets = $queue->ignoreVisibilityConstraints();
-
+//$view_all_tickets = true;
+//var_dump($view_all_tickets);
 // Impose visibility constraints
 // ------------------------------------------------------------
 
@@ -18,13 +18,13 @@ $view_all_tickets = $queue->ignoreVisibilityConstraints();
     // if ($teams = array_filter($thisstaff->getTeams()))
         // $assigned->add(array('team_id__in' => $teams));
 
-    // $visibility = Q::any(new Q(array('status__state'=>'open', $assigned)));
+     //$visibility = Q::any(new Q(array('dept_id__in' => $depts)));
 
     // // -- Routed to a department of mine
     // if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
-        // $visibility->add(array('dept_id__in' => $depts));
+        //$visibility->add(array('dept_id__in' => $depts));
 
-    // $tickets->filter($visibility);
+     //$tickets->filter($visibility);
 // }
 
 // Make sure the cdata materialized view is available
@@ -84,6 +84,7 @@ foreach ($columns as $C) {
         $sorted = true;
     }
 }
+
 if (!$sorted && isset($sort['queuesort'])) {
     // Apply queue sort-dropdown selected preference
     $sort['queuesort']->applySort($tickets, $sort['dir']);
@@ -94,7 +95,9 @@ if (isset($_REQUEST['query']) and  !isset($_REQUEST['p'])) $page = 1;
 If (!$page){
 $page = ($_GET['p'] && is_numeric($_GET['p']))?$_GET['p']:$_SESSION['pageno'];};
 $_SESSION['pageno'] = $page;
-$pageNav = new Pagenate(PHP_INT_MAX, $page, PAGE_LIMIT);
+//$pageNav = new Pagenate(PHP_INT_MAX, $page, PAGE_LIMIT);
+
+$pageNav = new Pagenate($count, $page, PAGE_LIMIT);
 $tickets = $pageNav->paginateSimple($tickets);
 $count = $tickets->total();
 $pageNav->setTotal($count);
@@ -257,6 +260,8 @@ foreach ($columns as $C) {
     </tr>
   </thead>
   <tbody>
+  
+  
 <?php
 
 foreach ($tickets as $T) {

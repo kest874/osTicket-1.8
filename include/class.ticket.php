@@ -12,7 +12,6 @@
 include_once(INCLUDE_DIR.'class.thread.php');
 include_once(INCLUDE_DIR.'class.staff.php');
 include_once(INCLUDE_DIR.'class.client.php');
-include_once(INCLUDE_DIR.'class.team.php');
 include_once(INCLUDE_DIR.'class.email.php');
 include_once(INCLUDE_DIR.'class.dept.php');
 include_once(INCLUDE_DIR.'class.topic.php');
@@ -40,7 +39,7 @@ implements RestrictedAccess, Threadable, Searchable {
             'sla', 'thread', 'user__default_email', 'status'),
         'joins' => array(
             'user' => array(
-                'constraint' => array('user_id' => 'User.id')
+                'constraint' => array('user_id' => 'Staff.staff_id')
             ),
             'status' => array(
                 'constraint' => array('status_id' => 'TicketStatus.id')
@@ -64,7 +63,7 @@ implements RestrictedAccess, Threadable, Searchable {
                 'reverse' => 'Task.ticket',
             ),
             'team' => array(
-                'constraint' => array('team_id' => 'Team.team_id'),
+                'constraint' => array('team_id' => 'Dept.id'),
                 'null' => true,
             ),
             'topic' => array(
@@ -96,7 +95,6 @@ implements RestrictedAccess, Threadable, Searchable {
     const PERM_REPLY    = 'ticket.reply';
     const PERM_CLOSE    = 'ticket.close';
     const PERM_DELETE   = 'ticket.delete';
-
     static protected $perms = array(
             self::PERM_CREATE => array(
                 'title' =>
@@ -147,7 +145,6 @@ implements RestrictedAccess, Threadable, Searchable {
             'Other' =>
             /* @trans */ 'Other',
             );
-
     var $lastMsgId;
     var $last_message;
     var $owner;     // TicketOwner
@@ -157,7 +154,6 @@ implements RestrictedAccess, Threadable, Searchable {
     var $active_collaborators;
     var $recipients;
     var $lastrespondent;
-
     function loadDynamicData($force=false) {
         if (!isset($this->_answers) || $force) {
             $this->_answers = array();
@@ -231,17 +227,18 @@ implements RestrictedAccess, Threadable, Searchable {
         return null !== $this->getLock();
     }
     function checkStaffPerm($staff, $perm=null) {
+        
         // Must be a valid staff
         if (!$staff instanceof Staff && !($staff=Staff::lookup($staff)))
-            return false;
+           return false;
         // Check access based on department or assignment
         if (($staff->showAssignedOnly()
             || !$staff->canAccessDept($this->getDeptId()))
             // only open tickets can be considered assigned
             && $this->isOpen()
             && $staff->getId() != $this->getStaffId()
-            && !$staff->isTeamMember($this->getTeamId())
-        ) {
+            )
+         {
             return false;
         }
         // At this point staff has view access unless a specific permission is
@@ -409,7 +406,6 @@ implements RestrictedAccess, Threadable, Searchable {
     }
     function getPriorityId() {
         global $cfg;
-
         if (($a = $this->getAnswer('priority'))
             && ($b = $a->getValue())
         ) {
@@ -661,47 +657,45 @@ implements RestrictedAccess, Threadable, Searchable {
         }
         return $this->recipients;
     }
-    function getAssignmentForm($source=null, $options=array()) {
-        $prompt = $assignee = '';
-        // Possible assignees
-        $assignees = array();
-        switch (strtolower($options['target'])) {
-            case 'agents':
-                $dept = $this->getDept();
-                foreach ($dept->getAssignees() as $member)
-                    $assignees['s'.$member->getId()] = $member;
-                if (!$source && $this->isOpen() && $this->staff)
-                    $assignee = sprintf('s%d', $this->staff->getId());
-                $prompt = __('Select an Agent');
-                break;
-            case 'teams':
-                if (($teams = Team::getActiveTeams()))
-                    foreach ($teams as $id => $name)
-                        $assignees['t'.$id] = $name;
-                if (!$source && $this->isOpen() && $this->team)
-                    $assignee = sprintf('t%d', $this->team->getId());
-                $prompt = __('Select a Team');
-                break;
-        }
-        // Default to current assignee if source is not set
+    // function getAssignmentForm($source=null, $options=array()) {
+        // $prompt = $assignee = '';
+        // // Possible assignees
+        // $assignees = array();
+        // switch (strtolower($options['target'])) {
+            // case 'agents':
+                // $dept = $this->getDept();
+                // foreach ($dept->getAssignees() as $member)
+                    // $assignees['s'.$member->getId()] = $member;
+                // if (!$source && $this->isOpen() && $this->staff)
+                    // $assignee = sprintf('s%d', $this->staff->getId());
+                // $prompt = __('Select an Agent');
+                // break;
+            // case 'teams':
+                // if (($teams = dept::getDepartments()))
+                    // foreach ($teams as $id => $name)
+                        // $assignees['t'.$id] = $name;
+                // if (!$source && $this->isOpen() && $this->team)
+                    // $assignee = sprintf('t%d', $this->team->getId());
+                // $prompt = __('Select a Team');
+                // break;
+        // }
+        // // Default to current assignee if source is not set
+        // if (!$source)
+            // $source = array('assignee' => array($assignee));
+        // $form = AssignmentForm::instantiate($source, $options);
+        // if ($assignees)
+            // $form->setAssignees($assignees);
+        // if ($prompt && ($f=$form->getField('assignee')))
+            // $f->configure('prompt', $prompt);
+        // return $form;
+    // }
+    
+    function getAssignmentForm($source=null) {
         if (!$source)
-            $source = array('assignee' => array($assignee));
-        $form = AssignmentForm::instantiate($source, $options);
-        if ($assignees)
-            $form->setAssignees($assignees);
-        if ($prompt && ($f=$form->getField('assignee')))
-            $f->configure('prompt', $prompt);
-        return $form;
+            $source = array('assignee' => array($this->getDeptId()));
+        return AssignmentForm::instantiate($source);
     }
-    function getClaimForm($source=null, $options=array()) {
-        global $thisstaff;
-        $id = sprintf('s%d', $thisstaff->getId());
-        if(!$source)
-            $source = array('assignee' => array($id));
-        $form = ClaimForm::instantiate($source, $options);
-        $form->setAssignees(array($id => $thisstaff->getName()));
-        return $form;
-    }
+    
     function getTransferForm($source=null) {
         if (!$source)
             $source = array('dept' => array($this->getDeptId()));
@@ -883,7 +877,7 @@ implements RestrictedAccess, Threadable, Searchable {
     function setTeamId($teamId) {
         if (!is_numeric($teamId))
             return false;
-        $this->team = Team::lookup($teamId);
+        $this->team = Dept::lookup($teamId);
         return $this->save();
     }
     //Status helper.
@@ -953,7 +947,7 @@ implements RestrictedAccess, Threadable, Searchable {
         $this->status = $status;
         if (!$this->save())
             return false;
-        // Log status change b4 reload â€” if currently has a status. (On new
+        // Log status change b4 reload — if currently has a status. (On new
         // ticket, the ticket is opened and thereafter the status is set to
         // the requested status).
         if ($hadStatus) {
@@ -1152,6 +1146,7 @@ implements RestrictedAccess, Threadable, Searchable {
      */
     function  notifyCollaborators($entry, $vars = array()) {  
         global $cfg;
+        
         if (!$entry instanceof ThreadEntry
             || !($recipients=$this->getRecipients($vars['role']))
             || !($dept=$this->getDept())
@@ -1168,7 +1163,7 @@ implements RestrictedAccess, Threadable, Searchable {
 	
             // Skip the person who sent in the message
             $skip[$entry->getUserId()] = 1;
-			$skip[Staff::getStaffUserId($this->getStaffId())] = 1;
+			$skip[$this->getStaffId()] = 1;
             // Skip all the other recipients of the message
             foreach ($entry->getAllEmailRecipients() as $R) {
                 foreach ($recipients as $R2) {
@@ -1219,7 +1214,6 @@ implements RestrictedAccess, Threadable, Searchable {
                 $options);
         }
     }
-
     function onMessage($message, $autorespond=true, $reopen=true) {
         global $cfg;
         $this->isanswered = 0;
@@ -1253,7 +1247,7 @@ implements RestrictedAccess, Threadable, Searchable {
         // Figure out the user
         if ($this->getOwnerId() == $message->getUserId())
             $user = new TicketOwner(
-                    User::lookup($message->getUserId()), $this);
+                    staff::lookup($message->getUserId()), $this);
         else
             $user = Collaborator::lookup(array(
                     'user_id' => $message->getUserId(),
@@ -1399,12 +1393,12 @@ implements RestrictedAccess, Threadable, Searchable {
         if ($assignee instanceof Staff) {
             if ($cfg->alertStaffONAssignment())
                 $recipients[] = $assignee;
-        } elseif (($assignee instanceof Team) && $assignee->alertsEnabled()) {
-            if ($cfg->alertTeamMembersONAssignment() && ($members=$assignee->getMembers()))
-                $recipients = array_merge($recipients, $members);
-            elseif ($cfg->alertTeamLeadONAssignment() && ($lead=$assignee->getTeamLead()))
-                $recipients[] = $lead;
-        }
+        } //elseif (($assignee instanceof Team) && $assignee->alertsEnabled()) {
+ //           if ($cfg->alertTeamMembersONAssignment() && ($members=$assignee->getMembers()))
+ //               $recipients = array_merge($recipients, $members);
+ //           elseif ($cfg->alertTeamLeadONAssignment() && ($lead=$assignee->getTeamLead()))
+ //               $recipients[] = $lead;
+ //       }
         // Get the message template
         if ($recipients
             && ($msg=$tpl->getAssignedAlertMsgTemplate())
@@ -1592,7 +1586,6 @@ implements RestrictedAccess, Threadable, Searchable {
         $extra = VariableReplacer::compileFormScope(TicketForm::getInstance());
         return $base + $extra;
     }
-
     // Searchable interface
     static function getSearchableFields() {
         $base = array(
@@ -1625,6 +1618,7 @@ implements RestrictedAccess, Threadable, Searchable {
             'staff_id' => new AgentSelectionField(array(
                 'label' => __('Assigned Staff'),
             )),
+
             'team_id' => new TeamSelectionField(array(
                 'label' => __('Assigned Team'),
             )),
@@ -1636,6 +1630,9 @@ implements RestrictedAccess, Threadable, Searchable {
             )),
             'source' => new TicketSourceChoiceField(array(
                 'label' => __('Ticket Source'),
+            )),
+            'user_id' => new AgentSelectionField (array(
+                'label' => __('Ticket Submitter'),
             )),
             'isoverdue' => new BooleanField(array(
                 'label' => __('Overdue'),
@@ -1660,11 +1657,9 @@ implements RestrictedAccess, Threadable, Searchable {
         }
         return $base;
     }
-
     static function supportsCustomData() {
         return true;
     }
-
     //Replace base variables.
     function replaceVars($input, $vars = array()) {
         global $ost;
@@ -1838,7 +1833,7 @@ implements RestrictedAccess, Threadable, Searchable {
         return true;
     }
     function assignToTeam($team, $note, $alert=true) {
-        if(!is_object($team) && !($team = Team::lookup($team)))
+        if(!is_object($team) && !($team = dept::lookup($team)))
             return false;
         if (!$team->isActive() || !$this->setTeamId($team->getId()))
             return false;
@@ -1853,7 +1848,9 @@ implements RestrictedAccess, Threadable, Searchable {
     function assign(AssignmentForm $form, &$errors, $alert=true) {
         global $thisstaff;
         $evd = array();
-        $assignee = $form->getAssignee();
+        $assignee = $form->getDept();
+        var_dump($assignee);
+        
         if ($assignee instanceof Staff) {
             $dept = $this->getDept();
             if ($this->getStaffId() == $assignee->getId()) {
@@ -1874,8 +1871,8 @@ implements RestrictedAccess, Threadable, Searchable {
                     $evd['staff'] = array($assignee->getId(), (string) $assignee->getName()->getOriginal());
                 }
             }
-        } elseif ($assignee instanceof Team) {
-            if ($this->getTeamId() == $assignee->getId()) {
+        } elseif ($assignee instanceof Dept) {
+            if ($this->getDeptId() == $assignee->getId()) {
                 $errors['assignee'] = sprintf(__('%s already assigned to %s'),
                         __('Ticket'),
                         __('the team')
@@ -1890,7 +1887,7 @@ implements RestrictedAccess, Threadable, Searchable {
         if ($errors || !$this->save(true))
             return false;
 		$this->logEvent('assigned', $evd);
-        $this->onAssign($assignee, $form->getComments(), $alert);
+        $this->onAssign($assignee, $form->getField('comments')->getClean(), $alert);
         return true;
     }
     // Unassign primary assignee
@@ -1941,7 +1938,6 @@ implements RestrictedAccess, Threadable, Searchable {
    
     function topic(TopicForm $form, &$errors, $alert=true) {
         global $thisstaff, $cfg;
-
         $ctopic = $this->getTopic(); // Current department
         $ptopic = $this->getTopicId(); // Current department Id
         $topic = $form->getTopic(); // Target Topic
@@ -1956,7 +1952,6 @@ implements RestrictedAccess, Threadable, Searchable {
                     __('Help Topic'),
                    $ctopic->getName(),
                    Topic::getLocalNameById($topic));
-
             $_errors = array();
             $note = $this->postNote(
                     array('note' => $comments, 'title' => $title),
@@ -2007,7 +2002,7 @@ implements RestrictedAccess, Threadable, Searchable {
                     continue;
                 if (($user=User::fromVars($recipient)))
                     if ($c=$this->addCollaborator($user, $info, $errors, false))
-                        // FIXME: This feels very unwise â€” should be a
+                        // FIXME: This feels very unwise — should be a
                         // string indexed array for future
                         $collabs[$c->user_id] = array(
                             'name' => $c->getName()->getOriginal(),
@@ -2028,9 +2023,7 @@ implements RestrictedAccess, Threadable, Searchable {
             $autorespond = $reopen= false;
         elseif ($autorespond && isset($vars['autorespond']))
             $autorespond = $vars['autorespond'];
-
         $this->onMessage($message, ($autorespond && $alerts), $reopen); //must be called b4 sending alerts to staff.
-
         if ($autorespond && $alerts && $cfg && $cfg->notifyCollabsONNewMessage())
             $this->notifyCollaborators($message, array('signature' => ''));
         if (!($alerts && $autorespond))
@@ -2092,7 +2085,6 @@ implements RestrictedAccess, Threadable, Searchable {
                 $sentlist[] = $staff->getEmail();
             }
         }
-
         return $message;
     }
     function postCannedReply($canned, $message, $alert=true) {
@@ -2228,6 +2220,7 @@ implements RestrictedAccess, Threadable, Searchable {
         );
 		
         $user = $this->getOwner();
+      
 		$currentstatus = ticket::getStatusId();
 		// Use a different template for closed tickets. todo: create closed template.
 		if ($currentstatus == 3){
@@ -2257,15 +2250,17 @@ implements RestrictedAccess, Threadable, Searchable {
 					$options);
 			}
 		}
+       
 	    if ($vars['emailcollab']) {
             $this->notifyCollaborators($response,
                 array(
                     'signature' => $signature,
                     'from_name' => $from_name,
-					'userId' => Staff::getStaffUserId($vars['staffId']),
+					'userId' => $vars['staffId'],
 					'poster' => $vars['poster'])
             );
         }
+        
         return $response;
     }
     //Activity log - saved as internal notes WHEN enabled!!
@@ -2332,20 +2327,17 @@ implements RestrictedAccess, Threadable, Searchable {
             'threadentry' => $note,
             'assignee' => $assignee
         ), $alert);
-	
-		if (!$vars['userId'])
-			$vars['userId'] = Staff::getStaffUserId($vars['staffId']);
-		
+
 		 $this->notifyCollaborators($note,
                 array(
                     'signature' => $signature,
-                    'from_name' => $from_name,
+                    'from_name' => $from_name, 
 					'role' => 'N',
-					'userId' => $vars['userId'],
+					'userId' => $vars['staffId'],
 					'poster' => $vars['poster'],
 					)
             );
-        return $note;
+        return $note; 
     }
     // Threadable interface
     function postThreadEntry($type, $vars, $options=array()) {
@@ -2425,7 +2417,7 @@ implements RestrictedAccess, Threadable, Searchable {
         $fields['duedate']  = array('type'=>'date',     'required'=>0, 'error'=>__('Invalid date format - must be MM/DD/YY'));
         $fields['user_id']  = array('type'=>'int',      'required'=>0, 'error'=>__('Invalid user-id'));
         if (!Validator::process($fields, $vars, $errors) && !$errors['err'])
-            $errors['err'] = sprintf('%s â€” %s',
+            $errors['err'] = sprintf('%s — %s',
                 __('Missing or invalid data'),
                 __('Correct any errors below and try again'));
         $vars['note'] = ThreadEntryBody::clean($vars['note']);
@@ -2485,9 +2477,7 @@ implements RestrictedAccess, Threadable, Searchable {
         }
         if (!$this->save())
             return false;
-
         $vars['note'] = ThreadEntryBody::clean($vars['note']);
-
         if ($vars['note'])
             $this->logNote(_S('Ticket Updated'), $vars['note'], $thisstaff);
         // Update dynamic meta-data
@@ -2549,7 +2539,6 @@ implements RestrictedAccess, Threadable, Searchable {
         $num = static::objects()
             ->filter(array('number' => $number))
 	    ->count();
-
 	return ($num === 0);
     }
     /* Quick staff's tickets stats */
@@ -2563,8 +2552,6 @@ implements RestrictedAccess, Threadable, Searchable {
             'staff_id' => $staff->getId(),
         ));
         // -- Open and assigned to a team of mine
-        if ($teams = array_filter($staff->getTeams()))
-            $assigned->add(array('team_id__in' => $teams));
         $visibility = Q::any(new Q(array('status__state'=>'open', $assigned)));
         // -- Routed to a department of mine
         if (!$staff->showAssignedOnly() && ($depts = $staff->getDepts()))
@@ -2573,14 +2560,14 @@ implements RestrictedAccess, Threadable, Searchable {
             ->filter(Q::any($visibility))
             ->filter(array('status__state' => 'open'))
             ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')))
-            ->values('status__state', 'isanswered', 'isoverdue','staff_id', 'team_id');
+            ->values('status__state', 'isanswered', 'isoverdue','staff_id', 'dept_id');
         $stats = array();
         $hideassigned = ($cfg && !$cfg->showAssignedTickets()) && !$staff->showAssignedTickets();
         $showanswered = $cfg->showAnsweredTickets();
         $id = $staff->getId();
         foreach ($blocks as $S) {
             if ($showanswered || !$S['isanswered']) {
-                if (!($hideassigned && ($S['staff_id'] || $S['team_id'])))
+                if (!($hideassigned && ($S['staff_id'] || $S['dept_id'])))
                     $stats['open'] += $S['count'];
             }
             else {
@@ -2590,11 +2577,11 @@ implements RestrictedAccess, Threadable, Searchable {
                 $stats['overdue'] += $S['count'];
             if ($S['staff_id'] == $id)
                 $stats['assigned'] += $S['count'];
-            elseif ($S['team_id']
-                    && $S['staff_id'] == 0
-                    && $teams
-                    && in_array($S['team_id'], $teams))
-                // Assigned to my team but uassigned to an agent
+ //           elseif ($S['team_id']
+ //                   && $S['staff_id'] == 0
+ //                   && $teams
+ //                   && in_array($S['team_id'], $teams))
+ //               // Assigned to my team but uassigned to an agent
                 $stats['assigned'] += $S['count'];
         }
         return $stats;
@@ -2682,6 +2669,7 @@ implements RestrictedAccess, Threadable, Searchable {
     static function create($vars, &$errors, $origin, $autorespond=true,
             $alertstaff=true) {
         global $ost, $cfg, $thisclient, $thisstaff;
+        
         // Don't enforce form validation for email
         $field_filter = function($type) use ($origin) {
             return function($f) use ($origin, $type) {
@@ -2693,7 +2681,7 @@ implements RestrictedAccess, Threadable, Searchable {
                     return false;
                 case 'staff':
                     // Required 'Contact Information' fields aren't required
-                    // when staff open tickets
+                    // when staff open tickets 
                     return $f->isVisibleToStaff();
                 case 'web':
                     return $f->isVisibleToUsers();
@@ -2722,8 +2710,9 @@ implements RestrictedAccess, Threadable, Searchable {
                     $field->value = $field->parse($vars[$fname]);
             }
         }
+
         if ($vars['uid'])
-            $user = User::lookup($vars['uid']);
+            $user = Staff::lookup($vars['uid']);
         $id=0;
         $fields=array();
         switch (strtolower($origin)) {
@@ -2746,7 +2735,7 @@ implements RestrictedAccess, Threadable, Searchable {
                 $errors['err']=$errors['origin'] = __('Invalid ticket origin given');
         }
         if(!Validator::process($fields, $vars, $errors) && !$errors['err'])
-            $errors['err'] = sprintf('%s â€” %s',
+            $errors['err'] = sprintf('%s — %s',
                 __('Missing or invalid data'),
                 __('Correct any errors below and try again'));
         // Make sure the due date is valid
@@ -2758,6 +2747,9 @@ implements RestrictedAccess, Threadable, Searchable {
             elseif (Misc::user2gmtime($vars['duedate'].' '.$vars['time']) <= Misc::user2gmtime())
                 $errors['duedate']=__('Due date must be in the future');
         }
+        if ($vars['assignId'] == '0')
+                $errors['assignId']=__('Select a team from the list');
+        
         $topic_forms = array();
         if (!$errors) {
             // Handle the forms associate with the help topics. Instanciate the
@@ -2770,7 +2762,7 @@ implements RestrictedAccess, Threadable, Searchable {
                             if (!$field->isEnabled() && $field->hasFlag(DynamicFormField::FLAG_ENABLED))
                                 $disabled[] = $field->get('id');
                         }
-                        // Special handling for the ticket form â€” disable fields
+                        // Special handling for the ticket form — disable fields
                         // requested to be disabled as per the help topic.
                         if ($__F->get('type') == 'T') {
                             foreach ($form->getFields() as $field) {
@@ -2792,57 +2784,57 @@ implements RestrictedAccess, Threadable, Searchable {
                     }
                 }
             }
-            try {
-                $vars = self::filterTicketData($origin, $vars,
-                    array_merge(array($form), $topic_forms), $user);
-            }
-            catch (RejectedException $ex) {
-                return $reject_ticket(
-                    sprintf(_S('Ticket rejected (%s) by filter "%s"'),
-                    $ex->vars['email'], $ex->getRejectingFilter()->getName())
-                );
-            }
+ //           try {
+ //               $vars = self::filterTicketData($origin, $vars,
+ //                   array_merge(array($form), $topic_forms), $user);
+ //           }
+ //           catch (RejectedException $ex) {
+ //               return $reject_ticket(
+ //                   sprintf(_S('Ticket rejected (%s) by filter "%s"'),
+ //                   $ex->vars['email'], $ex->getRejectingFilter()->getName())
+ //               );
+ //           }
             //Make sure the open ticket limit hasn't been reached. (LOOP CONTROL)
-            if ($cfg->getMaxOpenTickets() > 0
-                    && strcasecmp($origin, 'staff')
-                    && ($_user=TicketUser::lookupByEmail($vars['email']))
-                    && ($openTickets=$_user->getNumOpenTickets())
-                    && ($openTickets>=$cfg->getMaxOpenTickets()) ) {
-                $errors = array('err' => __("You've reached the maximum open tickets allowed."));
-                $ost->logWarning(sprintf(_S('Ticket denied - %s'), $vars['email']),
-                        sprintf(_S('Max open tickets (%1$d) reached for %2$s'),
-                            $cfg->getMaxOpenTickets(), $vars['email']),
-                        false);
-                return 0;
-            }
+//            if ($cfg->getMaxOpenTickets() > 0
+//                    && strcasecmp($origin, 'staff')
+//                    && ($_user=TicketUser::lookupByEmail($vars['email']))
+//                    && ($openTickets=$_user->getNumOpenTickets())
+//                    && ($openTickets>=$cfg->getMaxOpenTickets()) ) {
+//                $errors = array('err' => __("You've reached the maximum open tickets allowed."));
+//                $ost->logWarning(sprintf(_S('Ticket denied - %s'), $vars['email']),
+//                        sprintf(_S('Max open tickets (%1$d) reached for %2$s'),
+//                            $cfg->getMaxOpenTickets(), $vars['email']),
+//                        false);
+//                return 0;
+//            }
             // Allow vars to be changed in ticket filter and applied to the user
             // account created or detected
-            if (!$user && $vars['email'])
-                $user = User::lookupByEmail($vars['email']);
-            if (!$user) {
-                // Reject emails if not from registered clients (if
-                // configured)
-                if (strcasecmp($origin, 'email') === 0
-                        && !$cfg->acceptUnregisteredEmail()) {
-                    list($mailbox, $domain) = explode('@', $vars['email'], 2);
-                    // Users not yet created but linked to an organization
-                    // are still acceptable
-                    if (!Organization::forDomain($domain)) {
-                        return $reject_ticket(
-                            sprintf(_S('Ticket rejected (%s) (unregistered client)'),
-                                $vars['email']));
-                    }
-                }
-                $user_form = UserForm::getUserForm()->getForm($vars);
-                $can_create = !$thisstaff || $thisstaff->hasPerm(User::PERM_CREATE);
-                if (!$user_form->isValid($field_filter('user'))
-                    || !($user=User::fromVars($user_form->getClean(), $can_create))
-                ) {
-                    $errors['user'] = $can_create
-                        ? __('Incomplete client information')
-                        : __('You do not have permission to create users.');
-                }
-            }
+//            if (!$user && $vars['email'])
+//                $user = User::lookupByEmail($vars['email']);
+//            if (!$user) {
+//                // Reject emails if not from registered clients (if
+//                // configured)
+//                if (strcasecmp($origin, 'email') === 0
+//                        && !$cfg->acceptUnregisteredEmail()) {
+//                    list($mailbox, $domain) = explode('@', $vars['email'], 2);
+//                    // Users not yet created but linked to an organization
+//                    // are still acceptable
+//                    if (!Organization::forDomain($domain)) {
+//                        return $reject_ticket(
+//                            sprintf(_S('Ticket rejected (%s) (unregistered client)'),
+//                                $vars['email']));
+//                    }
+//               }
+//                $user_form = UserForm::getUserForm()->getForm($vars);
+//               $can_create = !$thisstaff || $thisstaff->hasPerm(User::PERM_CREATE);
+//               if (!$user_form->isValid($field_filter('user'))
+//                   || !($user=User::fromVars($user_form->getClean(), $can_create))
+//               ) {
+//                    $errors['user'] = $can_create
+//                       ? __('Incomplete client information')
+//                       : __('You do not have permission to create users.');
+//               }
+//           }
         }
         if (!$form->isValid($field_filter('ticket')))
             $errors += $form->errors();
@@ -2877,7 +2869,8 @@ implements RestrictedAccess, Threadable, Searchable {
         // members can always add more forms now
         // OK...just do it.
         $statusId = $vars['statusId'];
-        $deptId = $vars['deptId']; //pre-selected Dept if any.
+        $deptId = $vars['deptId']; 
+        
         $source = ucfirst($vars['source']);
         // Apply email settings for emailed tickets. Email settings should
         // trump help topic settins if the email has an associated help
@@ -2922,29 +2915,27 @@ implements RestrictedAccess, Threadable, Searchable {
                 $vars['slaId'] = $topic->getSLAId();
         }
         // Auto assignment to organization account manager
-        if (($org = $user->getOrganization())
-                && $org->autoAssignAccountManager()
-                && ($code = $org->getAccountManagerId())) {
-            if (!isset($vars['staffId']) && $code[0] == 's')
-                $vars['staffId'] = substr($code, 1);
-            elseif (!isset($vars['teamId']) && $code[0] == 't')
-                $vars['teamId'] = substr($code, 1);
-        }
-
+        // if (($org = $user->getOrganization())
+                // && $org->autoAssignAccountManager()
+                // && ($code = $org->getAccountManagerId())) {
+            // if (!isset($vars['staffId']) && $code[0] == 's')
+                // $vars['staffId'] = substr($code, 1);
+            // elseif (!isset($vars['teamId']) && $code[0] == 't')
+                // $vars['teamId'] = substr($code, 1);
+        // }
         // Auto assignment to organization department
-        if (($org = $user->getOrganization())
-                && $org->autoAssignDepartment()
-                && ($code = $org->getDepartmentId())) {
-				$deptId = substr($code, 0);
-        }
-
+ //       if (($org = $user->getOrganization())
+ //               && $org->autoAssignDepartment()
+ //               && ($code = $org->getDepartmentId())) {
+//				$deptId = substr($code, 0);
+//        }
         // Last minute checks
+       
         $priority = $form->getAnswer('priority');
         if (!$priority || !$priority->getIdValue())
             $form->setAnswer('priority', null, $cfg->getDefaultPriorityId());
         $deptId = $deptId ?: $deptId = $deptId ?: $deptId = $thisstaff->getDeptById($thisstaff->getId());
-
-        ;
+                ;
         $statusId = $statusId ?: $cfg->getDefaultTicketStatusId();
         $topicId = isset($topic) ? $topic->getId() : 0;
         $ipaddress = $vars['ip'] ?: $_SERVER['REMOTE_ADDR'];
@@ -2957,7 +2948,7 @@ implements RestrictedAccess, Threadable, Searchable {
             'number' => $number,
             'user' => $user,
             'dept_id' => $deptId,
-            'team_id' => $teamId,
+            'team_id' => substr($vars['assignId'], 1),
             'topic_id' => $topicId,
             'ip_address' => $ipaddress,
             'source' => $source,
@@ -2978,7 +2969,6 @@ implements RestrictedAccess, Threadable, Searchable {
         $subject = $form->getAnswer('subject');
         if ($subject && !$subject->getValue() && $topic)
             $subject->setValue($topic->getFullName());
-
         $form->setTicketId($ticket->getId());
         $form->save();
         // Save the form data from the help-topic form, if any
@@ -3031,24 +3021,26 @@ implements RestrictedAccess, Threadable, Searchable {
         // Only do assignment if the ticket is in an open state
         if ($ticket->isOpen()) {
             // Assign ticket to staff or team (new ticket by staff)
-            if ($vars['assignId']) {
-                $asnform = $ticket->getAssignmentForm(array(
-                            'assignee' => $vars['assignId'],
-                            'comments' => $vars['note'])
-                        );
-                $e = array();
-                $ticket->assign($asnform, $e);
-            }
-            else {
+            // if ($vars['assignId']) {
+                // $asnform = $ticket->getAssignmentForm(array(
+                            // 'assignee' => $vars['assignId'],
+                            // 'comments' => $vars['note'])
+                        // );
+                // $e = array();
+                // $ticket->assign($asnform, $e);
+            // }
+            // else {
                 // Auto assign staff or team - auto assignment based on filter
                 // rules. Both team and staff can be assigned
                 if ($vars['staffId'])
                      $ticket->assignToStaff($vars['staffId'], false);
-                if ($vars['teamId'])
+                if ($vars['assignId'])
                     // No team alert if also assigned to an individual agent
-                    $ticket->assignToTeam($vars['teamId'], false, !$vars['staffId']);
-            }
+                    $ticket->assignToTeam($vars['assignId'], false, !$vars['staffId']);
+            //}
         }
+        
+        $ticket->assignToTeam($vars['assignId'], false, !$vars['staffId']);
         // Update the estimated due date in the database
         $ticket->updateEstDueDate();
         /**********   double check auto-response  ************/
@@ -3227,16 +3219,13 @@ implements RestrictedAccess, Threadable, Searchable {
             return;
         require STAFFINC_DIR.'templates/tickets-actions.tmpl.php';
     }
-
     static function getLink($id) {
         global $thisstaff;
-
         switch (true) {
         case ($thisstaff instanceof Staff):
             return ROOT_PATH . sprintf('scp/tickets.php?id=%s', $id);
         }
     }
-
 	// Close tickets based on Ticket Auto-Close from config
    function AutoClose() {
 	global $cfg;
@@ -3263,17 +3252,14 @@ implements RestrictedAccess, Threadable, Searchable {
     static function getPermissions() {
         return self::$perms;
     }
-
     static function getSources() {
         static $translated = false;
         if (!$translated) {
             foreach (static::$sources as $k=>$v)
                 static::$sources[$k] = __($v);
         }
-
         return static::$sources;
     }
-
     static function registerCustomData(DynamicForm $form) {
         if (!isset(static::$meta['joins']['cdata+'.$form->id])) {
             $cdata_class = <<<EOF
@@ -3319,7 +3305,6 @@ EOF;
     }
 }
 RolePermission::register(/* @trans */ 'Tickets', Ticket::getPermissions(), true);
-
 class TicketCData extends VerySimpleModel {
     static $meta = array(
         'pk' => array('ticket_id'),
