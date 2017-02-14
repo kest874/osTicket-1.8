@@ -310,7 +310,7 @@ class TicketsAjaxAPI extends AjaxController {
         $info = array(
                 ':title' => sprintf(__('Ticket #%s: %s'),
                     $ticket->getNumber(),
-                    __('Transfer')),
+                    __('Transfer Ownership')),
                 ':action' => sprintf('#tickets/%d/transfer',
                     $ticket->getId())
                 );

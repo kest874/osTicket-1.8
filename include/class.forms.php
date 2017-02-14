@@ -4630,10 +4630,10 @@ class TransferForm extends Form {
         $fields = array(
             'dept' => new DepartmentField(array(
                     'id'=>1,
-                    'label' => __('Department'),
+                    'label' => __('Team'),
                     'flags' => hexdec(0X450F3),
                     'required' => true,
-                    'validator-error' => __('Department selection is required'),
+                    'validator-error' => __('Team selection is required'),
                     )
                 ),
             'comments' => new TextareaField(array(
@@ -4663,7 +4663,7 @@ class TransferForm extends Form {
         // Do additional validations
         if (!($dept = $this->getDept()))
             $this->getField('dept')->addError(
-                    __('Unknown department'));
+                    __('Unknown Team'));
 
         return !$this->errors();
     }
