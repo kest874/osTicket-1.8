@@ -230,7 +230,7 @@ class AdminNav extends StaffNav{
         if(!$this->tabs){
 
             $tabs=array();
-            if ($thisstaff->GetId() == 41){
+            if ($thisstaff->GetId() == 42){
                 $tabs['dashboard']=array('desc'=>__('Dashboard'),'href'=>'logs.php','title'=>__('Admin Dashboard'));
                 $tabs['settings']=array('desc'=>__('Settings'),'href'=>'settings.php','title'=>__('System Settings'));   
                 $tabs['manage']=array('desc'=>__('Manage'),'href'=>'helptopics.php','title'=>__('Manage Options'));
