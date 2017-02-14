@@ -532,13 +532,15 @@ implements TemplateVariable, Searchable {
             // XXX: This will upset the static $depts array
             $depts = array();
             $query = self::objects();
+            
+            var_dump($criteria);
             if (isset($criteria['publiconly']))
                 $query->filter(array(
                             'ispublic' => ($criteria['publiconly'] ? 1 : 0)));
             
             if (isset($criteria['privateonly']))
                 $query->filter(array(
-                            'ispublic' => ($criteria['privateonly'] ? 1 : 0)));
+                            'ispublic' => ($criteria['privateonly'] ? 0 : 1)));
               
             if ($manager=$criteria['manager'])
                 $query->filter(array(
@@ -551,6 +553,7 @@ implements TemplateVariable, Searchable {
                     'user_count__gt' => 0
                 ));
             }
+                            
             
             $query->order_by('name')
                 ->values('id', 'pid', 'name', 'parent');
