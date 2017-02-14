@@ -46,7 +46,7 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
             <h2><?php echo __('Departments');?></h2>
         </div>
         <div class="pull-right flush-right">
-            <a href="departments.php?a=add" class="green button action-button"><i class="icon-plus-sign"></i> <?php echo __('Add New Department');?></a>
+            <a href="departments.php?a=add" class="green button action-button"><i class="icon-plus-sign"></i> <?php echo __('Add New Team');?></a>
             <span class="action-button" data-dropdown="#action-dropdown-more">
                 <i class="icon-caret-down pull-right"></i>
                 <span ><i class="icon-cog"></i> <?php echo __('More');?></span>
