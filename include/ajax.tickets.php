@@ -529,8 +529,8 @@ class TicketsAjaxAPI extends AjaxController {
                 case 'teams':
                     $assignees = array();
                     $prompt = __('Select a Team');
-                    foreach (Team::getActiveTeams() as $id => $name)
-                        $assignees['t'.$id] = $name;
+                    foreach (dept::getDepartments() as $id => $name)
+                        $assignees[$id] = $name;
                     if (!$assignees)
                         $info['warn'] =  __('No teams available for assignment');
                     break;

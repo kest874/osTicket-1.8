@@ -40,27 +40,12 @@ if ($agent->hasPerm(Ticket::PERM_EDIT, false)) {?>
 <?php
 // Mass Claim/Assignment
 if ($agent->hasPerm(Ticket::PERM_ASSIGN, false)) {?>
-<span
-    class="action-button" data-placement="bottom"
-    data-dropdown="#action-dropdown-assign" data-toggle="tooltip" title=" <?php
-    echo __('Assign'); ?>">
-    <i class="icon-caret-down pull-right"></i>
-    <a class="tickets-action" id="tickets-assign"
-        href="#tickets/mass/assign"><i class="icon-user"></i></a>
+<span class="red button action-button">
+ <a class="tickets-action" id="tickets-helptopic" data-placement="bottom"
+    data-toggle="tooltip" title="<?php echo __('Assign to Team'); ?>"
+   href="#tickets/mass/assign/teams"><i class="icon-group"></i></a>
 </span>
-<div id="action-dropdown-assign" class="action-dropdown anchor-right">
-  <ul>
-     <li><a class="no-pjax tickets-action"
-        href="#tickets/mass/claim"><i
-        class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
-     <li><a class="no-pjax tickets-action"
-        href="#tickets/mass/assign/agents"><i
-        class="icon-user"></i> <?php echo __('Agent'); ?></a>
-     <li><a class="no-pjax tickets-action"
-        href="#tickets/mass/assign/teams"><i
-        class="icon-group"></i> <?php echo __('Team'); ?></a>
-  </ul>
-</div>
+
 <?php
 }
 // Mass Transfer

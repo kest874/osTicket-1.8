@@ -4611,6 +4611,12 @@ class AssignmentForm extends Form {
 
         return $this->_dept;
     }
+    
+    
+    function setAssignees($assignees) {
+        $this->_assignees = $assignees;
+        $this->_fields = array();
+    }
 }
 
 class TransferForm extends Form {
