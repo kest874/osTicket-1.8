@@ -128,17 +128,15 @@ class StaffNav {
         if(!$this->tabs) {
             $this->tabs = array();
             $this->tabs['dashboard'] = array(
-                'desc'=>__('Dashboard'),'href'=>'dashboard.php','title'=>__('Agent Dashboard'), "class"=>"no-pjax"
+                'desc'=>__('Dashboard'),'href'=>'directory.php','title'=>__('Agent Dashboard'), "class"=>"no-pjax"
             );
-            if ($thisstaff->hasPerm(User::PERM_DIRECTORY)) {
-                $this->tabs['users'] = array(
-                    'desc' => __('Users'), 'href' => 'users.php', 'title' => __('User Directory')
-                );
-            }
+            
             $this->tabs['tasks'] = array('desc'=>__('Tasks'), 'href'=>'tasks.php', 'title'=>__('Task Queue'));
             $this->tabs['tickets'] = array('desc'=>__('Tickets'),'href'=>'tickets.php','title'=>__('Ticket Queue'));
 
             $this->tabs['kbase'] = array('desc'=>__('Knowledgebase'),'href'=>'kb.php','title'=>__('Knowledgebase'));
+            $this->tabs['reports'] = array('desc'=>__('Reports'),'href'=>'reports.php','title'=>__('Reports'));
+
             if (count($this->getRegisteredApps()))
                 $this->tabs['apps']=array('desc'=>__('Applications'),'href'=>'apps.php','title'=>__('Applications'));
         }
@@ -176,7 +174,7 @@ class StaffNav {
                     }
                     break;
                 case 'dashboard':
-                    $subnav[]=array('desc'=>__('Dashboard'),'href'=>'dashboard.php','iconclass'=>'logs');
+                    //$subnav[]=array('desc'=>__('Dashboard'),'href'=>'dashboard.php','iconclass'=>'logs');
                     $subnav[]=array('desc'=>__('Agent Directory'),'href'=>'directory.php','iconclass'=>'teams');
                     $subnav[]=array('desc'=>__('My Profile'),'href'=>'profile.php','iconclass'=>'users');
                     break;
@@ -227,15 +225,18 @@ class AdminNav extends StaffNav{
     }
 
     function getTabs(){
-
+    global $thisstaff;
+   
         if(!$this->tabs){
 
             $tabs=array();
-            $tabs['dashboard']=array('desc'=>__('Dashboard'),'href'=>'logs.php','title'=>__('Admin Dashboard'));
-            $tabs['settings']=array('desc'=>__('Settings'),'href'=>'settings.php','title'=>__('System Settings'));
-            $tabs['manage']=array('desc'=>__('Manage'),'href'=>'helptopics.php','title'=>__('Manage Options'));
-            $tabs['emails']=array('desc'=>__('Emails'),'href'=>'emails.php','title'=>__('Email Settings'));
-            $tabs['staff']=array('desc'=>__('Agents'),'href'=>'staff.php','title'=>__('Manage Agents'));
+            if ($thisstaff->GetId() == 41){
+                $tabs['dashboard']=array('desc'=>__('Dashboard'),'href'=>'logs.php','title'=>__('Admin Dashboard'));
+                $tabs['settings']=array('desc'=>__('Settings'),'href'=>'settings.php','title'=>__('System Settings'));   
+                $tabs['manage']=array('desc'=>__('Manage'),'href'=>'helptopics.php','title'=>__('Manage Options'));
+                $tabs['emails']=array('desc'=>__('Emails'),'href'=>'emails.php','title'=>__('Email Settings'));
+            }
+            $tabs['staff']=array('desc'=>__('Associates'),'href'=>'staff.php','title'=>__('Manage Associates'));
             if (count($this->getRegisteredApps()))
                 $tabs['apps']=array('desc'=>__('Applications'),'href'=>'apps.php','title'=>__('Applications'));
             $this->tabs=$tabs;
@@ -245,6 +246,7 @@ class AdminNav extends StaffNav{
     }
 
     function getSubMenus(){
+        global $thisstaff;
 
         $submenus=array();
         foreach($this->getTabs() as $k=>$tab){
@@ -259,10 +261,11 @@ class AdminNav extends StaffNav{
                     $subnav[]=array('desc'=>__('System'),'href'=>'settings.php?t=system','iconclass'=>'preferences');
                     $subnav[]=array('desc'=>__('Tickets'),'href'=>'settings.php?t=tickets','iconclass'=>'ticket-settings');
                     $subnav[]=array('desc'=>__('Tasks'),'href'=>'settings.php?t=tasks','iconclass'=>'lists');
-                    $subnav[]=array('desc'=>__('Agents'),'href'=>'settings.php?t=agents','iconclass'=>'teams');
-                    $subnav[]=array('desc'=>__('Users'),'href'=>'settings.php?t=users','iconclass'=>'groups');
+                    $subnav[]=array('desc'=>__('Associates'),'href'=>'settings.php?t=agents','iconclass'=>'teams');
+                    //$subnav[]=array('desc'=>__('Users'),'href'=>'settings.php?t=users','iconclass'=>'groups');
                     $subnav[]=array('desc'=>__('Knowledgebase'),'href'=>'settings.php?t=kb','iconclass'=>'kb-settings');
                     break;
+                
                 case 'manage':
                     $subnav[]=array('desc'=>__('Help Topics'),'href'=>'helptopics.php','iconclass'=>'helpTopics');
                     $subnav[]=array('desc'=>__('Ticket Filters'),'href'=>'filters.php',
@@ -283,10 +286,10 @@ class AdminNav extends StaffNav{
                     $subnav[]=array('desc'=>__('Diagnostic'),'href'=>'emailtest.php', 'title'=>__('Email Diagnostic'), 'iconclass'=>'emailDiagnostic');
                     break;
                 case 'staff':
-                    $subnav[]=array('desc'=>__('Agents'),'href'=>'staff.php','iconclass'=>'users');
-                    $subnav[]=array('desc'=>__('Teams'),'href'=>'teams.php','iconclass'=>'teams');
+                    $subnav[]=array('desc'=>__('Associates'),'href'=>'staff.php','iconclass'=>'users');
+                    //$subnav[]=array('desc'=>__('Teams'),'href'=>'teams.php','iconclass'=>'teams');
                     $subnav[]=array('desc'=>__('Roles'),'href'=>'roles.php','iconclass'=>'lists');
-                    $subnav[]=array('desc'=>__('Departments'),'href'=>'departments.php','iconclass'=>'departments');
+                    $subnav[]=array('desc'=>__('Teams'),'href'=>'departments.php','iconclass'=>'teams');
                     break;
                 case 'apps':
                     foreach ($this->getRegisteredApps() as $app)

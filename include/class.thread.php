@@ -137,7 +137,7 @@ implements Searchable {
 		$collaborators->filter(array('role' => 'N'));
 		
         // TODO: sort by name of the user
-        $collaborators->order_by('user__name');
+        $collaborators->order_by('staff__username');
 
         if (!$criteria)
             $this->_collaborators = $collaborators;
@@ -704,7 +704,7 @@ implements TemplateVariable {
                 'null' => true,
             ),
             'user' => array(
-                'constraint' => array('user_id' => 'User.id'),
+                'constraint' => array('user_id' => 'staff.staff_id'),
                 'null' => true,
             ),
         ),
@@ -2069,7 +2069,7 @@ class EditEvent extends ThreadEvent {
                 'topic_id' => array(__('Help Topic'), array('Topic', 'getTopicName')),
                 'sla_id' => array(__('SLA'), array('SLA', 'getSLAName')),
                 'duedate' => array(__('Due Date'), array('Format', 'date')),
-                'user_id' => array(__('Ticket Owner'), array('User', 'getNameById')),
+                'user_id' => array(__('Ticket Owner'), array('Staff', 'getFullNameById')),
                 'source' => array(__('Source'), null)
             ) as $f => $info) {
                 if (isset($data[$f])) {
@@ -2462,7 +2462,7 @@ class HtmlThreadEntryBody extends ThreadEntryBody {
 
 /* Message - Ticket thread entry of type message */
 class MessageThreadEntry extends ThreadEntry {
-
+	
     const ENTRY_TYPE = 'M';
 
     function getSubject() {
@@ -2483,7 +2483,7 @@ class MessageThreadEntry extends ThreadEntry {
 
         if (!$vars['poster']
                 && $vars['userId']
-                && ($user = User::lookup($vars['userId'])))
+                && ($user = staff::lookup($vars['userId'])))
             $vars['poster'] = (string) $user->getName();
 
         return parent::add($vars);
@@ -2693,18 +2693,7 @@ implements TemplateVariable {
 
         //Add ticket Id.
         $vars['threadId'] = $this->getId();
-
-		// add agent as collaborator
-		if ($vars['staffId'] !== 0 && $vars['staffId'] !== $vars['assignToStaffId'] && $vars['staffId'] !==8){
-			$vars['flags'] = ThreadEntry::FLAG_COLLABORATOR;
-			$info['threadId'] = $vars['threadId'];
-			$info['userId'] = Staff::getStaffUserId($vars['staffId']);
-			$info['role'] = 'N';
-			$info['noerrors'] = 'N';
-			Collaborator::add($info, $errors);	
-		}		
-		
-       return NoteThreadEntry::add($vars, $errors);
+        return NoteThreadEntry::add($vars, $errors);
 
     }
 

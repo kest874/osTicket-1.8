@@ -2560,7 +2560,7 @@ class AssigneeField extends ChoiceField {
 
             next($choices);
             $T = current($choices);
-            if (($teams = Team::getActiveTeams()))
+            if (($teams = Dept::GetDepartments()))
                 foreach ($teams as $id => $name)
                     $T['t'.$id] = $name;
 
@@ -2590,7 +2590,7 @@ class AssigneeField extends ChoiceField {
         if ($id[0] == 's')
             return Staff::lookup(substr($id, 1));
         elseif ($id[0] == 't')
-            return Team::lookup(substr($id, 1));
+            return dept::lookup(substr($id, 1));
 
         return $id;
     }
@@ -4530,12 +4530,15 @@ class VisibilityConstraint {
     }
 }
 
+
 class AssignmentForm extends Form {
 
     static $id = 'assign';
-    var $_assignee = null;
-    var $_assignees = null;
+    var $_dept = null;
 
+    function __construct($source=null, $options=array()) {
+        parent::__construct($source, $options);
+    }
 
     function getFields() {
 
@@ -4543,17 +4546,12 @@ class AssignmentForm extends Form {
             return $this->fields;
 
         $fields = array(
-            'assignee' => new AssigneeField(array(
+            'dept' => new DepartmentField(array(
                     'id'=>1,
-                    'label' => __('Assignee'),
+                    'label' => __('Team'),
                     'flags' => hexdec(0X450F3),
                     'required' => true,
-                    'validator-error' => __('Assignee selection required'),
-                    'configuration' => array(
-                        'criteria' => array(
-                            'available' => true,
-                            ),
-                       ),
+                    'validator-error' => __('Team selection is required'),
                     )
                 ),
             'comments' => new TextareaField(array(
@@ -4570,42 +4568,20 @@ class AssignmentForm extends Form {
                 ),
             );
 
-
-        if (isset($this->_assignees))
-            $fields['assignee']->setChoices($this->_assignees);
-
-
         $this->setFields($fields);
 
         return $this->fields;
     }
 
-    function getField($name) {
-
-        if (($fields = $this->getFields())
-                && isset($fields[$name]))
-            return $fields[$name];
-    }
-
     function isValid($include=false) {
 
-        if (!parent::isValid($include) || !($f=$this->getField('assignee')))
+        if (!parent::isValid($include))
             return false;
 
-        // Do additional assignment validation
-        if (!($assignee = $this->getAssignee())) {
-            $f->addError(__('Unknown assignee'));
-        } elseif ($assignee instanceof Staff) {
-            // Make sure the agent is available
-            if (!$assignee->isAvailable())
-                $f->addError(__('Agent is unavailable for assignment'));
-        } elseif ($assignee instanceof Team) {
-            // Make sure the team is active and has members
-            if (!$assignee->isActive())
-                $f->addError(__('Team is disabled'));
-            elseif (!$assignee->getNumMembers())
-                $f->addError(__('Team does not have members'));
-        }
+        // Do additional validations
+        if (!($dept = $this->getDept()))
+            $this->getField('dept')->addError(
+                    __('Unknown Team'));
 
         return !$this->errors();
     }
@@ -4618,71 +4594,23 @@ class AssignmentForm extends Form {
             break;
         default:
             throw new Exception(sprintf(__('%s: Unknown template style %s'),
-                        'FormUtils', $options['template']));
+                        get_class(), $options['template']));
         }
 
         $form = $this;
         include $inc;
+
     }
 
-    function setAssignees($assignees) {
-        $this->_assignees = $assignees;
-        $this->_fields = array();
-    }
+    function getDept() {
 
-    function getAssignees() {
-        return $this->_assignees;
-    }
-
-    function getAssignee() {
-
-        if (!isset($this->_assignee))
-            $this->_assignee = $this->getField('assignee')->getClean();
-
-        return $this->_assignee;
-    }
-
-    function getComments() {
-        return $this->getField('comments')->getClean();
-    }
-}
-
-class ClaimForm extends AssignmentForm {
-
-    var $_fields;
-
-    function setFields($fields) {
-        $this->_fields = $fields;
-        parent::setFields($fields);
-    }
-
-    function getFields() {
-
-        if ($this->_fields)
-            return $this->_fields;
-
-        $fields = parent::getFields();
-
-        // Disable && hide assignee field selection
-        if (isset($fields['assignee'])) {
-            $visibility = new VisibilityConstraint(
-                    new Q(array()), VisibilityConstraint::HIDDEN);
-
-            $fields['assignee']->set('visibility', $visibility);
+        if (!isset($this->_dept)) {
+            if (($id = $this->getField('dept')->getClean()))
+                $this->_dept = Dept::lookup($id);
         }
 
-        // Change coments placeholder to reflect claim
-        if (isset($fields['comments'])) {
-            $fields['comments']->configure('placeholder',
-                    __('Optional reason for the claim'));
-        }
-
-
-        $this->setFields($fields);
-
-        return $this->fields;
+        return $this->_dept;
     }
-
 }
 
 class TransferForm extends Form {

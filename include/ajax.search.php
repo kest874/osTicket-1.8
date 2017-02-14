@@ -361,7 +361,7 @@ class SearchAjaxAPI extends AjaxController {
             'staff_id' => $thisstaff->getId(),
         ));
         // -- Open and assigned to a team of mine
-        if ($teams = array_filter($thisstaff->getTeams()))
+        if ($teams = array_filter($thisstaff->getDepartments()))
             $assigned->add(array('team_id__in' => $teams));
 
         $visibility = Q::any(new Q(array('status__state'=>'open', $assigned)));

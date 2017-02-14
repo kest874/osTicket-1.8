@@ -47,16 +47,15 @@ if ($_REQUEST['did'] && is_numeric($_REQUEST['did'])) {
     $qs += array('did' => $_REQUEST['did']);
 }
 
-if ($_REQUEST['tid'] && is_numeric($_REQUEST['tid'])) {
-    $filters += array('teams__team_id' => $_REQUEST['tid']);
-    $qs += array('tid' => $_REQUEST['tid']);
+if ($_REQUEST['usr']) {
+    $filters += array('name__contains' => $_REQUEST['usr']);
+    $qs += array('name' => $_REQUEST['usr']);
 }
-
 //agents objects
 $agents = Staff::objects()
-    ->annotate(array(
-            'teams_count'=>SqlAggregate::COUNT('teams', true),
-    ))
+    // ->annotate(array(
+            // 'teams_count'=>SqlAggregate::COUNT('teams', true),
+    // ))
     ->select_related('dept', 'group');
 
 $order = strcasecmp($order, 'DESC') ? '' : '-';
@@ -85,16 +84,18 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
         <div class="pull-left">
             <form action="staff.php" method="GET" name="filter">
                 <input type="hidden" name="a" value="filter">
+                <div class="attached input">
+                <input type="text" class="basic-search" id="usr" name="usr"
+                         size="30" value="<?php echo Format::htmlchars($_REQUEST['query']); ?>"
+                        autocomplete="off" autocorrect="off" autocapitalize="off">
+            <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
+                <button type="submit" class="attached button"><i class="icon-search"></i>
+                </button>
+            </div>
                 <select name="did" id="did">
                     <option value="0">&mdash;
-                        <?php echo __( 'All Departments');?> &mdash;</option>
-                    <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) { $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
-                    <option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
-                </select>
-                <select name="tid" id="tid">
-                    <option value="0">&mdash;
                         <?php echo __( 'All Teams');?> &mdash;</option>
-                    <?php if (($teams=Team::getTeams())) { foreach ($teams as $id=> $name) { $sel=($_REQUEST['tid'] && $_REQUEST['tid']==$id)?'selected="selected"':''; echo sprintf('
+                    <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) { $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
                     <option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
                 </select>
                 <input type="submit" name="submit" class="button muted" value="<?php echo __('Apply');?>" />
@@ -106,7 +107,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
     <div class="sticky bar opaque">
         <div class="content">
             <div class="pull-left flush-left">
-                <h2><?php echo __('Agents');?></h2>
+                <h2><?php echo __('Associates');?></h2>
             </div>
             <div class="pull-right">
                 <a class="green button action-button" href="staff.php?a=add">
@@ -140,7 +141,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                         <li>
                             <a class="dialog-first" data-action="department" href="#staff/change-department">
                                 <i class="icon-truck icon-fixed-width"></i>
-                                <?php echo __( 'Change Department'); ?>
+                                <?php echo __( 'Change Team'); ?>
                             </a>
                         </li>
                         <!-- TODO: Implement "Reset Access" mass action
@@ -167,14 +168,14 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
  <?php csrf_token(); ?>
  <input type="hidden" name="do" value="mass_process" >
  <input type="hidden" id="action" name="a" value="" >
- <table class="list" border="0" cellspacing="1" cellpadding="0" width="940">
+ <table class="list" border="0" cellspacing="1" cellpadding="0" width="100%">
     <thead>
         <tr>
-            <th width="4%">&nbsp;</th>
-            <th width="28%"><a <?php echo $name_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=name"><?php echo __('Name');?></a></th>
-            <th width="16%"><a <?php echo $username_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=username"><?php echo __('Username');?></a></th>
+            <th width="1%">&nbsp;</th>
+            <th width="5%"><a <?php echo $name_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=name"><?php echo __('Name');?></a></th>
+            <th width="5%"><a <?php echo $username_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=username"><?php echo __('Username');?></a></th>
             <th width="8%"><a  <?php echo $status_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=status"><?php echo __('Status');?></a></th>
-            <th width="14%"><a  <?php echo $dept_sort; ?>href="staff.php?<?php echo $qstr; ?>&sort=dept"><?php echo __('Department');?></a></th>
+            <th width="14%"><a  <?php echo $dept_sort; ?>href="staff.php?<?php echo $qstr; ?>&sort=dept"><?php echo __('Primary Team');?></a></th>
             <th width="14%"><a <?php echo $created_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=created"><?php echo __('Created');?></a></th>
             <th width="16%"><a <?php echo $login_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=login"><?php echo __('Last Login');?></a></th>
         </tr>

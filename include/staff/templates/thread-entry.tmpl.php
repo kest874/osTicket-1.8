@@ -9,7 +9,7 @@ if ($thisstaff && !strcasecmp($thisstaff->datetime_format, 'relative')) {
 
 $entryTypes = array('M'=>'message', 'R'=>'response', 'N'=>'note');
 $user = $entry->getUser() ?: $entry->getStaff();
-$name = $user ? $user->getName() : $entry->poster;
+$name = $user ? staff::getFullNameById($user->getId()) : $entry->poster;
 $avatar = '';
 if ($user && $cfg->isAvatarsEnabled())
     $avatar = $user->getAvatar();

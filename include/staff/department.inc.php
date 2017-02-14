@@ -307,8 +307,10 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         </tr>
         <tr>
             <td colspan=2>
+        
                 <textarea class="richtext no-bar" name="signature" cols="21"
                     rows="5" style="width: 60%;"><?php echo $info['signature']; ?></textarea>
+                    <?php //var_dump($dept->getMembers()) ?>
             </td>
         </tr>
     </tbody>
@@ -339,7 +341,9 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         <tr class="header" id="extended-access-members">
             <td colspan="2">
                 <div><small>
-                <?php echo __('Agents who have extended access to this department'); ?>
+                <?php echo __('Agents who have extended access to this department'); 
+                
+                var_dump($dept->getMembers());?>
                 </small></div>
             </td>
         </tr>

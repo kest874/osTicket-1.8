@@ -384,7 +384,7 @@ class MysqlSearchBackend extends SearchBackend {
             $criteria->extra(array(
                 'tables' => array(
                     str_replace(array(':', '{}'), array(TABLE_PREFIX, $search),
-                    "(SELECT COALESCE(Z3.`object_id`, Z5.`ticket_id`, Z8.`ticket_id`) as `ticket_id`, SUM({}) AS `relevance` FROM `:_search` Z1 LEFT JOIN `:thread_entry` Z2 ON (Z1.`object_type` = 'H' AND Z1.`object_id` = Z2.`id`) LEFT JOIN `:thread` Z3 ON (Z2.`thread_id` = Z3.`id` AND Z3.`object_type` = 'T') LEFT JOIN `:ticket` Z5 ON (Z1.`object_type` = 'T' AND Z1.`object_id` = Z5.`ticket_id`) LEFT JOIN `:user` Z6 ON (Z6.`id` = Z1.`object_id` and Z1.`object_type` = 'U') LEFT JOIN `:organization` Z7 ON (Z7.`id` = Z1.`object_id` AND Z7.`id` = Z6.`org_id` AND Z1.`object_type` = 'O') LEFT JOIN :ticket Z8 ON (Z8.`user_id` = Z6.`id`) WHERE {} GROUP BY `ticket_id`) Z1"),
+                    "(SELECT COALESCE(Z3.`object_id`, Z5.`ticket_id`, Z8.`ticket_id`) as `ticket_id`, SUM({}) AS `relevance` FROM `:_search` Z1 LEFT JOIN `:thread_entry` Z2 ON (Z1.`object_type` = 'H' AND Z1.`object_id` = Z2.`id`) LEFT JOIN `:thread` Z3 ON (Z2.`thread_id` = Z3.`id` AND Z3.`object_type` = 'T') LEFT JOIN `:ticket` Z5 ON (Z1.`object_type` = 'T' AND Z1.`object_id` = Z5.`ticket_id`) LEFT JOIN `:staff` Z6 ON (Z6.`staff_id` = Z1.`object_id` and Z1.`object_type` = 'U') LEFT JOIN `:organization` Z7 ON (Z7.`id` = Z1.`object_id` AND Z1.`object_type` = 'O') LEFT JOIN :ticket Z8 ON (Z8.`user_id` = Z6.`staff_id`) WHERE {} GROUP BY `ticket_id`) Z1"),
                 )
             ));
             $criteria->filter(array('ticket_id'=>new SqlCode('Z1.`ticket_id`')));
@@ -397,24 +397,12 @@ class MysqlSearchBackend extends SearchBackend {
                 ),
                 'tables' => array(
                     str_replace(array(':', '{}'), array(TABLE_PREFIX, $search),
-                    "(SELECT Z6.`id` as `user_id`, {} AS `relevance` FROM `:_search` Z1 LEFT JOIN `:user` Z6 ON (Z6.`id` = Z1.`object_id` and Z1.`object_type` = 'U') LEFT JOIN `:organization` Z7 ON (Z7.`id` = Z1.`object_id` AND Z7.`id` = Z6.`org_id` AND Z1.`object_type` = 'O') WHERE {}) Z1"),
+                    "(SELECT Z6.`staff_id` as `user_id`, {} AS `relevance` FROM `:_search` Z1 LEFT JOIN `:staff` Z6 ON (Z6.`staff_id` = Z1.`object_id` and Z1.`object_type` = 'U') LEFT JOIN `:organization` Z7 ON (Z7.`id` = Z1.`object_id` AND Z1.`object_type` = 'O') WHERE {}) Z1"),
                 )
             ));
             $criteria->filter(array('id'=>new SqlCode('Z1.`user_id`')));
             break;
 
-        case 'Organization':
-            $criteria->extra(array(
-                'select' => array(
-                    '__relevance__' => 'Z1.`relevance`',
-                ),
-                'tables' => array(
-                    str_replace(array(':', '{}'), array(TABLE_PREFIX, $search),
-                    "(SELECT Z2.`id` as `org_id`, {} AS `relevance` FROM `:_search` Z1 LEFT JOIN `:organization` Z2 ON (Z2.`id` = Z1.`object_id` AND Z1.`object_type` = 'O') WHERE {}) Z1"),
-                )
-            ));
-            $criteria->filter(array('id'=>new SqlCode('Z1.`org_id`')));
-            break;
         }
 
         // TODO: Ensure search table exists;
@@ -522,7 +510,7 @@ class MysqlSearchBackend extends SearchBackend {
 
         // USERS ------------------------------------
 
-        $sql = "SELECT A1.`id` FROM `".USER_TABLE."` A1
+        $sql = "SELECT A1.`staff_id` FROM `".STAFF_TABLE."` A1
             LEFT JOIN `".TABLE_PREFIX."_search` A2 ON (A1.`id` = A2.`object_id` AND A2.`object_type`='U')
             WHERE A2.`object_id` IS NULL
             ORDER BY A1.`id` DESC";
@@ -530,7 +518,7 @@ class MysqlSearchBackend extends SearchBackend {
             return false;
 
         while ($row = db_fetch_row($res)) {
-            $user = User::lookup($row[0]);
+            $user = Staff::lookup($row[0]);
             $cdata = $user->getDynamicData();
             $content = array();
             foreach ($user->emails as $e)
@@ -700,17 +688,77 @@ class HelpTopicChoiceField extends ChoiceField {
     }
 }
 
+
 require_once INCLUDE_DIR . 'class.dept.php';
 class DepartmentChoiceField extends ChoiceField {
     function getChoices($verbose=false) {
-        return Dept::getDepartments();
+        global $thisstaff;
+            $items = array(
+            'M' => __('Mine'),
+            'D' => __('One of my Departments'),
+        );
+ 
+        foreach (Dept::getDepartments() as $id=>$name) {
+            $items['d' . $id] = $name;
+        } 
+        return $items;
     }
-
     function getSearchMethods() {
         return array(
-            'includes' =>   __('is'),
-            '!includes' =>  __('is not'),
+            'includes' =>   __('includes'),
+            '!includes' =>  __('does not include'),
         );
+    }
+    
+    function getSearchQ($method, $value, $name=false) {
+        global $thisstaff;
+       //var_dump($thisstaff->getDepartments());
+        $Q = new Q();
+         
+        switch ($method) {
+        case '!includes':
+            $Q->negate();
+        case 'includes':
+            $depts = array();
+            foreach ($value as $id => $ST) {
+                
+                switch ($id[0]) {
+                case 'M':
+                    $depts[] = $thisstaff->getDeptId();
+                    break;
+                case 'D':
+                    $depts = $thisstaff->getDepartmentMembershipIds();
+                    break;
+                case 'd':
+                    $depts[] = (int) substr($id, 1);
+                    break;
+                }
+            }
+                                  
+            $constraints = array();
+            if ($depts)
+                $constraints['dept_id__in'] = $depts;
+                  
+            $Q->add(Q::any($constraints));
+        }
+        return $Q;
+    }
+    
+    function addToQuery($query, $name=false) {
+        return $query->values('dept__name', 'dept_id');
+    }
+    
+    function from_query($row, $name=false) {
+        if ($row['dept_id'])
+            return Dept::getLocalById($row['dept_id'], 'name', $row['dept__name']);
+    }
+    
+    function display($value) {
+        return (string) $value;
+    }
+    function applyOrderBy($query, $reverse=false, $name=false) {
+        $reverse = $reverse ? '-' : '';
+        return $query->order_by("{$reverse}dept__name");
     }
 }
 
@@ -728,7 +776,7 @@ class AssigneeChoiceField extends ChoiceField {
                 continue;
             $items['s' . $id] = $name;
         }
-        foreach (Team::getTeams() as $id=>$name) {
+        foreach (dept::getDepartments() as $id=>$name) {
             $items['t' . $id] = $name;
         }
         return $items;
@@ -782,13 +830,14 @@ class AssigneeChoiceField extends ChoiceField {
                     $agents[] = (int) substr($id, 1);
                     break;
                 case 'T':
-                    $teams = array_merge($thisstaff->getTeams());
+                    $teams = array_merge($thisstaff->getDepts());
                     break;
                 case 't':
                     $teams[] = (int) substr($id, 1);
                     break;
                 }
             }
+             
             $constraints = array();
             if ($teams)
                 $constraints['team_id__in'] = $teams;
@@ -818,7 +867,7 @@ class AssigneeChoiceField extends ChoiceField {
         if ($row['staff__firstname'])
             return new AgentsName(array('first' => $row['staff__firstname'], 'last' => $row['staff__lastname']));
         if ($row['team_id'])
-            return Team::getLocalById($row['team_id'], 'name', $row['team__name']);
+            return dept::getLocalById($row['dept_id'], 'name', $row['dept__name']);
     }
 
     function display($value) {
@@ -882,12 +931,12 @@ class AgentSelectionField extends ChoiceField {
 class TeamSelectionField extends ChoiceField {
     use ZeroMeansUnset;
     function getChoices($verbose=false) {
-        return Team::getTeams();
+        return Dept::getDepartments();
     }
 
     function applyOrderBy($query, $reverse=false, $name=false) {
         $reverse = $reverse ? '-' : '';
-        return $query->order_by("{$reverse}team__name");
+        return $query->order_by("{$reverse}dept__name");
     }
 }
 

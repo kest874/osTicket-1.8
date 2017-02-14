@@ -373,7 +373,7 @@ class TicketsAjaxAPI extends AjaxController {
                         sprintf(
                             __('%s assigned to %s'),
                             __("Ticket #<a href=\"tickets.php?queue=30&id={$ticket->getId()}\"\><b>{$ticket->getNumber()}</b></a>"),
-                            $form->getAssignee())
+                            $form->getDept())
                         );
                 Http::response(201, $ticket->getId());
             }

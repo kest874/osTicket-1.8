@@ -49,9 +49,8 @@ else {
 
   <ul class="clean tabs">
     <li class="active"><a href="#account"><i class="icon-user"></i> <?php echo __('Account'); ?></a></li>
-    <li><a href="#access"><?php echo __('Access'); ?></a></li>
+    <li><a href="#access"><?php echo __('Teams'); ?></a></li>
     <li><a href="#permissions"><?php echo __('Permisions'); ?></a></li>
-    <li><a href="#teams"><?php echo __('Teams'); ?></a></li>
   </ul>
 
   <div class="tab_content" id="account">
@@ -216,10 +215,10 @@ if (count($bks) > 1) {
           <th colspan="3">
             <?php echo __('Access'); ?>
             <div><small><?php echo __(
-            "Select the departments the agent is allowed to access and the corresponding effective role."
+            "Select the Team(s) the associate is allowed to access and the corresponding effective role."
           ); ?>
             </small></div><br>
-            <div><?php echo __('Primary Department'); ?> <span
+            <div><?php echo __('Primary Team'); ?> <span
             class="error">*</span></div>
           </th>
         </tr>
@@ -295,7 +294,7 @@ if (count($bks) > 1) {
       <tbody>
         <tr class="header">
           <th colspan="3">
-            <?php echo __('Extended Access'); ?>
+            <?php echo __('Extended Team(s) Access'); ?>
           </th>
         </tr>
 <?php
@@ -308,7 +307,7 @@ foreach ($staff->dept_access as $dept_access) {
           <td colspan="2">
             <i class="icon-plus-sign"></i>
             <select id="add_access" data-quick-add="department">
-              <option value="0">&mdash; <?php echo __('Select Department');?> &mdash;</option>
+              <option value="0">&mdash; <?php echo __('Select Team');?> &mdash;</option>
               <?php
               foreach ($depts as $id=>$name) {
                 echo sprintf('<option value="%d">%s</option>',$id,Format::htmlchars($name));
@@ -376,62 +375,6 @@ foreach ($staff->dept_access as $dept_access) {
 <?php } ?>
   </div>
 
-  <!-- ============== TEAM MEMBERSHIP =================== -->
-
-  <div class="hidden tab_content" id="teams">
-    <table class="table two-column" width="100%">
-      <tbody>
-        <tr class="header">
-          <th colspan="2">
-            <?php echo __('Assigned Teams'); ?>
-            <div><small><?php echo __(
-            "Agent will have access to tickets assigned to a team they belong to regardless of the ticket's department. Alerts can be enabled for each associated team."
-            ); ?>
-            </small></div>
-          </th>
-        </tr>
-<?php
-$teams = Team::getTeams();
-foreach ($staff->teams as $TM) {
-  unset($teams[$TM->team_id]);
-}
-?>
-        <tr id="join_team">
-          <td colspan="2">
-            <i class="icon-plus-sign"></i>
-            <select id="add_team" data-quick-add="team">
-              <option value="0">&mdash; <?php echo __('Select Team');?> &mdash;</option>
-              <?php
-              foreach ($teams as $id=>$name) {
-                echo sprintf('<option value="%d">%s</option>',$id,Format::htmlchars($name));
-              }
-              ?>
-              <option value="0" data-quick-add>&mdash; <?php echo __('Add New');?> &mdash;</option>
-            </select>
-            <button type="button" class="green button">
-              <?php echo __('Add'); ?>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-      <tbody>
-        <tr id="team_member_template" class="hidden">
-          <td>
-            <input type="hidden" data-name="teams[]" value="" />
-          </td>
-          <td>
-            <label>
-              <input type="checkbox" data-name="team_alerts" value="1" />
-              <?php echo __('Alerts'); ?>
-            </label>
-            <a href="#" class="pull-right drop-membership" title="<?php echo __('Delete');
-              ?>"><i class="icon-trash"></i></a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
   <p style="text-align:center;">
       <input type="submit" name="submit" value="<?php echo $submit_text; ?>">
       <input type="reset"  name="reset"  value="<?php echo __('Reset');?>">
@@ -479,41 +422,6 @@ $('#add_extended_access').find('button').on('click', function() {
   return false;
 });
 
-var joinTeam = function(teamid, name, alerts, error) {
-  if (!teamid) return;
-  var copy = $('#team_member_template').clone();
-
-  copy.find('[data-name=teams\\[\\]]')
-    .attr('name', 'teams[]')
-    .val(teamid);
-  copy.find('[data-name^=team_alerts]')
-    .attr('name', 'team_alerts['+teamid+']')
-    .prop('checked', alerts);
-  copy.find('td:first').append(document.createTextNode(name));
-  copy.attr('id', '').show().insertBefore($('#join_team'));
-  copy.removeClass('hidden');
-  if (error)
-      $('<div class="error">').text(error).appendTo(copy.find('td:last'));
-  copy.find('a.drop-membership').click(function() {
-    $('#add_team').append(
-      $('<option>')
-        .attr('value', copy.find('input[name^=teams][type=hidden]').val())
-        .text(copy.find('td:first').text())
-    );
-    copy.fadeOut(function() { $(this).remove(); });
-    return false;
-  });
-};
-
-$('#join_team').find('button').on('click', function() {
-  var selected = $('#add_team').find(':selected'),
-      id = parseInt(selected.val());
-  if (!id)
-      return;
-  joinTeam(id, selected.text(), true);
-  selected.remove();
-  return false;
-});
 
 
 <?php
@@ -527,13 +435,7 @@ foreach ($staff->dept_access as $dept_access) {
   );
 }
 
-foreach ($staff->teams as $member) {
-  echo sprintf('joinTeam(%d, %s, %d, %s);', $member->team_id,
-    JsonDataEncoder::encode($member->team->getName()),
-    $member->isAlertsEnabled(),
-    JsonDataEncoder::encode(@$errors['teams'][$member->team_id])
-  );
-}
+
 
 ?>
 </script>

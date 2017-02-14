@@ -110,6 +110,7 @@ class CustomQueue extends VerySimpleModel {
             $criteria = array_merge($this->parent->getCriteria(true),
                 $criteria);
         }
+      
         return $criteria;
     }
     function describeCriteria($criteria=false){
@@ -127,6 +128,7 @@ class CustomQueue extends VerySimpleModel {
             list($label, $field) = $all[$path];
             $items[] = $field->describeSearch($method, $value, $label);
         }
+
         return implode("\nAND ", $items);
     }
     /**
@@ -206,6 +208,7 @@ class CustomQueue extends VerySimpleModel {
             'Ticket' => array(
                 'status__state',
                 'dept_id',
+                'team_id',
                 'assignee',
                 'topic_id',
                 'created',
@@ -1260,6 +1263,7 @@ class QueueColumnCondition {
             $name2 = $this->getAnnotationName().'2';
             $query->annotate(array($name2 => SqlAggregate::MAX($name)));
         }
+      
         // Fetch a criteria Q for the query
         if (list(,$field) = $this->getField($name))
             return $field->getSearchQ($method, $value, $name2 ?: $name);
