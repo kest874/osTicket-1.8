@@ -526,6 +526,7 @@ implements TemplateVariable, Searchable {
 
     static function getDepartments( $criteria=null, $localize=true) {
         static $depts = null;
+      
 
         if (!isset($depts) || $criteria) {
             // XXX: This will upset the static $depts array
@@ -534,7 +535,11 @@ implements TemplateVariable, Searchable {
             if (isset($criteria['publiconly']))
                 $query->filter(array(
                             'ispublic' => ($criteria['publiconly'] ? 1 : 0)));
-
+            
+            if (isset($criteria['privateonly']))
+                $query->filter(array(
+                            'ispublic' => ($criteria['privateonly'] ? 1 : 0)));
+              
             if ($manager=$criteria['manager'])
                 $query->filter(array(
                             'manager_id' => is_object($manager)?$manager->getId():$manager));
@@ -546,7 +551,7 @@ implements TemplateVariable, Searchable {
                     'user_count__gt' => 0
                 ));
             }
-
+            
             $query->order_by('name')
                 ->values('id', 'pid', 'name', 'parent');
 
@@ -630,6 +635,9 @@ implements TemplateVariable, Searchable {
         if ($id && $id != $vars['id'])
             $errors['err']=__('Missing or invalid Dept ID (internal error).');
 
+        if ($vars['pid'] == 0) {
+            $errors['pid']=__('Location required');
+        }   
         if (!$vars['name']) {
             $errors['name']=__('Name required');
         } elseif (($did = static::getIdByName($vars['name'], $vars['pid']))

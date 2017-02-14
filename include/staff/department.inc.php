@@ -3,7 +3,7 @@ if(!defined('OSTADMININC') || !$thisstaff || !$thisstaff->isAdmin()) die('Access
 $info = $qs = array();
 if($dept && $_REQUEST['a']!='add') {
     //Editing Department.
-    $title=__('Update Department');
+    $title=__('Update Team');
     $action='update';
     $submit_text=__('Save Changes');
     $info = $dept->getInfo();
@@ -12,7 +12,7 @@ if($dept && $_REQUEST['a']!='add') {
 } else {
     if (!$dept)
         $dept = Dept::create();
-    $title=__('Add New Department');
+    $title=__('Add New Team');
     $action='create';
     $submit_text=__('Create Dept');
     $info['ispublic']=isset($info['ispublic'])?$info['ispublic']:1;
@@ -47,26 +47,28 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
     <thead>
         <tr>
             <th colspan="2">
-                <em><?php echo __('Department Information');?></em>
+                <em><?php echo __('Team Information');?></em>
             </th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td width="180">
-                <?php echo __('Parent');?>:
+            <td width="180"  class="required">
+                <?php echo __('Location');?>:
             </td>
             <td>
                 <select name="pid">
-                    <option value="">&mdash; <?php echo __('Top-Level Department'); ?> &mdash;</option>
-<?php foreach (Dept::getDepartments() as $id=>$name) {
+                    <option value="">&mdash; <?php echo __('Team Location'); ?> &mdash;</option>
+<?php foreach (Dept::getDepartments($criteria['privateonly']) as $id=>$name) {
     if ($info['id'] && $id == $info['id'])
         continue; ?>
                     <option value="<?php echo $id; ?>" <?php
                     if ($info['pid'] == $id) echo 'selected="selected"';
                     ?>><?php echo $name; ?></option>
+                    
 <?php } ?>
                 </select>
+                &nbsp;<span class="error">*&nbsp;<?php echo $errors['pid']; ?></span>
             </td>
         </tr>
         <tr>
@@ -139,138 +141,8 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
                 </span>
             </td>
         </tr>
-        <tr>
-            <td><?php echo __('Ticket Assignment'); ?>:</td>
-            <td>
-                <label>
-                <input type="checkbox" name="assign_members_only" <?php echo
-                $info['assign_members_only']?'checked="checked"':''; ?>>
-                <?php echo __('Restrict ticket assignment to department members'); ?>
-                </label>
-                <i class="help-tip icon-question-sign" href="#sandboxing"></i>
-            </td>
-        </tr>
-
-        <tr>
-            <td><?php echo __('Claim on Response'); ?>:</td>
-            <td>
-                <label>
-                <input type="checkbox" name="disable_auto_claim" <?php echo
-                 $info['disable_auto_claim'] ? 'checked="checked"' : ''; ?>>
-                <?php echo sprintf('<strong>%s</strong> %s',
-                        __('Disable'),
-                        __('auto claim')); ?>
-                </label>
-                <i class="help-tip icon-question-sign"
-                href="#disable_auto_claim"></i>
-            </td>
-        </tr>
-
-        <tr>
-            <th colspan="2">
-                <em><strong><?php echo __('Outgoing Email Settings'); ?></strong>:</em>
-            </th>
-        </tr>
-        <tr>
-            <td width="180">
-                <?php echo __('Outgoing Email'); ?>:
-            </td>
-            <td>
-                <select name="email_id">
-                    <option value="0">&mdash; <?php echo __('System Default'); ?> &mdash;</option>
-                    <?php
-                    $sql='SELECT email_id,email,name FROM '.EMAIL_TABLE.' email ORDER by name';
-                    if(($res=db_query($sql)) && db_num_rows($res)){
-                        while(list($id,$email,$name)=db_fetch_row($res)){
-                            $selected=($info['email_id'] && $id==$info['email_id'])?'selected="selected"':'';
-                            if($name)
-                                $email=Format::htmlchars("$name <$email>");
-                            echo sprintf('<option value="%d" %s>%s</option>',$id,$selected,$email);
-                        }
-                    }
-                    ?>
-                </select>
-                &nbsp;<span class="error">&nbsp;<?php echo $errors['email_id']; ?></span>&nbsp;<i class="help-tip icon-question-sign" href="#email"></i>
-            </td>
-        </tr>
-        <tr>
-            <td width="180">
-                <?php echo __('Template Set'); ?>:
-            </td>
-            <td>
-                <select name="tpl_id">
-                    <option value="0">&mdash; <?php echo __('System Default'); ?> &mdash;</option>
-                    <?php
-                    $sql='SELECT tpl_id,name FROM '.EMAIL_TEMPLATE_GRP_TABLE.' tpl WHERE isactive=1 ORDER by name';
-                    if(($res=db_query($sql)) && db_num_rows($res)){
-                        while(list($id,$name)=db_fetch_row($res)){
-                            $selected=($info['tpl_id'] && $id==$info['tpl_id'])?'selected="selected"':'';
-                            echo sprintf('<option value="%d" %s>%s</option>',$id,$selected,$name);
-                        }
-                    }
-                    ?>
-                </select>
-                &nbsp;<span class="error">&nbsp;<?php echo $errors['tpl_id']; ?></span>&nbsp;<i class="help-tip icon-question-sign" href="#template"></i>
-            </td>
-        </tr>
-        <tr>
-            <th colspan="2">
-                <em><strong><?php echo __('Autoresponder Settings'); ?></strong>:
-                <i class="help-tip icon-question-sign" href="#auto_response_settings"></i></em>
-            </th>
-        </tr>
-        <tr>
-            <td width="180">
-                <?php echo __('New Ticket');?>:
-            </td>
-            <td>
-                <label>
-                <input type="checkbox" name="ticket_auto_response" value="0" <?php echo !$info['ticket_auto_response']?'checked="checked"':''; ?> >
-
-                <?php echo __('<strong>Disable</strong> for this Department'); ?>
-                </label>
-                <i class="help-tip icon-question-sign" href="#new_ticket"></i>
-            </td>
-        </tr>
-        <tr>
-            <td width="180">
-                <?php echo __('New Message');?>:
-            </td>
-            <td>
-                <label>
-                <input type="checkbox" name="message_auto_response" value="0" <?php echo !$info['message_auto_response']?'checked="checked"':''; ?> >
-                <?php echo __('<strong>Disable</strong> for this Department'); ?>
-                </label>
-                <i class="help-tip icon-question-sign" href="#new_message"></i>
-            </td>
-        </tr>
-        <tr>
-            <td width="180">
-                <?php echo __('Auto-Response Email'); ?>:
-            </td>
-            <td>
-                <span>
-                <select name="autoresp_email_id">
-                    <option value="0" selected="selected">&mdash; <?php echo __('Department Email'); ?> &mdash;</option>
-                    <?php
-                    $sql='SELECT email_id,email,name FROM '.EMAIL_TABLE.' email ORDER by name';
-                    if(($res=db_query($sql)) && db_num_rows($res)){
-                        while(list($id,$email,$name)=db_fetch_row($res)){
-                            $selected = (isset($info['autoresp_email_id'])
-                                    && $id == $info['autoresp_email_id'])
-                                ? 'selected="selected"' : '';
-                            if($name)
-                                $email=Format::htmlchars("$name <$email>");
-                            echo sprintf('<option value="%d" %s>%s</option>',$id,$selected,$email);
-                        }
-                    }
-                    ?>
-                </select>
-                &nbsp;<span class="error"><?php echo $errors['autoresp_email_id']; ?></span>
-                <i class="help-tip icon-question-sign" href="#auto_response_email"></i>
-                </span>
-            </td>
-        </tr>
+      
+        
         <tr>
             <th colspan="2">
                 <em><strong><?php echo __('Alerts and Notices'); ?>:</strong>
@@ -286,8 +158,8 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
                 <select name="group_membership">
 <?php foreach (array(
     Dept::ALERTS_DISABLED =>        __("No one (disable Alerts and Notices)"),
-    Dept::ALERTS_DEPT_ONLY =>       __("Department members only"),
-    Dept::ALERTS_DEPT_AND_EXTENDED => __("Department and extended access members"),
+    Dept::ALERTS_DEPT_ONLY =>       __("Team members only"),
+    Dept::ALERTS_DEPT_AND_EXTENDED => __("Team and extended access members"),
 ) as $mode=>$desc) { ?>
     <option value="<?php echo $mode; ?>" <?php
         if ($info['group_membership'] == $mode) echo 'selected="selected"';
@@ -300,7 +172,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         </tr>
         <tr>
             <th colspan="2">
-                <em><strong><?php echo __('Department Signature'); ?></strong>:
+                <em><strong><?php echo __('Team Signature'); ?></strong>:
                 <span class="error">&nbsp;<?php echo $errors['signature']; ?></span>
                 <i class="help-tip icon-question-sign" href="#department_signature"></i></em>
             </th>
@@ -310,7 +182,6 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         
                 <textarea class="richtext no-bar" name="signature" cols="21"
                     rows="5" style="width: 60%;"><?php echo $info['signature']; ?></textarea>
-                    <?php //var_dump($dept->getMembers()) ?>
             </td>
         </tr>
     </tbody>
@@ -322,16 +193,16 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
     <tbody>
         <tr class="header" id="primary-members">
             <td colspan="2">
-                <?php echo __('Department Members'); ?>
+                <?php echo __('Team Members'); ?>
                 <div><small>
-                <?php echo __('Agents who are primary members of this department'); ?>
+                <?php echo __('Associates who are primary members of this Team'); ?>
                 </small></div>
             </td>
         </tr>
         <?php
         if (!count($dept->members)) { ?>
         <tr><td colspan=2><em><?php
-            echo __('Department does not have primary members'); ?>
+            echo __('Team does not have primary members'); ?>
            </em> </td>
         </tr>
         <?php
@@ -341,9 +212,8 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         <tr class="header" id="extended-access-members">
             <td colspan="2">
                 <div><small>
-                <?php echo __('Agents who have extended access to this department'); 
+                <?php echo __('Associates who have extended access to this department'); ?>
                 
-                var_dump($dept->getMembers());?>
                 </small></div>
             </td>
         </tr>
