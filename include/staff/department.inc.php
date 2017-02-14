@@ -59,7 +59,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
             <td>
                 <select name="pid">
                     <option value="">&mdash; <?php echo __('Team Location'); ?> &mdash;</option>
-<?php foreach (Dept::getDepartments($criteria['privateonly']) as $id=>$name) {
+<?php foreach (Dept::getDepartments(array('privateonly' =>1)) as $id=>$name) {
     if ($info['id'] && $id == $info['id'])
         continue; ?>
                     <option value="<?php echo $id; ?>" <?php
