@@ -15,13 +15,10 @@ if ($_REQUEST['a']=='add'){
             User::PERM_DELETE,
             User::PERM_MANAGE,
             User::PERM_DIRECTORY,
-            Organization::PERM_CREATE,
-            Organization::PERM_EDIT,
-            Organization::PERM_DELETE,
             FAQ::PERM_MANAGE,
         ));
     }
-    $title=__('Add New Agent');
+    $title=__('Add New Associate');
     $action='create';
     $submit_text=__('Create');
 }

@@ -54,7 +54,7 @@ $action = $info[':action'] ?: ('#');
         </span>
         <span class="buttons pull-right">
             <input type="submit" value="<?php
-            echo $verb ?: __('Transfer'); ?>">
+            echo $verb ?: __('Transfer Ownership'); ?>">
         </span>
      </p>
 </form>

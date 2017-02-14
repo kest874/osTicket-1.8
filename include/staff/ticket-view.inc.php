@@ -118,7 +118,7 @@ if($ticket->isOverdue())
             if ($ticket->checkStaffPerm($thisstaff)){ 
             if ($role->hasPerm(Ticket::PERM_TRANSFER)) {?>
             <span class="action-button pull-right">
-            <a class="ticket-action" id="ticket-transfer" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Transfer'); ?>"
+            <a class="ticket-action" id="ticket-transfer" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Transfer Ownership'); ?>"
                 data-redirect="tickets.php"
                 href="#tickets/<?php echo $ticket->getId(); ?>/transfer"><i class="icon-share"></i></a>
             </span>
@@ -242,7 +242,7 @@ if($ticket->isOverdue())
                     <td><?php echo $ticket->getPriority(); ?></td>
                 </tr>
                 <tr>
-                    <th><?php echo __('Department');?>:</th>
+                    <th><?php echo __('Owned By');?>:</th>
                     <td><?php echo Format::htmlchars($ticket->getDeptName()); ?></td>
                 </tr>
                 <tr>
