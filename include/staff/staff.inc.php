@@ -47,7 +47,6 @@ else {
   <ul class="clean tabs">
     <li class="active"><a href="#account"><i class="icon-user"></i> <?php echo __('Account'); ?></a></li>
     <li><a href="#access"><?php echo __('Teams'); ?></a></li>
-    <li><a href="#permissions"><?php echo __('Permisions'); ?></a></li>
   </ul>
 
   <div class="tab_content" id="account">
@@ -321,56 +320,6 @@ foreach ($staff->dept_access as $dept_access) {
     </table>
   </div>
 
-  <!-- ================= PERMISSIONS ====================== -->
-
-  <div id="permissions" class="hidden">
-<?php
-    $permissions = array();
-    foreach (RolePermission::allPermissions() as $g => $perms) {
-        foreach ($perms as $k=>$P) {
-            if (!$P['primary'])
-                continue;
-            if (!isset($permissions[$g]))
-                $permissions[$g] = array();
-            $permissions[$g][$k] = $P;
-        }
-    }
-?>
-    <ul class="alt tabs">
-<?php
-    $first = true;
-    foreach ($permissions as $g => $perms) { ?>
-      <li <?php if ($first) { echo 'class="active"'; $first=false; } ?>>
-        <a href="#<?php echo Format::slugify($g); ?>"><?php echo Format::htmlchars(__($g));?></a>
-      </li>
-<?php } ?>
-    </ul>
-<?php
-    $first = true;
-    foreach ($permissions as $g => $perms) { ?>
-    <div class="tab_content <?php if (!$first) { echo 'hidden'; } else { $first = false; }
-      ?>" id="<?php echo Format::slugify($g); ?>">
-      <table class="table">
-<?php foreach ($perms as $k => $v) { ?>
-        <tr>
-          <td>
-            <label>
-            <?php
-            echo sprintf('<input type="checkbox" name="perms[]" value="%s" %s />',
-              $k, ($staff->hasPerm($k)) ? 'checked="checked"' : '');
-            ?>
-            &nbsp;
-            <?php echo Format::htmlchars(__($v['title'])); ?>
-            —
-            <em><?php echo Format::htmlchars(__($v['desc'])); ?></em>
-           </label>
-          </td>
-        </tr>
-<?php   } ?>
-      </table>
-    </div>
-<?php } ?>
-  </div>
 
   <p style="text-align:center;">
       <input type="submit" name="submit" value="<?php echo $submit_text; ?>">
