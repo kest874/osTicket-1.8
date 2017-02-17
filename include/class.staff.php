@@ -637,12 +637,6 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
                 && (!isset($this->staff_id) || $uid!=$this->getId()))
             $errors['email']=__('Email already in use by another agent');
 
-        if($vars['phone'] && !Validator::is_phone($vars['phone']))
-            $errors['phone']=__('Valid phone number is required');
-
-        if($vars['mobile'] && !Validator::is_phone($vars['mobile']))
-            $errors['mobile']=__('Valid phone number is required');
-
         if($vars['default_signature_type']=='mine' && !$vars['signature'])
             $errors['default_signature_type'] = __("You don't have a signature");
 
@@ -1005,12 +999,6 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         elseif (($uid=static::getIdByEmail($vars['email']))
                 && (!isset($this->staff_id) || $uid!=$this->getId()))
             $errors['email']=__('Email already in use by another agent');
-
-        if($vars['phone'] && !Validator::is_phone($vars['phone']))
-            $errors['phone']=__('Valid phone number is required');
-
-        if($vars['mobile'] && !Validator::is_phone($vars['mobile']))
-            $errors['mobile']=__('Valid phone number is required');
 
         if(!$vars['dept_id'])
             $errors['dept_id']=__('Primary Department is required');
