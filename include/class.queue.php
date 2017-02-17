@@ -1963,7 +1963,6 @@ extends QueueColumnFilter {
             'link:ticket'   => 'ticket_id',
             'link:ticketP'  => 'ticket_id',
             'link:user'     => 'user_id',
-            'link:org'      => 'user__org_id',
         );
         if (isset($fields[static::$id])) {
             $query = $query->values($fields[static::$id]);
@@ -1982,17 +1981,10 @@ extends TicketLinkFilter {
         return User::getLink($row['user_id']);
     }
 }
-class OrgLinkFilter
-extends TicketLinkFilter {
-    static $id = 'link:org';
-    static $desc = /* @trans */ "Organization Link";
-    function getLink($row) {
-        return Organization::getLink($row['user__org_id']);
-    }
-}
+
 QueueColumnFilter::register('TicketLinkFilter', __('Link'));
 QueueColumnFilter::register('UserLinkFilter', __('Link'));
-QueueColumnFilter::register('OrgLinkFilter', __('Link'));
+
 class TicketLinkWithPreviewFilter
 extends TicketLinkFilter {
     static $id = 'link:ticketP';
