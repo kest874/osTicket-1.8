@@ -2,13 +2,10 @@
 // Calling convention (assumed global scope):
 // $tickets - <QuerySet> with all columns and annotations necessary to
 //      render the full page
-
 // For searches, some staff members may be able to see everything
-//$view_all_tickets = true;
-//var_dump($view_all_tickets);
+$view_all_tickets = $queue->ignoreVisibilityConstraints();
 // Impose visibility constraints
 // ------------------------------------------------------------
-
 // if (!$view_all_tickets) {
     // // -- Open and assigned to me
     // $assigned = Q::any(array(
@@ -17,34 +14,25 @@
     // // -- Open and assigned to a team of mine
     // if ($teams = array_filter($thisstaff->getTeams()))
         // $assigned->add(array('team_id__in' => $teams));
-
-     //$visibility = Q::any(new Q(array('dept_id__in' => $depts)));
-
+    // $visibility = Q::any(new Q(array('status__state'=>'open', $assigned)));
     // // -- Routed to a department of mine
     // if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
-        //$visibility->add(array('dept_id__in' => $depts));
-
-     //$tickets->filter($visibility);
+        // $visibility->add(array('dept_id__in' => $depts));
+    // $tickets->filter($visibility);
 // }
-
 // Make sure the cdata materialized view is available
 TicketForm::ensureDynamicDataView();
-
 // Identify columns of output
 $columns = $queue->getColumns();
-
-// Figure out REFRESH url — which might not be accurate after posting a
+// Figure out REFRESH url — which might not be accurate after posting a
 // response
 list($path,) = explode('?', $_SERVER['REQUEST_URI'], 2);
 $args = array();
 parse_str($_SERVER['QUERY_STRING'], $args);
-
 // Remove commands from query
 unset($args['id']);
 if ($args['a'] !== 'search') unset($args['a']);
-
 $refresh_url = $path . '?' . http_build_query($args);
-
 // Establish the selected or default sorting mechanism
 if (isset($_GET['sort']) && is_numeric($_GET['sort'])) {
     $sort = $_SESSION['sort'][$queue->getId()] = array(
@@ -73,9 +61,7 @@ elseif ($queue_sort = $queue->getDefaultSort()) {
         'dir' => (int) $_GET['dir'] ?: 0,
     );
 }
-
 // Handle current sorting preferences
-
 $sorted = false;
 foreach ($columns as $C) {
     // Sort by this column ?
@@ -84,20 +70,16 @@ foreach ($columns as $C) {
         $sorted = true;
     }
 }
-
 if (!$sorted && isset($sort['queuesort'])) {
     // Apply queue sort-dropdown selected preference
     $sort['queuesort']->applySort($tickets, $sort['dir']);
 }
-
 // Apply pagination
 if (isset($_REQUEST['query']) and  !isset($_REQUEST['p'])) $page = 1;
 If (!$page){
 $page = ($_GET['p'] && is_numeric($_GET['p']))?$_GET['p']:$_SESSION['pageno'];};
 $_SESSION['pageno'] = $page;
-//$pageNav = new Pagenate(PHP_INT_MAX, $page, PAGE_LIMIT);
-
-$pageNav = new Pagenate($count, $page, PAGE_LIMIT);
+$pageNav = new Pagenate(PHP_INT_MAX, $page, PAGE_LIMIT);
 $tickets = $pageNav->paginateSimple($tickets);
 $count = $tickets->total();
 $pageNav->setTotal($count);
@@ -260,10 +242,7 @@ foreach ($columns as $C) {
     </tr>
   </thead>
   <tbody>
-  
-  
 <?php
-
 foreach ($tickets as $T) {
     echo '<tr>';
     if ($canManageTickets) { ?>
