@@ -2669,7 +2669,6 @@ implements RestrictedAccess, Threadable, Searchable {
     static function create($vars, &$errors, $origin, $autorespond=true,
             $alertstaff=true) {
         global $ost, $cfg, $thisclient, $thisstaff;
-        
         // Don't enforce form validation for email
         $field_filter = function($type) use ($origin) {
             return function($f) use ($origin, $type) {
@@ -2720,7 +2719,7 @@ implements RestrictedAccess, Threadable, Searchable {
                 $fields['topicId']  = array('type'=>'int',  'required'=>1, 'error'=>__('Select a Help Topic'));
                 break;
             case 'staff':
-                $fields['deptId']   = array('type'=>'int',  'required'=>0, 'error'=>__('Department selection is required'));
+               // $fields['deptId']   = array('type'=>'int',  'required'=>0, 'error'=>__('Department selection is required'));
                 $fields['topicId']  = array('type'=>'int',  'required'=>1, 'error'=>__('Help topic selection is required'));
                 $fields['duedate']  = array('type'=>'date', 'required'=>0, 'error'=>__('Invalid date format - must be MM/DD/YY'));
             case 'api':

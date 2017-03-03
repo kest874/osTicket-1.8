@@ -188,31 +188,36 @@ if ($_POST)
                 <em><?php echo __('Time is based on your time zone');?> (GMT <?php echo Format::date(false, false, 'ZZZ'); ?>)</em>
             </td>
         </tr>
-            <tr  id="open_ticket_informationdata"  style="display:none;">
-            <td width="160">
-                <?php echo __('Department'); ?>:
-            </td>
+        
+                <?php
+        $info['assignId'] = 't'.$thisstaff->getDeptById($thisstaff->GetId());
+        
+        if($thisstaff->hasPerm(Ticket::PERM_ASSIGN, false)) { ?>
+        <tr id="open_ticket_informationdata">
+            <td width="160"><?php echo __('Owned By');?>:</td>
             <td>
-                <select name="assignId">
-                    <option value="" selected >&mdash; <?php echo __('Select Department'); ?>&mdash;</option>
+                <select id="deptId" name="deptId">
+                    <option value="0" selected="selected">&mdash; <?php echo __('Select a Team');?> &mdash;</option>
                     <?php
-                    if($depts=Dept::getDepartments(array('dept_id' => $thisstaff->getDepts()))) {
-                        foreach($depts as $id =>$name) {
-                            if (!($role = $thisstaff->getRole($id))
-                                || !$role->hasPerm(Ticket::PERM_CREATE)
-                            ) {
-                                // No access to create tickets in this dept
-                                continue;
-                            }
-                            echo sprintf('<option value="%d" %s>%s</option>',
-                                    $id, ($info['deptId']==$id)?'selected="selected"':'',$name);
+                    
+                    
+                    if(($teams=Dept::getDepartments(array('dept_id' => $thisstaff->getDepts())))) {
+                        echo '<OPTGROUP label="'.sprintf(__('Teams (%d)'), count($teams)).'">';
+                        foreach($teams as $id => $name) {
+                            $k="$id";
+                            echo sprintf('<option value="%s" %s>%s</option>',
+                                        $k,(($info['assignId']==$k)?'selected="selected"':''),$name);
                         }
+                        echo '</OPTGROUP>';
                     }
-                    ?>
-                </select>
-                &nbsp;<font class="error"><?php echo $errors['deptId']; ?></font>
-            </td>
+                    
+                   ?>
+                </select>&nbsp;
+                <font class='error'>&nbsp;<?php echo $errors['deptId']; ?></font> <em>Assign the team that should own this</em><br>
+                </td>
         </tr>
+        <?php } ?>
+            
         <?php
         $info['assignId'] = 't'.$thisstaff->getDeptById($thisstaff->GetId());
         
