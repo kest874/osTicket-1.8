@@ -204,7 +204,7 @@ if ($_POST)
                     if(($teams=Dept::getDepartments(array('dept_id' => $thisstaff->getDepts())))) {
                         echo '<OPTGROUP label="'.sprintf(__('Teams (%d)'), count($teams)).'">';
                         foreach($teams as $id => $name) {
-                            $k="$id";
+                            $k="t$id";
                             echo sprintf('<option value="%s" %s>%s</option>',
                                         $k,(($info['assignId']==$k)?'selected="selected"':''),$name);
                         }
