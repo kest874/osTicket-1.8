@@ -2,7 +2,6 @@
 
 require_once(INCLUDE_DIR . 'class.dept.php');
 require_once(INCLUDE_DIR . 'class.role.php');
-require_once(INCLUDE_DIR . 'class.team.php');
 
 class AdminAjaxAPI extends AjaxController {
 
