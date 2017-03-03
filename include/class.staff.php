@@ -1185,13 +1185,13 @@ extends AbstractForm {
     function buildFields() {
         return array(
             'welcome_email' => new BooleanField(array(
-                'default' => true,
+                'default' => false,
                 'configuration' => array(
                     'desc' => __('Send the agent a password reset email'),
                 ),
             )),
             'passwd1' => new PasswordField(array(
-                'placeholder' => __('New Password'),
+                'placeholder' => __('New Password (6 Characters Minimum)'),
                 'required' => true,
                 'configuration' => array(
                     'classes' => 'span12',
