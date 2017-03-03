@@ -2946,7 +2946,7 @@ implements RestrictedAccess, Threadable, Searchable {
             'lastupdate' => SqlFunction::NOW(),
             'number' => $number,
             'user' => $user,
-            'dept_id' => $deptId,
+            'dept_id' => substr($vars['deptId'], 1),
             'team_id' => substr($vars['assignId'], 1),
             'topic_id' => $topicId,
             'ip_address' => $ipaddress,
