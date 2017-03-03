@@ -172,7 +172,7 @@ if ($_POST)
 
          <tr id="open_ticket_informationdata">
             <td width="160">
-                <?php echo __('Due Date');?>:
+                <strong><?php echo __('Due Date');?>:</strong>
             </td>
             <td>
                 <input class="dp" id="duedate" name="duedate" value="<?php echo Format::htmlchars($info['duedate']); ?>" size="12" autocomplete=OFF>
@@ -194,7 +194,7 @@ if ($_POST)
         
         if($thisstaff->hasPerm(Ticket::PERM_ASSIGN, false)) { ?>
         <tr id="open_ticket_informationdata">
-            <td width="160"><?php echo __('Owned By');?>:</td>
+            <td width="160"><strong><?php echo __('Owned By');?>:</strong></td>
             <td>
                 <select id="deptId" name="deptId">
                     <option value="0" selected="selected">&mdash; <?php echo __('Select a Team');?> &mdash;</option>
@@ -213,7 +213,7 @@ if ($_POST)
                     
                    ?>
                 </select>&nbsp;
-                <font class='error'>&nbsp;<?php echo $errors['deptId']; ?></font> <em>Assign the team that should own this</em><br>
+                <font class='error'>&nbsp;<?php echo $errors['deptId']; ?></font> <em>The team that should own this suggestion</em><br>
                 </td>
         </tr>
         <?php } ?>
@@ -223,7 +223,7 @@ if ($_POST)
         
         if($thisstaff->hasPerm(Ticket::PERM_ASSIGN, false)) { ?>
         <tr id="open_ticket_informationdata">
-            <td width="160"><?php echo __('Assign To');?>:</td>
+            <td width="160"><strong><?php echo __('Assign To');?>:</strong></td>
             <td>
                 <select id="assignId" name="assignId">
                     <option value="0" selected="selected">&mdash; <?php echo __('Select a Team');?> &mdash;</option>
