@@ -3689,6 +3689,7 @@ td.indented {
 }
 .sticky.bar.fixed h2 {
   margin: 0;
+  display: inline;
 }
 .sticky.bar:not(.fixed) .sticky.only {
     display:none;

@@ -211,7 +211,9 @@ if($ticket->isOverdue())
              <h2><a href="tickets.php?id=<?php echo $ticket->getId(); ?>"
              title="<?php echo __('Reload'); ?>"><i class="icon-refresh"></i>
              <?php echo sprintf(__('Ticket #%s'), $ticket->getNumber()); ?></a>
-            </h2>
+            <span  class="only sticky"> - <span style="color: <?php echo
+                $ticket->isOpen() ? '#51c351;' : '#f00;'; ?>"><?php echo sprintf(__('%s'), $ticket->getStatus()); ?></span></span></h2>
+
         </div></div>
     </div>
   </div>
