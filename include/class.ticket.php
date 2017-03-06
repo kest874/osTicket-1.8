@@ -235,7 +235,7 @@ implements RestrictedAccess, Threadable, Searchable {
         if (($staff->showAssignedOnly()
             || !$staff->canAccessDept($this->getDeptId()))
             // only open tickets can be considered assigned
-            && $this->isOpen()
+            //&& $this->isOpen()
             && $staff->getId() != $this->getStaffId()
             )
          {
