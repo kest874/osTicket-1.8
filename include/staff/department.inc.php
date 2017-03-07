@@ -118,7 +118,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         </tr>
         <tr>
             <td width="180">
-                <?php echo __('Manager'); ?>:
+                <strong><?php echo __('Faciliatator'); ?>:</strong>
             </td>
             <td>
                 <span>
@@ -151,7 +151,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         </tr>
         <tr>
             <td width="180">
-                <?php echo __('Recipients'); ?>:
+                <strong><?php echo __('Recipients'); ?>:</strong>
             </td>
             <td>
                 <span>
@@ -212,7 +212,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         <tr class="header" id="extended-access-members">
             <td colspan="2">
                 <div><small>
-                <?php echo __('Associates who have extended access to this department'); ?>
+                <?php echo __('Associates who have extended access to this Team'); ?>
                 
                 </small></div>
             </td>
@@ -226,7 +226,7 @@ foreach ($dept->getMembers() as $member) {
         <td colspan="2">
           <i class="icon-plus-sign"></i>
           <select id="add_access" data-quick-add="staff">
-            <option value="0">&mdash; <?php echo __('Select Agent');?> &mdash;</option>
+            <option value="0">&mdash; <?php echo __('Select Associate');?> &mdash;</option>
             <?php
             foreach ($agents as $id=>$name) {
               echo sprintf('<option value="%d">%s</option>',$id,Format::htmlchars($name));

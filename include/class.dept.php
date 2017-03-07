@@ -225,29 +225,23 @@ implements TemplateVariable, Searchable {
     }
 
     function getExtendedMembers() {
-        
         if (!isset($this->_exended_members)) {
             // We need a query set so we can sort the names
             $members = StaffDeptAccess::objects();
             $members->filter(array('dept_id' => $this->getId()));
             $members = Staff::nsort($members, 'staff__');
             $extended = array();
-            
-            
             foreach($members as $member) {
-
                 if (!$member->staff)
                     continue;
                 // Annoted the staff model with alerts and role
-                // $extended[] = new AnnotatedModel($member->staff, array(
-                    // 'alerts'  => $member->isAlertsEnabled(),
-                    // 'role_id' => $member->role_id,
-                // ));
+                $extended[] = new AnnotatedDeptModel($member->staff, array(
+                    'alerts'  => $member->isAlertsEnabled(),
+                    'role_id' => $member->role_id,
+                ));
             }
-
             $this->_extended_members = $extended;
         }
-
         return $this->_extended_members;
     }
 
