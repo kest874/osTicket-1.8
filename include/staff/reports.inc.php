@@ -12,15 +12,24 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
 <div>
 <div>
 <br>
-<table>
+<table cellpadding="3px">
+       </tr>
+        <tr>
+        <td width="240px">
+            <a href="http://crpsql01/Reports/Pages/Report.aspx?ItemPath=%2fosTicket%2fSuggestions%2fSuggestions_AssociateSummary&ViewMode=Detail" target="_blank">Associate Suggestion Summary</a>
+        </td>
+        <td>
+            <em>Report showing associate activity by month.</em>
+        </td>
+    </tr>
     <tr>
         <td>
-            <a href="http://crpsql01/Reports/Pages/Report.aspx?ItemPath=%2fosTicket%2fSuggestions%2fSuggestion+Summary" target="_blank">Suggestion Summary</a>
+            <a href="http://crpsql01/Reports/Pages/Report.aspx?ItemPath=%2fosTicket%2fSuggestions%2fSuggestion+Summary" target="_blank">Team Suggestion Summary</a>
         </td>
         <td>
             <em>Report showing team activity by month.</em>
         </td>
-    </tr>
+
 </table>
 <br><br><br>
 <hr>
