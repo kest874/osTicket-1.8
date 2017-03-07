@@ -528,7 +528,6 @@ implements TemplateVariable, Searchable {
     
     function getNameById($id) {
         $names = static::getDepartments();
-        var_dump($names);
         return $names[$id];
     }
 
