@@ -29,9 +29,18 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
         <td>
             <em>Report showing team activity by month.</em>
         </td>
+            <tr>
+        <td>
+            <a href="http://crpsql01/Reports/Pages/Report.aspx?ItemPath=%2fosTicket%2fSuggestions%2fSuggestions_OpenSuggesitonAge&ViewMode=Detail" target="_blank">Suggestions Open Age</a>
+        </td>
+        <td>
+            <em>Report showing Suggestions By Age</em>
+        </td>
 
 </table>
 <br><br><br>
 <hr>
 <div>
 </div>
+
+
