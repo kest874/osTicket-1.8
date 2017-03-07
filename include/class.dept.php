@@ -126,7 +126,10 @@ implements TemplateVariable, Searchable {
     function getId() {
         return $this->id;
     }
-
+    
+    function getPId() {
+        return $this->pid;
+    }
     function getName() {
         return $this->name;
     }
@@ -502,9 +505,30 @@ implements TemplateVariable, Searchable {
 
         return $row ? $row[0] : 0;
     }
+    
+    static function getDNamebyId($Id) {
+        $row = static::objects()
+            ->filter(array(
+                        'id' => $Id))
+            ->values_flat('name')
+            ->first();
 
+        return $row ? $row[0] : 0;
+    }
+        
+    static function getParentName($Id) {
+        $row = static::objects()
+            ->filter(array(
+                        'id' => $Id))
+            ->values_flat('name')
+            ->first();
+
+        return $row ? $row[0] : 0;
+    }
+    
     function getNameById($id) {
         $names = static::getDepartments();
+        var_dump($names);
         return $names[$id];
     }
 

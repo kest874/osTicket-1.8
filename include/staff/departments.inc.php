@@ -4,15 +4,16 @@ if (!defined('OSTADMININC') || !$thisstaff->isAdmin())
 
 $qs = array();
 $sortOptions=array(
+    'pid' => 'pid',
     'name' => 'name',
-    'type' => 'ispublic',
     'members'=> 'members_count',
-    'email'=> 'email__name',
     'manager'=>'manager__lastname'
     );
 
 $orderWays = array('DESC'=>'DESC', 'ASC'=>'ASC');
 $sort = ($_REQUEST['sort'] && $sortOptions[strtolower($_REQUEST['sort'])]) ? strtolower($_REQUEST['sort']) : 'name';
+
+
 if ($sort && $sortOptions[$sort]) {
     $order_column = $sortOptions[$sort];
 }
@@ -30,15 +31,74 @@ if ($order_column && strpos($order_column,',')) {
 }
 $x=$sort.'_sort';
 $$x=' class="'.strtolower($order).'" ';
+
+//Filters
+$filters = array();
+if ($_REQUEST['did'] && is_numeric($_REQUEST['did'])) {
+    $filters += array('pid' => $_REQUEST['did']);
+    $qs += array('did' => $_REQUEST['did']);
+}
+if ($_REQUEST['tm']) {
+    $filters += array('name__contains' => $_REQUEST['tm']);
+    $qs += array('name' => $_REQUEST['tm']);
+}
+    
+$depts = Dept::objects()
+                ->annotate(array(
+                        'members_count' => SqlAggregate::COUNT('members', true),
+                ));
+                //->order_by(sprintf('%s%s',
+                  //          strcasecmp($order, 'DESC') ? '' : '-',
+                    //        $order_column));
+                
+$order = strcasecmp($order, 'DESC') ? '' : '-';
+foreach ((array) $order_column as $C) {
+    $depts->order_by($order.$C);
+}
+
+if ($filters)
+    $depts->filter($filters);
+            
+
+// paginate
 $page = ($_GET['p'] && is_numeric($_GET['p'])) ? $_GET['p'] : 1;
-$count = Dept::objects()->count();
+$count = $depts->count();
 $pageNav = new Pagenate($count, $page, PAGE_LIMIT);
-$qstr = '&amp;'. Http::build_query($qs);
-$qstr .= '&amp;order='.($order=='DESC' ? 'ASC' : 'DESC');
 $qs += array('sort' => $_REQUEST['sort'], 'order' => $_REQUEST['order']);
 $pageNav->setURL('departments.php', $qs);
-$showing = $pageNav->showing().' '._N('department', 'departments', $count);
+$showing = $pageNav->showing().' '._N('agent', 'agents', $count);
+$qstr = '&amp;'. Http::build_query($qs);
+$qstr .= '&amp;order='.($order=='-' ? 'ASC' : 'DESC');
+
+// add limits.
+$depts->limit($pageNav->getLimit())->offset($pageNav->getStart());
 ?>
+
+
+<div id="basic_search" >
+    <div style="min-height:25px;">
+        <div class="pull-left">
+            <form action="departments.php" method="GET" name="filter">
+                <input type="hidden" name="a" value="filter">
+                <div class="attached input">
+                <input type="text" class="basic-search" id="tm" name="tm"
+                         size="30" value="<?php echo Format::htmlchars($_REQUEST['query']); ?>"
+                        autocomplete="off" autocorrect="off" autocapitalize="off">
+            <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
+                <button type="submit" class="attached button"><i class="icon-search"></i>
+                </button>
+            </div>
+                <select name="did" id="did">
+                    <option value="0">&mdash;
+                        <?php echo __( 'Location');?> &mdash;</option>
+                    <?php if (($depts1=Dept::getDepartments(array('privateonly' =>1)))) { foreach ($depts1 as $id=> $name) { $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
+                    <option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
+                </select>
+                <input type="submit" name="submit" class="button muted" value="<?php echo __('Apply');?>" />
+            </form>
+        </div>
+    </div>
+</div>
 <form action="departments.php" method="POST" name="depts">
 <div class="sticky bar">
     <div class="content">
@@ -69,45 +129,33 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
     <thead>
         <tr>
             <th width="4%">&nbsp;</th>
+            <th width="8%"><a  <?php echo $users_sort; ?>href="departments.php?<?php echo $qstr; ?>&sort=pid"><?php echo __('Location');?></a></th>
             <th width="28%"><a <?php echo $name_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=name"><?php echo __('Name');?></a></th>
-            <th width="8%"><a  <?php echo $type_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=type"><?php echo __('Type');?></a></th>
-            <th width="8%"><a  <?php echo $users_sort; ?>href="departments.php?<?php echo $qstr; ?>&sort=users"><?php echo __('Agents');?></a></th>
-            <th width="30%"><a  <?php echo $email_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=email"><?php echo __('Email Address');?></a></th>
+            <th width="8%"><a  <?php echo $users_sort; ?>href="departments.php?<?php echo $qstr; ?>&sort=members"><?php echo __('Associates');?></a></th>
+
             <th width="22%"><a  <?php echo $manager_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=manager"><?php echo __('Manager');?></a></th>
         </tr>
     </thead>
     <tbody>
-    <?php
+  <?php
+ 
         $ids= ($errors && is_array($_POST['ids'])) ? $_POST['ids'] : null;
         if ($count) {
-            $depts = Dept::objects()
-                ->annotate(array(
-                        'members_count' => SqlAggregate::COUNT('members', true),
-                ))
-                ->order_by(sprintf('%s%s',
-                            strcasecmp($order, 'DESC') ? '' : '-',
-                            $order_column))
-                ->limit($pageNav->getLimit())
-                ->offset($pageNav->getStart());
-            $defaultId=$cfg->getDefaultDeptId();
-            $defaultEmailId = $cfg->getDefaultEmailId();
+            
             $defaultEmailAddress = (string) $cfg->getDefaultEmail();
             foreach ($depts as $dept) {
+                
                 $id = $dept->getId();
+                $pid = $dept->getPId();
                 $sel=false;
                 if($ids && in_array($dept->getId(), $ids))
                     $sel=true;
-
-                if ($dept->email) {
-                    $email = (string) $dept->email;
-                    $emailId = $dept->email->getId();
-                } else {
-                    $emailId = $defaultEmailId;
-                    $email = $defaultEmailAddress;
-                }
-
+                
                 $default= ($defaultId == $dept->getId()) ?' <small>'.__('(Default)').'</small>' : '';
-                ?>
+            
+            if ($pid != 0){
+            ?>
+            
             <tr id="<?php echo $id; ?>">
                 <td align="center">
                   <input type="checkbox" class="ckb" name="ids[]"
@@ -115,9 +163,15 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
                   <?php echo $sel? 'checked="checked"' : ''; ?>
                   <?php echo $default? 'disabled="disabled"' : ''; ?> >
                 </td>
+                <td>&nbsp;&nbsp;
+                    <b>
+                    <a href="departments.php?did=<?php echo $pid; ?>"><?php echo $dept->getParentName($pid); ?></a>
+                    </b>
+                </td>
+                
                 <td><a href="departments.php?id=<?php echo $id; ?>"><?php
-                echo Dept::getNameById($id); ?></a>&nbsp;<?php echo $default; ?></td>
-                <td><?php echo $dept->isPublic() ? __('Public') :'<b>'.__('Private').'</b>'; ?></td>
+                echo Dept::getDNamebyId($id); ?></a>&nbsp;<?php echo $default; ?></td>
+                
                 <td>&nbsp;&nbsp;
                     <b>
                     <?php if ($dept->members_count) { ?>
@@ -126,12 +180,12 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
                     <?php } ?>
                     </b>
                 </td>
-                <td><span class="ltr"><a href="emails.php?id=<?php echo $emailId; ?>"><?php
-                    echo Format::htmlchars($email); ?></a></span></td>
+                
                 <td><a href="staff.php?id=<?php echo $dept->manager_id; ?>"><?php
                     echo $dept->manager_id ? $dept->manager : ''; ?>&nbsp;</a></td>
             </tr>
             <?php
+            }
             } //end of foreach.
         } ?>
     <tfoot>
@@ -144,7 +198,7 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
             <a id="selectNone" href="#ckb"><?php echo __('None');?></a>&nbsp;&nbsp;
             <a id="selectToggle" href="#ckb"><?php echo __('Toggle');?></a>&nbsp;&nbsp;
             <?php }else{
-                echo __('No departments found!');
+                echo __('No teams found!');
             } ?>
         </td>
      </tr>

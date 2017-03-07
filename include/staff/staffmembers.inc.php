@@ -40,7 +40,7 @@ if ($_REQUEST['order'] && isset($orderWays[strtoupper($_REQUEST['order'])])) {
 $x=$sort.'_sort';
 $$x=' class="'.strtolower($order).'" ';
 
-//Filers
+//Filters
 $filters = array();
 if ($_REQUEST['did'] && is_numeric($_REQUEST['did'])) {
     $filters += array('dept_id' => $_REQUEST['did']);
