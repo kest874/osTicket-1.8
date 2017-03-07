@@ -476,7 +476,7 @@ class CustomQueue extends VerySimpleModel {
             return $this->columns;
         }
         // Use the columns of the "Open" queue as a default template
-        if ($use_template && ($template = CustomQueue::lookup(1)))
+        if (($template = CustomQueue::lookup(1)))
             return $template->getColumns();
         // Last resort — use standard columns
         foreach (array(
