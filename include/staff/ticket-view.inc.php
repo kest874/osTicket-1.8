@@ -34,7 +34,7 @@ elseif ($ticket->isAssigned()
             || ($team && !$team->isMember($thisstaff))
         ))
     $warn.= sprintf('&nbsp;&nbsp;<span class="Icon assignedTicket">%s</span>',
-            sprintf(__('Ticket is assigned to %s'),
+            sprintf(__('Suggesiton is assigned to %s'),
                 implode('/', $ticket->getAssignees())
                 ));
 
@@ -60,7 +60,7 @@ if($ticket->isOverdue())
        <div class="thread_content">
         <div class="pull-right flush-right">
             
-			<a class="action-button pull-right" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Tickets'); ?>"
+			<a class="action-button pull-right" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Suggestions'); ?>"
 				href="tickets.php<?php 
 		
 			 ?>"><i class="icon-list-alt"></i></a>
@@ -108,7 +108,7 @@ if($ticket->isOverdue())
             <div id="action-dropdown-print" class="action-dropdown anchor-right">
               <ul>
                  <li><a class="no-pjax" target="_blank" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=print&notes=0"><i
-                 class="icon-file-alt"></i> <?php echo __('Ticket Thread'); ?></a>
+                 class="icon-file-alt"></i> <?php echo __('Suggestion Thread'); ?></a>
                  <li><a class="no-pjax" target="_blank" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=print&notes=1"><i
                  class="icon-file-text-alt"></i> <?php echo __('Thread + Internal Notes'); ?></a>
               </ul>
@@ -210,7 +210,7 @@ if($ticket->isOverdue())
         <div class="flush-left">
              <h2><a href="tickets.php?id=<?php echo $ticket->getId(); ?>"
              title="<?php echo __('Reload'); ?>"><i class="icon-refresh"></i>
-             <?php echo sprintf(__('Ticket #%s'), $ticket->getNumber()); ?></a>
+             <?php echo sprintf(__('Suggestion #%s'), $ticket->getNumber()); ?></a>
             <span  class="only sticky"> - <span style="color: <?php echo
                 $ticket->isOpen() ? '#51c351;' : '#f00;'; ?>"><?php echo sprintf(__('%s'), $ticket->getStatus()); ?></span></span></h2>
 
@@ -466,7 +466,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
 ?>
 <ul  class="tabs clean threads" id="ticket_tabs" >
     <li class="active"><a id="ticket-thread-tab" href="#ticket_thread"><?php
-        echo sprintf(__('Ticket Thread (%d)'), $tcount); ?></a></li>
+        echo sprintf(__('Suggestion Thread (%d)'), $tcount); ?></a></li>
     <li><a id="ticket-tasks-tab" href="#tasks"
             data-url="<?php
         echo sprintf('#tickets/%d/tasks', $ticket->getId()); ?>"><?php

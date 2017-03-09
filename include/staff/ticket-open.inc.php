@@ -32,7 +32,7 @@ if ($_POST)
  <input type="hidden" name="a" value="open">
 
     <div class="ticket_open_title">
-        <h2><?php echo __('Open a New Ticket');?></h2>
+        <h2><?php echo __('Open a New Suggestion');?></h2>
     </div>
 
  <table class="ticket_open" width="100%" border="0" cellspacing="0" cellpadding="2">

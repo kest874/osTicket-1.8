@@ -165,8 +165,8 @@ class StaffNav {
                                             'droponly'=>true);
 
                         if ($staff->hasPerm(Ticket::PERM_CREATE, false))
-                            $subnav[]=array('desc'=>__('New Ticket'),
-                                            'title' => __('Open a New Ticket'),
+                            $subnav[]=array('desc'=>__('New Suggestion'),
+                                            'title' => __('Open a New Suggestion'),
                                             'href'=>'tickets.php?a=open',
                                             'iconclass'=>'newTicket',
                                             'id' => 'new-ticket',
@@ -304,82 +304,5 @@ class AdminNav extends StaffNav{
     }
 }
 
-class UserNav {
-
-    var $navs=array();
-    var $activenav;
-
-    var $user;
-
-    function __construct($user=null, $active=''){
-
-        $this->user=$user;
-        $this->navs=$this->getNavs();
-        if($active)
-            $this->setActiveNav($active);
-    }
-
-    function getRegisteredApps() {
-        return Application::getClientApps();
-    }
-
-    function setActiveNav($nav){
-
-        if($nav && $this->navs[$nav]){
-            $this->navs[$nav]['active']=true;
-            if($this->activenav && $this->activenav!=$nav && $this->navs[$this->activenav])
-                 $this->navs[$this->activenav]['active']=false;
-
-            $this->activenav=$nav;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function getNavLinks(){
-        global $cfg;
-
-        //Paths are based on the root dir.
-        if(!$this->navs){
-
-            $navs = array();
-            $user = $this->user;
-           // $navs['home']=array('desc'=>__('Support Center Home'),'href'=>'index.php','title'=>'');
-            if($cfg && $cfg->isKnowledgebaseEnabled())
-                $navs['kb']=array('desc'=>__('<span class="glyphicon glyphicon-book"></span> Knowledgebase'),'href'=>'kb/index.php','title'=>'');
-
-            // Show the "Open New Ticket" link unless BOTH client
-            // registration is disabled and client login is required for new
-            // tickets. In such a case, creating a ticket would not be
-            // possible for web clients.
-            if ($cfg->getClientRegistrationMode() != 'disabled'
-                    || !$cfg->isClientLoginRequired())
-                $navs['new']=array('desc'=>__('<span class="glyphicon glyphicon-tag"></span> Open a New Ticket'),'href'=>'open.php','title'=>'');
-            if($user && $user->isValid()) {
-                if(!$user->isGuest()) {
-                    $navs['tickets']=array('desc'=>sprintf(__('<span class="glyphicon glyphicon-tags"></span> Tickets <span class="badge">(%d)</span>'),$user->getNumTickets()),
-                                           'href'=>'tickets.php',
-                                            'title'=>__('Show all tickets'));
-                } else {
-                    $navs['tickets']=array('desc'=>__('View Ticket Thread'),
-                                           'href'=>sprintf('tickets.php?id=%d',$user->getTicketId()),
-                                           'title'=>__('View ticket status'));
-                }
-            } else {
-                 $navs['status']=array('desc'=>__('<span class="glyphicon glyphicon-ok"></span> Check Ticket Status'),'href'=>'view.php','title'=>'');
-            }
-            $this->navs=$navs;
-        }
-
-        return $this->navs;
-    }
-
-    function getNavs(){
-        return $this->getNavLinks();
-    }
-
-}
 
 ?>

@@ -160,7 +160,7 @@ if($_POST && !$errors):
                     }
                     // Use locks to avoid double replies
                     elseif ($lock->getStaffId()!=$thisstaff->getId()) {
-                        $errors['err'] = __('Action Denied. Ticket is locked by someone else!');
+                        $errors['err'] = __('Action Denied. Suggestion is locked by someone else!');
                     }
                     // Attempt to renew the lock if possible
                     elseif (($lock->isExpired() && !$lock->renew())
@@ -177,7 +177,7 @@ if($_POST && !$errors):
 
             if(!$errors && ($response=$ticket->postReply($vars, $errors, $_POST['emailreply']))) {
                 $msg = sprintf(__('%s: Reply posted successfully'),
-                        sprintf(__('Ticket #%s'),
+                        sprintf(__('Suggestion #%s'),
                             sprintf('<a href="tickets.php?queue=30&id=%d"><b>%s</b></a>',
                                 $ticket->getId(), $ticket->getNumber()))
                         );
@@ -218,7 +218,7 @@ if($_POST && !$errors):
                 }
                 // Use locks to avoid double replies
                 elseif ($lock->getStaffId()!=$thisstaff->getId()) {
-                    $errors['err'] = __('Action Denied. Ticket is locked by someone else!');
+                    $errors['err'] = __('Action Denied. Suggestion is locked by someone else!');
                 }
                 elseif ($lock->getCode() != $_POST['lockCode']) {
                     $errors['err'] = __('Your lock has expired. Please try again');
@@ -229,7 +229,7 @@ if($_POST && !$errors):
             if(($note=$ticket->postNote($vars, $errors, $thisstaff))) {
 
                 $msg = sprintf(__('%s: Internal note posted successfully'),
-                        sprintf(__('Ticket #%s'),
+                        sprintf(__('Suggestion #%s'),
                             sprintf('<a href="tickets.php?queue=30&id=%d"><b>%s</b></a>',
                                 $ticket->getId(), $ticket->getNumber()))
                         );
@@ -264,7 +264,7 @@ if($_POST && !$errors):
             if(!$ticket || !$role->hasPerm(Ticket::PERM_EDIT))
                 $errors['err']=__('Permission Denied. You are not allowed to edit tickets');
             elseif($ticket->update($_POST,$errors)) {
-                $msg=__('Ticket updated successfully');
+                $msg=__('Suggestion updated successfully');
                 $redirect = 'tickets.php?id='.$ticket->getId();
                 $_REQUEST['a'] = null; //Clear edit action - going back to view.
                 //Check to make sure the staff STILL has access post-update (e.g dept change).
@@ -280,13 +280,13 @@ if($_POST && !$errors):
             switch(strtolower($_POST['do'])):
                 case 'release':
                     if(!$ticket->isAssigned() || !($assigned=$ticket->getAssigned())) {
-                        $errors['err'] = __('Ticket is not assigned!');
+                        $errors['err'] = __('Suggestion is not assigned!');
                     } elseif($ticket->release()) {
                         $msg=sprintf(__(
                             /* 1$ is the current assignee, 2$ is the agent removing the assignment */
-                            'Ticket released (unassigned) from %1$s by %2$s'),
+                            'Suggestion released (unassigned) from %1$s by %2$s'),
                             $assigned, $thisstaff->getName());
-                        $ticket->logActivity(__('Ticket unassigned'),$msg);
+                        $ticket->logActivity(__('Suggestion unassigned'),$msg);
                     } else {
                         $errors['err'] = __('Problems releasing the ticket. Try again');
                     }
@@ -295,11 +295,11 @@ if($_POST && !$errors):
                     if(!$role->hasPerm(Ticket::PERM_EDIT)) {
                         $errors['err'] = __('Permission Denied. You are not allowed to assign/claim tickets.');
                     } elseif(!$ticket->isOpen()) {
-                        $errors['err'] = __('Only open tickets can be assigned');
+                        $errors['err'] = __('Only open suggestions can be assigned');
                     } elseif($ticket->isAssigned()) {
-                        $errors['err'] = sprintf(__('Ticket is already assigned to %s'),$ticket->getAssigned());
+                        $errors['err'] = sprintf(__('Suggestion is already assigned to %s'),$ticket->getAssigned());
                     } elseif ($ticket->claim()) {
-                        $msg = __('Ticket is now assigned to you!');
+                        $msg = __('Suggestion is now assigned to you!');
 					} else {
                         $errors['err'] = __('Problems assigning the ticket. Try again');
                     }
@@ -309,8 +309,8 @@ if($_POST && !$errors):
                     if(!$dept || !$dept->isManager($thisstaff)) {
                         $errors['err']=__('Permission Denied. You are not allowed to flag tickets overdue');
                     } elseif($ticket->markOverdue()) {
-                        $msg=sprintf(__('Ticket flagged as overdue by %s'),$thisstaff->getName());
-                        $ticket->logActivity(__('Ticket Marked Overdue'),$msg);
+                        $msg=sprintf(__('Suggestion flagged as overdue by %s'),$thisstaff->getName());
+                        $ticket->logActivity(__('Suggestion Marked Overdue'),$msg);
                     } else {
                         $errors['err']=__('Problems marking the the ticket overdue. Try again');
                     }
@@ -320,10 +320,10 @@ if($_POST && !$errors):
                     if(!$dept || !$dept->isManager($thisstaff)) {
                         $errors['err']=__('Permission Denied. You are not allowed to flag tickets');
                     } elseif($ticket->markAnswered()) {
-                        $msg=sprintf(__('Ticket flagged as answered by %s'),$thisstaff->getName());
-                        $ticket->logActivity(__('Ticket Marked Answered'),$msg);
+                        $msg=sprintf(__('Suggestion flagged as answered by %s'),$thisstaff->getName());
+                        $ticket->logActivity(__('Suggestion Marked Answered'),$msg);
                     } else {
-                        $errors['err']=__('Problems marking the the ticket answered. Try again');
+                        $errors['err']=__('Problems marking the the suggestion answered. Try again');
                     }
                     break;
                 case 'unanswered':
@@ -331,8 +331,8 @@ if($_POST && !$errors):
                     if(!$dept || !$dept->isManager($thisstaff)) {
                         $errors['err']=__('Permission Denied. You are not allowed to flag tickets');
                     } elseif($ticket->markUnAnswered()) {
-                        $msg=sprintf(__('Ticket flagged as unanswered by %s'),$thisstaff->getName());
-                        $ticket->logActivity(__('Ticket Marked Unanswered'),$msg);
+                        $msg=sprintf(__('Suggestion flagged as unanswered by %s'),$thisstaff->getName());
+                        $ticket->logActivity(__('Suggestion Marked Unanswered'),$msg);
                     } else {
                         $errors['err']=__('Problems marking the ticket unanswered. Try again');
                     }
@@ -365,7 +365,7 @@ if($_POST && !$errors):
                     } elseif (!$_POST['user_id'] || !($user=User::lookup($_POST['user_id']))) {
                         $errors['err'] = __('Unknown user selected');
                     } elseif ($ticket->changeOwner($user)) {
-                        $msg = sprintf(__('Ticket ownership changed to %s'),
+                        $msg = sprintf(__('Suggestion ownership changed to %s'),
                             Format::htmlchars($user->getName()));
                     } else {
                         $errors['err'] = __('Unable to change ticket ownership. Try again');
@@ -398,7 +398,7 @@ if($_POST && !$errors):
                     $vars['cannedattachments'] = $response_form->getField('attachments')->getClean();
 
                     if(($ticket=Ticket::open($vars, $errors))) {
-                        $msg=__('Ticket created successfully');
+                        $msg=__('Suggestion created successfully');
                         $_REQUEST['a']=null;
                         if (!$ticket->checkStaffPerm($thisstaff) || $ticket->isClosed())
                             $ticket=null;
@@ -470,8 +470,8 @@ $nav->addSubMenu(function() use ($queue) {
 });
 
 if ($thisstaff->hasPerm(Ticket::PERM_CREATE, false)) {
-    $nav->addSubMenu(array('desc'=>__('New Ticket'),
-                           'title'=> __('Open a New Ticket'),
+    $nav->addSubMenu(array('desc'=>__('New Suggestion'),
+                           'title'=> __('Open a New Suggestion'),
                            'href'=>'tickets.php?a=open',
                            'iconclass'=>'newTicket',
                            'id' => 'new-ticket'),
@@ -485,7 +485,7 @@ $ost->addExtraHeader('<meta name="tip-namespace" content="tickets.queue" />',
     "$('#content').data('tipNamespace', 'tickets.queue');");
 
 if($ticket) {
-    $ost->setPageTitle(sprintf(__('Ticket #%s'),$ticket->getNumber()));
+    $ost->setPageTitle(sprintf(__('Suggestion #%s'),$ticket->getNumber()));
     $nav->setActiveSubMenu(-1);
     $inc = 'ticket-view.inc.php';
     if ($_REQUEST['a']=='edit'
