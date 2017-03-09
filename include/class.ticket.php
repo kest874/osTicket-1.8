@@ -1615,17 +1615,17 @@ implements RestrictedAccess, Threadable, Searchable {
                 'label' => __('Assignee'),
             )),
             'staff_id' => new AgentSelectionField(array(
-                'label' => __('Assigned Staff'),
+                'label' => __('Assigned Associate'),
             )),
 
             'team_id' => new TeamSelectionField(array(
-                'label' => __('Assigned Team'),
+                'label' => __('Assigned to Team'),
             )),
             'dept_id' => new DepartmentChoiceField(array(
-                'label' => __('Department'),
+                'label' => __('Owner By Team'),
             )),
             'topic_id' => new HelpTopicChoiceField(array(
-                'label' => __('Help Topic'),
+                'label' => __('Category'),
             )),
             'source' => new TicketSourceChoiceField(array(
                 'label' => __('Ticket Source'),
@@ -1635,13 +1635,6 @@ implements RestrictedAccess, Threadable, Searchable {
             )),
             'isoverdue' => new BooleanField(array(
                 'label' => __('Overdue'),
-            )),
-            'isanswered' => new BooleanField(array(
-                'label' => __('Answered'),
-            )),
-            'ip_address' => new TextboxField(array(
-                'label' => __('IP Address'),
-                'configuration' => array('validator' => 'ip'),
             )),
         );
         $tform = TicketForm::getInstance();
