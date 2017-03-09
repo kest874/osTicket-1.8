@@ -145,40 +145,7 @@ class SearchInterface {
             );
             break;
 
-        case $model instanceof User:
-            $cdata = array();
-            foreach ($model->getDynamicData($false) as $e)
-                foreach ($e->getAnswers() as $tag=>$a)
-                    if ($tag != 'subject' && ($v = $a->getSearchable()))
-                        $cdata[] = $v;
-            $this->update($model, $model->getId(),
-                trim(implode("\n", $cdata)),
-                $new === true,
-                array(
-                    'title'=>       Format::searchable($model->getFullName()),
-                    'emails'=>      $model->emails->asArray(),
-                    'org_id'=>      $model->getOrgId(),
-                    'created'=>     $model->getCreateDate(),
-                )
-            );
-            break;
-
-        case $model instanceof Organization:
-            $cdata = array();
-            foreach ($model->getDynamicData(false) as $e)
-                foreach ($e->getAnswers() as $a)
-                    if ($v = $a->getSearchable())
-                        $cdata[] = $v;
-            $this->update($model, $model->getId(),
-                trim(implode("\n", $cdata)),
-                $new === true,
-                array(
-                    'title'=>       Format::searchable($model->getName()),
-                    'created'=>     $model->getCreateDate(),
-                )
-            );
-            break;
-
+        
         case $model instanceof FAQ:
             $this->update($model, $model->getId(),
                 $model->getSearchableAnswer(),
@@ -219,8 +186,6 @@ class SearchInterface {
         // Users, organizations
         Signal::connect('threadentry.created', array($this, 'createModel'));
         Signal::connect('ticket.created', array($this, 'createModel'));
-        Signal::connect('user.created', array($this, 'createModel'));
-        Signal::connect('organization.created', array($this, 'createModel'));
         Signal::connect('model.created', array($this, 'createModel'), 'FAQ');
 
         Signal::connect('model.updated', array($this, 'updateModel'));
@@ -384,7 +349,7 @@ class MysqlSearchBackend extends SearchBackend {
             $criteria->extra(array(
                 'tables' => array(
                     str_replace(array(':', '{}'), array(TABLE_PREFIX, $search),
-                    "(SELECT COALESCE(Z3.`object_id`, Z5.`ticket_id`, Z8.`ticket_id`) as `ticket_id`, SUM({}) AS `relevance` FROM `:_search` Z1 LEFT JOIN `:thread_entry` Z2 ON (Z1.`object_type` = 'H' AND Z1.`object_id` = Z2.`id`) LEFT JOIN `:thread` Z3 ON (Z2.`thread_id` = Z3.`id` AND Z3.`object_type` = 'T') LEFT JOIN `:ticket` Z5 ON (Z1.`object_type` = 'T' AND Z1.`object_id` = Z5.`ticket_id`) LEFT JOIN `:staff` Z6 ON (Z6.`staff_id` = Z1.`object_id` and Z1.`object_type` = 'U') LEFT JOIN `:organization` Z7 ON (Z7.`id` = Z1.`object_id` AND Z1.`object_type` = 'O') LEFT JOIN :ticket Z8 ON (Z8.`user_id` = Z6.`staff_id`) WHERE {} GROUP BY `ticket_id`) Z1"),
+                    "(SELECT COALESCE(Z3.`object_id`, Z5.`ticket_id`, Z8.`ticket_id`) as `ticket_id`, SUM({}) AS `relevance` FROM `:_search` Z1 LEFT JOIN `:thread_entry` Z2 ON (Z1.`object_type` = 'H' AND Z1.`object_id` = Z2.`id`) LEFT JOIN `:thread` Z3 ON (Z2.`thread_id` = Z3.`id` AND Z3.`object_type` = 'T') LEFT JOIN `:ticket` Z5 ON (Z1.`object_type` = 'T' AND Z1.`object_id` = Z5.`ticket_id`) LEFT JOIN `:staff` Z6 ON (Z6.`staff_id` = Z1.`object_id` and Z1.`object_type` = 'U') LEFT JOIN :ticket Z8 ON (Z8.`user_id` = Z6.`staff_id`) WHERE {} GROUP BY `ticket_id`) Z1"),
                 )
             ));
             $criteria->filter(array('ticket_id'=>new SqlCode('Z1.`ticket_id`')));
@@ -397,7 +362,7 @@ class MysqlSearchBackend extends SearchBackend {
                 ),
                 'tables' => array(
                     str_replace(array(':', '{}'), array(TABLE_PREFIX, $search),
-                    "(SELECT Z6.`staff_id` as `user_id`, {} AS `relevance` FROM `:_search` Z1 LEFT JOIN `:staff` Z6 ON (Z6.`staff_id` = Z1.`object_id` and Z1.`object_type` = 'U') LEFT JOIN `:organization` Z7 ON (Z7.`id` = Z1.`object_id` AND Z1.`object_type` = 'O') WHERE {}) Z1"),
+                    "(SELECT Z6.`staff_id` as `user_id`, {} AS `relevance` FROM `:_search` Z1 LEFT JOIN `:staff` Z6 ON (Z6.`staff_id` = Z1.`object_id` and Z1.`object_type` = 'U') WHERE {}) Z1"),
                 )
             ));
             $criteria->filter(array('id'=>new SqlCode('Z1.`user_id`')));
