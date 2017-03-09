@@ -1,7 +1,7 @@
 <?php
 header("Content-Type: text/html; charset=UTF-8");
 $title = ($ost && ($title=$ost->getPageTitle()))
-    ? $title : ('osTicket :: '.__('Staff Control Panel'));
+    ? $title : ('Suggestions :: '.__('Ticket Queue'));
 if (!isset($_SERVER['HTTP_X_PJAX'])) { ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html<?php
@@ -68,7 +68,7 @@ if ($lang) {
             if($thisstaff->isAdmin() && !defined('ADMINPAGE')) { ?>
             | <a href="<?php echo ROOT_PATH ?>scp/admin.php" class="no-pjax"><?php echo __('Admin Panel'); ?></a>
             <?php }else{ ?>
-            | <a href="<?php echo ROOT_PATH ?>scp/index.php" class="no-pjax"><?php echo __('Agent Panel'); ?></a>
+            | <a href="<?php echo ROOT_PATH ?>scp/index.php" class="no-pjax"><?php echo __('Associate Panel'); ?></a>
             <?php } ?>
             | <a href="<?php echo ROOT_PATH ?>scp/profile.php"><?php echo __('Profile'); ?></a>
             | <a href="<?php echo ROOT_PATH ?>scp/logout.php?auth=<?php echo $ost->getLinkToken(); ?>" class="no-pjax"><?php echo __('Log Out'); ?></a>
