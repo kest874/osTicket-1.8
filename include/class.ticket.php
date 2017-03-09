@@ -1631,7 +1631,7 @@ implements RestrictedAccess, Threadable, Searchable {
                 'label' => __('Ticket Source'),
             )),
             'user_id' => new AgentSelectionField (array(
-                'label' => __('Ticket Submitter'),
+                'label' => __('Submitter'),
             )),
             'isoverdue' => new BooleanField(array(
                 'label' => __('Overdue'),
