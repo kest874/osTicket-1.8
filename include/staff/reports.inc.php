@@ -55,6 +55,17 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
             <em>Report showing Suggestions By Age</em>
         </td>     
     </tr>
+        <tr class="tg-3we0">
+        <td width="220px">
+            <strong>
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestions_Suggesitons&rs:Command=Render" target="_blank">
+                Suggestions</a>
+            </strong>
+        </td>
+        <td>
+            <em>Report showing Suggestions with filters (Catagory, Status)</em>
+        </td>     
+    </tr>
  
 </table>
 <br><br><br>
