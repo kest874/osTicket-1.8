@@ -54,6 +54,7 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
 if($ticket->isOverdue())
     $warn.='&nbsp;&nbsp;<span class="Icon overdueTicket">'.__('Marked overdue!').'</span>';
 ?>
+<div id="threaddata">
 <div>
     <div class="thread sticky bar">
 	<div class="thread_content_top">
@@ -218,13 +219,15 @@ if($ticket->isOverdue())
     </div>
   </div>
 </div>
-<div class="clear tixTitle has_bottom_border">
+
+
+
+<div class="tixTitle has_bottom_border">
     <h3>
     <?php $subject_field = TicketForm::getInstance()->getField('subject');
         echo $subject_field->display($ticket->getSubject()); ?>
     </h3>
 </div>
-<div id="threaddata">
 <?php If  (!$ticket->checkStaffPerm($thisstaff)) { ?>
             <div class="permissions-error"><?php echo "This another Team's improvment (view only)."; ?></div>
              <?php
