@@ -1867,8 +1867,8 @@ h2 .reload {
     border-radius: 5px 5px 0 0;
 	/*border-left: 1px solid #999;
     border-right: 1px solid #999;
-    border-bottom: 1px solid #999;
-    border-radius: 0 0 5px 5px;*/
+    border-bottom: 1px solid #999;*/
+    border-radius: 5px 5px 5px 5px;
 }
 
 .thread-entry {
