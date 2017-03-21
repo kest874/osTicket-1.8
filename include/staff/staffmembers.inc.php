@@ -197,7 +197,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                 <td><a href="staff.php?id=<?php echo $id; ?>"><?php echo
                 Format::htmlchars((string) $agent->getName()); ?></a></td>
                 <td><?php echo $agent->getUserName(); ?></td>
-                <td><?php echo $agent->isActive() ? __('Active') :'<b>'.__('Locked').'</b>'; ?><?php
+                <td><?php echo $agent->isActive() ? __('Enabled') :'<b>'.__('Disabled').'</b>'; ?><?php
                     echo $agent->onvacation ? ' <small>(<i>'.__('vacation').'</i>)</small>' : ''; ?></td>
 
                 <td><a href="departments.php?id=<?php echo
@@ -242,7 +242,7 @@ if ($count) { //Show options..
     <p class="confirm-action" style="display:none;" id="disable-confirm">
         <?php echo sprintf(__('Are you sure you want to <b>disable</b> (lock) %s?'),
             _N('selected agent', 'selected agents', 2));?>
-        <br><br><?php echo __("Locked staff won't be able to login to Staff Control Panel.");?>
+        <br><br><?php echo __("Disabled staff won't be able to login to Staff Control Panel.");?>
     </p>
     <p class="confirm-action" style="display:none;" id="delete-confirm">
         <font color="red"><strong><?php echo sprintf(__('Are you sure you want to DELETE %s?'),

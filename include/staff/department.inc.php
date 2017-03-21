@@ -118,7 +118,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         </tr>
         <tr>
             <td width="180">
-                <strong><?php echo __('Faciliatator'); ?>:</strong>
+                <strong><?php echo __('Mentor'); ?>:</strong>
             </td>
             <td>
                 <span>
@@ -141,7 +141,31 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
                 </span>
             </td>
         </tr>
-      
+        <tr>
+            <td width="180">
+                <strong><?php echo __('Team Leader'); ?>:</strong>
+            </td>
+            <td>
+                <span>
+                <select name="teamleader_id">
+                    <option value="0">&mdash; <?php echo __('None'); ?> &mdash;</option>
+                    <?php
+                    $sql='SELECT staff_id,CONCAT_WS(", ",lastname, firstname) as name '
+                        .' FROM '.STAFF_TABLE.' staff '
+                        .' ORDER by name';
+                    if(($res=db_query($sql)) && db_num_rows($res)) {
+                        while(list($id,$name)=db_fetch_row($res)){
+                            $selected=($info['teamleader_id'] && $id==$info['teamleader_id'])?'selected="selected"':'';
+                            echo sprintf('<option value="%d" %s>%s</option>',$id,$selected,$name);
+                        }
+                    }
+                    ?>
+                </select>
+                &nbsp;<span class="error"><?php echo $errors['teamleader_id']; ?></span>
+                <i class="help-tip icon-question-sign" href="#manager"></i>
+                </span>
+            </td>
+        </tr>
         
         <tr>
             <th colspan="2">

@@ -7,7 +7,8 @@ $sortOptions=array(
     'pid' => 'pid',
     'name' => 'name',
     'members'=> 'members_count',
-    'manager'=>'manager__lastname'
+    'manager'=>'manager__lastname',
+    'teamleader'=>'teamleader__lastname'
     );
 
 $orderWays = array('DESC'=>'DESC', 'ASC'=>'ASC');
@@ -133,7 +134,8 @@ $depts->limit($pageNav->getLimit())->offset($pageNav->getStart());
             <th width="28%"><a <?php echo $name_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=name"><?php echo __('Name');?></a></th>
             <th width="8%"><a  <?php echo $users_sort; ?>href="departments.php?<?php echo $qstr; ?>&sort=members"><?php echo __('Associates');?></a></th>
 
-            <th width="22%"><a  <?php echo $manager_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=manager"><?php echo __('Manager');?></a></th>
+            <th width="22%"><a  <?php echo $manager_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=manager"><?php echo __('Mentor');?></a></th>
+            <th width="22%"><a  <?php echo $teamleader_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=teamleader"><?php echo __('Team Leader');?></a></th>
         </tr>
     </thead>
     <tbody>
@@ -183,6 +185,8 @@ $depts->limit($pageNav->getLimit())->offset($pageNav->getStart());
                 
                 <td><a href="staff.php?id=<?php echo $dept->manager_id; ?>"><?php
                     echo $dept->manager_id ? $dept->manager : ''; ?>&nbsp;</a></td>
+                <td><a href="staff.php?id=<?php echo $dept->teamleader_id; ?>"><?php
+                    echo $dept->teamleader_id ? $dept->teamleader : ''; ?>&nbsp;</a></td>
             </tr>
             <?php
             }

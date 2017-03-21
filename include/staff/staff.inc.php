@@ -170,23 +170,14 @@ if (count($bks) > 1) {
             <label class="checkbox">
             <input type="checkbox" name="islocked" value="1"
               <?php echo (!$staff->isactive) ? 'checked="checked"' : ''; ?> />
-              <?php echo __('Locked'); ?>
+              <?php echo __('Disabled'); ?>
             </label>
             <label class="checkbox">
             <input type="checkbox" name="isadmin" value="1"
               <?php echo ($staff->isadmin) ? 'checked="checked"' : ''; ?> />
               <?php echo __('Administrator'); ?>
             </label>
-            <label class="checkbox">
-            <input type="checkbox" name="assigned_only"
-              <?php echo ($staff->assigned_only) ? 'checked="checked"' : ''; ?> />
-              <?php echo __('Limit ticket access to ONLY assigned tickets'); ?>
-            </label>
-            <label class="checkbox">
-            <input type="checkbox" name="onvacation"
-              <?php echo ($staff->onvacation) ? 'checked="checked"' : ''; ?> />
-              <?php echo __('Vacation Mode'); ?>
-            </label>
+           
             <br/>
         </tr>
       </tbody>

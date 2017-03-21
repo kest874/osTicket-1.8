@@ -38,6 +38,10 @@ implements TemplateVariable, Searchable {
                 'null' => true,
                 'constraint' => array('manager_id' => 'Staff.staff_id'),
             ),
+            'teamleader' => array(
+                'null' => true,
+                'constraint' => array('teamleader_id' => 'Staff.staff_id'),
+            ),
             'members' => array(
                 'null' => true,
                 'list' => true,
@@ -341,7 +345,21 @@ implements TemplateVariable, Searchable {
 
         return ($this->getManagerId() && $this->getManagerId()==$staff);
     }
+   
+   function getTeamLeaderId() {
+        return $this->teamleader_id;
+    }
 
+    function getTeamLeader() {
+        return $this->teamleader;
+    }
+
+    function isTeamLeader($staff) {
+        if (is_object($staff))
+            $staff = $staff->getId();
+
+        return ($this->getTeamLeaderId() && $this->getTeamLeaderId()==$staff);
+    }
     function isMember($staff) {
         if (is_object($staff))
             $staff = $staff->getId();
@@ -561,7 +579,9 @@ implements TemplateVariable, Searchable {
             if ($manager=$criteria['manager'])
                 $query->filter(array(
                             'manager_id' => is_object($manager)?$manager->getId():$manager));
-
+            if ($teamleader=$criteria['teamleader'])
+                $query->filter(array(
+                            'teamleader_id' => is_object($teamleader)?$teamleader->getId():$teamleader));
             if (isset($criteria['nonempty'])) {
                 $query->annotate(array(
                     'user_count' => SqlAggregate::COUNT('members')
@@ -690,6 +710,7 @@ implements TemplateVariable, Searchable {
         $this->sla_id = isset($vars['sla_id'])?$vars['sla_id']:0;
         $this->autoresp_email_id = isset($vars['autoresp_email_id'])?$vars['autoresp_email_id']:0;
         $this->manager_id = $vars['manager_id'] ?: 0;
+        $this->teamleader_id = $vars['teamleader_id'] ?: 0;
         $this->name = Format::striptags($vars['name']);
         $this->signature = Format::sanitize($vars['signature']);
         $this->group_membership = $vars['group_membership'];
