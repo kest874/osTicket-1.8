@@ -141,12 +141,6 @@ if($ticket->isOverdue())
             <div id="action-dropdown-more" class="action-dropdown anchor-right">
               <ul>
                 <?php
-                 if ($role->hasPerm(Ticket::PERM_EDIT)) { ?>
-                    <li><a class="change-user" href="#tickets/<?php
-                    echo $ticket->getId(); ?>/change-user"><i class="icon-user"></i> <?php
-                    echo __('Change Owner'); ?></a></li>
-                <?php
-                 }
 
                  if($ticket->isOpen() && ($dept && $dept->isManager($thisstaff))) {
 
