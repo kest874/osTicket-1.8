@@ -31,7 +31,7 @@ $info=Format::htmlchars(($errors && $_POST)?$_POST:$info);
 
 <ul class="clean tabs" id="topic-tabs">
     <li class="active"><a href="#info"><i class="icon-info-sign"></i> <?php echo __('Help Topic Information'); ?></a></li>
-    <li><a href="#routing"><i class="icon-ticket"></i> <?php echo __('New ticket options'); ?></a></li>
+    <li><a href="#routing"><i class="icon-ticket"></i> <?php echo __('New suggestion options'); ?></a></li>
     <li><a href="#forms"><i class="icon-paste"></i> <?php echo __('Forms'); ?></a></li>
 </ul>
 
@@ -109,20 +109,20 @@ $info=Format::htmlchars(($errors && $_POST)?$_POST:$info);
 
 <div class="hidden tab_content" id="routing">
 <div style="padding:8px 0;border-bottom: 2px dotted #ddd;">
-<div><b class="big"><?php echo __('New ticket options');?></b></div>
+<div><b class="big"><?php echo __('New suggestion options');?></b></div>
 </div>
 
  <table class="table" border="0" cellspacing="0" cellpadding="2">
         <tbody>
         <tr>
             <td width="180" class="required">
-                <?php echo __('Department'); ?>:
+                <?php echo __('Team'); ?>:
             </td>
             <td>
                 <select name="dept_id" data-quick-add="department">
                     <option value="0">&mdash; <?php echo __('System Default'); ?> &mdash;</option>
                     <?php
-                    foreach (Dept::getDepartments() as $id=>$name) {
+                    foreach (Dept::getDepartments(array('publiconly' => 1)) as $id=>$name) {
                         $selected=($info['dept_id'] && $id==$info['dept_id'])?'selected="selected"':'';
                         echo sprintf('<option value="%d" %s>%s</option>',$id,$selected,$name);
                     } ?>
@@ -134,7 +134,7 @@ $info=Format::htmlchars(($errors && $_POST)?$_POST:$info);
         </tr>
         <tr class="border">
             <td>
-                <?php echo __('Ticket Number Format'); ?>:
+                <?php echo __('Suggestion Number Format'); ?>:
             </td>
             <td>
                 <label>
@@ -286,9 +286,8 @@ $info=Format::htmlchars(($errors && $_POST)?$_POST:$info);
                 <select name="assign" data-quick-add>
                     <option value="0">&mdash; <?php echo __('Unassigned'); ?> &mdash;</option>
                     <?php
-                    if (($users=Staff::getStaffMembers())) {
-                        echo sprintf('<OPTGROUP label="%s">',
-                                sprintf(__('Agents (%d)'), count($users)));
+                    if (($users=Dept::getDepartments(array('publiconly' => 1)))) {
+                  
                         foreach ($users as $id => $name) {
                             $k="s$id";
                             $selected = ($info['assign']==$k || $info['staff_id']==$id)?'selected="selected"':'';
@@ -299,7 +298,7 @@ $info=Format::htmlchars(($errors && $_POST)?$_POST:$info);
                         }
                         echo '</OPTGROUP>';
                     }
-                    if ($teams = Team::getTeams()) { ?>
+                    if ($teams = dept::getDepartments()) { ?>
                       <optgroup data-quick-add="team" label="<?php
                         echo sprintf(__('Teams (%d)'), count($teams)); ?>"><?php
                         foreach ($teams as $id => $name) {
@@ -324,7 +323,7 @@ $info=Format::htmlchars(($errors && $_POST)?$_POST:$info);
             </td>
             <td>
                 <input type="checkbox" name="noautoresp" value="1" <?php echo $info['noautoresp']?'checked="checked"':''; ?> >
-                    <?php echo __('<strong>Disable</strong> new ticket auto-response'); ?>
+                    <?php echo __('<strong>Disable</strong> new suggestion auto-response'); ?>
                     <i class="help-tip icon-question-sign" href="#ticket_auto_response"></i>
             </td>
         </tr>
