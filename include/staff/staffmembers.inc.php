@@ -218,7 +218,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
             <a id="selectNone" href="#ckb"><?php echo __('None');?></a>&nbsp;&nbsp;
             <a id="selectToggle" href="#ckb"><?php echo __('Toggle');?></a>&nbsp;&nbsp;
             <?php }else{
-                echo __('No agents found!');
+                echo __('No associates found!');
             } ?>
         </td>
      </tr>
@@ -237,16 +237,16 @@ if ($count) { //Show options..
     <hr/>
     <p class="confirm-action" style="display:none;" id="enable-confirm">
         <?php echo sprintf(__('Are you sure you want to <b>enable</b> (unlock) %s?'),
-            _N('selected agent', 'selected agents', 2));?>
+            _N('selected associate', 'selected associate', 2));?>
     </p>
     <p class="confirm-action" style="display:none;" id="disable-confirm">
         <?php echo sprintf(__('Are you sure you want to <b>disable</b> (lock) %s?'),
-            _N('selected agent', 'selected agents', 2));?>
+            _N('selected associate', 'selected associates', 2));?>
         <br><br><?php echo __("Disabled staff won't be able to login to Staff Control Panel.");?>
     </p>
     <p class="confirm-action" style="display:none;" id="delete-confirm">
         <font color="red"><strong><?php echo sprintf(__('Are you sure you want to DELETE %s?'),
-            _N('selected agent', 'selected agents', 2));?></strong></font>
+            _N('selected associate', 'selected associates', 2));?></strong></font>
         <br><br><?php echo __('Deleted data CANNOT be recovered.');?>
     </p>
     <div><?php echo __('Please confirm to continue.');?></div>

@@ -104,7 +104,7 @@ $depts->limit($pageNav->getLimit())->offset($pageNav->getStart());
 <div class="sticky bar">
     <div class="content">
         <div class="pull-left">
-            <h2><?php echo __('Departments');?></h2>
+            <h2><?php echo __('Teams');?></h2>
         </div>
         <div class="pull-right flush-right">
             <a href="departments.php?a=add" class="green button action-button"><i class="icon-plus-sign"></i> <?php echo __('Add New Team');?></a>

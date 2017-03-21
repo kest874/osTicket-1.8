@@ -24,7 +24,7 @@ if ($_REQUEST['a']=='add'){
 }
 else {
     //Editing Department.
-    $title=__('Manage Agent');
+    $title=__('Manage Associate');
     $action='update';
     $submit_text=__('Save Changes');
     $info['id'] = $staff->getId();
