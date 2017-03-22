@@ -548,9 +548,8 @@ if ($errors['err'] && isset($_POST['a'])) {
                     $emailReply = (!isset($info['emailreply']) || $info['emailreply']);
                     ?>
                     <select id="emailreply" name="emailreply">
-                        <option value="1" <?php echo $emailReply ?  'selected="selected"' : ''; ?>><?php echo $to; ?></option>
-                        <option value="0" <?php echo !$emailReply ? 'selected="selected"' : ''; ?>
-                        >&mdash; <?php echo __('Do Not Email Reply'); ?> &mdash;</option>
+                        <option value="1" <?php echo !$emailReply ?  'selected="selected"' : ''; ?>><?php echo $to; ?></option>
+                        <option value="0" <?php echo $emailReply ? 'selected="selected"' : ''; ?>>&mdash; <?php echo __('Do Not Email Reply'); ?> &mdash;</option>
                     </select>
                 </td>
             </tr>
@@ -560,7 +559,7 @@ if ($errors['err'] && isset($_POST['a'])) {
                 ?>
             <tbody id="cc_sec"
                 style="display:<?php echo $emailReply?  'table-row-group':'none'; ?>;">
-             <tr>
+             <tr style="display: none;">
                 <td width="120">
                     <label><strong><?php echo __('Collaborators'); ?>:</strong></label>
                 </td>
@@ -599,7 +598,7 @@ if ($errors['err'] && isset($_POST['a'])) {
                     <label><strong><?php echo __('Response');?>:</strong></label>
                 </td>
                 <td>
-<?php if ($cfg->isCannedResponseEnabled()) { ?>
+<?php if (!$cfg->isCannedResponseEnabled()) { ?>
                     <select id="cannedResp" name="cannedResp">
                         <option value="0" selected="selected"><?php echo __('Select a canned response');?></option>
                         <option value='original'><?php echo __('Original Message'); ?></option>

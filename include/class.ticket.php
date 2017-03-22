@@ -1056,6 +1056,8 @@ implements RestrictedAccess, Threadable, Searchable {
                 $sentlist[] = $this->getEmail();
             // Only alerts dept members if the ticket is NOT assigned.
             $manager = $dept->getManager();
+            $teamleader = $dept->getTeamLeader();
+            
             if ($cfg->alertDeptMembersONNewTicket() && !$this->isAssigned()
                 && ($members = $dept->getMembersForAlerts())
             ) {
@@ -1065,6 +1067,9 @@ implements RestrictedAccess, Threadable, Searchable {
             }
             if ($cfg->alertDeptManagerONNewTicket() && $manager) {
                 $recipients[] = $manager;
+            }
+            if ($cfg->alertDeptTeamLeaderONNewTicket() && $teamleader) {
+                $recipients[] = $teamleader;
             }
             // Account manager
             if ($cfg->alertAcctManagerONNewMessage()
@@ -1389,10 +1394,20 @@ implements RestrictedAccess, Threadable, Searchable {
         }
         // Recipients
         $recipients = array();
-        if ($assignee instanceof Staff) {
-            if ($cfg->alertStaffONAssignment())
-                $recipients[] = $assignee;
-        } //elseif (($assignee instanceof Team) && $assignee->alertsEnabled()) {
+        
+                    $manager = $dept->getManager();
+            $teamleader = $dept->getTeamLeader();
+
+            if ($cfg->alertStaffONAssignment() && $manager) {
+                $recipients[] = $manager;
+            }
+            if ($cfg->alertTeamLeaderONAssignment() && $teamleader) {
+                $recipients[] = $teamleader;
+            }
+     //   if ($assignee instanceof Staff) {
+     //       if ($cfg->alertStaffONAssignment())
+       //         $recipients[] = $assignee;
+      //  } //elseif (($assignee instanceof Team) && $assignee->alertsEnabled()) {
  //           if ($cfg->alertTeamMembersONAssignment() && ($members=$assignee->getMembers()))
  //               $recipients = array_merge($recipients, $members);
  //           elseif ($cfg->alertTeamLeadONAssignment() && ($lead=$assignee->getTeamLead()))
