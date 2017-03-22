@@ -95,7 +95,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                 <select name="did" id="did">
                     <option value="0">&mdash;
                         <?php echo __( 'All Teams');?> &mdash;</option>
-                    <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) { $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
+                    <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) if (strlen($name) > 5 ){  $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
                     <option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
                 </select>
                 <input type="submit" name="submit" class="button muted" value="<?php echo __('Apply');?>" />

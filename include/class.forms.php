@@ -2456,6 +2456,7 @@ class DepartmentField extends ChoiceField {
         $choices = array();
         if (($depts = Dept::getDepartments()))
             foreach ($depts as $id => $name)
+                if (strlen($name) > 5)
                 $choices[$id] = $name;
 
         return $choices;

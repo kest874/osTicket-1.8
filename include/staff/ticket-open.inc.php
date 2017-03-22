@@ -202,9 +202,10 @@ if ($_POST)
                     
                     
                     if(($teams=Dept::getDepartments(array('dept_id' => $thisstaff->getDepts())))) {
-                        echo '<OPTGROUP label="'.sprintf(__('Teams (%d)'), count($teams)).'">';
+                        //echo '<OPTGROUP label="'.sprintf(__('Teams (%d)'), count($teams)).'">';
                         foreach($teams as $id => $name) {
                             $k="t$id";
+                            if (strlen($name) > 5)
                             echo sprintf('<option value="%s" %s>%s</option>',
                                         $k,(($info['assignId']==$k)?'selected="selected"':''),$name);
                         }
@@ -231,9 +232,10 @@ if ($_POST)
                     
                     
                     if(($teams=Dept::getDepartments(array('dept_id' => $thisstaff->getDepts())))) {
-                        echo '<OPTGROUP label="'.sprintf(__('Teams (%d)'), count($teams)).'">';
+                        //echo '<OPTGROUP label="'.sprintf(__('Teams (%d)'), count($teams)).'">';
                         foreach($teams as $id => $name) {
                             $k="t$id";
+                            if (strlen($name) > 5)
                             echo sprintf('<option value="%s" %s>%s</option>',
                                         $k,(($info['assignId']==$k)?'selected="selected"':''),$name);
                         }
