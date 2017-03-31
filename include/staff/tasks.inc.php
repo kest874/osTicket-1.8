@@ -33,7 +33,11 @@ $sort_options = array(
 $queue_columns = array(
         'number' => array(
             'width' => '8%',
-            'heading' => __('Number'),
+            'heading' => __('Task'),
+            ),
+        'parent' => array(
+             'width' => '8%',
+             'heading' => __('Parent Ticket'),
             ),
         'date' => array(
             'width' => '20%',
