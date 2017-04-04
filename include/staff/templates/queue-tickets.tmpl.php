@@ -86,19 +86,13 @@ $pageNav->setTotal($count);
 $pageNav->setURL('tickets.php', $args);
 
 $filters = array('id' =>$thisstaff ->getDeptId());
-$depts = Dept::objects()
-    ->annotate(array(
-            'members_count' => SqlAggregate::COUNT('members', true),
-    ));
+    
+$sql='SELECT count(dept_id) as count FROM '.STAFF_TABLE.' staff '
+.'WHERE dept_id = '.$thisstaff->dept_id
+.' AND isactive = 1 group by dept_id ';
 
-$depts->filter($filters);
+$DeptMembers = db_fetch_array(db_query($sql));    
 
-foreach ($depts as $dept) {
-    
-    $id = $dept->getId();
-    $pid = $dept->getPId(); 
-    
-    
     
 $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(created) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
@@ -137,7 +131,7 @@ $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 
 $YearToDateImplemented = db_fetch_array(db_query($sql));
 
-$MemberCount = $dept->members_count;
+$MemberCount = $DeptMembers["count"];
 
 $PMSubmitted = (int)$PMonthSubmitted["count"];
 $PMTargetSuggestions =  round(($MemberCount * 17) /12 * (int) date('m', strtotime(date('Y-m')." -1 month")));
@@ -174,8 +168,7 @@ $YTDTargetImplemented = $MemberCount * 12;
 $YTDImpAheadBehind = $YTDImplemented - $YTDTargetImplemented;
 $YTDImpAheadBehindColor = ($YTDImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
 $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%';
-   
-}
+
 ?>
 <div id="dashboard">
     <table width="100%" style="font-size: smaller">
