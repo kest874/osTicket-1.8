@@ -102,14 +102,12 @@ foreach ($depts as $dept) {
     
 $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(created) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
-.'AND MONTH(created) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)'
 .'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
 
 $PMonthSubmitted = db_fetch_array(db_query($sql));
 
 $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(created) = YEAR(CURRENT_DATE)'
-.'AND MONTH(created) = MONTH(CURRENT_DATE)'
 .'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
 
 $CMonthSubmitted = db_fetch_array(db_query($sql));
@@ -122,7 +120,6 @@ $YearToDateSubmitted = db_fetch_array(db_query($sql));
 
 $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(closed) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
-.'AND MONTH(closed) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)'
 .'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
 
 $PMonthImplemented = db_fetch_array(db_query($sql));
@@ -145,37 +142,37 @@ $MemberCount = $dept->members_count;
 $PMSubmitted = (int)$PMonthSubmitted["count"];
 $PMTargetSuggestions =  round(($MemberCount * 17) /12 * (int) date('m', strtotime(date('Y-m')." -1 month")));
 $PMSugAheadBehind = $PMSubmitted - $PMTargetSuggestions;
-$PMSugAheadBehindColor = ($PMSugAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$PMSugAheadBehindColor = ($PMSugAheadBehind > -1 ? 'lightgreen':'#ff9999');
 $PMSugGoal = number_format($PMSubmitted / $PMTargetSuggestions * 100,2).'%';
             
 $PMImplemented = (int)$PMonthImplemented["count"];
 $PMTargetImplemented = $MemberCount * 12/12 * (int) date('m', strtotime(date('Y-m')." -1 month"));
 $PMImpAheadBehind = $PMImplemented - $PMTargetImplemented;
-$PMImpAheadBehindColor = ($PMImpAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$PMImpAheadBehindColor = ($PMImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
 $PMImpGoal = number_format($PMImplemented / $PMTargetImplemented * 100,2).'%';
             
 $CMSubmitted = (int)$CMonthSubmitted["count"];
 $CMTargetSuggestions =  round(($MemberCount * 17) /12 * (int) date('m', strtotime(date('Y-m'))));
 $CMSugAheadBehind = $CMSubmitted - $CMTargetSuggestions;
-$CMSugAheadBehindColor = ($CMSugAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$CMSugAheadBehindColor = ($CMSugAheadBehind > -1 ? 'lightgreen':'#ff9999');
 $CMSugGoal = number_format($CMSubmitted / $CMTargetSuggestions * 100,2).'%';
             
 $CMImplemented = (int)$CMonthImplemented["count"];
 $CMTargetImplemented = $MemberCount * 12/12 * (int) date('m', strtotime(date('Y-m')));
 $CMImpAheadBehind = $CMImplemented - $CMTargetImplemented;
-$CMImpAheadBehindColor = ($CMImpAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$CMImpAheadBehindColor = ($CMImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
 $CMImpGoal = number_format($CMImplemented / $CMTargetImplemented * 100,2).'%';
 
 $YTDSubmitted = (int)$YearToDateSubmitted["count"];
 $YTDTargetSuggestions =  round(($MemberCount * 17));
 $YTDSugAheadBehind = $YTDSubmitted - $YTDTargetSuggestions;
-$YTDSugAheadBehindColor = ($YTDSugAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$YTDSugAheadBehindColor = ($YTDSugAheadBehind > -1 ? 'lightgreen':'#ff9999');
 $YTDSugGoal = number_format($YTDSubmitted / $YTDTargetSuggestions * 100,2).'%';
 
 $YTDImplemented = (int)$YearToDateImplemented["count"];
 $YTDTargetImplemented = $MemberCount * 12;
 $YTDImpAheadBehind = $YTDImplemented - $YTDTargetImplemented;
-$YTDImpAheadBehindColor = ($YTDImpAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$YTDImpAheadBehindColor = ($YTDImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
 $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%';
    
 }
