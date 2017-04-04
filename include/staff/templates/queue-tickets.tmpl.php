@@ -84,8 +84,160 @@ $tickets = $pageNav->paginateSimple($tickets);
 $count = $tickets->total();
 $pageNav->setTotal($count);
 $pageNav->setURL('tickets.php', $args);
-?>
 
+$filters = array('id' =>$thisstaff ->getDeptId());
+$depts = Dept::objects()
+    ->annotate(array(
+            'members_count' => SqlAggregate::COUNT('members', true),
+    ));
+
+$depts->filter($filters);
+
+foreach ($depts as $dept) {
+    
+    $id = $dept->getId();
+    $pid = $dept->getPId(); 
+    
+    
+    
+$sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
+.'WHERE YEAR(created) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
+.'AND MONTH(created) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)'
+.'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
+
+$PMonthSubmitted = db_fetch_array(db_query($sql));
+
+$sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
+.'WHERE YEAR(created) = YEAR(CURRENT_DATE)'
+.'AND MONTH(created) = MONTH(CURRENT_DATE)'
+.'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
+
+$CMonthSubmitted = db_fetch_array(db_query($sql));
+
+$sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
+.'WHERE YEAR(created) = YEAR(CURRENT_DATE)'
+.'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
+
+$YearToDateSubmitted = db_fetch_array(db_query($sql));
+
+$sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
+.'WHERE YEAR(closed) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
+.'AND MONTH(closed) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)'
+.'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
+
+$PMonthImplemented = db_fetch_array(db_query($sql));
+
+                        $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
+.'WHERE YEAR(closed) = YEAR(CURRENT_DATE)'
+.'AND MONTH(closed) = MONTH(CURRENT_DATE)'
+.'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
+
+$CMonthImplemented = db_fetch_array(db_query($sql));
+
+$sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
+.'WHERE YEAR(closed) = YEAR(CURRENT_DATE)'
+.'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
+
+$YearToDateImplemented = db_fetch_array(db_query($sql));
+
+$MemberCount = $dept->members_count;
+
+$PMSubmitted = (int)$PMonthSubmitted["count"];
+$PMTargetSuggestions =  round(($MemberCount * 17) /12 * (int) date('m', strtotime(date('Y-m')." -1 month")));
+$PMSugAheadBehind = $PMSubmitted - $PMTargetSuggestions;
+$PMSugAheadBehindColor = ($PMSugAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$PMSugGoal = number_format($PMSubmitted / $PMTargetSuggestions * 100,2).'%';
+            
+$PMImplemented = (int)$PMonthImplemented["count"];
+$PMTargetImplemented = $MemberCount * 12/12 * (int) date('m', strtotime(date('Y-m')." -1 month"));
+$PMImpAheadBehind = $PMImplemented - $PMTargetImplemented;
+$PMImpAheadBehindColor = ($PMImpAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$PMImpGoal = number_format($PMImplemented / $PMTargetImplemented * 100,2).'%';
+            
+$CMSubmitted = (int)$CMonthSubmitted["count"];
+$CMTargetSuggestions =  round(($MemberCount * 17) /12 * (int) date('m', strtotime(date('Y-m'))));
+$CMSugAheadBehind = $CMSubmitted - $CMTargetSuggestions;
+$CMSugAheadBehindColor = ($CMSugAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$CMSugGoal = number_format($CMSubmitted / $CMTargetSuggestions * 100,2).'%';
+            
+$CMImplemented = (int)$CMonthImplemented["count"];
+$CMTargetImplemented = $MemberCount * 12/12 * (int) date('m', strtotime(date('Y-m')));
+$CMImpAheadBehind = $CMImplemented - $CMTargetImplemented;
+$CMImpAheadBehindColor = ($CMImpAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$CMImpGoal = number_format($CMImplemented / $CMTargetImplemented * 100,2).'%';
+
+$YTDSubmitted = (int)$YearToDateSubmitted["count"];
+$YTDTargetSuggestions =  round(($MemberCount * 17));
+$YTDSugAheadBehind = $YTDSubmitted - $YTDTargetSuggestions;
+$YTDSugAheadBehindColor = ($YTDSugAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$YTDSugGoal = number_format($YTDSubmitted / $YTDTargetSuggestions * 100,2).'%';
+
+$YTDImplemented = (int)$YearToDateImplemented["count"];
+$YTDTargetImplemented = $MemberCount * 12;
+$YTDImpAheadBehind = $YTDImplemented - $YTDTargetImplemented;
+$YTDImpAheadBehindColor = ($YTDImpAheadBehind > 0 ? 'lightgreen':'#ff9999');
+$YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%';
+   
+}
+?>
+<div id="dashboard">
+    <table width="100%" style="font-size: smaller">
+        <tr style="font-weight: bold;">
+            <td width="10px"> </td>
+            <td width="120px">Team Members: <span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span></td>
+            <td width="100px">Suggestions</td> 
+            <td width="90px">Target</td>
+            <td width="100px">Ahead/Behind</td>
+            <td width="100px">Goal</td>
+            <td width="100px">Implementations</td>
+            <td width="90px">Target</td>
+            <td width="100px">Ahead/Behind</td>
+            <td width="100px">Goal</td>
+            <td></td>
+            
+        </tr>
+        <tr>
+        <td> </td>
+        <td style="font-weight: bold;">Last Month</td>
+            <td><?php echo $PMSubmitted;?></td>
+            <td><?php echo $PMTargetSuggestions;?></td>
+            <td style="background-color:<?php echo $PMSugAheadBehindColor ?>"><?php echo $PMSugAheadBehind;?></td>
+            <td><?php echo $PMSugGoal;?></td>
+            <td><?php echo $PMImplemented;?></td>
+            <td><?php echo $PMTargetImplemented;?></td>
+            <td style="background-color:<?php echo $PMImpAheadBehindColor ?>"><?php echo $PMImpAheadBehind;?></td>
+            <td><?php echo $PMImpGoal;?></td>
+            <td></td>
+        <tr>
+        <td> </td>
+            <td style="font-weight: bold;">This Month</td>
+            <td><?php echo $CMSubmitted;?></td>
+            <td><?php echo $CMTargetSuggestions;?></td>
+            <td style="background-color:<?php echo $CMSugAheadBehindColor ?>"><?php echo $CMSugAheadBehind;?></td>
+            <td><?php echo $CMSugGoal;?></td>
+            <td><?php echo $CMImplemented;?></td>
+            <td><?php echo $CMTargetImplemented;?></td>
+            <td style="background-color:<?php echo $CMImpAheadBehindColor ?>"><?php echo $CMImpAheadBehind;?></td>
+            <td><?php echo $CMImpGoal;?></td>
+            <td></td>
+        </tr>
+        <tr>
+        <td> </td>
+            <td style="font-weight: bold;">Year To Date</td>
+            <td><?php echo $YTDSubmitted;?></td>
+            <td><?php echo $YTDTargetSuggestions;?></td>
+            <td style="background-color:<?php echo $YTDSugAheadBehindColor ?>"><?php echo $YTDSugAheadBehind;?></td>
+            <td><?php echo $YTDSugGoal;?></td>
+            <td><?php echo $YTDImplemented;?></td>
+            <td><?php echo $YTDTargetImplemented;?></td>
+            <td style="background-color:<?php echo $YTDImpAheadBehindColor ?>"><?php echo $YTDImpAheadBehind;?></td>
+            <td><?php echo $YTDImpGoal;?></td>
+            <td></td>
+        </tr>
+        
+    </table>
+
+</div>
 <!-- SEARCH FORM START -->
 <div id='basic_search'>
   <div class="pull-right" style="height:25px">
