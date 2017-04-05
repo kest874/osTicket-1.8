@@ -100,12 +100,14 @@ $DeptName = db_fetch_array(db_query($sql));
 
 $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(created) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
+.'WHERE MONTH(created) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)'
 .'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
 
 $PMonthSubmitted = db_fetch_array(db_query($sql));
 
 $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(created) = YEAR(CURRENT_DATE)'
+.'AND MONTH(closed) = MONTH(CURRENT_DATE)'
 .'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
 
 $CMonthSubmitted = db_fetch_array(db_query($sql));
@@ -118,6 +120,7 @@ $YearToDateSubmitted = db_fetch_array(db_query($sql));
 
 $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(closed) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
+.'WHERE MONTH(closed) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)'
 .'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
 
 $PMonthImplemented = db_fetch_array(db_query($sql));
