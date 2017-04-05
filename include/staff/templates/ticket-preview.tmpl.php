@@ -12,13 +12,13 @@ $thread = $ticket->getThread();
 
 if($lock && $lock->getStaffId()==$thisstaff->getId())
     $warn.='&nbsp;<span class="Icon lockedTicket">'
-    .sprintf(__('Ticket is locked by %s'), $lock->getStaffName()).'</span>';
+    .sprintf(__('Suggestion is locked by %s'), $lock->getStaffName()).'</span>';
 elseif($ticket->isOverdue())
     $warn.='&nbsp;<span class="Icon overdueTicket">'.__('Marked overdue!').'</span>';
 
 echo sprintf(
         '<div style="min-width:450px; padding: 2px 2px 0 5px;" id="t%s">
-         <h2>'.__('Ticket #%s').': %s</h2>',
+         <h2>'.__('Suggestion #%s').': %s</h2>',
          $ticket->getNumber(),
          $ticket->getNumber(),
          Format::htmlchars($ticket->getSubject()));
@@ -34,7 +34,7 @@ echo '<ul class="tabs" id="ticket-preview">';
 
 echo '
         <li class="active"><a id="preview_tab" href="#preview"
-            ><i class="icon-list-alt"></i>&nbsp;'.__('Ticket Summary').'</a></li>';
+            ><i class="icon-list-alt"></i>&nbsp;'.__('Suggestion Summary').'</a></li>';
 if ($thread && $thread->getNumCollaborators()) {
 echo sprintf('
         <li><a id="collab_tab" href="#collab"
@@ -58,7 +58,7 @@ if($ticket->isOpen()) {
 
 echo sprintf('
         <tr>
-            <th width="100">'.__('Ticket State').':</th>
+            <th width="100">'.__('Suggestion State').':</th>
             <td>%s</td>
         </tr>
         <tr>
@@ -102,11 +102,11 @@ echo sprintf(
             <td><a href="users.php?id=%d" class="no-pjax">%s</a> <span class="faded">%s</span></td>
         </tr>
         <tr>
-            <th width="100">'.__('Department').':</th>
+            <th width="100">'.__('Owned by').':</th>
             <td>%s</td>
         </tr>
         <tr>
-            <th>'.__('Help Topic').':</th>
+            <th>'.__('Category').':</th>
             <td>%s</td>
         </tr>',
     $ticket->getUserId(),
@@ -138,7 +138,7 @@ echo '</div>'; // ticket preview content.
                         $collab->getEmail());
             }
         }  else {
-            echo __("Ticket doesn't have any collaborators.");
+            echo __("Suggestion doesn't have any collaborators.");
         }?>
     </table>
     <br>

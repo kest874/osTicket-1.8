@@ -92,7 +92,7 @@ if ($task->isOverdue())
 ?>
 <div>
     <div class="sticky bar">
-       <div class="content">
+       <div id="task_top">
         <div class="pull-left flush-left">
             <?php
             if ($ticket) { ?>
@@ -301,7 +301,7 @@ if ($task->isOverdue())
 </div>
 <?php
 if (!$ticket) { ?>
-    <table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
+    <table class="task_info" cellspacing="0" cellpadding="0" width="100%" border="0">
         <tr>
             <td width="50%">
                 <table border="0" cellspacing="" cellpadding="4" width="100%">
@@ -337,7 +337,7 @@ if (!$ticket) { ?>
                 <table cellspacing="0" cellpadding="4" width="100%" border="0">
 
                     <tr>
-                        <th><?php echo __('Department');?>:</th>
+                        <th><?php echo __('Owned By');?>:</th>
                         <td><?php echo Format::htmlchars($task->dept->getName()); ?></td>
                     </tr>
                     <?php
@@ -368,31 +368,12 @@ if (!$ticket) { ?>
                     </tr>
                     <?php
                     } ?>
-                    <tr>
-                        <th><?php echo __('Collaborators');?>:</th>
-                        <td>
-                            <?php
-                            $collaborators = __('Add Participants');
-                            if ($task->getThread()->getNumCollaborators())
-                                $collaborators = sprintf(__('Participants (%d)'),
-                                        $task->getThread()->getNumCollaborators());
-
-                            echo sprintf('<span><a class="collaborators preview"
-                                    href="#thread/%d/collaborators"><span
-                                    id="t%d-collaborators">%s</span></a></span>',
-                                    $task->getThreadId(),
-                                    $task->getThreadId(),
-                                    $collaborators);
-                           ?>
-                        </td>
-                    </tr>
+                    
                 </table>
             </td>
         </tr>
     </table>
-    <br>
-    <br>
-    <table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
+    <table class="task_info" cellspacing="0" cellpadding="0" width="100%" border="0">
     <?php
     $idx = 0;
     foreach (DynamicFormEntry::forObject($task->getId(),
@@ -479,27 +460,7 @@ else
         <span class="error"></span>
         <table style="width:100%" border="0" cellspacing="0" cellpadding="3">
             <tbody id="collab_sec" style="display:table-row-group">
-             <tr>
-                <td>
-                    <input type='checkbox' value='1' name="emailcollab" id="emailcollab"
-                        <?php echo ((!$info['emailcollab'] && !$errors) || isset($info['emailcollab']))?'checked="checked"':''; ?>
-                        style="display:<?php echo $thread->getNumCollaborators() ? 'inline-block': 'none'; ?>;"
-                        >
-                    <?php
-                    $recipients = __('Add Participants');
-                    if ($thread->getNumCollaborators())
-                        $recipients = sprintf(__('Recipients (%d of %d)'),
-                                $thread->getNumActiveCollaborators(),
-                                $thread->getNumCollaborators());
-
-                    echo sprintf('<span><a class="collaborators preview"
-                            href="#thread/%d/collaborators"><span id="t%d-recipients">%s</span></a></span>',
-                            $thread->getId(),
-                            $thread->getId(),
-                            $recipients);
-                   ?>
-                </td>
-             </tr>
+             
             </tbody>
             <tbody id="update_sec">
             <tr>

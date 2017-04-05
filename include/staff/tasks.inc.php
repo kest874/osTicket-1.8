@@ -37,7 +37,7 @@ $queue_columns = array(
             ),
         'parent' => array(
              'width' => '8%',
-             'heading' => __('Parent Ticket'),
+             'heading' => __('Parent Suggestion'),
             ),
         'date' => array(
             'width' => '20%',
@@ -51,12 +51,12 @@ $queue_columns = array(
             ),
         'dept' => array(
             'width' => '16%',
-            'heading' => __('Department'),
+            'heading' => __('Team'),
             'sort_col'  => 'dept__name',
             ),
         'assignee' => array(
             'width' => '16%',
-            'heading' => __('Agent'),
+            'heading' => __('Associate'),
             ),
         );
 
@@ -386,7 +386,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                         Format::truncate((string) $staff, 40));
             } elseif($T['team_id']) {
                 $assignee = sprintf('<span class="Icon teamAssigned">%s</span>',
-                    Format::truncate(Team::getLocalById($T['team_id'], 'name', $T['team__name']),40));
+                    Format::truncate(Dept::getLocalById($T['team_id'], 'name', $T['team__name']),40));
             }
 
             $threadcount=$T['thread_count'];

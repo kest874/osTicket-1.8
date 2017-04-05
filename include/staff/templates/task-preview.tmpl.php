@@ -80,7 +80,7 @@ if ($task->isOpen()) {
 echo sprintf(
     '
         <tr>
-            <th width="100">'.__('Department').':</th>
+            <th width="100">'.__('Owned By').':</th>
             <td>%s</td>
         </tr>',
     Format::htmlchars($task->dept->getName())

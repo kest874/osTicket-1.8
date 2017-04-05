@@ -132,7 +132,7 @@ class StaffNav {
             );
             
             $this->tabs['tasks'] = array('desc'=>__('Tasks'), 'href'=>'tasks.php', 'title'=>__('Task Queue'));
-            $this->tabs['tickets'] = array('desc'=>__('Tickets'),'href'=>'tickets.php','title'=>__('Ticket Queue'));
+            $this->tabs['tickets'] = array('desc'=>__('Suggestions'),'href'=>'tickets.php','title'=>__('Ticket Queue'));
 
             $this->tabs['kbase'] = array('desc'=>__('Knowledgebase'),'href'=>'kb.php','title'=>__('Knowledgebase'));
             $this->tabs['reports'] = array('desc'=>__('Reports'),'href'=>'reports.php','title'=>__('Reports'));

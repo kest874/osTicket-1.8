@@ -1497,20 +1497,20 @@ class TaskForm extends DynamicForm {
 class TaskInternalForm
 extends AbstractForm {
     static $layout = 'GridFormLayout';
-
+   
     function buildFields() {
-
+    Global $thisstaff;
         $fields = array(
                 'dept_id' => new DepartmentField(array(
                     'id'=>1,
-                    'label' => __('Department'),
+                    'label' => __('Owned By Team'),
                     'required' => true,
-					'default' => 1,
+					'default' => $thisstaff ->getDeptId(),
                     'layout' => new GridFluidCell(6),
                     )),
                 'assignee' => new AssigneeField(array(
                     'id'=>2,
-                    'label' => __('Assignee'),
+                    'label' => __('Assigned To:'),
                     'required' => false,
                     'layout' => new GridFluidCell(6),
                     )),

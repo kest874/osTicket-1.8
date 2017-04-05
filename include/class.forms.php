@@ -2502,7 +2502,7 @@ class DepartmentField extends ChoiceField {
 
 FormField::addFieldTypes(/*@trans*/ 'Dynamic Fields', function() {
     return array(
-        'department' => array(__('Department'), DepartmentField),
+        'department' => array(__('Team'), DepartmentField),
     );
 });
 
@@ -2543,7 +2543,7 @@ class AssigneeField extends ChoiceField {
         if (!isset($this->_choices)) {
             $config = $this->getConfiguration();
             $choices = array(
-                    __('Agents') => new ArrayObject(),
+                    __('Associates') => new ArrayObject(),
                     __('Teams') => new ArrayObject());
             $A = current($choices);
             $criteria = $this->getCriteria();
@@ -4533,26 +4533,24 @@ class VisibilityConstraint {
 
 
 class AssignmentForm extends Form {
-
     static $id = 'assign';
-    var $_dept = null;
-
-    function __construct($source=null, $options=array()) {
-        parent::__construct($source, $options);
-    }
-
+    var $_assignee = null;
+    var $_assignees = null;
     function getFields() {
-
         if ($this->fields)
             return $this->fields;
-
         $fields = array(
-            'dept' => new DepartmentField(array(
+            'assignee' => new AssigneeField(array(
                     'id'=>1,
-                    'label' => __('Team'),
+                    'label' => __('Assignee'),
                     'flags' => hexdec(0X450F3),
                     'required' => true,
-                    'validator-error' => __('Team selection is required'),
+                    'validator-error' => __('Assignee selection required'),
+                    'configuration' => array(
+                        'criteria' => array(
+                            'available' => true,
+                            ),
+                       ),
                     )
                 ),
             'comments' => new TextareaField(array(
@@ -4568,55 +4566,61 @@ class AssignmentForm extends Form {
                     )
                 ),
             );
-
+        if (isset($this->_assignees))
+            $fields['assignee']->setChoices($this->_assignees);
         $this->setFields($fields);
-
         return $this->fields;
     }
-
+    function getField($name) {
+        if (($fields = $this->getFields())
+                && isset($fields[$name]))
+            return $fields[$name];
+    }
     function isValid($include=false) {
-
-        if (!parent::isValid($include))
+        if (!parent::isValid($include) || !($f=$this->getField('assignee')))
             return false;
-
-        // Do additional validations
-        if (!($dept = $this->getDept()))
-            $this->getField('dept')->addError(
-                    __('Unknown Team'));
-
+        // Do additional assignment validation
+        if (!($assignee = $this->getAssignee())) {
+            $f->addError(__('Unknown assignee'));
+        } elseif ($assignee instanceof Staff) {
+            // Make sure the agent is available
+            if (!$assignee->isAvailable())
+                $f->addError(__('Agent is unavailable for assignment'));
+        } elseif ($assignee instanceof Team) {
+            // Make sure the team is active and has members
+            if (!$assignee->isActive())
+                $f->addError(__('Team is disabled'));
+            elseif (!$assignee->getNumMembers())
+                $f->addError(__('Team does not have members'));
+        }
         return !$this->errors();
     }
-
     function render($options) {
-
         switch(strtolower($options['template'])) {
         case 'simple':
             $inc = STAFFINC_DIR . 'templates/dynamic-form-simple.tmpl.php';
             break;
         default:
             throw new Exception(sprintf(__('%s: Unknown template style %s'),
-                        get_class(), $options['template']));
+                        'FormUtils', $options['template']));
         }
-
         $form = $this;
         include $inc;
-
     }
-
-    function getDept() {
-
-        if (!isset($this->_dept)) {
-            if (($id = $this->getField('dept')->getClean()))
-                $this->_dept = Dept::lookup($id);
-        }
-
-        return $this->_dept;
-    }
-    
-    
     function setAssignees($assignees) {
         $this->_assignees = $assignees;
         $this->_fields = array();
+    }
+    function getAssignees() {
+        return $this->_assignees;
+    }
+    function getAssignee() {
+        if (!isset($this->_assignee))
+            $this->_assignee = $this->getField('assignee')->getClean();
+        return $this->_assignee;
+    }
+    function getComments() {
+        return $this->getField('comments')->getClean();
     }
 }
 
