@@ -177,8 +177,10 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%'
 <div id="dashboard">
     <table width="100%" style="font-size: smaller">
         <tr style="font-weight: bold;">
-            <td width="10px"> </td>
-            <td width="120px"><span style="color: red; font-weight: bold;"><?php echo $DeptName["name"]; ?></span> Members: <span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span></td>
+        <td colspan="9"><span style="color: red; font-weight: bold;"><?php echo $DeptName["name"]; ?></span> Members: <span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span></td>
+        </tr>
+        <tr style="font-weight: bold;">
+            <td width="125px">Month</td>
             <td width="100px">Suggestions</td> 
             <td width="90px">Target</td>
             <td width="100px">Ahead/Behind</td>
@@ -191,8 +193,7 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%'
             
         </tr>
         <tr>
-        <td> </td>
-        <td style="font-weight: bold;">Last Month</td>
+            <td style="font-weight: bold;">Last Month</td>
             <td><?php echo $PMSubmitted;?></td>
             <td><?php echo $PMTargetSuggestions;?></td>
             <td style="background-color:<?php echo $PMSugAheadBehindColor ?>"><?php echo $PMSugAheadBehind;?></td>
@@ -203,7 +204,6 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%'
             <td><?php echo $PMImpGoal;?></td>
             <td></td>
         <tr>
-        <td> </td>
             <td style="font-weight: bold;">This Month</td>
             <td><?php echo $CMSubmitted;?></td>
             <td><?php echo $CMTargetSuggestions;?></td>
@@ -216,7 +216,6 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%'
             <td></td>
         </tr>
         <tr>
-        <td> </td>
             <td style="font-weight: bold;">Year To Date</td>
             <td><?php echo $YTDSubmitted;?></td>
             <td><?php echo $YTDTargetSuggestions;?></td>
