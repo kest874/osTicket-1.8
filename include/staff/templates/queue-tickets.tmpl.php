@@ -93,7 +93,11 @@ $sql='SELECT count(dept_id) as count FROM '.STAFF_TABLE.' staff '
 
 $DeptMembers = db_fetch_array(db_query($sql));    
 
-    
+$sql='SELECT name FROM '.DEPT_TABLE.' dept '
+.'WHERE id = '.$thisstaff->dept_id;
+
+$DeptName = db_fetch_array(db_query($sql));
+
 $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(created) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
 .'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
@@ -174,7 +178,7 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%'
     <table width="100%" style="font-size: smaller">
         <tr style="font-weight: bold;">
             <td width="10px"> </td>
-            <td width="120px">Team Members: <span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span></td>
+            <td width="120px"><span style="color: red; font-weight: bold;"><?php echo $DeptName["name"]; ?></span> Members: <span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span></td>
             <td width="100px">Suggestions</td> 
             <td width="90px">Target</td>
             <td width="100px">Ahead/Behind</td>
