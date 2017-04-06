@@ -4622,6 +4622,12 @@ class AssignmentForm extends Form {
     function getComments() {
         return $this->getField('comments')->getClean();
     }
+        
+    function getDept() {
+        if (!isset($this->_assignee))
+            $this->_assignee = $this->getField('assignee')->getClean();
+        return $this->_assignee;
+    }
 }
 
 class TransferForm extends Form {

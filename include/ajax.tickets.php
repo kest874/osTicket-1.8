@@ -344,12 +344,12 @@ class TicketsAjaxAPI extends AjaxController {
             Http::response(403, __('Permission denied'));
         $errors = array();
         $info = array(
-                ':title' => sprintf(__('Ticket #%s: %s'),
+                ':title' => sprintf(__('Suggestion #%s: %s'),
                     $ticket->getNumber(),
                     sprintf('%s %s',
                         $ticket->isAssigned() ?
                             __('Reassign') :  __('Assign'),
-                        !strcasecmp($target, 'agents') ?
+                        !strcasecmp($target, 'selected tickets') ?
                             __('to an Agent') : __('to a Team')
                     )),
                 ':action' => sprintf('#tickets/%d/assign%s',
@@ -477,7 +477,7 @@ class TicketsAjaxAPI extends AjaxController {
             $inc = 'assign.tmpl.php';
             $info[':action'] = "#tickets/mass/assign/$w";
             $info[':title'] = sprintf('Assign %s',
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
             $form = AssignmentForm::instantiate($_POST);
             $assignCB = function($t, $f, $e) {
                 return $t->assign($f, $e);
@@ -519,12 +519,12 @@ class TicketsAjaxAPI extends AjaxController {
                     default:
                         $members->order_by('firstname', 'lastname');
                     }
-                    $prompt  = __('Select an Agent');
+                    $prompt  = __('Select an Associate');
                     $assignees = array();
                     foreach ($members as $member)
                          $assignees['s'.$member->getId()] = $member->getName();
                     if (!$assignees)
-                        $info['warn'] =  __('No agents available for assignment');
+                        $info['warn'] =  __('No Associates available for assignment');
                     break;
                 case 'teams':
                     $assignees = array();
@@ -537,10 +537,10 @@ class TicketsAjaxAPI extends AjaxController {
                 case 'me':
                     $info[':action'] = '#tickets/mass/claim';
                     $info[':title'] = sprintf('Claim %s',
-                            _N('selected ticket', 'selected tickets', $count));
+                            _N('selected suggestion', 'selected suggestions', $count));
                     $info['warn'] = sprintf(
                             __('Are you sure you want to CLAIM %s?'),
-                            _N('selected ticket', 'selected tickets', $count));
+                            _N('selected sugestion', 'selected suggestions', $count));
                     $verb = sprintf('%s, %s', __('Yes'), __('Claim'));
                     $id = sprintf('s%s', $thisstaff->getId());
                     $assignees = array($id => $thisstaff->getName());
@@ -570,7 +570,7 @@ class TicketsAjaxAPI extends AjaxController {
                     $info['error'] = sprintf(
                             __('Unable to %1$s %2$s'),
                             __('assign'),
-                            _N('selected ticket', 'selected tickets', $count));
+                            _N('selected suggestion', 'selected suggestions', $count));
                 }
             }
             break;
@@ -578,7 +578,7 @@ class TicketsAjaxAPI extends AjaxController {
             $inc = 'transfer.tmpl.php';
             $info[':action'] = '#tickets/mass/transfer';
             $info[':title'] = sprintf('Transfer %s',
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
             $form = TransferForm::instantiate($_POST);
             if ($_POST && $form->isValid()) {
                 foreach ($_POST['tids'] as $tid) {
@@ -595,7 +595,7 @@ class TicketsAjaxAPI extends AjaxController {
                     $info['error'] = sprintf(
                             __('Unable to %1$s %2$s'),
                             __('transfer'),
-                            _N('selected ticket', 'selected tickets', $count));
+                            _N('selected suggestion', 'selected suggestions', $count));
                 }
             }
             break;
@@ -603,13 +603,13 @@ class TicketsAjaxAPI extends AjaxController {
             $inc = 'delete.tmpl.php';
             $info[':action'] = '#tickets/mass/delete';
             $info[':title'] = sprintf('Delete %s',
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
             $info[':placeholder'] = sprintf(__(
                         'Optional reason for deleting %s'),
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
             $info['warn'] = sprintf(__(
                         'Are you sure you want to DELETE %s?'),
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
             $info[':extra'] = sprintf('<strong>%s</strong>',
                         __('Deleted tickets CANNOT be recovered, including any associated attachments.')
                         );
@@ -630,7 +630,7 @@ class TicketsAjaxAPI extends AjaxController {
                     $info['error'] = sprintf(
                             __('Unable to %1$s %2$s'),
                             __('delete'),
-                            _N('selected ticket', 'selected tickets', $count));
+                            _N('selected suggestion', 'selected suggestions', $count));
                 }
             }
             break;
@@ -640,11 +640,11 @@ class TicketsAjaxAPI extends AjaxController {
                 $info[':action'] = "#tickets/mass/priority/{$w}";
                 $verb = __('Update');
                 $info[':title'] = sprintf('Change Priority On %s',
-                        _N('selected ticket', 'selected tickets', $count));
+                        _N('selected suggestion', 'selected suggestions', $count));
     
                 $info[':placeholder'] = sprintf(__(
                             'Optional reason for changing priority on %s'),
-                        _N('selected ticket', 'selected tickets', $count));
+                        _N('selected suggestion', 'selected suggestions', $count));
     
                 if (!($P = Priority::lookup($w)))
                     Http::response(422, 'No such priority');
@@ -681,7 +681,7 @@ class TicketsAjaxAPI extends AjaxController {
                 $inc = 'topic.tmpl.php';
                 $info[':action'] = '#tickets/mass/topic';
                 $info[':title'] = sprintf('Change Help Topic On %s',
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
                 $form = TopicForm::instantiate($_POST);
                
                 if ($_POST && $form->isValid()) {
@@ -699,7 +699,7 @@ class TicketsAjaxAPI extends AjaxController {
                         $info['error'] = sprintf(
                                 __('Unable to %1$s %2$s'),
                                 __('topic'),
-                                _N('selected ticket', 'selected tickets', $count));
+                                _N('selected suggestion', 'selected suggestions', $count));
                     }
                 }
                 break;
@@ -715,15 +715,15 @@ class TicketsAjaxAPI extends AjaxController {
                         $actions[$action]['verbed'],
                         sprintf('%1$d %2$s',
                             $count,
-                            _N('selected ticket', 'selected tickets', $count))
+                            _N('selected suggestion', 'selected suggestions', $count))
                         );
                 $_SESSION['::sysmsgs']['msg'] = $msg;
             } else {
                 $warn = sprintf(
                         __('%1$d of %2$d %3$s %4$s'
-                        /* Tokens are <x> of <y> <selected ticket(s)> <actioned> */),
+                        /* Tokens are <x> of <y> <selected suggestion(s)> <actioned> */),
                         $i, $count,
-                        _N('selected ticket', 'selected tickets',
+                        _N('selected suggestion', 'selected suggestions',
                             $count),
                         $actions[$action]['verbed']);
                 $_SESSION['::sysmsgs']['warn'] = $warn;
@@ -733,7 +733,7 @@ class TicketsAjaxAPI extends AjaxController {
             $info['error'] = $errors['err'] ?: sprintf(
                     __('Unable to %1$s %2$s'),
                     __('process'),
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
         }
         if ($_POST)
             $info = array_merge($info, Format::htmlchars($_POST));
@@ -939,21 +939,21 @@ class TicketsAjaxAPI extends AjaxController {
             if (!$i) {
                 $errors['err'] = $errors['err']
                     ?: sprintf(__('Unable to change status for %s'),
-                        _N('the selected ticket', 'any of the selected tickets', $count));
+                        _N('the selected suggestion', 'any of the selected suggestions', $count));
             }
             else {
                 // Assume success
                 if ($i==$count) {
                     if (!strcasecmp($status->getState(), 'deleted')) {
                         $msg = sprintf(__( 'Successfully deleted %s.'),
-                                _N('selected ticket', 'selected tickets',
+                                _N('selected suggestion', 'selected suggestions',
                                     $count));
                     } else {
                        $msg = sprintf(
                             __(
-                                /* 1$ will be 'selected ticket(s)', 2$ is the new status */
+                                /* 1$ will be 'selected suggestion(s)', 2$ is the new status */
                                 'Successfully changed status of %1$s to %2$s'),
-                            _N('selected ticket', 'selected tickets',
+                            _N('selected suggestion', 'selected suggestions',
                                 $count),
                             $status->getName());
                     }
@@ -961,13 +961,13 @@ class TicketsAjaxAPI extends AjaxController {
                 } else {
                     if (!strcasecmp($status->getState(), 'deleted')) {
                         $warn = sprintf(__('Successfully deleted %s.'),
-                                sprintf(__('%1$d of %2$d selected tickets'),
+                                sprintf(__('%1$d of %2$d selected suggestions'),
                                     $i, $count)
                                 );
                     } else {
                         $warn = sprintf(
                                 __('%1$d of %2$d %3$s status changed to %4$s'),$i, $count,
-                                _N('selected ticket', 'selected tickets',
+                                _N('selected suggestion', 'selected suggestions',
                                     $count),
                                 $status->getName());
                     }
@@ -1006,14 +1006,14 @@ class TicketsAjaxAPI extends AjaxController {
 				 if (!strcasecmp($state, 'deleted')) {
             $info['warn'] = sprintf(__(
                         'Are you sure you want to DELETE %s?'),
-                    _N('selected ticket', 'selected tickets', $count)
+                    _N('selected suggestion', 'selected suggestions', $count)
                     );
             $info['extra'] = sprintf('<strong>%s</strong>', __(
                         'Deleted tickets CANNOT be recovered, including any associated attachments.')
                     );
             $info['placeholder'] = sprintf(__(
                         'Optional reason for deleting %s'),
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
         }
         $info['status_id'] = $info['status_id'] ?: $_REQUEST['status_id'];
         $info['comments'] = Format::htmlchars($_REQUEST['comments']);

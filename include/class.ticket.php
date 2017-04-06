@@ -656,44 +656,45 @@ implements RestrictedAccess, Threadable, Searchable {
         }
         return $this->recipients;
     }
-    // function getAssignmentForm($source=null, $options=array()) {
-        // $prompt = $assignee = '';
-        // // Possible assignees
-        // $assignees = array();
-        // switch (strtolower($options['target'])) {
-            // case 'agents':
-                // $dept = $this->getDept();
-                // foreach ($dept->getAssignees() as $member)
-                    // $assignees['s'.$member->getId()] = $member;
-                // if (!$source && $this->isOpen() && $this->staff)
-                    // $assignee = sprintf('s%d', $this->staff->getId());
-                // $prompt = __('Select an Agent');
-                // break;
-            // case 'teams':
-                // if (($teams = dept::getDepartments()))
-                    // foreach ($teams as $id => $name)
-                        // $assignees['t'.$id] = $name;
-                // if (!$source && $this->isOpen() && $this->team)
-                    // $assignee = sprintf('t%d', $this->team->getId());
-                // $prompt = __('Select a Team');
-                // break;
-        // }
-        // // Default to current assignee if source is not set
-        // if (!$source)
-            // $source = array('assignee' => array($assignee));
-        // $form = AssignmentForm::instantiate($source, $options);
-        // if ($assignees)
-            // $form->setAssignees($assignees);
-        // if ($prompt && ($f=$form->getField('assignee')))
-            // $f->configure('prompt', $prompt);
-        // return $form;
-    // }
-    
-    function getAssignmentForm($source=null) {
+    function getAssignmentForm($source=null, $options=array()) {
+        $prompt = $assignee = '';
+        // Possible assignees
+        $assignees = array();
+        switch (strtolower($options['target'])) {
+            case 'agents':
+                $dept = $this->getDept();
+                foreach ($dept->getAssignees() as $member)
+                    $assignees['s'.$member->getId()] = $member;
+                if (!$source && $this->isOpen() && $this->staff)
+                    $assignee = sprintf('s%d', $this->staff->getId());
+                $prompt = __('Select an Agent');
+                break;
+            case 'teams':
+                if (($teams = dept::getDepartments()))
+                    foreach ($teams as $id => $name)
+                if (strlen($name) > 5)
+                        $assignees['t'.$id] = $name;
+                if (!$source && $this->isOpen() && $this->team)
+                    $assignee = sprintf('t%d', $this->team->getId());
+                $prompt = __('Select a Team');
+                break;
+        }
+        // Default to current assignee if source is not set
         if (!$source)
-            $source = array('assignee' => array($this->getDeptId()));
-        return AssignmentForm::instantiate($source);
+            $source = array('assignee' => array($assignee));
+        $form = AssignmentForm::instantiate($source, $options);
+        if ($assignees)
+            $form->setAssignees($assignees);
+        if ($prompt && ($f=$form->getField('assignee')))
+            $f->configure('prompt', $prompt);
+        return $form;
     }
+    
+   // function getAssignmentForm($source=null) {
+   //     if (!$source)
+   //         $source = array('assignee' => array($this->getDeptId()));
+   //     return AssignmentForm::instantiate($source);
+   // }
     
     function getTransferForm($source=null) {
         if (!$source)
