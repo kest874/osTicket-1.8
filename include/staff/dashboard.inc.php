@@ -14,6 +14,16 @@ switch ($cfg->getAgentNameFormat()) {
 }
 $agents->order_by('lastname');
 
+$sql='SELECT concat(a.lastname,'."', '".',a.firstname) as manager FROM '
+.STAFF_TABLE.' a join '.DEPT_TABLE.' b on a.staff_id = b.manager_id '
+.'WHERE b.id = '.$thisstaff->dept_id;
+$Manager = db_fetch_array(db_query($sql)); 
+
+$sql='SELECT concat(a.lastname,'."', '".',a.firstname) as teamleader FROM '
+.STAFF_TABLE.' a join '.DEPT_TABLE.' b on a.staff_id = b.teamleader_id '
+.'WHERE b.id = '.$thisstaff->dept_id;
+$Teamleader = db_fetch_array(db_query($sql)); 
+
 $sql='SELECT count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE dept_id = '.$thisstaff->dept_id
 .' and status_id != 3 and status_id !=6 ';
@@ -107,6 +117,8 @@ $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
 
 $YearToDateImplemented = db_fetch_array(db_query($sql));
+$Manager = $Manager["manager"];
+$Teamleader = $Teamleader["teamleader"];
 
 $MemberCount = $DeptMembers["count"];
 $OpenSuggestions = $OpenSuggestions["count"];
@@ -190,7 +202,16 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%'
         </tr>
 
 <tr><td colspan = "2"><table>
-    <?php
+   
+   <tr>
+        <td><span style="color: red; font-weight: bold;">Manager: </span> <?php echo $Manager ?></td>
+   </tr>
+    <tr>
+        <td><span style="color: red; font-weight: bold;">Team Leader: </span> <?php echo $Teamleader ?></td>
+   </tr>
+
+   <?php
+        
         foreach ($agents as $A) { ?>
            <tr id="<?php echo $A->staff_id; ?>">
                 <td><?php echo Format::htmlchars($A->getName()); ?></td>
