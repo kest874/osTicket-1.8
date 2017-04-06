@@ -13,6 +13,23 @@ body, html {
     padding:0;
 }
 
+
+.toggle-box {
+  display: none;
+}
+
+.toggle-box + label {
+  display: block;
+}
+
+.toggle-box + label + div {
+  display: none;
+}
+
+.toggle-box:checked + label + div {
+  display: block;
+}
+
 .link,
 a {
     color:#184E81;

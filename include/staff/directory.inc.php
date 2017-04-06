@@ -80,7 +80,7 @@ $qstr.='&amp;order='.($order=='DESC' ? 'ASC' : 'DESC');
     <form action="directory.php" method="GET" name="filter">
        <input type="text" name="q" value="<?php echo Format::htmlchars($_REQUEST['q']); ?>" >
         <select name="did" id="did">
-             <option value="0">&mdash; <?php echo __('All Departments');?> &mdash;</option>
+             <option value="0">&mdash; <?php echo __('All Teams');?> &mdash;</option>
              <?php
                 foreach (Dept::getDepartments(array('nonempty'=>1)) as $id=>$name) {
                     $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':'';
@@ -97,7 +97,7 @@ $qstr.='&amp;order='.($order=='DESC' ? 'ASC' : 'DESC');
 <div class="clear"></div>
 <div style="margin-bottom:20px; padding-top:5px;">
     <div class="pull-left flush-left">
-        <h2><?php echo __('Agents');?>
+        <h2><?php echo __('Associates');?>
             &nbsp;<i class="help-tip icon-question-sign" href="#staff_members"></i>
         </h2>
     </div>

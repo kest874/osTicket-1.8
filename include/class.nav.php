@@ -128,7 +128,7 @@ class StaffNav {
         if(!$this->tabs) {
             $this->tabs = array();
             $this->tabs['dashboard'] = array(
-                'desc'=>__('Dashboard'),'href'=>'directory.php','title'=>__('Agent Dashboard'), "class"=>"no-pjax"
+                'desc'=>__('Directory'),'href'=>'directory.php','title'=>__('Agent Dashboard'), "class"=>"no-pjax"
             );
             
             $this->tabs['tasks'] = array('desc'=>__('Tasks'), 'href'=>'tasks.php', 'title'=>__('Task Queue'));
@@ -175,8 +175,8 @@ class StaffNav {
                     break;
                 case 'dashboard':
                     //$subnav[]=array('desc'=>__('Dashboard'),'href'=>'dashboard.php','iconclass'=>'logs');
-                    $subnav[]=array('desc'=>__('Agent Directory'),'href'=>'directory.php','iconclass'=>'teams');
-                    $subnav[]=array('desc'=>__('My Profile'),'href'=>'profile.php','iconclass'=>'users');
+                    $subnav[]=array('desc'=>__('Associate Directory'),'href'=>'directory.php','iconclass'=>'teams');
+                    
                     break;
                 case 'users':
                     $subnav[] = array('desc' => __('User Directory'), 'href' => 'users.php', 'iconclass' => 'teams');
