@@ -204,7 +204,7 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%'
 <tr><td colspan = "2"><table>
    
    <tr>
-        <td><span style="color: red; font-weight: bold;">Manager: </span> <?php echo $Manager ?></td>
+        <td><span style="color: red; font-weight: bold;">Mentor: </span> <?php echo $Manager ?></td>
    </tr>
     <tr>
         <td><span style="color: red; font-weight: bold;">Team Leader: </span> <?php echo $Teamleader ?></td>
