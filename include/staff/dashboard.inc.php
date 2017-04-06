@@ -179,6 +179,7 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%'
          header: "ui-icon-plus",    // custom icon class
          activeHeader: "ui-icon-minus" // custom icon class
      };
+    $("#dashboard").show();
     $( "#dashboard" ).accordion({
        active: false,
        autoHeight: true,
@@ -192,7 +193,7 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%'
   </script>
 
 
-<div id="dashboard">
+<div id="dashboard" style="display:none">
 <h3>AI Team Dashboard</h3>
     <table width="100%" style="font-size: smaller">
     
