@@ -127,7 +127,14 @@ a time.relative {
 
 #msg_notice,
 .success-banner,
-.notice-banner { margin: 0; padding: 5px 10px 5px 36px; margin-bottom: 10px; border: 1px solid #0a0; background: url('../images/icons/ok.png') 10px 50% no-repeat #e0ffe0; }
+.notice-banner { 
+    padding: 5px 10px 5px 36px; 
+    margin-left: -11px;
+    margin-right: -11px;
+    margin-bottom: 10px; 
+    border: 1px solid #0a0; 
+    background: url('../images/icons/ok.png') 10px 50% no-repeat #e0ffe0; 
+}
 
 #msg_warning,
 .warning-banner { 
