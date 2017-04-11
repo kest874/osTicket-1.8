@@ -1054,8 +1054,7 @@ class TicketsAjaxAPI extends AjaxController {
     }
     function tasks($tid) {
         global $thisstaff;
-        if (!($ticket=Ticket::lookup($tid))
-                || !$ticket->checkStaffPerm($thisstaff))
+        if (!($ticket=Ticket::lookup($tid)))
             Http::response(404, 'Unknown ticket');
          include STAFFINC_DIR . 'ticket-tasks.inc.php';
     }
@@ -1063,8 +1062,7 @@ class TicketsAjaxAPI extends AjaxController {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid)))
             Http::response(404, 'Unknown ticket');
-        if (!$ticket->checkStaffPerm($thisstaff, Task::PERM_CREATE))
-            Http::response(403, 'Permission denied');
+        
         $info=$errors=array();
         if ($_POST) {
             Draft::deleteForNamespace(

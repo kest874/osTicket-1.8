@@ -1040,7 +1040,7 @@ extends QueueColumnAnnotation {
         $threadcount = $row[static::$qname];
         if ($threadcount > 1) {
             return sprintf(
-                '<small class="faded-more"><i class="icon-comments-alt"></i> %s</small>',
+                '<small class="faded-more"><i class="icon-comments-alt"></i> %s &nbsp;</small>',
                 $threadcount
             );
         }
@@ -1067,10 +1067,36 @@ extends QueueColumnAnnotation {
         $count = $row[static::$qname];
         if ($count) {
             return sprintf(
-                '<i class="small icon-paperclip icon-flip-horizontal" data-toggle="tooltip" title="%s"></i>',
+                '<i class="small icon-paperclip icon-flip-horizontal" data-toggle="tooltip" title="%s"></i>	&nbsp;',
                 $count);
         }
     }
+    function isVisible($row) {
+        return $row[static::$qname] > 0;
+    }
+}
+class TasksCount
+extends QueueColumnAnnotation {
+    static $icon = 'tasks';
+    static $qname = '_tasks_count';
+    static $desc = /* @trans */ 'T Count';
+    function annotate($query) {
+        return $query->annotate(array(
+        static::$qname => Task::objects()
+            ->filter(array('flags' => 1))
+            ->filter(array('ticket__ticket_id' => new SqlField('ticket_id', 1)))
+            ->aggregate(array('count' => SqlAggregate::COUNT('ticket__ticket_id')))
+        ));
+    }
+    function getDecoration($row, $text) {
+        $taskcount = $row[static::$qname];
+       
+        if ($taskcount) {
+            return sprintf(
+                '<span class="Icon tasklist"></span><small class="faded-more">%s</small>	&nbsp;',
+                $taskcount
+            );
+    }}
     function isVisible($row) {
         return $row[static::$qname] > 0;
     }
@@ -1091,7 +1117,7 @@ extends QueueColumnAnnotation {
         $count = $row[static::$qname];
         if ($count) {
             return sprintf(
-                '<span class="pull-right faded-more" data-toggle="tooltip" title="%d"><i class="icon-group"></i></span>',
+                '<span class="pull-right faded-more" data-toggle="tooltip" title="%d"><i class="icon-group"></i></span>	&nbsp;',
                 $count);
         }
     }

@@ -32,7 +32,7 @@ if ($task->isOpen() && $role->hasPerm(Task::PERM_ASSIGN)) {
             'assign/agents' => array(
                 'href' => sprintf('#tasks/%d/assign/agents', $task->getId()),
                 'icon' => 'icon-user',
-                'label' => __('Assign to Agent'),
+                'label' => __('Assign to Associate'),
                 'redirect' => 'tasks.php'
             ));
 
@@ -50,7 +50,7 @@ if ($role->hasPerm(Task::PERM_TRANSFER)) {
             'transfer' => array(
                 'href' => sprintf('#tasks/%d/transfer', $task->getId()),
                 'icon' => 'icon-share',
-                'label' => __('Transfer'),
+                'label' => __('Transfer Ownership'),
                 'redirect' => 'tasks.php'
             ));
 }
@@ -73,16 +73,30 @@ if ($role->hasPerm(Task::PERM_EDIT)) {
             ));
 }
 
-if ($role->hasPerm(Task::PERM_DELETE)) {
-    $actions += array(
-            'delete' => array(
-                'href' => sprintf('#tasks/%d/delete', $task->getId()),
-                'icon' => 'icon-trash',
-                'class' => 'red button',
-                'label' => __('Delete'),
-                'redirect' => 'tasks.php'
-            ));
+if (!$ticket) {
+    if ($role->hasPerm(Task::PERM_DELETE)) {
+        $actions += array(
+                'delete' => array(
+                    'href' => sprintf('#tasks/%d/delete', $task->getId()),
+                    'icon' => 'icon-trash',
+                    'class' => 'red button',
+                    'label' => __('Delete'),
+                    'redirect' => 'tasks.php'
+                ));
+    } 
+} else {       
+        if ($role->hasPerm(Task::PERM_DELETE)) {
+        $actions += array(
+                'delete' => array(
+                    'href' => sprintf('#tasks/%d/delete', $task->getId()),
+                    'icon' => 'icon-trash',
+                    'class' => 'danger',
+                    'label' => __('Delete'),
+                    'redirect' => 'tasks.php'
+                ));
+    }
 }
+
 
 $info=($_POST && $errors)?Format::input($_POST):array();
 
@@ -97,21 +111,15 @@ if ($task->isOverdue())
             <?php
             if ($ticket) { ?>
                 <strong>
-                <a id="all-ticket-tasks" href="#">
-                <?php
-                    echo sprintf(__('All Tasks (%s)'),
-                            $ticket->getNumTasks());
-                 ?></a>
-                &nbsp;/&nbsp;
-                <a id="reload-task" class="preview"
+                <h2>
+                <a id="reload-task" 
                     <?php
-                    echo ' class="preview" ';
-                    echo sprintf('data-preview="#tasks/%d/preview" ', $task->getId());
-                    echo sprintf('href="#tickets/%s/tasks/%d/view" ',
+                        echo sprintf('href="#tickets/%s/tasks/%d/view" ',
                             $ticket->getId(), $task->getId()
                             );
-                    ?>><?php echo sprintf(__('Task #%s'), $task->getNumber()); ?></a>
-                </strong>
+                    ?>><i
+                    class="icon-refresh"></i>&nbsp;<?php echo sprintf(__('Task #%s'), $task->getNumber()); ?></a>
+                </strong></h2>
             <?php
             } else { ?>
                <h2>
@@ -143,7 +151,10 @@ if ($task->isOverdue())
             </span>
             <div id="action-dropdown-task-options"
                 class="action-dropdown anchor-right">
+                 
+
                 <ul>
+                
 
                     <?php
                     if ($task->isOpen()) { ?>
@@ -183,12 +194,20 @@ if ($task->isOverdue())
                             echo $action['icon'] ?: 'icon-tag'; ?>"></i> <?php
                             echo  $action['label']; ?></a>
                     </li>
+                    
                 <?php
-                } ?>
-                </ul>
+                } ?></ul>
+                
+
+                
             </div>
+            <span class="action-button">
+                    <a id="all-ticket-tasks" class=" pull-right" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('All Tasks'); ?>"
+                    href="#"><i class="icon-list-alt"></i></a>
+                </span> 
             <?php
            } else { ?>
+           
                 <span
                     class="action-button"
                     data-dropdown="#action-dropdown-tasks-status">
@@ -200,6 +219,7 @@ if ($task->isOverdue())
                         title="<?php echo __('Change Status'); ?>"><i
                         class="icon-flag"></i></a>
                 </span>
+                
                 <div id="action-dropdown-tasks-status"
                     class="action-dropdown anchor-right">
                     <ul>
@@ -256,7 +276,7 @@ if ($task->isOverdue())
                      <li><a class="no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/assign/agents"><i
-                        class="icon-user"></i> <?php echo __('Agent'); ?></a>
+                        class="icon-user"></i> <?php echo __('Associate'); ?></a>
                      <li><a class="no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/assign/teams"><i
@@ -283,9 +303,17 @@ if ($task->isOverdue())
                         echo $action['icon'] ?: 'icon-tag'; ?>"></i>
                     </a>
                 </span>
+
            <?php
                 }
-           } ?>
+            ?>
+                <span class="action-button">
+                    <a class=" pull-right" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Tasks'); ?>"
+                    href="tasks.php"><i class="icon-list-alt"></i></a>
+                </span> 
+            <?php
+           } ?>                                
+
         </div>
     </div>
    </div>
@@ -373,7 +401,7 @@ if (!$ticket) { ?>
             </td>
         </tr>
     </table>
-    <table class="task_info" cellspacing="0" cellpadding="0" width="100%" border="0">
+    <table class="task_dinfo" cellspacing="0" cellpadding="0" width="100%" border="0">
     <?php
     $idx = 0;
     foreach (DynamicFormEntry::forObject($task->getId(),

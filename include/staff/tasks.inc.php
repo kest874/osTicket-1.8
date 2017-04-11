@@ -37,10 +37,10 @@ $queue_columns = array(
             ),
         'parent' => array(
              'width' => '8%',
-             'heading' => __('Parent Suggestion'),
+             'heading' => __('Suggestion'),
             ),
         'date' => array(
-            'width' => '20%',
+            'width' => '100px',
             'heading' => __('Date Created'),
             'sort_col' => 'created',
             ),
@@ -270,7 +270,8 @@ if ($thisstaff->hasPerm(Task::PERM_TRANSFER, false)) {
     $actions += array(
             'transfer' => array(
                 'icon' => 'icon-share',
-                'action' => __('Transfer Tasks')
+                'action' => __('Transfer Tasks'),
+                'label' => __('Transfer Ownership'),
             ));
 }
 
@@ -336,7 +337,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
  <input type="hidden" name="do" id="action" value="" >
  <input type="hidden" name="status" value="<?php echo
  Format::htmlchars($_REQUEST['status'], true); ?>" >
- <table class="list" border="0" cellspacing="1" cellpadding="2" width="940">
+ <table class="list" border="0" cellspacing="1" cellpadding="2" width="100%">
     <thead>
         <tr>
             <?php if ($thisstaff->canManageTickets()) { ?>

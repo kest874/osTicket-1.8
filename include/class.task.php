@@ -93,7 +93,7 @@ class TaskModel extends VerySimpleModel {
                 /* @trans */ 'Ability to assign tasks to agents or teams'),
             self::PERM_TRANSFER  => array(
                 'title' =>
-                /* @trans */ 'Transfer',
+                /* @trans */ 'Transfer Ownership',
                 'desc'  =>
                 /* @trans */ 'Ability to transfer tasks between departments'),
             self::PERM_REPLY => array(
@@ -434,22 +434,40 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
     }
 
     function getAssignmentForm($source=null, $options=array()) {
+        global $thisstaff, $cfg;
         $prompt = $assignee = '';
         // Possible assignees
         $assignees = array();
         switch (strtolower($options['target'])) {
             case 'agents':
-                $dept = $this->getDept();
-                foreach ($dept->getAssignees() as $member)
-                    $assignees['s'.$member->getId()] = $member;
-
-                if (!$source && $this->isOpen() && $this->staff)
-                    $assignee = sprintf('s%d', $this->staff->getId());
-                $prompt = __('Select an Agent');
-                break;
+            
+                    $members = Staff::objects()
+                        ->distinct('staff_id')
+                        ->filter(array(
+                                    'onvacation' => 0,
+                                    'isactive' => 1,
+                                    )
+                                );
+                    switch ($cfg->getAgentNameFormat()) {
+                    case 'last':
+                    case 'lastfirst':
+                    case 'legal':
+                        $members->order_by('lastname', 'firstname');
+                        break;
+                    default:
+                        $members->order_by('firstname', 'lastname');
+                    }
+                    $prompt  = __('Select an Associate');
+                    $assignees = array();
+                    foreach ($members as $member)
+                         $assignees['s'.$member->getId()] = $member->getName();
+                    if (!$assignees)
+                        $info['warn'] =  __('No Associates available for assignment');
+                    break;
             case 'teams':
-                if (($teams = Team::getActiveTeams()))
+                if (($teams = Dept::GetDepartments()))
                     foreach ($teams as $id => $name)
+                        if (strlen($name) > 5)
                         $assignees['t'.$id] = $name;
 
                 if (!$source && $this->isOpen() && $this->team)
@@ -833,7 +851,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             $msg = $this->replaceVars($msg->asArray(),
                 array('comments' => $note, 'staff' => $thisstaff));
             // Recipients
-            $recipients = array();
+            $recipients = array(); 
             // Assigned staff or team... if any
             if ($this->isAssigned() && $cfg->alertAssignedONTaskTransfer()) {
                 if($this->getStaffId())

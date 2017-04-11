@@ -136,16 +136,17 @@ a time.relative {
     background: url('../images/icons/ok.png') 10px 50% no-repeat #e0ffe0; 
 }
 
-#msg_warning,
-.warning-banner { 
-margin-left: auto; 
-margin-right: auto; 
-padding: 5px 10px 5px 36px; 
-margin-bottom: 10px; 
-border: 1px solid #f26522; 
-background: url('../images/icons/alert.png') 10px 50% no-repeat #ffffdd;
-border-radius: 5px;
+#ticket_thread div#msg_notice,
+.success-banner,
+.notice-banner { 
+    padding: 5px 10px 5px 36px; 
+    margin-left: -1px;
+    margin-right: -1px;
+    margin-bottom: 10px; 
+    border: 1px solid #0a0; 
+    background: url('../images/icons/ok.png') 10px 50% no-repeat #e0ffe0; 
 }
+
 div#msg_warning {
     border-radius: 5px;
 }
@@ -1077,6 +1078,7 @@ a.Icon:hover {
 .Icon.apiTicket { background:url(../images/icons/ticket_source_other.gif) 0 0 no-repeat; }
 .Icon.otherTicket { background:url(../images/icons/ticket_source_other.gif) 0 0 no-repeat; }
 .Icon.overdueTicket { background:url(../images/icons/overdue_ticket.gif) 0 0 no-repeat; }
+.Icon.tasklist { background:url(../images/icons/task-list.gif) 0 0 no-repeat; }
 .Icon.assignedTicket { background:url(../images/icons/assigned_ticket.gif) 0 0 no-repeat; }
 .Icon.lockedTicket { background:url(../images/icons/locked_ticket.gif) 0 0 no-repeat; }
 .Icon.editTicket { background-image: url(../images/icons/edit_ticket.png); }
@@ -1908,6 +1910,15 @@ h2 .reload {
 table.task_info{
     border-bottom: 1px solid #aaa;
     background-color:#F4FAFF;
+}
+.task_info {
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+}
+  
+.task_info th{
+    text-align: left;
 }
 
 #task_content{

@@ -131,9 +131,8 @@ class StaffNav {
                 'desc'=>__('Directory'),'href'=>'directory.php','title'=>__('Agent Dashboard'), "class"=>"no-pjax"
             );
             
-            $this->tabs['tasks'] = array('desc'=>__('Tasks'), 'href'=>'tasks.php', 'title'=>__('Task Queue'));
             $this->tabs['tickets'] = array('desc'=>__('Suggestions'),'href'=>'tickets.php','title'=>__('Ticket Queue'));
-
+            $this->tabs['tasks'] = array('desc'=>__('Tasks'), 'href'=>'tasks.php', 'title'=>__('Task Queue'));
             $this->tabs['kbase'] = array('desc'=>__('Knowledgebase'),'href'=>'kb.php','title'=>__('Knowledgebase'));
             $this->tabs['reports'] = array('desc'=>__('Reports'),'href'=>'reports.php','title'=>__('Reports'));
 

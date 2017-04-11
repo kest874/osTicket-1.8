@@ -4630,6 +4630,32 @@ class AssignmentForm extends Form {
     }
 }
 
+class ClaimForm extends AssignmentForm {
+    var $_fields;
+    function setFields($fields) {
+        $this->_fields = $fields;
+        parent::setFields($fields);
+    }
+    function getFields() {
+        if ($this->_fields)
+            return $this->_fields;
+        $fields = parent::getFields();
+        // Disable && hide assignee field selection
+        if (isset($fields['assignee'])) {
+            $visibility = new VisibilityConstraint(
+                    new Q(array()), VisibilityConstraint::HIDDEN);
+            $fields['assignee']->set('visibility', $visibility);
+        }
+        // Change coments placeholder to reflect claim
+        if (isset($fields['comments'])) {
+            $fields['comments']->configure('placeholder',
+                    __('Optional reason for the claim'));
+        }
+        $this->setFields($fields);
+        return $this->fields;
+    }
+}
+
 class TransferForm extends Form {
 
     static $id = 'transfer';

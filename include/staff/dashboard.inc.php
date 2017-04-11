@@ -80,7 +80,7 @@ $DeptName = db_fetch_array(db_query($sql));
 
 $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(created) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
-.'WHERE MONTH(created) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)'
+.'AND MONTH(created) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)'
 .'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
 
 $PMonthSubmitted = db_fetch_array(db_query($sql));

@@ -195,19 +195,6 @@ if (isset($_SESSION['advsearch:tasks'])) {
                         (!$_REQUEST['status'] || $_REQUEST['status']=='search'));
 }
 
-if ($thisstaff->hasPerm(TaskModel::PERM_CREATE, false)) {
-    $nav->addSubMenu(array('desc'=>__('New Task'),
-                           'title'=> __('Open a New Task'),
-                           'href'=>'#tasks/add',
-                           'iconclass'=>'newTicket new-task',
-                           'id' => 'new-task',
-                           'attr' => array(
-                               'data-dialog-config' => '{"size":"large"}'
-                               )
-                           ),
-                        ($_REQUEST['a']=='open'));
-}
-
 
 $ost->addExtraHeader('<script type="text/javascript" src="js/ticket.js"></script>');
 $ost->addExtraHeader('<script type="text/javascript" src="js/thread.js"></script>');

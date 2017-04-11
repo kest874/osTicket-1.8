@@ -69,9 +69,7 @@ if($ticket->isOverdue())
         <div class="pull-right flush-right">
             
 			<a class="action-button pull-right" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Suggestions'); ?>"
-				href="tickets.php<?php 
-		
-			 ?>"><i class="icon-list-alt"></i></a>
+				href="tickets.php"><i class="icon-list-alt"></i></a>
 			<span class="action-button pull-right only sticky">
 				<a href="#" data-stop="top" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Scroll Top'); ?>">
 				<i class="icon-chevron-up"></i></a>
@@ -123,7 +121,7 @@ if($ticket->isOverdue())
             </div>
             <?php
             // Transfer
-            if ($haspermission){ 
+            if ($ticket->checkStaffPerm($thisstaff)){ 
             if ($role->hasPerm(Ticket::PERM_TRANSFER)) {?>
             <span class="action-button pull-right">
             <a class="ticket-action" id="ticket-transfer" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Transfer Ownership'); ?>"
