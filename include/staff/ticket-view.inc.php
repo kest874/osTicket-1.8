@@ -469,6 +469,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
 <ul  class="tabs clean threads" id="ticket_tabs" >
     <li class="active"><a id="ticket-thread-tab" href="#ticket_thread"><?php
         echo sprintf(__('Suggestion Thread (%d)'), $tcount); ?></a></li>
+     <?php if ($haspermission) {?>
     <li><a id="ticket-tasks-tab" href="#tasks"
             data-url="<?php
         echo sprintf('#tickets/%d/tasks', $ticket->getId()); ?>"><?php
@@ -476,6 +477,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
         if ($ticket->getNumTasks())
             echo sprintf('&nbsp;(<span id="ticket-tasks-count">%d</span>)', $ticket->getNumTasks());
         ?></a></li>
+     <?php } ?>
 </ul>
 
 <div id="ticket_tabs_container">
