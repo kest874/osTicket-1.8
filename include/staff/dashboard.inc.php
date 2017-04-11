@@ -211,15 +211,11 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%'
         <td><span style="color: red; font-weight: bold;">Team Leader: </span> <?php echo $Teamleader ?></td>
    </tr>
 
-   <?php
-        
-        foreach ($agents as $A) { ?>
-           <tr id="<?php echo $A->staff_id; ?>">
-                <td><?php echo Format::htmlchars($A->getName()); ?></td>
+           <tr >
+                <td><a href="https://suggestions.nasg.net/scp/directory.php?q=&did=<?php echo $thisstaff->dept_id; ?>&submit=Filter"  style="color: red; font-weight: bold;"> Click to view members</a></td>
            </tr>
-            <?php
-        } // end of foreach
-    ?></table>
+
+   </table>
     </td>
     <td colspan = "7"  valign="top">
         <table>

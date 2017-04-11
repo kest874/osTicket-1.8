@@ -270,8 +270,7 @@ if ($thisstaff->hasPerm(Task::PERM_TRANSFER, false)) {
     $actions += array(
             'transfer' => array(
                 'icon' => 'icon-share',
-                'action' => __('Transfer Tasks'),
-                'label' => __('Transfer Ownership'),
+                'action' => __('Transfer Tasks')
             ));
 }
 
