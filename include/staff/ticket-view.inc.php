@@ -500,10 +500,10 @@ if ($errors['err'] && isset($_POST['a'])) {
     // Reflect errors back to the tab.
     $errors[$_POST['a']] = $errors['err'];
 } elseif($msg) { ?>
-    <div id="msg_notice"><?php echo $msg; ?></div>
+    <div id="thread_msg_notice"><?php echo $msg; ?></div>
 <?php
 } elseif($warn) { ?>
-    <div id="msg_warning"><?php echo $warn; ?></div>
+    <div id="thread_msg_warning"><?php echo $warn; ?></div>
 <?php
 } ?>
 
@@ -686,7 +686,7 @@ if ($errors['err'] && isset($_POST['a'])) {
                     if ($role->hasPerm(Ticket::PERM_CLOSE)
                             && is_string($warning=$ticket->isCloseable())) {
                         $outstanding =  true;
-                        echo sprintf('<div class="warning-banner">%s</div>', $warning);
+                        echo sprintf('<div class="thread_warning-banner">%s</div>', $warning);
                     } ?>
                     <select name="reply_status_id">
                     <?php

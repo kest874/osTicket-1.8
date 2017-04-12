@@ -57,11 +57,11 @@ if ($lang) {
 <div id="container">
     <?php
     if($ost->getError())
-        echo sprintf('<div id="error_bar">%s</div>', $ost->getError());
+        echo sprintf('<div id="header_error_bar">%s</div>', $ost->getError());
     elseif($ost->getWarning())
-        echo sprintf('<div id="warning_bar">%s</div>', $ost->getWarning());
+        echo sprintf('<div id="header_warning_bar">%s</div>', $ost->getWarning());
     elseif($ost->getNotice())
-        echo sprintf('<div id="notice_bar">%s</div>', $ost->getNotice());
+        echo sprintf('<div id="header_notice_bar">%s</div>', $ost->getNotice());
         
     $header = (defined('ADMINPAGE'))?'headeradmin':'header';
     ?>
@@ -102,13 +102,13 @@ if ($lang) {
 
         <div id="content">
         <?php if($errors['err']) { ?>
-            <div id="msg_error"><?php echo $errors['err']; ?></div>
+            <div id="header_msg_error"><?php echo $errors['err']; ?></div>
         <?php }elseif($msg) { ?>
-            <div id="msg_notice"><?php echo $msg; ?></div>
+            <div id="header_msg_notice"><?php echo $msg; ?></div>
         <?php }elseif($warn) { ?>
-            <div id="msg_warning"><?php echo $warn; ?></div>
+            <div id="header_msg_warning"><?php echo $warn; ?></div>
         <?php }
         foreach (Messages::getMessages() as $M) { ?>
-            <div class="<?php echo strtolower($M->getLevel()); ?>-banner"><?php
+            <div class="header_<?php echo strtolower($M->getLevel()); ?>-banner"><?php
                 echo (string) $M; ?></div>
 <?php   } ?>
