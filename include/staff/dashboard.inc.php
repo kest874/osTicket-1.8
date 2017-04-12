@@ -199,7 +199,8 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%'
     
         <tr style="font-weight: bold;">
             <td colspan="2"><h2> <span style="color: red; font-weight: bold;"><?php echo $DeptName["name"]; ?></span> Members: (<span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span>) </h2></td>
-            <td colspan = "7"><h2>Suggestions</h2></td>        
+            <td colspan = "4"><h2>Suggestions</h2></td>
+            <td colspan = "3"><h2>Targets <small>(1 associate)</small></h2></td>               
         </tr>
 
 <tr><td colspan = "2"><table>
@@ -217,7 +218,7 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%'
 
    </table>
     </td>
-    <td colspan = "7"  valign="top">
+    <td colspan = "4"  valign="top">
         <table>
             <tr style="font-weight: bold;">
                 <td rowspan="2" width="50px" style="color: red;"  align="middle"> Open (<?php echo $OpenSuggestions ?>) </td>
@@ -246,6 +247,14 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%'
                 <td><?php echo $NotImplmentedSuggestions ?></td>
             </tr>
         </table>
+    <td colspan = "3"  valign="top">    
+        <table>
+        <tr><td style="font-weight: bold; color: red;" width = "30px">1.4</td><td style="font-weight: bold;">Suggestions per month</td></tr>
+        <tr><td style="font-weight: bold; color: red;" width = "30px">16.8</td><td style="font-weight: bold;">Suggestions per year</td></tr>
+        <tr><td style="font-weight: bold; color: red;" width = "30px">1</td><td style="font-weight: bold;">Implmentations per month</td></tr>
+        <tr><td style="font-weight: bold; color: red;" width = "30px">12</td><td style="font-weight: bold;">Implmentations per year</td></tr>
+        </table>
+    </td>    
     </tr>
         <tr><td>	&nbsp;</td></tr>
         <tr style="font-weight: bold;">
