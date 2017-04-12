@@ -112,7 +112,7 @@ if ($_POST)
         </tr>
         <tr id="open_ticket_informationdata">
             <td width="160" class="required">
-                <?php echo __('Help Topic'); ?>:
+                <?php echo __('Category'); ?>:
             </td>
             <td>
                 <select class="requiredfield" name="topicId" onchange="javascript:
@@ -132,7 +132,7 @@ if ($_POST)
                         if (count($topics) == 1)
                             $selected = 'selected="selected"';
                         else { ?>
-                        <option value="" selected >&mdash; <?php echo __('Select Help Topic'); ?> &mdash;</option>
+                        <option value="" selected >&mdash; <?php echo __('Select Category'); ?> &mdash;</option>
 <?php                   }
                         foreach($topics as $id =>$name) {
                             echo sprintf('<option value="%d" %s %s>%s</option>',

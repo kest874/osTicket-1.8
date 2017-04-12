@@ -410,12 +410,12 @@ if($ticket->isOverdue())
                 ?>
 				<tr>
         			<th width="180">
-						<?php echo __('Help Topic');?>:
+						<?php echo __('Category');?>:
 					</th>
 					<td>
 						<?php $id = $ticket->getHelpTopicId(); ?>
 							<select name="topicId"  class="requiredfield" <?php if (!$haspermission){ echo " disabled ";} ?>>
-								<option value="" selected >&mdash; <?php echo __('Select Help Topic');?> &mdash;</option>
+								<option value="" selected >&mdash; <?php echo __('Select Category');?> &mdash;</option>
 								<?php
 								if($topics=Topic::getHelpTopics()) {
 									foreach($topics as $id =>$name) {
