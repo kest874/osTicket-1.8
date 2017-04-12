@@ -1939,7 +1939,7 @@ class AssignmentEvent extends ThreadEvent {
             $desc = __('<b>{somebody}</b> assigned this to <strong>{<Staff>data.staff}</strong> {timestamp}');
             break;
         case isset($data['team']):
-            $desc = __('<b>{somebody}</b> assigned this to <strong>{<Team>data.team}</strong> {timestamp}');
+            $desc = __('<b>{somebody}</b> assigned this to <strong>{<Dept>data.team}</strong> {timestamp}');
             break;
         case isset($data['claim']):
             $desc = __('<b>{somebody}</b> claimed this {timestamp}');
