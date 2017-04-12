@@ -162,7 +162,7 @@ $YTDImplemented = (int)$YearToDateImplemented["count"];
 $YTDTargetImplemented = $MemberCount * 12;
 $YTDImpAheadBehind = $YTDImplemented - $YTDTargetImplemented;
 $YTDImpAheadBehindColor = ($YTDImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
-$YTDImpGoal = number_format($YTDImplemented / $YTDTargetSuggestions * 100,2).'%';
+$YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%';
 
 ?>
 
