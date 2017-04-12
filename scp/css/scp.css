@@ -53,6 +53,10 @@ div#header a {
     color:#E65524;
 }
 
+div#headeradmin a {
+    color:#E65524;
+}
+
 .centered {
     text-align:center;
 }
@@ -184,6 +188,14 @@ div#ticket_thread.tab_content div#msg_warning{
     box-shadow: inset 0 -10px 8px -5px rgba(0,0,0,0.1);
 }
 
+#headeradmin {
+    height:76px;
+    border-left:1px solid #aaa;
+    border-right:1px solid #aaa;
+    background-color: #E65524;
+    box-shadow: inset 0 -10px 8px -5px rgba(0,0,0,0.1);
+}
+
 #logo {
     display:block;
     text-decoration:none;
@@ -208,6 +220,18 @@ div#ticket_thread.tab_content div#msg_warning{
 }
 
 #header p {
+    display:block;
+    width:auto;
+    max-width:1;
+    margin:10px;
+    background:#eee;
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+}
+
+
+#headeradmin p {
     display:block;
     width:auto;
     max-width:1;

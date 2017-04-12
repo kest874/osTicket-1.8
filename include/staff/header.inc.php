@@ -62,8 +62,10 @@ if ($lang) {
         echo sprintf('<div id="warning_bar">%s</div>', $ost->getWarning());
     elseif($ost->getNotice())
         echo sprintf('<div id="notice_bar">%s</div>', $ost->getNotice());
+        
+    $header = (defined('ADMINPAGE'))?'headeradmin':'header';
     ?>
-    <div id="header">
+    <div id="<?php echo $header; ?>">
         <p id="info" class="pull-right no-pjax"><?php echo sprintf(__('Welcome, %s.'), '<strong>'.$thisstaff->getFirstName().'</strong>'); ?>
            <?php
             if($thisstaff->isAdmin() && !defined('ADMINPAGE')) { ?>
