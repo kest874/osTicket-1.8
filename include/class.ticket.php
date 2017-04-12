@@ -1386,7 +1386,7 @@ implements RestrictedAccess, Threadable, Searchable {
         // See if we need to send alerts
         if (!$alert || !$cfg->alertONAssignment())
             return true; //No alerts!
-        $dept = $this->getDept();
+        $dept = $this->getTeam();
         if (!$dept
             || !($tpl = $dept->getTemplate())
             || !($email = $dept->getAlertEmail())
@@ -1396,7 +1396,7 @@ implements RestrictedAccess, Threadable, Searchable {
         // Recipients
         $recipients = array();
         
-                    $manager = $dept->getManager();
+            $manager = $dept->getManager();
             $teamleader = $dept->getTeamLeader();
 
             if ($cfg->alertStaffONAssignment() && $manager) {

@@ -338,8 +338,7 @@ class TicketsAjaxAPI extends AjaxController {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid)))
             Http::response(404, __('No such ticket'));
-        if (!$ticket->checkStaffPerm($thisstaff, Ticket::PERM_ASSIGN)
-                || !($form = $ticket->getAssignmentForm($_POST,
+        if (!($form = $ticket->getAssignmentForm($_POST,
                         array('target' => $target))))
             Http::response(403, __('Permission denied'));
         $errors = array();
