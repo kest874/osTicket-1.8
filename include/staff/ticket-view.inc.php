@@ -450,7 +450,7 @@ if($ticket->isOverdue())
 	</tr>
 	</table>
     <?php if ($haspermission){ ?> 
-	<table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" style="border-top:1px solid #dddddd;">
+	<table id="formbuttons" class="ticket_info" cellspacing="0" cellpadding="0" width="100%" style="border-top:1px solid #dddddd;">
 	<tr>
 		<td align="center" colspan="2">
 			<input type="submit" name="submit" value="<?php echo __('Save');?>">
@@ -964,5 +964,18 @@ $(function() {
         return false;
     });
 
+});
+// To Disable Submit Button By Default
+
+
+// Hide form buttons By Default
+$("#formbuttons").hide();
+
+$("input, select").change(function(){
+$("#formbuttons").show();
+});
+
+$("form").keyup(function(){
+$("#formbuttons").show();
 });
 </script>
