@@ -140,8 +140,8 @@ a time.relative {
 .success-banner,
 .notice-banner { 
     padding: 5px 10px 5px 36px; 
-    margin-left: -1px;
-    margin-right: -1px;
+    /*margin-left: -1px;
+    margin-right: -1px;*/
     margin-bottom: 10px; 
     border: 1px solid #0a0; 
     background: url('../images/icons/ok.png') 10px 50% no-repeat #e0ffe0; 
