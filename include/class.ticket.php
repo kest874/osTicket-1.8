@@ -1857,8 +1857,7 @@ implements RestrictedAccess, Threadable, Searchable {
         global $thisstaff;
         $evd = array();
         $assignee = $form->getDept();
-        var_dump($assignee);
-        
+               
         if ($assignee instanceof Staff) {
             $dept = $this->getDept();
             if ($this->getStaffId() == $assignee->getId()) {
