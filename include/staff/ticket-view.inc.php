@@ -965,8 +965,6 @@ $(function() {
     });
 
 });
-// To Disable Submit Button By Default
-
 
 // Hide form buttons By Default
 $("#formbuttons").hide();
