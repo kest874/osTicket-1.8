@@ -31,6 +31,8 @@ if($_REQUEST['did'] && is_numeric($_REQUEST['did'])) {
     $qs += array('did' => $_REQUEST['did']);
 }
 
+$agents->filter(array('isactive'=>1));
+
 $sortOptions=array('name'=>array('firstname','lastname'),'email'=>'email','dept'=>'dept__name',
                    'phone'=>'phone','mobile'=>'mobile','ext'=>'phone_ext',
                    'created'=>'created','login'=>'lastlogin');
@@ -79,15 +81,12 @@ $qstr.='&amp;order='.($order=='DESC' ? 'ASC' : 'DESC');
     <div style="min-height:25px;">
     <form action="directory.php" method="GET" name="filter">
        <input type="text" name="q" value="<?php echo Format::htmlchars($_REQUEST['q']); ?>" >
-        <select name="did" id="did">
-             <option value="0">&mdash; <?php echo __('All Teams');?> &mdash;</option>
-             <?php
-                foreach (Dept::getDepartments(array('nonempty'=>1)) as $id=>$name) {
-                    $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':'';
-                    echo sprintf('<option value="%d" %s>%s</option>',$id,$sel,$name);
-                }
-             ?>
-        </select>
+                        <select name="did" id="did">
+                    <option value="0">&mdash;
+                        <?php echo __( 'All Teams');?> &mdash;</option>
+                    <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) if (strlen($name) > 5 ){  $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
+                    <option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
+                </select>
         &nbsp;&nbsp;
         <input type="submit" name="submit" value="<?php echo __('Filter');?>"/>
         &nbsp;<i class="help-tip icon-question-sign" href="#apply_filtering_criteria"></i>
@@ -112,11 +111,8 @@ $qstr.='&amp;order='.($order=='DESC' ? 'ASC' : 'DESC');
     <thead>
         <tr>
             <th width="20%"><a <?php echo $name_sort; ?> href="directory.php?<?php echo $qstr; ?>&sort=name"><?php echo __('Name');?></a></th>
-            <th width="15%"><a  <?php echo $dept_sort; ?>href="directory.php?<?php echo $qstr; ?>&sort=dept"><?php echo __('Department');?></a></th>
+            <th width="15%"><a  <?php echo $dept_sort; ?>href="directory.php?<?php echo $qstr; ?>&sort=dept"><?php echo __('AI Team');?></a></th>
             <th width="25%"><a  <?php echo $email_sort; ?>href="directory.php?<?php echo $qstr; ?>&sort=email"><?php echo __('Email Address');?></a></th>
-            <th width="15%"><a <?php echo $phone_sort; ?> href="directory.php?<?php echo $qstr; ?>&sort=phone"><?php echo __('Phone Number');?></a></th>
-            <th width="10%"><a <?php echo $ext_sort; ?> href="directory.php?<?php echo $qstr; ?>&sort=ext"><?php echo __(/* As in a phone number `extension` */ 'Extension');?></a></th>
-            <th width="15%"><a <?php echo $mobile_sort; ?> href="directory.php?<?php echo $qstr; ?>&sort=mobile"><?php echo __('Mobile Number');?></a></th>
         </tr>
     </thead>
     <tbody>
@@ -127,9 +123,7 @@ $qstr.='&amp;order='.($order=='DESC' ? 'ASC' : 'DESC');
                 <td>&nbsp;<?php echo Format::htmlchars($A->getName()); ?></td>
                 <td>&nbsp;<?php echo Format::htmlchars((string) $A->dept); ?></td>
                 <td>&nbsp;<?php echo Format::htmlchars($A->email); ?></td>
-                <td>&nbsp;<?php echo Format::phone($A->phone); ?></td>
-                <td>&nbsp;<?php echo $A->phone_ext; ?></td>
-                <td>&nbsp;<?php echo Format::phone($A->mobile); ?></td>
+
            </tr>
             <?php
             } // end of foreach
