@@ -1879,7 +1879,7 @@ implements RestrictedAccess, Threadable, Searchable {
                 }
             }
         } elseif ($assignee instanceof Dept) {
-            if ($this->getDeptId() == $assignee->getId()) {
+            if ($this->getTeamId() == $assignee->getId()) {
                 $errors['assignee'] = sprintf(__('%s already assigned to %s'),
                         __('Ticket'),
                         __('the team')
