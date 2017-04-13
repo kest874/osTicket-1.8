@@ -115,6 +115,7 @@ $CMonthImplemented = db_fetch_array(db_query($sql));
 $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(closed) = YEAR(CURRENT_DATE)'
 .'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
+$YearToDateImplemented = db_fetch_array(db_query($sql));
 
 //Open Tasks Count
 $tasks = Task::objects()
@@ -127,7 +128,7 @@ $tasks = Task::objects()
                 $OpenTasks = $row;
                
 
-$YearToDateImplemented = db_fetch_array(db_query($sql));
+
 $Manager = $Manager["manager"];
 $Teamleader = $Teamleader["teamleader"];
 
