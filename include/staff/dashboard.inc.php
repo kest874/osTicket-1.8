@@ -175,7 +175,7 @@ $YTDImpAheadBehind = $YTDImplemented - $YTDTargetImplemented;
 $YTDImpAheadBehindColor = ($YTDImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
 $YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%';
 
-$OpenTasks = $OpenTasks["count"];
+$OpenTasks = ($OpenTasks["count"]) ? $OpenTasks["count"] : 0
 
 ?>
 
