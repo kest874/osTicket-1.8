@@ -14,6 +14,25 @@ switch ($cfg->getAgentNameFormat()) {
 }
 $agents->order_by('lastname');
 
+
+
+//Team Members Count
+$DeptMembers = Staff::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('isactive' => '1'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('staff_id')));
+ 
+        foreach ($DeptMembers as $row)
+                $DeptMembers  = $row;
+
+//Team Name
+$DeptName = Dept::objects()
+        ->filter(array('id' => $thisstaff->dept_id));
+ 
+        foreach ($DeptName as $row)
+                $DeptName  = $row;
+
+                
 $sql='SELECT concat(a.lastname,'."', '".',a.firstname) as manager FROM '
 .STAFF_TABLE.' a join '.DEPT_TABLE.' b on a.staff_id = b.manager_id '
 .'WHERE b.id = '.$thisstaff->dept_id;
@@ -24,98 +43,128 @@ $sql='SELECT concat(a.lastname,'."', '".',a.firstname) as teamleader FROM '
 .'WHERE b.id = '.$thisstaff->dept_id;
 $Teamleader = db_fetch_array(db_query($sql)); 
 
-$sql='SELECT count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE dept_id = '.$thisstaff->dept_id
-.' and status_id != 3 and status_id !=6 ';
 
-$OpenSuggestions = db_fetch_array(db_query($sql)); 
+//Submitted Suggestions
+$SubmittedSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '1'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($SubmittedSuggestions as $row)
+                $SubmittedSuggestions  = $row;
+                
+//Active Suggestions
+$ActiveSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '8'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($ActiveSuggestions as $row)
+                $ActiveSuggestions  = $row;
+                
+//Parking Lot Suggestions
+$ParkedSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '7'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($ParkedSuggestions as $row)
+                $ParkedSuggestions  = $row;
 
-$sql='SELECT count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE dept_id = '.$thisstaff->dept_id
-.' and status_id = 1 ';
+//Open Suggestions
+$OpenSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id__ne' => '3'))
+        ->filter(array('status_id__ne' => '6'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($OpenSuggestions as $row)
+                $OpenSuggestions  = $row;
 
-$SubmittedSuggestions = db_fetch_array(db_query($sql)); 
+//Implmented
+$ImplmentedSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '3'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($ImplmentedSuggestions as $row)
+                $ImplmentedSuggestions  = $row;
 
-$sql='SELECT count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE dept_id = '.$thisstaff->dept_id
-.' and status_id = 8 ';
+//Not Implmented
+$NotImplmentedSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '6'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($NotImplmentedSuggestions as $row)
+                $NotImplmentedSuggestions  = $row;
 
-$ActiveSuggestions = db_fetch_array(db_query($sql)); 
+//Previous Month Submitted
+$PMonthSubmitted= Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('created__year' => date("Y")))
+        ->filter(array('created__month' => date("m")-1))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+                 
+        foreach ($PMonthSubmitted as $row)
+                $PMonthSubmitted = $row;
 
-$sql='SELECT count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE dept_id = '.$thisstaff->dept_id
-.' and status_id = 7 ';
+                //Current Month Submitted
+$CMonthSubmitted= Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('created__year' => date("Y")))
+        ->filter(array('created__month' => date("m")))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+            
+        foreach ($CMonthSubmitted as $row)
+                $CMonthSubmitted = $row;
 
-$ParkedSuggestions = db_fetch_array(db_query($sql)); 
+//YTD Submitted
+$YearToDateSubmitted = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('created__year' => date("Y")))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+               
+        foreach ($YearToDateSubmitted as $row)
+                $YearToDateSubmitted = $row;
 
+//Previous Month Implemented
+$PMonthImplemented= Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '3'))
+        ->filter(array('closed__year' => date("Y")))
+        ->filter(array('closed__month' => date("m")-1))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+           
+        foreach ($PMonthImplemented as $row)
+                $PMonthImplemented = $row;
 
-$sql='SELECT count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE dept_id = '.$thisstaff->dept_id
-.' and status_id != 3 and status_id !=6 ';
-
-$OpenSuggestions = db_fetch_array(db_query($sql)); 
-
-$sql='SELECT count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE dept_id = '.$thisstaff->dept_id
-.' and status_id = 3';
-
-$ImplmentedSuggestions = db_fetch_array(db_query($sql)); 
-
-$sql='SELECT count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE dept_id = '.$thisstaff->dept_id
-.' and status_id = 6';
-
-$NotImplmentedSuggestions = db_fetch_array(db_query($sql)); 
-
-$sql='SELECT count(dept_id) as count FROM '.STAFF_TABLE.' staff '
-.'WHERE dept_id = '.$thisstaff->dept_id
-.' AND isactive = 1 group by dept_id ';
-
-$DeptMembers = db_fetch_array(db_query($sql));    
-
-$sql='SELECT name FROM '.DEPT_TABLE.' dept '
-.'WHERE id = '.$thisstaff->dept_id;
-
-$DeptName = db_fetch_array(db_query($sql));
-
-$sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE YEAR(created) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
-.'AND MONTH(created) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)'
-.'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
-
-$PMonthSubmitted = db_fetch_array(db_query($sql));
-
-$sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE YEAR(created) = YEAR(CURRENT_DATE)'
-.'AND MONTH(closed) = MONTH(CURRENT_DATE)'
-.'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
-
-$CMonthSubmitted = db_fetch_array(db_query($sql));
-
-$sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE YEAR(created) = YEAR(CURRENT_DATE)'
-.'and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
-
-$YearToDateSubmitted = db_fetch_array(db_query($sql));
-
-$sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE YEAR(closed) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)'
-.'WHERE MONTH(closed) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH)'
-.'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
-
-$PMonthImplemented = db_fetch_array(db_query($sql));
-
-                        $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE YEAR(closed) = YEAR(CURRENT_DATE)'
-.'AND MONTH(closed) = MONTH(CURRENT_DATE)'
-.'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
-
-$CMonthImplemented = db_fetch_array(db_query($sql));
-
-$sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
-.'WHERE YEAR(closed) = YEAR(CURRENT_DATE)'
-.'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
-$YearToDateImplemented = db_fetch_array(db_query($sql));
+//Current Month Implemented
+$CMonthImplemented= Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '3'))
+        ->filter(array('closed__year' => date("Y")))
+        ->filter(array('closed__month' => date("m")))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+               
+        foreach ($CMonthImplemented as $row)
+                $CMonthImplemented = $row;
+                
+//YTD Implemented
+$YearToDateImplemented = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '3'))
+        ->filter(array('closed__year' => date("Y")))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+               
+        foreach ($YearToDateImplemented as $row)
+                $YearToDateImplemented = $row;
 
 //Open Tasks Count
 $tasks = Task::objects()
@@ -126,9 +175,8 @@ $tasks = Task::objects()
                    
         foreach ($tasks as $row)
                 $OpenTasks = $row;
-               
 
-
+                
 $Manager = $Manager["manager"];
 $Teamleader = $Teamleader["teamleader"];
 
@@ -212,7 +260,7 @@ $OpenTasks = ($OpenTasks["count"]) ? $OpenTasks["count"] : 0
     <table width="100%" style="font-size: smaller">
     
         <tr style="font-weight: bold;">
-            <td colspan="2"><h2> <span style="color: red; font-weight: bold;"><?php echo $DeptName["name"]; ?></span> Members: (<span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span>) </h2></td>
+            <td colspan="2"><h2> <span style="color: red; font-weight: bold;"><?php echo $DeptName; ?></span> Members: (<span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span>) </h2></td>
             <td colspan = "3"><h2>Suggestions</h2></td>
             <td colspan = "1"><h2>Tasks</h2></td>
             <td colspan = "3"><h2>Targets <small>(1 associate)</small></h2></td>               

@@ -2275,7 +2275,7 @@ class SqlCompiler {
     static function splitCriteria($criteria) {
         static $operators = array(
             'exact' => 1, 'isnull' => 1,
-            'gt' => 1, 'lt' => 1, 'gte' => 1, 'lte' => 1, 'range' => 1,
+            'gt' => 1, 'lt' => 1, 'gte' => 1, 'lte' => 1, 'ne' => 1, 'range' => 1 ,'year' => 1,'month' => 1,
             'contains' => 1, 'like' => 1, 'startswith' => 1, 'endswith' => 1, 'regex' => 1,
             'in' => 1, 'intersect' => 1,
             'hasbit' => 1,
@@ -2316,6 +2316,7 @@ class SqlCompiler {
             'gte' => function($a, $b) { return $a >= $b; },
             'lt' => function($a, $b) { return $a < $b; },
             'lte' => function($a, $b) { return $a <= $b; },
+            'ne' => function($a, $b) { return $a != $b; },
             'contains' => function($a, $b) { return stripos($a, $b) !== false; },
             'startswith' => function($a, $b) { return stripos($a, $b) === 0; },
             'endswith' => function($a, $b) { return iEndsWith($a, $b); },
@@ -2712,7 +2713,10 @@ class MySqlCompiler extends SqlCompiler {
         'lt' => '%1$s < %2$s',
         'gte' => '%1$s >= %2$s',
         'lte' => '%1$s <= %2$s',
+        'ne' => '%1$s != %2$s',
         'range' => array('self', '__range'),
+        'year' => array('self', '__year'),
+        'month' => array('self', '__month'),
         'isnull' => array('self', '__isnull'),
         'like' => '%1$s LIKE %2$s',
         'hasbit' => '%1$s & %2$s != 0',
@@ -2793,6 +2797,17 @@ class MySqlCompiler extends SqlCompiler {
     function __range($a, $b) {
         // XXX: Crash if $b is not array of two items
         return sprintf('%s BETWEEN %s AND %s', $a, $this->input($b[0]), $this->input($b[1]));
+    }
+    
+    //conveet field to year
+    function __year($a, $b) {
+        // XXX: Crash if $b is not array of two items
+        return sprintf('YEAR(%s) = %s', $a,$b);
+    }
+    
+    function __month($a, $b) {
+        // XXX: Crash if $b is not array of two items
+        return sprintf('MONTH(%s) = %s', $a,$b);
     }
 
     function compileJoin($tip, $model, $alias, $info, $extra=false) {
