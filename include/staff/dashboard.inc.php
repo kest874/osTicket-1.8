@@ -116,6 +116,17 @@ $sql='SELECT  dept_id, count(number) as count FROM '.TICKET_TABLE.' ticket '
 .'WHERE YEAR(closed) = YEAR(CURRENT_DATE)'
 .'and status_id = 3 and dept_id = '.$thisstaff->dept_id.' group by dept_id ';
 
+//Open Tasks Count
+$tasks = Task::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('flags' => '1'))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('id')));
+                   
+        foreach ($tasks as $row)
+                $OpenTasks = $row;
+               
+
 $YearToDateImplemented = db_fetch_array(db_query($sql));
 $Manager = $Manager["manager"];
 $Teamleader = $Teamleader["teamleader"];
@@ -164,6 +175,8 @@ $YTDImpAheadBehind = $YTDImplemented - $YTDTargetImplemented;
 $YTDImpAheadBehindColor = ($YTDImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
 $YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%';
 
+$OpenTasks = $OpenTasks["count"];
+
 ?>
 
 <style>
@@ -199,7 +212,8 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%'
     
         <tr style="font-weight: bold;">
             <td colspan="2"><h2> <span style="color: red; font-weight: bold;"><?php echo $DeptName["name"]; ?></span> Members: (<span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span>) </h2></td>
-            <td colspan = "4"><h2>Suggestions</h2></td>
+            <td colspan = "3"><h2>Suggestions</h2></td>
+            <td colspan = "1"><h2>Tasks</h2></td>
             <td colspan = "3"><h2>Targets <small>(1 associate)</small></h2></td>               
         </tr>
 
@@ -218,7 +232,7 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%'
 
    </table>
     </td>
-    <td colspan = "4"  valign="top">
+    <td colspan = "3"  valign="top">
         <table>
             <tr style="font-weight: bold;">
                 <td rowspan="2" width="50px" style="color: red;"  align="middle"> Open (<?php echo $OpenSuggestions ?>) </td>
@@ -247,6 +261,13 @@ $YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%'
                 <td><?php echo $NotImplmentedSuggestions ?></td>
             </tr>
         </table>
+        <td colspan = "1"  valign="top">    
+        <table>
+        <tr><td style="font-weight: bold;" width = "100px">Open Tasks</td></tr>
+        <tr><td ><?php echo $OpenTasks ?></td></tr>
+        
+        </table>
+    </td>  
     <td colspan = "3"  valign="top">    
         <table>
         <tr><td style="font-weight: bold; color: red;" width = "30px">1.4</td><td style="font-weight: bold;">Suggestions per month</td></tr>
