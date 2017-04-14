@@ -1,20 +1,5 @@
 <?php
 
-$agents = Staff::objects()
-    ->select_related('dept');
-$agents->filter(array('dept'=>$thisstaff->dept_id,'isactive'=>1));
-
-switch ($cfg->getAgentNameFormat()) {
-    case 'last':
-    case 'lastfirst':
-    case 'legal':
-    $sortOptions['name'] = array('lastname', 'firstname');
-    break;
-// Otherwise leave unchanged
-}
-$agents->order_by('lastname');
-
-
 
 //Team Members Count
 $DeptMembers = Staff::objects()
@@ -25,24 +10,14 @@ $DeptMembers = Staff::objects()
         foreach ($DeptMembers as $row)
                 $DeptMembers  = $row;
 
-//Team Name
-$DeptName = Dept::objects()
+//Department Information
+$Dept= Dept::objects()
         ->filter(array('id' => $thisstaff->dept_id));
- 
-        foreach ($DeptName as $row)
-                $DeptName  = $row;
-
-                
-$sql='SELECT concat(a.lastname,'."', '".',a.firstname) as manager FROM '
-.STAFF_TABLE.' a join '.DEPT_TABLE.' b on a.staff_id = b.manager_id '
-.'WHERE b.id = '.$thisstaff->dept_id;
-$Manager = db_fetch_array(db_query($sql)); 
-
-$sql='SELECT concat(a.lastname,'."', '".',a.firstname) as teamleader FROM '
-.STAFF_TABLE.' a join '.DEPT_TABLE.' b on a.staff_id = b.teamleader_id '
-.'WHERE b.id = '.$thisstaff->dept_id;
-$Teamleader = db_fetch_array(db_query($sql)); 
-
+        foreach ($Dept as $row)
+                $Dept  = $row;
+    
+$Manager = $Dept->manager;
+$Teamleader = $Dept->teamleader;
 
 //Submitted Suggestions
 $SubmittedSuggestions = Ticket::objects()
@@ -177,8 +152,7 @@ $tasks = Task::objects()
                 $OpenTasks = $row;
 
                 
-$Manager = $Manager["manager"];
-$Teamleader = $Teamleader["teamleader"];
+
 
 $MemberCount = $DeptMembers["count"];
 $OpenSuggestions = $OpenSuggestions["count"];
@@ -260,7 +234,7 @@ $OpenTasks = ($OpenTasks["count"]) ? $OpenTasks["count"] : 0
     <table width="100%" style="font-size: smaller">
     
         <tr style="font-weight: bold;">
-            <td colspan="2"><h2> <span style="color: red; font-weight: bold;"><?php echo $DeptName; ?></span> Members: (<span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span>) </h2></td>
+            <td colspan="2"><h2> <span style="color: red; font-weight: bold;"><?php echo $Dept; ?></span> Members: (<span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span>) </h2></td>
             <td colspan = "3"><h2>Suggestions</h2></td>
             <td colspan = "1"><h2>Tasks</h2></td>
             <td colspan = "3"><h2>Targets <small>(1 associate)</small></h2></td>               
