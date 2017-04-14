@@ -1040,7 +1040,7 @@ extends QueueColumnAnnotation {
         $threadcount = $row[static::$qname];
         if ($threadcount > 1) {
             return sprintf(
-                '<small class="faded-more"><i class="icon-comments-alt"></i> %s &nbsp;</small>',
+                '<small class="faded-more"><i class="icon-comments-alt"  data-toggle="tooltip" title="Comments"></i> %s &nbsp;</small>',
                 $threadcount
             );
         }
@@ -1067,7 +1067,7 @@ extends QueueColumnAnnotation {
         $count = $row[static::$qname];
         if ($count) {
             return sprintf(
-                '<i class="small icon-paperclip icon-flip-horizontal" data-toggle="tooltip" title="%s"></i>	&nbsp;',
+                '&nbsp;<i class="small icon-paperclip icon-flip-horizontal" data-toggle="tooltip" title="(%s) Attachments"></i>&nbsp;',
                 $count);
         }
     }
@@ -1093,7 +1093,7 @@ extends QueueColumnAnnotation {
        
         if ($taskcount) {
             return sprintf(
-                '<span class="Icon tasklist"></span><small class="faded-more">%s</small>	&nbsp;',
+                '<i class="Icon tasklist" data-toggle="tooltip" title="(%s) Open Tasks"></i>',
                 $taskcount
             );
     }}
@@ -1134,7 +1134,7 @@ extends QueueColumnAnnotation {
     }
     function getDecoration($row, $text) {
         if ($row['isoverdue'])
-            return '<span class="Icon overdueTicket"></span>';
+            return '<span class="Icon overdueTicket" data-toggle="tooltip" title="Overdue"></span>';
     }
     function isVisible($row) {
         return $row['isoverdue'];
@@ -1185,7 +1185,7 @@ extends QueueColumnAnnotation {
         if ($row['staff_id'] && ($staff = Staff::lookup($row['staff_id'])))
             return sprintf('<span class="avatar">%s</span>',
                 $staff->getAvatar(16));
-        elseif ($row['team_id'] && ($team = Team::lookup($row['team_id']))) {
+        elseif ($row['team_id'] && ($team = Dept::lookup($row['team_id']))) {
             $avatars = [];
             foreach ($team->getMembers() as $T)
                 $avatars[] = $T->getAvatar(16);
@@ -1201,7 +1201,7 @@ extends QueueColumnAnnotation {
             return 0;
         // If assigned to a team with no members, return 0 width
         $width = 10;
-        if ($row['team_id'] && ($team = Team::lookup($row['team_id'])))
+        if ($row['team_id'] && ($team = Dept::lookup($row['team_id'])))
             $width += (count($team->getMembers()) - 1) * 10;
         return $width ? $width + 10 : $width;
     }
