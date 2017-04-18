@@ -794,6 +794,12 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
             ->values_flat('username')->first();
         return $row ? $row[0] : 0;
     }
+    
+    	static function getStaffById($id) {
+        $row = static::objects()->filter(array('staff_id' => $id));
+        return $row ? $row[0] : 0;
+    }
+    
 	static function getFirstNameById($id) {
         $row = static::objects()->filter(array('staff_id' => $id))
             ->values_flat('firstname')->first();

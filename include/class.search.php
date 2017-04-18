@@ -893,6 +893,112 @@ class AgentSelectionField extends ChoiceField {
     }
 }
 
+
+class SubmitterSelectionField extends ChoiceField {
+        function getChoices($verbose=false) {
+        global $thisstaff;
+
+        $items = array(
+            'M' => __('Me'),
+           
+        );
+        foreach (Staff::getStaffMembers() as $id=>$name) {
+            // Don't include $thisstaff (since that's 'Me')
+            if ($thisstaff && $thisstaff->getId() == $id)
+                continue;
+            $items['s' . $id] = $name;
+        }
+
+        return $items;
+    }
+
+    function getSearchMethods() {
+        return array(
+
+            'includes' =>   __('includes'),
+            '!includes' =>  __('does not include'),
+        );
+    }
+
+    function getSearchMethodWidgets() {
+        return array(
+
+            'includes' => array('ChoiceField', array(
+                'choices' => $this->getChoices(),
+                'configuration' => array('multiselect' => true),
+            )),
+            '!includes' => array('ChoiceField', array(
+                'choices' => $this->getChoices(),
+                'configuration' => array('multiselect' => true),
+            )),
+        );
+    }
+
+    function getSearchQ($method, $value, $name=false) {
+        global $thisstaff;
+
+        $Q = new Q();
+        switch ($method) {
+
+        case '!includes':
+            $Q->negate();
+        case 'includes':
+            $teams = $agents = array();
+            foreach ($value as $id => $ST) {
+                switch ($id[0]) {
+                case 'M':
+                    $agents[] = $thisstaff->getId();
+                    break;
+                case 's':
+                    $agents[] = (int) substr($id, 1);
+                    break;
+                }
+            }
+             
+            $constraints = array();
+           
+            if ($agents)
+                $constraints['user_id__in'] = $agents;
+            $Q->add(Q::any($constraints));
+        }
+
+        return $Q;
+    }
+
+    function describeSearchMethod($method) {
+        switch ($method) {
+        case 'assigned':
+            return __('assigned');
+        case '!assigned':
+            return __('unassigned');
+        default:
+            return parent::describeSearchMethod($method);
+        }
+    }
+
+    function addToQuery($query, $name=false) {
+
+        return $query->values('user_id');
+    }
+
+    function from_query($row, $name=false) {
+        
+        if ($row['user_id'])
+            return staff::getStaffById($row['user_id']);
+    }
+
+    function display($value) {
+        return (string) $value;
+    }
+
+    function applyOrderBy($query, $reverse=false, $name=false) {
+        $reverse = $reverse ? '-' : '';
+        return $query->order_by("{$reverse}staff__firstname",
+            "{$reverse}staff__lastname", "{$reverse}team__name");
+    }
+
+}
+
 class TeamSelectionField extends ChoiceField {
     use ZeroMeansUnset;
     function getChoices($verbose=false) {

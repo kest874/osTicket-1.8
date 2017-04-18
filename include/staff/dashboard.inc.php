@@ -1,6 +1,5 @@
 <?php
 
-
 //Team Members Count
 $DeptMembers = Staff::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))

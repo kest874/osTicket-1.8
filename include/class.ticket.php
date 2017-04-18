@@ -1644,10 +1644,10 @@ implements RestrictedAccess, Threadable, Searchable {
                 'label' => __('Category'),
             )),
             'source' => new TicketSourceChoiceField(array(
-                'label' => __('Ticket Source'),
+                'label' => __('Suggestion Source'),
             )),
-            'user_id' => new AgentSelectionField (array(
-                'label' => __('Submitter'),
+            'user_id' => new SubmitterSelectionField (array(
+                'label' => __('Suggestion Submitter'),
             )),
             'isoverdue' => new BooleanField(array(
                 'label' => __('Overdue'),
