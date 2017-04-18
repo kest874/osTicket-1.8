@@ -148,15 +148,22 @@ a time.relative {
 .success-banner,
 .notice-banner { 
     padding: 5px 10px 5px 36px; 
-    margin-left: -1px;
-    margin-right: -1px;
     margin-bottom: 10px; 
-    border: 1px solid #0a0; 
+    border-top: 1px solid #0a0;
+    border-bottom: 1px solid #0a0;     
     background: url('../images/icons/ok.png') 10px 50% no-repeat #e0ffe0; 
 }
 
 div#msg_warning {
     border-radius: 5px;
+}
+
+div#thread_msg_warning{
+    padding: 5px 10px 5px 36px; 
+    margin-bottom: 10px; 
+    border-top: 1px solid #f26522;
+    border-bottom: 1px solid #f26522;
+    background: url(../images/icons/alert.png) 10px 50% no-repeat #fff0f0;
 }
 
 div#ticket_thread.tab_content div#msg_warning{
