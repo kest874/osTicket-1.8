@@ -679,7 +679,7 @@ class CustomQueue extends VerySimpleModel {
         // For saved searches (not queues), staff can have a permission to
         // see all records
         return !$this->isAQueue()
-            && $thisstaff->hasPerm(SearchBackend::PERM_EVERYTHING);
+            ;
     }
     function inheritCriteria() {
         return $this->flags & self::FLAG_INHERIT_CRITERIA;

@@ -370,7 +370,7 @@ class SearchAjaxAPI extends AjaxController {
         if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
             $visibility->add(array('dept_id__in' => $depts));
 
-        $query->filter($visibility);
+        //$query->filter($visibility);
 
         foreach ($queues as $queue) {
             $Q = $queue->getBasicQuery();
