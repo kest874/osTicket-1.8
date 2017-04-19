@@ -27,6 +27,15 @@ $SubmittedSuggestions = Ticket::objects()
         foreach ($SubmittedSuggestions as $row)
                 $SubmittedSuggestions  = $row;
                 
+//Submitted Suggestions
+$AssignedSubmittedSuggestions = Ticket::objects()
+        ->filter(array('team_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '1'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($AssignedSubmittedSuggestions as $row)
+                $AssignedSubmittedSuggestions  = $row;                
+                
 //Active Suggestions
 $ActiveSuggestions = Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -36,6 +45,15 @@ $ActiveSuggestions = Ticket::objects()
         foreach ($ActiveSuggestions as $row)
                 $ActiveSuggestions  = $row;
                 
+//Active Suggestions
+$AssignedActiveSuggestions = Ticket::objects()
+        ->filter(array('team_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '8'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($AssignedActiveSuggestions as $row)
+                $AssignedActiveSuggestions  = $row;
+                
 //Parking Lot Suggestions
 $ParkedSuggestions = Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -44,17 +62,36 @@ $ParkedSuggestions = Ticket::objects()
  
         foreach ($ParkedSuggestions as $row)
                 $ParkedSuggestions  = $row;
+                
+//Parking Lot Suggestions
+$AssignedParkedSuggestions = Ticket::objects()
+        ->filter(array('team_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '7'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($AssignedParkedSuggestions as $row)
+                $AssignedParkedSuggestions  = $row;
 
-//Open Suggestions
-$OpenSuggestions = Ticket::objects()
+//Open Owned Suggestions
+$OwnedSuggestions = Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
         ->filter(array('status_id__ne' => '3'))
         ->filter(array('status_id__ne' => '6'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
  
-        foreach ($OpenSuggestions as $row)
-                $OpenSuggestions  = $row;
-
+        foreach ($OwnedSuggestions as $row)
+                $OwnedSuggestions  = $row;
+                
+//Open Assigned Suggestions
+$AssignedSuggestions = Ticket::objects()
+        ->filter(array('team_id' => $thisstaff->dept_id))
+        ->filter(array('status_id__ne' => '3'))
+        ->filter(array('status_id__ne' => '6'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($AssignedSuggestions as $row)
+                $AssignedSuggestions  = $row;
+                
 //Implmented
 $ImplmentedSuggestions = Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -154,10 +191,14 @@ $tasks = Task::objects()
 
 
 $MemberCount = $DeptMembers["count"];
-$OpenSuggestions = $OpenSuggestions["count"];
+$OwnedSuggestions = $OwnedSuggestions["count"];
+$AssignedSuggestions = $AssignedSuggestions["count"];
 $SubmittedSuggestions = $SubmittedSuggestions["count"];
+$AssignedSubmittedSuggestions = $AssignedSubmittedSuggestions["count"];
 $ActiveSuggestions = $ActiveSuggestions["count"];
+$AssignedActiveSuggestions = $AssignedActiveSuggestions["count"];
 $ParkedSuggestions = $ParkedSuggestions["count"];
+$AssignedParkedSuggestions = $AssignedParkedSuggestions["count"];
 $ImplmentedSuggestions = $ImplmentedSuggestions["count"];
 $NotImplmentedSuggestions = $NotImplmentedSuggestions["count"];
 
@@ -234,9 +275,9 @@ $OpenTasks = ($OpenTasks["count"]) ? $OpenTasks["count"] : 0
     
         <tr style="font-weight: bold;">
             <td colspan="2"><h2> <span style="color: red; font-weight: bold;"><?php echo $Dept; ?></span> Members: (<span style="color: red; font-weight: bold;"><?php echo $MemberCount ?></span>) </h2></td>
-            <td colspan = "3"><h2>Suggestions</h2></td>
+            <td colspan = "4"><h2>Suggestions</h2></td>
             <td colspan = "1"><h2>Tasks</h2></td>
-            <td colspan = "3"><h2>Targets <small>(1 associate)</small></h2></td>               
+            <td colspan = "2"><h2>Targets <small>(1 associate)</small></h2></td>               
         </tr>
 
 <tr><td colspan = "2"><table>
@@ -254,43 +295,58 @@ $OpenTasks = ($OpenTasks["count"]) ? $OpenTasks["count"] : 0
 
    </table>
     </td>
-    <td colspan = "3"  valign="top">
+    <td colspan = "4"  valign="top">
         <table>
             <tr style="font-weight: bold;">
-                <td rowspan="2" width="50px" style="color: red;"  align="middle"> Open (<?php echo $OpenSuggestions ?>) </td>
-                <td width="80px">Submitted</td>
-                <td width="50px">Active</td>
-                <td width="70px">Parking Lot</td>
-                
+                <td rowspan="2" width="50px" style="color: red;"  align="middle"> Owned<br>Open<br>(<?php echo $OwnedSuggestions ?>)</td>
+                <td width="80px" valign="top">Submitted</td>
+                <td width="50px" valign="top">Active</td>
+                <td width="70px" valign="top">Parking Lot</td>
+                <td rowspan="2" width="50px" style="color: green;">Closed</td>
+                <td width="80px" valign="top">Implemented</td>
+                              
             </tr>        
-            <tr>
+            <tr  valign="top">
                 
-                <td><?php echo $SubmittedSuggestions ?></td>
+                <td valign="top"><?php echo $SubmittedSuggestions ?></td>
                 <td><?php echo $ActiveSuggestions ?></td>
                 <td><?php echo $ParkedSuggestions ?></td>
+                <td><?php echo $ImplmentedSuggestions ?></td>
                 
             </tr>
             
-            <tr style="font-weight: bold;" >
-                <td rowspan="2" width="50px" style="color: green;">Closed</td>
-                <td width="80px">Implemented</td>
-                <td width="50px" colspan="2">Not Implemented</td>
+            <tr style="font-weight: bold;">
+            
+                <td rowspan="2" width="50px" style="color: red;" align="middle">Assigned<br>Open<br>(<?php echo $AssignedSuggestions?>)</td>
+                <td width="80px" valign="top">Submitted</td>
+                <td width="50px" valign="top">Active</td>
+                <td width="70px" valign="top">Parking Lot</td>
+                <td rowspan="2" width="50px" style="color: green;">&nbsp;</td>
+                <td width="80px" valign="top" style="text-decoration: line-through;">Implemented</td>
+                
                 
             </tr>        
             <tr>
-                
-                <td><?php echo $ImplmentedSuggestions ?></td>
+                <td><?php echo $AssignedSubmittedSuggestions ?></td>
+                <td><?php echo $AssignedActiveSuggestions ?></td>
+                <td><?php echo $AssignedParkedSuggestions ?></td>
                 <td><?php echo $NotImplmentedSuggestions ?></td>
+                
             </tr>
         </table>
-        <td colspan = "1"  valign="top">    
-        <table>
-        <tr><td style="font-weight: bold;" width = "100px">Open Tasks</td></tr>
-        <tr><td ><?php echo $OpenTasks ?></td></tr>
         
-        </table>
+        <td colspan = "1"  valign="top">    
+            <table>
+            <tr>
+                <td style="font-weight: bold;" width = "100px">Open Tasks</td>
+            </tr>
+            <tr>
+                <td><?php echo $OpenTasks ?></td>
+            </tr>
+            
+            </table>
     </td>  
-    <td colspan = "3"  valign="top">    
+    <td colspan = "2"  valign="top">    
         <table>
         <tr><td style="font-weight: bold; color: red;" width = "30px">1.4</td><td style="font-weight: bold;">Suggestions per month</td></tr>
         <tr><td style="font-weight: bold; color: red;" width = "30px">16.8</td><td style="font-weight: bold;">Suggestions per year</td></tr>
