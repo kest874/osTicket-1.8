@@ -488,8 +488,7 @@ if($ticket) {
     $ost->setPageTitle(sprintf(__('Suggestion #%s'),$ticket->getNumber()));
     $nav->setActiveSubMenu(-1);
     $inc = 'ticket-view.inc.php';
-    if ($_REQUEST['a']=='edit'
-            && $ticket->checkStaffPerm($thisstaff, Ticket::PERM_EDIT)) {
+    if ($_REQUEST['a']=='edit') {
         $inc = 'ticket-view.inc.php';
         if (!$forms) $forms=DynamicFormEntry::forTicket($ticket->getId());
         // Auto add new fields to the entries
