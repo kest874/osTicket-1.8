@@ -1,4 +1,4 @@
-<?php
+ <?php
 /*********************************************************************
     ajax.tickets.php
     AJAX interface for tickets
@@ -776,8 +776,7 @@ class TicketsAjaxAPI extends AjaxController {
                     $info['warn'] =  $closeable;
                 break;
             case 'delete':
-                if (!$role->hasPerm(Ticket::PERM_DELETE))
-                    Http::response(403, 'Access denied');
+                
                 $state = 'deleted';
                 break;
             default:

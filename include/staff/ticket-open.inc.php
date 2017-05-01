@@ -35,7 +35,7 @@ if ($_POST)
         <h2><?php echo __('Open a New Suggestion');?></h2>
     </div>
 
- <table class="ticket_open" width="100%" border="0" cellspacing="0" cellpadding="2">
+ <table class="ticket_open" width="100%" border="0" cellspacing="0" cellpadding="2" class="ticket_info" id="ticket_info" >
     <thead>
     <!-- This looks empty - but beware, with fixed table layout, the user
          agent will usually only consult the cells in the first row to
@@ -50,9 +50,9 @@ if ($_POST)
                 <div class="error"><?php echo $errors['user']; ?></div>
             </th>
         </tr>
-        <tr id="open_ticket_userdata"><td><strong><?php echo __('Submitter'); ?>:</strong>
+        <tr id="open_ticket_userdata"><td class="multi-line dynamicformdatamulti "><strong><?php echo __('Submitter'); ?>:</strong>
             
-            <td>
+            <td class="multi-line dynamicformdatamulti ">
                 <select id="uid" name="uid">
                     
                     <?php
@@ -75,19 +75,18 @@ if ($_POST)
         <?php
         if($cfg->notifyONNewStaffTicket()) {  ?>
         <tr  id="open_ticket_userdata">
-            <td width="160"><strong><?php echo __('Ticket Notice'); ?>:</strong></td>
-            <td>
+            <td width="160" class="multi-line dynamicformdatamulti "><strong><?php echo __('Suggestion Notice'); ?>:</strong></td>
+            <td class="multi-line dynamicformdatamulti ">
             <input type="checkbox" name="alertuser" <?php echo (!$errors || $info['alertuser'])? '': ''; ?>><?php
-                echo __('Send alert to user.'); ?>
+                echo __('Send alert to associate.'); ?>
             </td>
         </tr>
         <?php
         } ?>
-    </tbody>
-    <tbody class="open_ticket_informationdata">
+
         <tr id="open_ticket_informationoptions">
             <th colspan="2">
-                <em><strong><?php echo __('Ticket Information');?></strong>:</em>
+                <em><strong><?php echo __('Suggestion Information');?></strong>:</em>
             </th>
         </tr>
         <tr id="open_ticket_informationdata" style="display: none;">
@@ -116,6 +115,7 @@ if ($_POST)
             </td>
             <td>
                 <select class="requiredfield" name="topicId" onchange="javascript:
+                        
                         var data = $(':input[name]', '#dynamic-form').serialize();
                         $.ajax(
                           'ajax.php/form/help-topic/' + this.value,
@@ -126,7 +126,12 @@ if ($_POST)
                               $('#dynamic-form').empty().append(json.html);
                               $(document.head).append(json.media);
                             }
-                          });">
+                          });
+                          
+                          
+                          $('#submit').show();
+                          $('#reset').show();
+                          ">
                     <?php
                     if ($topics=Topic::getHelpTopics(false, false, true)) {
                         if (count($topics) == 1)
@@ -185,7 +190,7 @@ if ($_POST)
                 echo Misc::timeDropdown($hr, $min, 'time');
                 ?>
                 &nbsp;<font class="error">&nbsp;<?php echo $errors['duedate']; ?> &nbsp; <?php echo $errors['time']; ?></font>
-                <em><?php echo __('Time is based on your time zone');?> (GMT <?php echo Format::date(false, false, 'ZZZ'); ?>)</em>
+                <em style="color:gray;"><?php echo __('Time is based on your time zone');?> (GMT <?php echo Format::date(false, false, 'ZZZ'); ?>)</em>
             </td>
         </tr>
         
@@ -214,7 +219,7 @@ if ($_POST)
                     
                    ?>
                 </select>&nbsp;
-                <font class='error'>&nbsp;<?php echo $errors['deptId']; ?></font> <em>The team that should own this suggestion</em><br>
+                <font class='error'>&nbsp;<?php echo $errors['deptId']; ?></font> <em style="color:gray;">The team that should own this suggestion</em><br>
                 </td>
         </tr>
         <?php } ?>
@@ -244,14 +249,14 @@ if ($_POST)
                     
                    ?>
                 </select>&nbsp;
-                <font class='error'>&nbsp;<?php echo $errors['assignId']; ?></font> <em>Assign the team that should work on this</em><br>
+                <font class='error'>&nbsp;<?php echo $errors['assignId']; ?></font> <em style="color:gray;">Assign the team that should work on this</em><br>
                 </td>
         </tr>
         <?php } ?>
         
         
         </tbody>
-        <tbody id="dynamic-form">
+        <tbody id="dynamic-form" class="ticket_info" >
         <?php
             foreach ($forms as $form) {
                 print $form->getForm()->getMedia();
@@ -260,12 +265,12 @@ if ($_POST)
         ?>
         
         
-        <tbody>
+        </tbody>
         
 </table>
-<p style="text-align:center;">
-    <input type="submit" name="submit" class="save pending" value="<?php echo _P('action-button', 'Submit');?>">
-    <input type="reset"  name="reset"  value="<?php echo __('Reset');?>">
+<p style="text-align:center;" id="submitreset">
+    <input type="submit" name="submit" id="submit" class="save pending" value="<?php echo _P('action-button', 'Submit');?> ">
+    <input type="reset"  name="reset"  id="reset" value="<?php echo __('Reset');?>">
     <input type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick="javascript:
         $('.richtext').each(function() {
             var redactor = $(this).data('redactor');
@@ -276,3 +281,10 @@ if ($_POST)
     ">
 </p>
 </form>
+
+<script>
+// Hide form buttons By Default
+$("#submit").hide();
+$("#reset").hide();
+
+</script>

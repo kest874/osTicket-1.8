@@ -8,9 +8,9 @@ if (isset($options['entry']) && $options['mode'] == 'edit'
     return;
 
 if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
-<tbody>
+
 <?php } ?>
-    <tr id="df"><td style="width:<?php echo $options['width'] ?: 150;?>px;"></td><td></td></tr>
+    <tr id="df" style="display: none;"><td style="width:<?php echo $options['width'] ?: 150;?>px;"></td><td></td></tr>
 <?php
 // Keep up with the entry id in a hidden field to decide what to add and
 // delete when the parent form is submitted
@@ -22,15 +22,8 @@ if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
     <tr><th colspan="2">
         <em>
 <?php if ($options['mode'] == 'edit') { ?> 
-        <div class="pull-right">
-    <?php if ($options['entry']
-                && $options['entry']->getDynamicForm()->get('type') == 'G') { ?>
-            <a href="#" title="Delete Entry" onclick="javascript:
-                $(this).closest('tbody').remove();
-                return false;"><i class="icon-trash"></i></a>&nbsp;
-    <?php } ?>
-            <i class="icon-sort" title="Drag to Sort"></i>
-        </div>
+        <div class="section-break">
+    
 <?php } ?>
         <strong><?php echo Format::htmlchars($form->getTitle()); ?></strong>:
         <div><?php echo Format::display($form->getInstructions()); ?></div>
@@ -58,12 +51,12 @@ if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
 			<?php } else if ($field->isBlockLevel()) { ?>
                 <td <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'id="requiredfield"';
                 ?> > <td style="padding-right:16px;" <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'id="requiredfield"';
-                ?>> &nbsp
+                ?>> 
                 <?php
             }
             
 			else { ?>
-                <td class="multi-line dynamicformdatamulti <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'required';
+                <td style="font-weight: bold" class="multi-line dynamicformdatamulti <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'required';
                 ?>" style="min-width:120px;" <?php if ($options['width'])
                     echo "width=\"{$options['width']}\""; ?>>
                 <?php echo Format::htmlchars($field->getLocal('label')); ?>:</td>
@@ -72,7 +65,7 @@ if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
             }
 			
             $field->render($options); ?>
-            <?php if (!$field->isBlockLevel() && $field->isRequiredForStaff()) { ?>
+            <?php if (!$field->isBlockLevel() && $field->isRequiredForStaff()&& !$field->HideAsterisk()) { ?>
                 <span class="error ">*</span>
             <?php
             }
@@ -110,5 +103,5 @@ if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
         </tr>
     <?php }
 if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
-</tbody>
+
 <?php } ?>

@@ -1209,6 +1209,10 @@ class FormField {
     function isBlockLevel() {
         return false;
     }
+    
+    function HideAsterisk() {
+        return false;
+    }
 
     /**
      * Fields should not be saved with the dynamic data. It is assumed that
@@ -1339,7 +1343,7 @@ class TextboxField extends FormField {
             'placeholder' => new TextboxField(array(
                 'id'=>5, 'label'=>__('Placeholder'), 'required'=>false, 'default'=>'',
                 'hint'=>__('Text shown in before any input from the user'),
-                'configuration'=>array('size'=>40, 'length'=>40,
+                'configuration'=>array('size'=>40, 'length'=>40,'contenteditable'=>false,
                     'translatable'=>$this->getTranslateTag('placeholder')
                 ),
             )),
@@ -1428,6 +1432,8 @@ class TextareaField extends FormField {
             )),
         );
     }
+    
+    
 
     function display($value) {
         $config = $this->getConfiguration();
@@ -1453,7 +1459,11 @@ class TextareaField extends FormField {
         else
             return $value;
     }
-
+        
+    function HideAsterisk() {
+        return true;
+    }
+    
 }
 
 class PhoneField extends FormField {
@@ -2185,6 +2195,10 @@ class SectionBreakField extends FormField {
     function isBlockLevel() {
         return false;
     }
+    
+    function HideAsterisk() {
+        return false;
+    }
 }
 
 class ThreadEntryField extends FormField {
@@ -2197,6 +2211,10 @@ class ThreadEntryField extends FormField {
 		return false;
 	}
     function isBlockLevel() {
+        return true;
+    }
+        
+    function HideAsterisk() {
         return true;
     }
     function isPresentationOnly() {
@@ -3404,17 +3422,31 @@ class TextareaWidget extends Widget {
             $class = sprintf('class="%s"', implode(' ', $class));
             $this->value = Format::viewableImages($this->value);
         }
+        
         if (isset($config['context']))
             $attrs['data-root-context'] = '"'.$config['context'].'"';
         ?>
         <span style="display:inline-block;width:100%">
-        <textarea <?php echo $rows." ".$cols." ".$maxlength." ".$class
+        
+        <?php
+           
+        if (isset($config['disabled'])|| isset($options['disabled'])){ ?>
+        
+        <div class="faketextbox">
+        <?php echo $this->value;?>
+        </div>   
+       
+       <?php } else { ?>
+        <textarea <?php echo $rows." ".$cols." ".$maxlength." ".$disabled. "" .$class
                 .' '.Format::array_implode('=', ' ', $attrs)
                 .' placeholder="'.$config['placeholder'].'"'; ?>
             id="<?php echo $this->id; ?>"
             name="<?php echo $this->name; ?>"><?php
                 echo Format::htmlchars($this->value);
+           
             ?></textarea>
+            
+        <?php } ?>
         </span>
         <?php
     }
@@ -4061,7 +4093,7 @@ class DatetimePickerWidget extends Widget {
 
 class SectionBreakWidget extends Widget {
     function render($options=array()) {
-        ?><div class="form-header section-break"><h3><?php
+        ?><div class="section-break"><h3><?php
         echo Format::htmlchars($this->field->getLocal('label'));
         ?></h3><em><?php echo Format::htmlchars($this->field->getLocal('hint'));
         ?></em></div>
@@ -4161,6 +4193,8 @@ class FileUploadWidget extends Widget {
                 ->all()
             );
         }
+        
+        $deletable = ($options['disabled'] ? 0:1);
 
         foreach ($F as $file) {
             $files[] = array(
@@ -4168,19 +4202,24 @@ class FileUploadWidget extends Widget {
                 'name' => $file->getName(),
                 'type' => $file->getType(),
                 'size' => $file->getSize(),
+                'deletable' => $deletable,
                 'download_url' => $file->getDownloadUrl(),
+                
             );
         }
+                
+            
         ?><div id="<?php echo $id;
             ?>" class="filedrop"><div class="files"></div>
-            <div class="dropzone"><i class="icon-upload"></i>
-            <?php echo sprintf(
-                __('Drop files here or %s choose them %s'),
-                '<a href="#" class="manual">', '</a>'); ?>
+           
+
+           <div class="dropzone" <?php echo ($options['disabled'] ? 'style="display:none;"':'') ?>>
+            <i class="icon-upload"></i>
+            <?php echo sprintf(__('Drop files here or %s choose them %s'),'<a href="#" class="manual">', '</a>');?>
         <input type="file" multiple="multiple"
             id="file-<?php echo $id; ?>" style="display:none;"
-            accept="<?php echo implode(',', $config['__mimetypes']); ?>"/>
-        </div></div>
+           accept="<?php echo implode(',', $config['__mimetypes']); ?>"/>
+          </div></div>
         <script type="text/javascript">
         $(function(){$('#<?php echo $id; ?> .dropzone').filedropbox({
           url: 'ajax.php/form/upload/<?php echo $this->field->get('id') ?>',
@@ -4197,7 +4236,7 @@ class FileUploadWidget extends Widget {
           files: <?php echo JsonDataEncoder::encode($files); ?>
         });});
         </script>
-<?php
+        <?php 
     }
 
     function getValue() {
@@ -4285,6 +4324,10 @@ class FreeTextField extends FormField {
 
     function isBlockLevel() {
         return true;
+    }
+        
+    function HideAsterisk() {
+        return false;
     }
 
     /* utils */

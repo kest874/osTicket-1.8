@@ -56,7 +56,7 @@ if ($user && $cfg->isAvatarsEnabled())
 		<span class="label label-bare"><?php echo __('Message'); ?></span>
 <?php } ?>	
 <?php if ($entry->type == 'R') { ?>
-		<span class="label label-bare"><?php echo __('Response'); ?></span>
+		<span class="label label-bare"><?php echo __('Update'); ?></span>
 <?php } ?>	
 <?php   if ($entry->flags & ThreadEntry::FLAG_EDITED) { ?>
             <span class="label label-bare" title="<?php

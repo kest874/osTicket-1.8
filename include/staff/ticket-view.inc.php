@@ -33,8 +33,8 @@ elseif ($ticket->isAssigned()
         && (($staff && $staff->getId()!=$thisstaff->getId())
             || ($team && !$team->isMember($thisstaff))
         ))
-    $warn.= sprintf('&nbsp;&nbsp;<span class="Icon assignedTicket">%s</span>',
-            sprintf(__('Suggesiton is assigned to %s'),
+    $warn.= sprintf('&nbsp;&nbsp;%s</span>',
+            sprintf(__('Suggestion is assigned to %s'),
                 implode('/', $ticket->getAssignees())
                 ));
 
@@ -62,18 +62,28 @@ if($ticket->isOverdue())
     $warn.='&nbsp;&nbsp;<span class="Icon overdueTicket">'.__('Marked overdue!').'</span>';
 ?>
 <div id="threaddata">
+<form action="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit" method="post" id="save"  enctype="multipart/form-data" >
 <div>
     <div class="thread sticky bar">
 	<div class="thread_content_top">
        <div class="thread_content">
         <div class="pull-right flush-right">
-            
-			<a class="action-button pull-right" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Suggestions'); ?>"
-				href="tickets.php"><i class="icon-list-alt"></i></a>
 			<span class="action-button pull-right only sticky">
 				<a href="#" data-stop="top" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Scroll Top'); ?>">
 				<i class="icon-chevron-up"></i></a>
+			</span>             
+			<a class="action-button pull-right" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Suggestions'); ?>"
+				href="tickets.php"><i class="icon-list-alt"></i></a>
+<?php if ($haspermission){ ?>
+            <span class="action-button pull-right" id="cancelbutton">
+				<a href="" onclick="window.location.href="tickets.php?id=<?php echo $ticket->getId(); ?>" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Cancel');?>" >
+				<i class="icon-remove"></i></a>
 			</span> 
+            <span class="action-button pull-right" id="savebutton">
+				<a href="#" onclick="document.getElementById('save').submit();" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Save'); ?>">
+				<i class="icon-save"></i></a>
+			</span> 
+<?php }?>
 				<span class="action-button pull-right">
 					<a href="#post-note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Post Internal Note'); ?>">
 					<i class="icon-edit"></i></a>
@@ -82,7 +92,7 @@ if($ticket->isOverdue())
             if ($haspermission){
 				if ($haspermission) { ?>
 				<span class="action-button pull-right">
-					<a href="#post-reply" class="post-response" id="post-reply" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Post Reply'); ?>">
+					<a href="#post-reply" class="post-response" id="post-reply" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Post Update'); ?>">
 					<i class="icon-mail-reply"></i></a>
 				</span>
            
@@ -149,29 +159,15 @@ if($ticket->isOverdue())
 
                  if($ticket->isOpen() && ($dept && $dept->isManager($thisstaff))) {
 
-                    if($ticket->isAssigned()) { ?>
-                        <li><a  class="confirm-action" id="ticket-release" href="#release"><i class="icon-user"></i> <?php
-                            echo __('Release (unassign) Ticket'); ?></a></li>
-                    <?php
-                    }
-
+                   
                     if(!$ticket->isOverdue()) { ?>
                         <li><a class="confirm-action" id="ticket-overdue" href="#overdue"><i class="icon-bell"></i> <?php
                             echo __('Mark as Overdue'); ?></a></li>
                     <?php
                     }
 
-                    if($ticket->isAnswered()) { ?>
-                    <li><a class="confirm-action" id="ticket-unanswered" href="#unanswered"><i class="icon-circle-arrow-left"></i> <?php
-                            echo __('Mark as Unanswered'); ?></a></li>
-                    <?php
-                    } else { ?>
-                    <li><a class="confirm-action" id="ticket-answered" href="#answered"><i class="icon-circle-arrow-right"></i> <?php
-                            echo __('Mark as Answered'); ?></a></li>
-                    <?php
-                    }
                 } ?>
-                    <li><a href="#ajax.php/tickets/<?php echo $ticket->getId();
+                    <li style="display:none;"><a href="#ajax.php/tickets/<?php echo $ticket->getId();
                     ?>/forms/manage" onclick="javascript:
                     $.dialog($(this).attr('href').substr(1), 201);
                     return false"
@@ -227,12 +223,14 @@ if($ticket->isOverdue())
         echo $subject_field->display($ticket->getSubject()); ?>
     </h3>
 </div>
+
+    
 <?php If  (!$haspermission) { ?>
-            <div class="permissions-error"><?php echo "This another Team's improvment (view only)."; ?></div>
+            <div class="permissions-error"><?php echo $warn." (view only)."; ?></div>
              <?php
             }?>
             
-<form action="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit" method="post" id="save"  enctype="multipart/form-data" >
+
 <table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
     <tr>
         <td width="50%">
@@ -312,16 +310,7 @@ if($ticket->isOverdue())
                     <th nowrap><?php echo __('Last Message');?>:</th>
                     <td><?php echo Format::datetime($ticket->getLastMsgDate()); ?></td>
                 </tr>
-                <tr>
-                    <th><?php echo __('Source'); ?>:</th>
-                    <td><?php
-                        echo Format::htmlchars($ticket->getSource());
-
-                        if (!strcasecmp($ticket->getSource(), 'Web') && $ticket->getIP())
-                            echo '&nbsp;&nbsp; <span class="faded">('.Format::htmlchars($ticket->getIP()).')</span>';
-                        ?>
-                    </td>
-                </tr>
+                
             </table>
         </td>
     </tr>
@@ -332,11 +321,9 @@ if($ticket->isOverdue())
 				<input type="hidden" name="do" value="update">
 				<input type="hidden" name="a" value="edit">
 				<input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">					
-<table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" style="border-top:1px solid #dddddd;">
-	<tr>
-		<td width="50%" style="vertical-align:top">
-            <table border="0" cellspacing="" cellpadding="4" width="100%"> 	
-				<tr>
+
+            <table border="0" cellspacing="" cellpadding="0" width="100%"  class="ticket_info"  id="ticket_info"> 	
+				<tr style="display:none;">
 					<th width="180">
 						<?php echo __('Ticket Source');?>:
 					</th>
@@ -395,7 +382,7 @@ if($ticket->isOverdue())
                         }
 						?>
 						&nbsp;<font class="error">&nbsp;<?php echo $errors['duedate']; ?>&nbsp;<?php echo $errors['time']; ?></font>
-						<em><?php echo __('Time is based on your time zone');?>
+						<em style="color:gray;"><?php echo __('Time is based on your time zone');?>
 							(<?php echo $cfg->getTimezone($thisstaff); ?>)</em>
 					</td>
                 </tr>
@@ -429,12 +416,9 @@ if($ticket->isOverdue())
 							&nbsp;<font class="error">* <br>&nbsp;<?php echo $errors['topicId']; ?></font>
 					</td>
 				</tr>
-			</table>
-		</td>
-		<td  style="vertical-align:top">
-            <table border="0" cellspacing="" cellpadding="0" width="100%" id="dynamic"> 
-				<tr>
-              		<td>
+			
+		
+
 						<?php 
                             foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
                                 if ($haspermission){
@@ -443,23 +427,9 @@ if($ticket->isOverdue())
                                 $form->render(true, false, array('mode'=>'edit','width'=>140,'disabled'=>1,'entry'=>$form));    
                                 }
 						} ?>
-					</td>
-				</tr>
-			</table>
-		</td>
-	</tr>
+
 	</table>
-    <?php if ($haspermission){ ?> 
-	<table id="formbuttons" class="ticket_info" cellspacing="0" cellpadding="0" width="100%" style="border-top:1px solid #dddddd;">
-	<tr>
-		<td align="center" colspan="2">
-			<input type="submit" name="submit" value="<?php echo __('Save');?>">
-			<input type="reset"  name="reset"  value="<?php echo __('Reset');?>">
-            <input type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick='window.location.href="tickets.php?id=<?php echo $ticket->getId(); ?>"'>
-		</td>
-	</tr>
-    </table>
-    <?php } ?>
+   
 </form>
 
 
@@ -468,7 +438,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
 ?>
 <ul  class="tabs clean threads" id="ticket_tabs" >
     <li class="active"><a id="ticket-thread-tab" href="#ticket_thread"><?php
-        echo sprintf(__('Suggestion Thread (%d)'), $tcount); ?></a></li>
+        echo sprintf(__('Suggestion History (%d)'), $tcount); ?></a></li>
      <?php if ($haspermission) {?>
     <li><a id="ticket-tasks-tab" href="#tasks"
             data-url="<?php
@@ -514,7 +484,7 @@ if ($errors['err'] && isset($_POST['a'])) {
         if ($haspermission){ ?>
         <li class="active <?php
             echo isset($errors['reply']) ? 'error' : ''; ?>"><a
-            href="#reply" id="post-reply-tab"><?php echo __('Post Reply');?></a></li>
+            href="#reply" id="post-reply-tab"><?php echo __('Post Update');?></a></li>
         <?php
         } ?>
         <li><a href="#note" <?php
@@ -561,39 +531,7 @@ if ($errors['err'] && isset($_POST['a'])) {
                 </td>
             </tr>
             </tbody>
-            <?php
-            if(1) { //Make CC optional feature? NO, for now.
-                ?>
-            <tbody id="cc_sec"
-                style="display:<?php echo $emailReply?  'table-row-group':'none'; ?>;">
-             <tr style="display: none;">
-                <td width="120">
-                    <label><strong><?php echo __('Collaborators'); ?>:</strong></label>
-                </td>
-                <td>
-                    <input type='checkbox' value='1' name="emailcollab"
-                    id="t<?php echo $ticket->getThreadId(); ?>-emailcollab"
-                        <?php echo ((!$info['emailcollab'] && !$errors) || isset($info['emailcollab']))?'checked="checked"':''; ?>
-                        style="display:<?php echo $ticket->getThread()->getNumCollaborators() ? 'inline-block': 'none'; ?>;"
-                        >
-                    <?php
-                    $recipients = __('Add Recipients');
-                    if ($ticket->getThread()->getNumCollaborators())
-                        $recipients = sprintf(__('Recipients (%d of %d)'),
-                                $ticket->getThread()->getNumActiveCollaborators(),
-                                $ticket->getThread()->getNumCollaborators());
 
-                    echo sprintf('<span><a class="collaborators preview"
-                            href="#thread/%d/collaborators"><span id="t%d-recipients">%s</span></a></span>',
-                            $ticket->getThreadId(),
-                            $ticket->getThreadId(),
-                            $recipients);
-                   ?>
-                </td>
-             </tr>
-            </tbody>
-            <?php
-            } ?>
             <tbody id="resp_sec">
             <?php
             if($errors['response']) {?>
@@ -602,7 +540,7 @@ if ($errors['err'] && isset($_POST['a'])) {
             }?>
             <tr>
                 <td width="120" style="vertical-align:top">
-                    <label><strong><?php echo __('Response');?>:</strong></label>
+                    <label><strong><?php echo __('Update');?>:</strong></label>
                 </td>
                 <td>
 <?php if (!$cfg->isCannedResponseEnabled()) { ?>
@@ -637,7 +575,7 @@ if ($errors['err'] && isset($_POST['a'])) {
                         data-signature="<?php
                             echo Format::htmlchars(Format::viewableImages($signature)); ?>"
                         placeholder="<?php echo __(
-                        'Start writing your response here. Use canned responses from the drop-down above'
+                        'Enter your update here.'
                         ); ?>"
                         rows="9" wrap="soft"
                         class="<?php if ($cfg->isRichTextEnabled()) echo 'richtext';
@@ -652,33 +590,10 @@ if ($errors['err'] && isset($_POST['a'])) {
                 </div>
                 </td>
             </tr>
-            <tr>
-                <td width="120">
-                    <label for="signature" class="left"><?php echo __('Signature');?>:</label>
-                </td>
-                <td>
-                    <?php
-                    $info['signature']=$info['signature']?$info['signature']:$thisstaff->getDefaultSignatureType();
-                    ?>
-                    <label><input type="radio" name="signature" value="none" checked="checked"> <?php echo __('None');?></label>
-                    <?php
-                    if($thisstaff->getSignature()) {?>
-                    <label><input type="radio" name="signature" value="mine"
-                        <?php echo ($info['signature']=='mine')?'checked="checked"':''; ?>> <?php echo __('My Signature');?></label>
-                    <?php
-                    } ?>
-                    <?php
-                    if($dept && $dept->canAppendSignature()) { ?>
-                    <label><input type="radio" name="signature" value="dept"
-                        <?php echo ($info['signature']=='dept')?'checked="checked"':''; ?>>
-                        <?php echo sprintf(__('Department Signature (%s)'), Format::htmlchars($dept->getName())); ?></label>
-                    <?php
-                    } ?>
-                </td>
-            </tr>
+            
             <tr>
                 <td width="120" style="vertical-align:top">
-                    <label><strong><?php echo __('Ticket Status');?>:</strong></label>
+                    <label><strong><?php echo __('Suggestion Status');?>:</strong></label>
                 </td>
                 <td>
                     <?php
@@ -715,7 +630,7 @@ if ($errors['err'] && isset($_POST['a'])) {
          </tbody>
         </table>
         <p  style="text-align:center;">
-            <input class="save pending" type="submit" value="<?php echo __('Post Reply');?>">
+            <input class="save pending" type="submit" value="<?php echo __('Post Update');?>">
             <input class="" type="reset" value="<?php echo __('Reset');?>">
         </p>
     </form>
@@ -773,8 +688,8 @@ if ($errors['err'] && isset($_POST['a'])) {
             <tr><td colspan="2">&nbsp;</td></tr>
             <?php if ($ticket->checkStaffPerm($thisstaff)) {?>
             <tr>
-                <td width="120">
-                    <label><?php echo __('Ticket Status');?>:</label>
+                <td width="125">
+                    <label><strong><?php echo __('Suggestion Status');?>:</strong></label>
                 </td>
                 <td>
                     <div class="faded"></div>
@@ -970,10 +885,15 @@ $(function() {
 $("#formbuttons").hide();
 
 $("input, select").change(function(){
-$("#formbuttons").show();
+$("#savebutton").css("backgroundColor", "rgb(193, 237, 174);");
+$("#cancelbutton").css("backgroundColor", "rgb(246, 193, 193)");
 });
 
-$("form").keyup(function(){
-$("#formbuttons").show();
+$("form").keyup(function(e){
+    var charCode = e.which || e.keyCode; 
+    if (!(charCode === 9)){
+        $("#savebutton").css("backgroundColor", "rgb(193, 237, 174);");
+        $("#cancelbutton").css("backgroundColor", "rgb(246, 193, 193)");
+    }
 });
 </script>

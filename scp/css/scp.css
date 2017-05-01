@@ -157,7 +157,15 @@ a time.relative {
 div#msg_warning {
     border-radius: 5px;
 }
-
+#msg_warning, .warning-banner {
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px 10px 5px 36px;
+    margin-bottom: 10px;
+    border: 1px solid #f26522;
+    background: url(../images/icons/alert.png) 10px 50% no-repeat #ffffdd;
+    border-radius: 5px;
+}
 div#thread_msg_warning{
     padding: 5px 10px 5px 36px; 
     margin-bottom: 10px; 
@@ -184,6 +192,16 @@ div#ticket_thread.tab_content div#msg_warning{
     margin-top: -11px;
     padding: 5px 10px 5px 36px; 
     border-bottom: 1px solid #b7afaf; 
+    background: url('../images/icons/error.png') 10px 50% no-repeat #fff0f0; 
+}
+
+div.thread_warning-banner{
+    margin-left: 0px;
+    margin-right: -1px;
+    margin-bottom: 10px; 
+    border-radius:5px;
+    padding: 5px 10px 5px 36px; 
+    border: 1px solid #b7afaf; 
     background: url('../images/icons/error.png') 10px 50% no-repeat #fff0f0; 
 }
 
@@ -1553,17 +1571,62 @@ input[type=text], input[type=password], textarea, input {
     border:1px solid #f00;
 }
 
+.faketextbox{
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px 10px 5px 5px;
+    margin-bottom: 10px;
+    border: 1px solid #aaa;
+    background: #fff;
+    border-radius: 5px;
+    color: #929cac;
+    min-height: 75px
+}    
 .form_table th, div.section-break {
+    margin-left: -21px;
+    margin-right: -15px;
+    max-width: 1001px;
     text-align:left;
-    border:1px solid #ccc;
+    border-top:1px solid #ccc;
+    border-bottom:1px solid #ccc;
     background:#eee;
-    padding:0;
-    padding:5px;
+    padding-top: 10px; 
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
+form#save.ticket_open_content table.ticket_open tbody#dynamic-form tr#open_ticket_dynamicformdata td div.section-break{
+    margin-left: -12px;
+    margin-right: -30px;
+}
+
+#ticket_info tbody #open_ticket_dynamicformdata td div.section-break{
+    margin-left: -23px;
+    margin-right: -41px;
+    padding-top: 10px;
+	padding-left: 10px;
+	padding-bottom: 10px;
+	background-color:#FFF;
+	text-align: left;
+	border-top: 1px solid #999;
+	border-left: 0px solid #999;
+	border-right: 0px solid #999;
+	border-bottom: 1px solid #999;
+    background: #eee;
+}
+
+
+
+#dynamic tbody #open_ticket_dynamicformdata td div.section-break{
+    margin-left: -10px;
+    margin-right: -41px;
+    max-width: 1001px;
+
 }
 
 div.section-break h3 {
     margin: 0;
     padding: 0;
+    padding-left: 8px;
 }
 
 .permissions-error {
@@ -1685,7 +1748,7 @@ h3 {
     margin-left: auto;
     margin-right: auto;
     padding-top: 10px;
-	width: 960px;
+	max-width: 1001px; 
 	border-radius: 5px;
 	border: 1px solid #999;
 }
@@ -1735,7 +1798,7 @@ tr#open_ticket_userinformation th{
 	 padding-top: 10px;
 	  padding-bottom: 10px;
 	 text-align: left;
-	 background-color:#FFF;
+	 background-color:#eee;
 	 border-bottom: 1px solid #999;
 }
 tr#open_ticket_userdata td{
@@ -1751,7 +1814,7 @@ tr#open_ticket_userdata td{
  	padding-top: 10px;
 	padding-left: 10px;
 	padding-bottom: 10px;
-	background-color:#FFF;
+	background-color:#eee;
 	text-align: left;
 	 border-top: 1px solid #999;
 	  border-bottom: 1px solid #999;
@@ -1812,18 +1875,20 @@ tr#open_ticket_userdata td{
 }
 
 .dynamicformdatamulti{
-	padding-left: 10px;
+	/*padding-left: 10px;*/
 	
 }
  tr#open_ticket_dynamicformdata {
 	padding-top: 5px;
 	padding-left: 10px;
 	padding-bottom: 5px;
-	background-color: #f7f7f7;
+	background-color: #f4faff;
 }
  tr#open_ticket_dynamicformdata td{
 	padding-top: 5px;
 	padding-bottom: 5px;
+    padding-right: 30px;
+    padding-left: 12px;
 }
 
 
@@ -1831,7 +1896,7 @@ tr#open_ticket_userdata td{
 	padding-top: 10px;
 	padding-left: 10px;
 	padding-bottom: 10px;
-	background-color:#FFF;
+	background-color:#eee;
 	text-align: left;
 	border-top: 1px solid #999;
 	border-bottom: 1px solid #999;
@@ -1857,7 +1922,7 @@ tr#open_ticket_userdata td{
 	border-top: 1px solid #999;
 	border-bottom: 1px solid #999;
 	border-left: 0px solid #999;
-	border-r: 0px solid #999;
+	border-right: 0px solid #999;
  	
  }
 .open_ticket_dynamic-form{
@@ -1872,7 +1937,7 @@ tr#open_ticket_userdata td{
 	border-top: 1px solid #999;
 	border-bottom: 1px solid #999;
 	border-left: 0px solid #999;
-	border-r: 0px solid #999;
+	border-right: 0px solid #999;
  	
  }
 
@@ -1913,7 +1978,7 @@ form#save.ticket_edit_content>table.ticket_edit>tbody>tr#open_ticket_dynamicform
 form#save.ticket_edit_content>table.ticket_edit>tbody>tr#open_ticket_dynamicformdata>td>div.form-header.section-break{
 	margin-left: -15px;
 }
-form#save.ticket_edit_content>table.ticket_edit>tbody>tr#df>td{
+form#save table #ticket_info.ticket_info tbody tr th{
 	display: none;
 	
 }
@@ -1962,11 +2027,13 @@ table#dynamic>tbody>tr#open_ticket_dynamicformdata>td>div#requiredfield>select {
 .ticket_info{
 	margin-left: auto;
 	margin-right: auto;
-	padding: 10px;
-
+	padding-top: 10px;
+    padding-right: 10px;
+    padding-left: 10px;
 }
 .ticket_info th {
     text-align:left;
+    padding-left: 10px;
 }
 
 .ticket_info {
@@ -3050,8 +3117,6 @@ input[type="button"],
     border: none;
     box-shadow: 0 0 0 1px rgba(0,0,0,0.25) inset;
     padding:2px 11px;
-    color: #555;
-    /*background-color: #f0f0f0;*/
 
     /*background-color: rgba(0,0,0,0.02);*/
 	background-color: rgba(255,255,255,0.95);
@@ -3743,6 +3808,11 @@ tr i.help-tip.warning {
 	background-color: #ffffcc !important;	
 }
 td#requiredfield .redactor-editor, .redactor-box, .redactor-box textarea
+{
+  background-color: #ffffcc;
+}
+  
+tr#open_ticket_dynamicformdata td div#requiredfield .redactor-editor, .redactor-box, .redactor-box textarea
 {
   background-color: #ffffcc;
  

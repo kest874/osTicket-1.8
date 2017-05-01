@@ -2967,7 +2967,7 @@ implements RestrictedAccess, Threadable, Searchable {
                 Misc::dbtime($vars['duedate'].' '.$vars['time']));
         if (!$ticket->save())
             return null;
-        if (!($thread = TicketThread::create($ticket->getId())))
+        if (!($thread = TicketThread::create($ticket->getId()))) 
             return null;
         /* -------------------- POST CREATE ------------------------ */
         // Save the (common) dynamic form
@@ -3007,14 +3007,14 @@ implements RestrictedAccess, Threadable, Searchable {
         //post the message.
         $vars['title'] = $vars['subject']; //Use the initial subject as title of the post.
         $vars['userId'] = $ticket->getUserId();
-        $message = $ticket->postMessage($vars , $origin, '0');
+        ////$message = $ticket->postMessage($vars , $origin, '0');
         // If a message was posted, flag it as the orignal message. This
         // needs to be done on new ticket, so as to otherwise separate the
         // concept from the first message entry in a thread.
-        if ($message instanceof ThreadEntry) {
-            $message->setFlag(ThreadEntry::FLAG_ORIGINAL_MESSAGE);
-            $message->save();
-        }
+        // if ($message instanceof ThreadEntry) {
+            // $message->setFlag(ThreadEntry::FLAG_ORIGINAL_MESSAGE);
+            // $message->save();
+        //  }
         // Configure service-level-agreement for this ticket
         $ticket->selectSLAId($vars['slaId']);
         // Set status
@@ -3072,7 +3072,7 @@ implements RestrictedAccess, Threadable, Searchable {
         // Don't send alerts to staff when the message is a bounce
         // this is necessary to avoid possible loop (especially on new ticket)
         if ($alertstaff && $message instanceof ThreadEntry && $message->isBounce())
-            $alertstaff = false;
+            $alertstaff = false; 
         /***** See if we need to send some alerts ****/
         $ticket->onNewTicket($message, $autorespond, $alertstaff);
         /************ check if the user JUST reached the max. open tickets limit **********/
@@ -3127,8 +3127,8 @@ implements RestrictedAccess, Threadable, Searchable {
         $vars['note'] = ThreadEntryBody::clean($vars['note']);
         $create_vars = $vars;
         $tform = TicketForm::objects()->one()->getForm($create_vars);
-        $create_vars['cannedattachments']
-            = $tform->getField('message')->getWidget()->getAttachments()->getClean();
+  //      $create_vars['cannedattachments']
+    //        = $tform->getField('message')->getWidget()->getAttachments()->getClean();
         if (!($ticket=self::create($create_vars, $errors, 'staff', false)))
             return false;
         $vars['msgId']=$ticket->getLastMsgId();

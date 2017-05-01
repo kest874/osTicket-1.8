@@ -171,7 +171,7 @@
             .hide())
           .append($('<input type="hidden"/>').attr('name', this.options.name)
             .val(file.id))
-      if (this.options.deletable) {
+  if (file.deletable == 1) {
         filenode.prepend($('<span><i class="icon-trash"></i></span>')
           .addClass('trash pull-right')
           .click($.proxy(this.deleteNode, this, filenode))
