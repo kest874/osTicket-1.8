@@ -287,4 +287,16 @@ if ($_POST)
 $("#submit").hide();
 $("#reset").hide();
 
+$("input, select").change(function(){
+        $("#submit").show();
+        $("#reset").show();
+});
+
+$("form").keyup(function(e){
+    var charCode = e.which || e.keyCode; 
+    if (!(charCode === 9)){
+        $("#submit").show();
+        $("#reset").show();
+    }
+});
 </script>

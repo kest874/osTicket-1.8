@@ -882,7 +882,6 @@ $(function() {
 });
 
 // Hide form buttons By Default
-$("#formbuttons").hide();
 
 $("input, select").change(function(){
 $("#savebutton").css("backgroundColor", "rgb(193, 237, 174);");
