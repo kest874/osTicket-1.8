@@ -1217,6 +1217,12 @@ a.Icon:hover {
 .Icon.otherTicket { background:url(../images/icons/ticket_source_other.gif) 0 0 no-repeat; }
 .Icon.overdueTicket { background:url(../images/icons/overdue_ticket.gif) 0 0 no-repeat; }
 .Icon.tasklist { background:url(../images/icons/task-list.gif) 0 0 no-repeat; }
+.Icon.pie0 { background:url(../images/icons/pie0.png) 0 0 no-repeat; }
+.Icon.pie1 { background:url(../images/icons/pie1.png) 0 0 no-repeat; }
+.Icon.pie2 { background:url(../images/icons/pie2.png) 0 0 no-repeat; }
+.Icon.pie3 { background:url(../images/icons/pie3.png) 0 0 no-repeat; }
+.Icon.pie4 { background:url(../images/icons/pie4.png) 0 0 no-repeat; }
+.Icon.pie5 { background:url(../images/icons/pie5.png) 0 0 no-repeat; }
 .Icon.assignedTicket { background:url(../images/icons/assigned_ticket.gif) 0 0 no-repeat; }
 .Icon.lockedTicket { background:url(../images/icons/locked_ticket.gif) 0 0 no-repeat; }
 .Icon.editTicket { background-image: url(../images/icons/edit_ticket.png); }

@@ -1125,6 +1125,50 @@ extends QueueColumnAnnotation {
         return $row[static::$qname] > 0;
     }
 }
+
+class ProgressDecoration
+extends QueueColumnAnnotation {
+    static $icon = 'exclamation';
+    static $desc = /* @trans */ 'Progress Pie';
+    function annotate($query) {
+        return $query->values('cdata__progress');
+    }
+    function getDecoration($row, $text) {
+        
+        if ($row)
+        
+        switch ($row["cdata__progress"][0]){
+        
+        case 0:
+            $pie = '<i class="Icon pie0" data-toggle="tooltip" title="0%"></i>';
+            break;
+        case 1:
+            $pie = '<i class="Icon pie1" data-toggle="tooltip" title="0%"></i>';
+            break;
+        case 2:
+            $pie = '<i class="Icon pie2" data-toggle="tooltip" title="0%"></i>';
+            break;
+        case 3:
+            $pie = '<i class="Icon pie3" data-toggle="tooltip" title="0%"></i>';
+            break;
+        case 4:
+            $pie = '<i class="Icon pie4" data-toggle="tooltip" title="0%"></i>';;
+            break;
+        case 5:
+            $pie = '<i class="Icon pie5" data-toggle="tooltip" title="0%"></i>';
+            break;
+            
+            
+        }
+        
+        
+            return  $pie;
+    }
+    function isVisible($row) {
+        return $row['isoverdue'];
+    }
+}
+
 class OverdueFlagDecoration
 extends QueueColumnAnnotation {
     static $icon = 'exclamation';
