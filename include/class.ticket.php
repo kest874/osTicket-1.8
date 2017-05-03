@@ -390,6 +390,16 @@ implements RestrictedAccess, Threadable, Searchable {
     function getStatus() {
         return $this->status;
     }
+    
+    //Set progress to 100% when status_id = 3
+    function SetProgressTo100($id){
+    
+$value = '{"5":"100%"}';
+$sql= "update osticket_sugtest.ost_form_entry a join ost_form_entry_values b on a.id = b.entry_id  set b.value = '".$value."' where a.object_id = ".$id." and b.field_id = 59";
+
+    return db_query($sql);
+    }
+    
     function getState() {
         if (!$this->getStatus()) {
             return '';
@@ -916,7 +926,7 @@ implements RestrictedAccess, Threadable, Searchable {
                 // Check if ticket is closeable
                 $closeable = $this->isCloseable();
                 if ($closeable !== true)
-                    $errors['err'] = $closeable ?: sprintf(__('%s cannot be closed'), __('This ticket'));
+                    $errors['err'] = $closeable ?: sprintf(__('%s cannot be closed'), __('This Suggestion'));
                 if ($errors)
                     return false;
                 $this->closed = $this->lastupdate = SqlFunction::NOW();
@@ -928,6 +938,12 @@ implements RestrictedAccess, Threadable, Searchable {
                     $t->logEvent('closed', array('status' => array($status->getId(), $status->getName())));
                     $t->deleteDrafts();
                 };
+                
+                if ($status->getId = 2){
+                    
+                ticket::SetProgressTo100($this->ticket_id);  
+                DynamicForm::dropDynamicDataView(TicketForm::$cdata['table']);
+                }
                 break;
             case 'open':
                 // TODO: check current status if it allows for reopening
@@ -2459,9 +2475,9 @@ implements RestrictedAccess, Threadable, Searchable {
         if ($errors)
             return false;
         // Decide if we need to keep the just selected SLA
-        $keepSLA = ($this->getSLAId() != $vars['slaId']);
+        
         $this->topic_id = $vars['topicId'];
-        $this->sla_id = $vars['slaId'];
+       
         $this->source = $vars['source'];
         $this->duedate = $vars['duedate']
             ? date('Y-m-d G:i',Misc::dbtime($vars['duedate'].' '.$vars['time']))
@@ -2489,6 +2505,7 @@ implements RestrictedAccess, Threadable, Searchable {
             $this->logNote(_S('Ticket Updated'), $vars['note'], $thisstaff);
         // Update dynamic meta-data
         foreach ($forms as $f) {
+            
             if ($C = $f->getChanges())
                 $changes['fields'] = ($changes['fields'] ?: array()) + $C;
             // Drop deleted forms
@@ -2503,12 +2520,7 @@ implements RestrictedAccess, Threadable, Searchable {
         }
         if ($changes)
             $this->logEvent('edited', $changes);
-        // Reselect SLA if transient
-        if (!$keepSLA
-            && (!$this->getSLA() || $this->getSLA()->isTransient())
-        ) {
-            $this->selectSLAId();
-        }
+
         // Update estimated due date in database
         $estimatedDueDate = $this->getEstDueDate();
         $this->updateEstDueDate();

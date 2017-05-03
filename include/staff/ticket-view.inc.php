@@ -421,6 +421,7 @@ if($ticket->isOverdue())
 
 						<?php 
                             foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
+                                $form->addMissingFields();
                                 if ($haspermission){
 								$form->render(true, false, array('mode'=>'edit','width'=>140,'entry'=>$form));
                                 } else {

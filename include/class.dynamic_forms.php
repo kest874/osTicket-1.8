@@ -1027,6 +1027,7 @@ class DynamicFormEntry extends VerySimpleModel {
         return $this->getForm()->render($staff, $title, $options);
     }
     function getChanges() {
+        $this->addMissingFields();
         $fields = array();
         foreach ($this->getAnswers() as $a) {
             $field = $a->getField();

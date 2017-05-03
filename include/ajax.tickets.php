@@ -793,14 +793,14 @@ class TicketsAjaxAPI extends AjaxController {
             Http::response(403, 'Access denied');
         elseif (!$tid
                 || !($ticket=Ticket::lookup($tid)))
-            Http::response(404, 'Unknown ticket #');
+            Http::response(404, 'Unknown suggestion #');
         $errors = $info = array();
         if (!$_POST['status_id']
                 || !($status= TicketStatus::lookup($_POST['status_id'])))
             $errors['status_id'] = sprintf('%s %s',
                     __('Unknown or invalid'), __('status'));
         elseif ($status->getId() == $ticket->getStatusId())
-            $errors['err'] = sprintf(__('Ticket already set to %s status'),
+            $errors['err'] = sprintf(__('Suggestion already set to %s status'),
                     __($status->getName()));
         elseif (($role = $thisstaff->getRole($ticket->getDeptId()))) {
             // Make sure the agent has permission to set the status
@@ -808,7 +808,7 @@ class TicketsAjaxAPI extends AjaxController {
                 case 'open':
                     if (!$role->hasPerm(Ticket::PERM_CREATE))
                         $errors['err'] = sprintf(__('You do not have permission %s'),
-                                __('to reopen tickets'));
+                                __('to reopen suggesitons'));
                     break;
                 case 'closed':
                    
@@ -829,7 +829,7 @@ class TicketsAjaxAPI extends AjaxController {
         if (!$errors && $ticket->setStatus($status, $_REQUEST['comments'], $errors)) {
             if ($state == 'deleted') {
                 $msg = sprintf('%s %s',
-                        sprintf(__('Ticket #%s'), $ticket->getNumber()),
+                        sprintf(__('Suggesiton #%s'), $ticket->getNumber()),
                         __('deleted sucessfully')
                         );
             } elseif ($state != 'open') {
@@ -839,7 +839,7 @@ class TicketsAjaxAPI extends AjaxController {
             } else {
                 $msg = sprintf(
                         __('%s status changed to %s'),
-                        __('Ticket'),
+                        __('Suggesiton'),
                         $status->getName());
             }
             $_SESSION['::sysmsgs']['msg'] = $msg;
@@ -1012,7 +1012,7 @@ class TicketsAjaxAPI extends AjaxController {
         $info['action'] = sprintf('#tickets/%d/status', $ticket->getId());
         $info['title'] = sprintf(__(
                     /* 1$ will be a verb, like 'open', 2$ will be the ticket number */
-                    '%1$s Ticket #%2$s'),
+                    '%1$s Suggestion #%2$s'),
                 $verb ?: $state,
                 $ticket->getNumber()
                 );
