@@ -864,7 +864,7 @@ class TicketsAjaxAPI extends AjaxController {
                 $state = 'open';
                 break;
             case 'close':
-
+                $state = 'closed';
                 break;
             case 'delete':
                 if (!$thisstaff->hasPerm(Ticket::PERM_DELETE, false))
