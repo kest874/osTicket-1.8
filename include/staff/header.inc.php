@@ -26,6 +26,7 @@ if ($lang) {
         .tip_shadow { display:block !important; }
     </style>
     <![endif]-->
+
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-1.11.2.min.js"></script>
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>css/thread.css" media="all">
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/scp.css" media="all">
@@ -42,11 +43,13 @@ if ($lang) {
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/flags.css">
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/select2.min.css">
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/rtl.css"/>
-    <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/helptopic.css"/>
-    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery.min.js"></script>
+    
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery.easyui.min.js"></script>
     <link type="text/css" rel="stylesheet" href="./css/translatable.css"/>
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/accordian.css" media="all">
+    
+    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/jquery.fancybox.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>scp/css/jquery.fancybox.min.css"/>
     <?php
     if($ost && ($headers=$ost->getExtraHeaders())) {
         echo "\n\t".implode("\n\t", $headers)."\n";

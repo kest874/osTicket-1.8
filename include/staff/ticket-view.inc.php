@@ -61,6 +61,8 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
 if($ticket->isOverdue())
     $warn.='&nbsp;&nbsp;<span class="Icon overdueTicket">'.__('Marked overdue!').'</span>';
 ?>
+
+
 <div id="threaddata">
 <form action="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit" method="post" id="save"  enctype="multipart/form-data" >
 <div>
@@ -896,4 +898,10 @@ $("form").keyup(function(e){
         $("#cancelbutton").css("backgroundColor", "rgb(246, 193, 193)");
     }
 });
+
+$("[data-fancybox]").fancybox({
+		closeClickOutside : true
+       
+	});
+    
 </script>
