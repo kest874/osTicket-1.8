@@ -481,6 +481,12 @@ if ($errors['err'] && isset($_POST['a'])) {
 } ?>
 
 <div class="sticky bar stop actions" id="response_options">
+
+    <div id="saveneeded">
+   <span> Please save or cancel the changes above using the buttons on the ribbon </span>
+   <div>	&nbsp;</div>
+    </div>
+    <div id="updatearea">
     <ul class="tabs" id="response-tabs">
         <?php
         
@@ -494,6 +500,7 @@ if ($errors['err'] && isset($_POST['a'])) {
             echo isset($errors['postnote']) ?  'class="error"' : ''; ?>
             id="post-note-tab"><?php echo __('Post Internal Note');?></a></li>
     </ul>
+   
     <?php
 
     if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
@@ -726,8 +733,8 @@ if ($errors['err'] && isset($_POST['a'])) {
            <input class="save pending" type="submit" value="<?php echo __('Post Note');?>">
            <input class="" type="reset" value="<?php echo __('Reset');?>">
        </p>
-   </form>
-   
+   </form></div>
+   </div>
    </div>
  </div>
  </div>
@@ -886,17 +893,22 @@ $(function() {
 
 // Hide form buttons By Default
 
-$("input, select").change(function(){
+$('#save').find('input, select').change(function(){
 $("#savebutton").css("backgroundColor", "rgb(193, 237, 174);");
 $("#cancelbutton").css("backgroundColor", "rgb(246, 193, 193)");
+$("#updatearea").css("display", "none");
+$("#saveneeded").css("display", "inherit");
 });
 
-$("form").keyup(function(e){
+$("#save").keyup(function(e){
     var charCode = e.which || e.keyCode; 
     if (!(charCode === 9)){
         $("#savebutton").css("backgroundColor", "rgb(193, 237, 174);");
         $("#cancelbutton").css("backgroundColor", "rgb(246, 193, 193)");
+        $("#updatearea").css("display", "none");
+        $("#saveneeded").css("display", "inherit");
     }
+    
 });
     
 </script>

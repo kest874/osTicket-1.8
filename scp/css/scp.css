@@ -2546,7 +2546,7 @@ ul#thread-preview.tabs>li {
     background-repeat:no-repeat;
 }
 
-#response_options > form {
+#updatearea > form {
     padding-left:20px; 
 	padding-right: 20px;
 	padding-bottom: 5px;
@@ -2557,6 +2557,19 @@ ul#thread-preview.tabs>li {
 	margin-left: auto;
 	margin-right: auto;
 	border-radius: 0 0 5px 5px;
+}
+
+div#response_options.sticky.bar.stop.actions > div#saveneeded {
+    display: none;
+}
+
+div#response_options.sticky.bar.stop.actions > div#saveneeded span{
+    display: block;
+    padding: 5px 10px 5px 36px;
+    margin-bottom: 10px;
+    border-top: 1px solid #f26522;
+    border-bottom: 1px solid #f26522;
+    background: url(../images/icons/alert.png) 10px 50% no-repeat #fff0f0;}
 }
 
 #response_options > form > table {
