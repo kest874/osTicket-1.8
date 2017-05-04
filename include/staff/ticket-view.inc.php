@@ -226,6 +226,10 @@ if($ticket->isOverdue())
     </h3>
 </div>
 
+<div id="detailschanged">
+   <span> Changes made please click the save <i class="icon-save"></i> or cancel <i class="icon-remove"></i> button on the ribbon.</span>
+   <div>	&nbsp;</div>
+</div>
     
 <?php If  (!$haspermission) { ?>
             <div class="permissions-error"><?php echo $warn." (view only)."; ?></div>
@@ -435,7 +439,11 @@ if($ticket->isOverdue())
    
 </form>
 
-
+<div id="saveneeded">
+   <span> Changes made please click the save <i class="icon-save"></i> or cancel <i class="icon-remove"></i> button on the ribbon.</span>
+   <div>	&nbsp;</div>
+</div>
+    <div id="updatearea">
 <?php
 $tcount = $ticket->getThreadEntries($types)->count();
 ?>
@@ -482,11 +490,7 @@ if ($errors['err'] && isset($_POST['a'])) {
 
 <div class="sticky bar stop actions" id="response_options">
 
-    <div id="saveneeded">
-   <span> Please save or cancel the changes above using the buttons on the ribbon </span>
-   <div>	&nbsp;</div>
-    </div>
-    <div id="updatearea">
+    
     <ul class="tabs" id="response-tabs">
         <?php
         
@@ -894,21 +898,47 @@ $(function() {
 // Hide form buttons By Default
 
 $('#save').find('input, select').change(function(){
-$("#savebutton").css("backgroundColor", "rgb(193, 237, 174);");
+$("#savebutton").css("backgroundColor", "rgba(76, 175, 80, 0.5);");
 $("#cancelbutton").css("backgroundColor", "rgb(246, 193, 193)");
 $("#updatearea").css("display", "none");
+$("#detailschanged").css("display", "inherit");
 $("#saveneeded").css("display", "inherit");
 });
 
 $("#save").keyup(function(e){
     var charCode = e.which || e.keyCode; 
     if (!(charCode === 9)){
-        $("#savebutton").css("backgroundColor", "rgb(193, 237, 174);");
+        $("#savebutton").css("backgroundColor", "rgba(76, 175, 80, 0.5);");
         $("#cancelbutton").css("backgroundColor", "rgb(246, 193, 193)");
         $("#updatearea").css("display", "none");
+        $("#detailschanged").css("display", "inherit");
         $("#saveneeded").css("display", "inherit");
     }
-    
 });
+
+$('#reply').find('input, select').change(function(){
+$("#savebutton").css("pointer-events", "none");
+});
+
+$('#reply').keyup(function(e){
+    var charCode = e.which || e.keyCode; 
+    if (!(charCode === 9)){
+     $("#savebutton").css("pointer-events", "none");
+     
+    }
+});   
+
+$('#note').find('input, select').change(function(){
+$("#savebutton").css("pointer-events", "none");
+});
+ 
+$('#note').keyup(function(e){
+    var charCode = e.which || e.keyCode; 
+    if (!(charCode === 9)){
+     $("#savebutton").css("pointer-events", "none");
+     
+    }
+});       
+
     
 </script>
