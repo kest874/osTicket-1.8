@@ -49,7 +49,7 @@ if ($lang) {
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/accordian.css" media="all">
     
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/jquery.fancybox.min.js"></script>
-<link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>scp/css/jquery.fancybox.min.css"/>
+    <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>scp/css/jquery.fancybox.min.css"/>
     <?php
     if($ost && ($headers=$ost->getExtraHeaders())) {
         echo "\n\t".implode("\n\t", $headers)."\n";

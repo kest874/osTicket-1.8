@@ -26,6 +26,7 @@ if ($_POST)
     $info['duedate'] = Format::date(strtotime($info['duedate']), false, false, 'UTC');
 
 ?>
+
 <form action="tickets.php?a=open" method="post" id="save"  enctype="multipart/form-data" class="ticket_open_content">
  <?php csrf_token(); ?>
  <input type="hidden" name="do" value="create">
@@ -299,4 +300,5 @@ $("form").keyup(function(e){
         $("#reset").show();
     }
 });
+
 </script>

@@ -105,3 +105,13 @@ if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
 if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
 
 <?php } ?>
+
+<script>
+
+$("[data-fancybox]").fancybox({
+		closeClickOutside : true
+       
+	});
+</script>
+                            
+                            

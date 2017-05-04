@@ -898,10 +898,5 @@ $("form").keyup(function(e){
         $("#cancelbutton").css("backgroundColor", "rgb(246, 193, 193)");
     }
 });
-
-$("[data-fancybox]").fancybox({
-		closeClickOutside : true
-       
-	});
     
 </script>
