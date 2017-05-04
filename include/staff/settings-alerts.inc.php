@@ -113,7 +113,7 @@
         <tr>
             <td>
               <input type="checkbox" name="note_alert_dept_teamleader" <?php echo $config['note_alert_dept_teamleader']?'checked':''; ?>>
-                <?php echo __('Mentor'); ?>
+                <?php echo __('Team Leader'); ?>
             </td>
         </tr>
         <tr><th><em><b><?php echo __('Ticket Assignment Alert'); ?></b>:

@@ -1337,12 +1337,16 @@ $sql= "update osticket_sugtest.ost_form_entry a join ost_form_entry_values b on 
             if ($team = $this->getTeam())
                 $recipients = array_merge($recipients, $team->getMembers());
         }
-        // Dept manager
-        if ($cfg->alertDeptManagerONNewActivity() && $dept && $dept->getManagerId())
-            $recipients[] = $dept->getManager();
-        $options = array();
-        $staffId = $thisstaff ? $thisstaff->getId() : 0;
-		
+		   
+        $manager = $dept->getManager();
+        $teamleader = $dept->getTeamLeader();
+ 
+        if ($cfg->alertDeptManagerONNewActivity() && $manager) {
+            $recipients[] = $manager;
+        }
+        if ($cfg->alertDeptTeamLeaderONNewActivity() && $teamleader) {
+            $recipients[] = $teamleader;
+        }
         if ($vars['threadentry'] && $vars['threadentry'] instanceof ThreadEntry) {
             $options = array('thread' => $vars['threadentry']);
             // Activity details
