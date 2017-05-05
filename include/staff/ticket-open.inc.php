@@ -215,7 +215,7 @@ if ($_POST)
                             echo sprintf('<option value="%s" %s>%s</option>',
                                         $k,(($info['assignId']==$k)?'selected="selected"':''),$name);
                         }
-                        echo '</OPTGROUP>';
+                        //echo '</OPTGROUP>';
                     }
                     
                    ?>
