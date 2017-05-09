@@ -24,7 +24,7 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
     <tr class="tg-3we0">
         <td width="220px">
             <strong>
-                <a data-fancybox data-src="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestions_AssociateSummary&rs:Command=Render">
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestions_AssociateSummary&rs:Command=Render" target="_blank">
                 Associate Suggestion Summary</a>
             </strong>
         </td>
@@ -36,7 +36,7 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
     <tr class="tg-3we0">
         <td width="220px">
             <strong>
-            <a data-fancybox data-src="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestion+Summary&rs:Command=Render" target="_blank">
+            <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestion+Summary&rs:Command=Render" target="_blank">
             Team Suggestion Summary</a>
             </strong>
         </td>
@@ -47,7 +47,7 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
     <tr class="tg-3we0">
         <td width="220px">
             <strong>
-                <a data-fancybox data-src="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestions_OpenSuggesitonAge&rs:Command=Render" target="_blank">
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestions_OpenSuggesitonAge&rs:Command=Render" target="_blank">
                 Suggestions Open Age</a>
             </strong>
         </td>
@@ -58,7 +58,7 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
         <tr class="tg-3we0">
         <td width="220px">
             <strong>
-                <a data-fancybox data-src="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestions_Suggesitons&rs:Command=Render" target="_blank">
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestions_Suggesitons&rs:Command=Render" target="_blank">
                 Suggestions</a>
             </strong>
         </td>
