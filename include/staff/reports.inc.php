@@ -13,18 +13,24 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
 <div>
 <br>
 
+
+
 <style type="text/css">
 .tg  {border-collapse:collapse;border-spacing:0;border:none;}
 .tg td{font-family:Arial, sans-serif;font-size:14px;padding:12px 10px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
 .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:12px 10px;border-style:solid;border-width:0px;overflow:hidden;word-break:normal;}
 .tg .tg-3we0{background-color:#ffffff;vertical-align:top}
 </style>
+
+<?php $DeptId = Dept::getParentId($thisstaff->dept_id);?>
+<?php $TeamId = $thisstaff->dept_id;?>
+
 <table class="tg" width="100%">
 
     <tr class="tg-3we0">
         <td width="220px">
             <strong>
-                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestions_AssociateSummary&rs:Command=Render" target="_blank">
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_AssociateSummary&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
                 Associate Suggestion Summary</a>
             </strong>
         </td>
@@ -36,7 +42,7 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
     <tr class="tg-3we0">
         <td width="220px">
             <strong>
-            <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestion+Summary&rs:Command=Render" target="_blank">
+            <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_Summary&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
             Team Suggestion Summary</a>
             </strong>
         </td>
@@ -47,7 +53,7 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
     <tr class="tg-3we0">
         <td width="220px">
             <strong>
-                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestions_OpenSuggesitonAge&rs:Command=Render" target="_blank">
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_OpenSuggesitonAge&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
                 Suggestions Open Age</a>
             </strong>
         </td>
@@ -58,12 +64,24 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
         <tr class="tg-3we0">
         <td width="220px">
             <strong>
-                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fSuggestions_Suggesitons&rs:Command=Render" target="_blank">
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_Suggestions&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
                 Suggestions</a>
             </strong>
         </td>
         <td>
             <em>Report showing Suggestions with filters (Catagory, Status)</em>
+        </td>     
+    </tr>
+        </tr>
+        <tr class="tg-3we0">
+        <td width="220px"> 
+            <strong>
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_Statistics&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
+                Suggestions Statistics</a>
+            </strong>
+        </td>
+        <td>
+            <em>Report showing Suggestions Statistics</em>
         </td>     
     </tr>
  

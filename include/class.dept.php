@@ -543,7 +543,15 @@ implements TemplateVariable, Searchable {
 
         return $row ? $row[0] : 0;
     }
-    
+    static function getParentId($Id) {
+        $row = static::objects()
+            ->filter(array(
+                        'id' => $Id))
+            ->values_flat('pid')
+            ->first();
+
+        return $row ? $row[0] : 0;
+    }    
     function getNameById($id) {
         $names = static::getDepartments();
         return $names[$id];
