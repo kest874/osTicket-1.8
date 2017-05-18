@@ -1146,16 +1146,16 @@ extends QueueColumnAnnotation {
             $pie = '<i class="Icon pie1" data-toggle="tooltip" title="0%"></i>';
             break;
         case 2:
-            $pie = '<i class="Icon pie2" data-toggle="tooltip" title="0%"></i>';
+            $pie = '<i class="Icon pie2" data-toggle="tooltip" title="25%"></i>';
             break;
         case 3:
-            $pie = '<i class="Icon pie3" data-toggle="tooltip" title="0%"></i>';
+            $pie = '<i class="Icon pie3" data-toggle="tooltip" title="50%"></i>';
             break;
         case 4:
-            $pie = '<i class="Icon pie4" data-toggle="tooltip" title="0%"></i>';;
+            $pie = '<i class="Icon pie4" data-toggle="tooltip" title="75%"></i>';;
             break;
         case 5:
-            $pie = '<i class="Icon pie5" data-toggle="tooltip" title="0%"></i>';
+            $pie = '<i class="Icon pie5" data-toggle="tooltip" title="100%"></i>';
             break;
             
             
