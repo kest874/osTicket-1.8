@@ -938,12 +938,10 @@ $sql= "update osticket_sugtest.ost_form_entry a join ost_form_entry_values b on 
                     $t->logEvent('closed', array('status' => array($status->getId(), $status->getName())));
                     $t->deleteDrafts();
                 };
-                
-                if ($status->getId = 3){
-                    
+
                 ticket::SetProgressTo100($this->ticket_id);  
                 DynamicForm::dropDynamicDataView(TicketForm::$cdata['table']);
-                }
+             
                 break;
             case 'open':
                 // TODO: check current status if it allows for reopening
