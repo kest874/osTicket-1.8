@@ -939,7 +939,7 @@ $sql= "update osticket_sugtest.ost_form_entry a join ost_form_entry_values b on 
                     $t->deleteDrafts();
                 };
                 
-                if ($status->getId = 2){
+                if ($status->getId = 3){
                     
                 ticket::SetProgressTo100($this->ticket_id);  
                 DynamicForm::dropDynamicDataView(TicketForm::$cdata['table']);
