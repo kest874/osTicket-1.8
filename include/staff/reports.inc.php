@@ -30,6 +30,17 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
     <tr class="tg-3we0">
         <td width="220px">
             <strong>
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_AssociateActivity&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
+                Associate Activity</a>
+            </strong>
+        </td>
+        <td>
+            <em>Report showing associate system activity.</em>
+        </td>
+    </tr>
+    <tr class="tg-3we0">
+        <td width="220px">
+            <strong>
                 <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_AssociateSummary&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
                 Associate Suggestion Summary</a>
             </strong>
