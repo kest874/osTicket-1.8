@@ -242,6 +242,7 @@ $orgs = Organization::objects();
                     <td width="30px">MEX</td>
                     <td width="30px">NTC</td>
                     <td width="30px">OH</td>
+                    <td width="30px">SS</td>
                     <td width="30px">TNN1</td>
                     <td width="30px">TNN2</td>
                     <td width="30px">TNS</td>
@@ -249,6 +250,7 @@ $orgs = Organization::objects();
                                    $BacklogTickets["IND"]+
                                    $BacklogTickets["MEX"]+
                                    $BacklogTickets["OH"]+
+                                   $BacklogTickets["SS"]+
                                    $BacklogTickets["NTC"]+
                                    $BacklogTickets["TNN1"]+
                                    $BacklogTickets["TNN2"]+
@@ -295,6 +297,7 @@ $orgs = Organization::objects();
                     <td><a href="/scp/tickets.php?queue=202&p=1" style="color:#000"><?php echo $BacklogTickets["MEX"]; ?></a></td>
                     <td><a href="/scp/tickets.php?queue=203&p=1" style="color:#000"><?php echo $BacklogTickets["NTC"]; ?></a></td>
                     <td><a href="/scp/tickets.php?queue=204&p=1" style="color:#000"><?php echo $BacklogTickets["OH"]; ?></a></td>
+                    <td><a href="/scp/tickets.php?queue=204&p=1" style="color:#000"><?php echo $BacklogTickets["SS"]; ?></a></td>
                     <td><a href="/scp/tickets.php?queue=205&p=1" style="color:#000"><?php echo $BacklogTickets["TNN1"]; ?></a></td>
                     <td><a href="/scp/tickets.php?queue=206&p=1" style="color:#000"><?php echo $BacklogTickets["TNN2"]; ?></a></td>
                     <td><a href="/scp/tickets.php?queue=207&p=1" style="color:#000"><?php echo $BacklogTickets["TNS"]; ?></a></td>
@@ -321,7 +324,7 @@ $orgs = Organization::objects();
                 </tr>
            
                 <tr style="text-align: center;">
-                    <td colspan="9">&nbsp;</td>
+                    <td colspan="10">&nbsp;</td>
                     
                     <td width="80px" style="text-align: right;"><span style="color: red; font-weight: bold;">My Open Tickets</span></td>                   
                     <td><a href="/scp/tickets.php?queue=35&p=1" style="color:#000"><?php echo $MyAssignedTickets; ?></a></td>
