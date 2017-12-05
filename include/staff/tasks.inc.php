@@ -45,6 +45,16 @@ $queue_columns = array(
             'heading' => __('Date Created'),
             'sort_col' => 'created',
             ),
+		'closed' => array(
+            'width' => '100px',
+            'heading' => __('Date Closed'),
+            'sort_col' => 'closed',
+            ),
+	    'daysopen' => array(
+            'width' => '100px',
+            'heading' => __('Days Open'),
+            'sort_col' => 'daysopen',
+            ),
         'title' => array(
             'width' => '38%',
             'heading' => __('Title'),
@@ -66,7 +76,7 @@ $queue_columns = array(
             ),
         );
 
-$queue_sort_options = array('closed', 'updated', 'created', 'number','ticketnumber', 'parent');
+$queue_sort_options = array('closed', 'updated', 'created','closed', 'number','ticketnumber', 'parent');
 
 $l = $_GET['tl'];
 $s = $_GET['ts'];
@@ -135,7 +145,7 @@ $tasks->annotate(array(
     ),
 ));
 
-$tasks->values('id', 'number', 'created', 'staff_id', 'team_id',
+$tasks->values('id', 'number', 'created','closed','staff_id', 'team_id',
         'staff__firstname', 'staff__lastname', 'team__name',
         'dept__name', 'cdata__title', 'flags','ticket','ticket__number','ticket__source');
 // Apply requested quick filter
@@ -184,6 +194,14 @@ case 'closed':
     $queue_columns['date']['sort_dir'] = $sort_dir;
     $tasks->values('closed');
     $tasks->order_by($sort_dir ? 'closed' : '-closed');
+    break;
+case 'dayesopen':
+    $queue_columns['date']['heading'] = __('Days Open');
+    $queue_columns['date']['sort'] = $sort_cols;
+    $queue_columns['date']['sort_col'] = $date_col = 'daysopen';
+    $queue_columns['date']['sort_dir'] = $sort_dir;
+    $tasks->values('closed');
+    $tasks->order_by($sort_dir ? 'daysopen' : '-daysopen');
     break;
 case 'updated':
     $queue_columns['date']['heading'] = __('Last Updated');
@@ -518,8 +536,17 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                     <?php echo $T['ticket__number']; ?></a></td>
 	
 				<?php } ?>
+				
+				
 				<td align="left" nowrap><?php echo
                 Format::date($T[$date_col ?: 'created']); ?></td>
+				<td align="left" nowrap><?php echo
+                Format::date($T[$date_col ?: 'closed']); ?></td>
+				
+
+				<td align="left" nowrap><?php echo
+           $T['daysopen'] ?></td>
+				
                 <td><a <?php if ($flag) { ?> class="Icon <?php echo $flag; ?>Ticket" title="<?php echo ucfirst($flag); ?> Ticket" <?php } ?>
                     href="tasks.php?id=<?php echo $T['id']; ?>"><?php
                     echo $title; ?></a>

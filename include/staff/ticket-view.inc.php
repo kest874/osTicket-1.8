@@ -18,7 +18,6 @@ $lock  = $ticket->getLock();  //Ticket lock obj
 $topic = $ticket->getHelpTopicId();
 $recordable = $ticket->isRecordable();
 $dart = $ticket->isdart();
-
 if (!$lock && $cfg->getTicketLockMode() == Lock::MODE_ON_VIEW)
     $lock = $ticket->acquireLock($thisstaff->getId());
 $mylock = ($lock && $lock->getStaffId() == $thisstaff->getId()) ? $lock : null;
@@ -35,11 +34,9 @@ if (!$errors['err']) {
         $errors['err'] = __('EndUser email address is not valid! Consider updating it before responding');
 }
 $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
-
 $staffpermission = $ticket->checkStaffPerm($thisstaff);
 $assigned = ($team->id == $thisstaff->dept_id ? 1:0);
 $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
-
 ?>
 
 <script>
@@ -49,7 +46,6 @@ textColor: "#dd2c00",
 color: "#dd2c00",
 background: "rgba(0, 0, 0, 0.2)"
 });
-
  
 </script>
 
@@ -228,7 +224,6 @@ background: "rgba(0, 0, 0, 0.2)"
 <div class="clearfix"></div>
           
 </div>
-
 <?php
   $outstanding = false;
   if ($role->hasPerm(Ticket::PERM_CLOSE)
@@ -242,7 +237,6 @@ background: "rgba(0, 0, 0, 0.2)"
       <i class="fa fa-warning"></i> <?php echo $warning;?>
 </div>
  <?php } ?>
-
  
  <?php if($alerttext) { ?>
 <div class="alert alert-warning">
@@ -262,7 +256,6 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
             $bannermsg = (string) $M; }?>
   
              
-
   
  
   
@@ -304,17 +297,29 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                     }
                     echo '<span class="badge label-table '.$badgecolor.'">'.$ticket->getPriority().'</span>'; ?>
         </div>
+		<div>
+            <label><?php echo __('Division');?>:</label>
+                    <?php echo Format::htmlchars($ticket->getdeptName()); ?>
+		</div>
                 </div>
             </div>
             <div class='col-sm-3'>    
                 <div class='form-group'>
-        <div>
-            <label><?php echo __('Division');?>:</label>
-                    <?php echo Format::htmlchars($ticket->getdeptName()); ?></div>
         <div> 
             <label><?php echo __('Create Date');?>:</label>
                 <?php echo Format::datetime($ticket->getCreateDate()); ?></div>
-         </div></div>
+         </div>
+		 <?php if($ticket->isOpen()) { } else {?>
+		 <div> 
+            <label><?php echo __('Closed Date');?>:</label>
+                <?php echo Format::datetime($ticket->getCloseDate()); ?>
+		</div>
+		 <?php }?>
+		<div>
+		 <label><?php echo __('Days Open');?>:</label>
+               <span class="badge badge-danger "><?php echo $ticket->getDaysOpen(); ?></span>
+		 </div>		 
+		 </div>
 <div class='col-sm-3'>    
                 <div class='form-group'>         
         <?php if($ticket->isOpen()) { ?>
@@ -380,7 +385,6 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
             <div class="row boldlabels">
             <div class="col-sm-3 hidden">
             <div class="form-group">
-
         <div>
         <?php  
             $duedate = date("m/d/Y", strtotime($ticket->getEstDueDate()));
@@ -530,7 +534,6 @@ $tcount = $ticket->getThreadEntries($types)->count();
 			
 		</ul>
 			<div class="tab-content clearfix">
-
 				<div class="tab-pane active" id="note">
                     <form class="spellcheck exclusive save"
         data-lock-object-id="ticket/<?php echo $ticket->getId(); ?>"
@@ -915,7 +918,6 @@ $(function() {
                });
                 
                $.busyLoadFull("hide", {
-
                 });
                <?php //if ($msg){echo "$.Notification.notify('warning','top right', 'Warning', '".$msg."');";} ?>
                <?php if ($errors['err']){echo "$.Notification.notify('warning','top right', 'Warning', '".$errors['err']."');";} ?>
@@ -1031,8 +1033,6 @@ $('#note').keyup(function(e){
 $(".dropdown-menu a").click(function() {
     $(this).closest(".dropdown-menu").prev().dropdown("toggle");
 });
-
-
 $("#isRecordable").on("click", function(){
      if($('#isRecordable')[0].checked){
          $("#isdartlbl").css('display','');
@@ -1043,5 +1043,4 @@ $("#isRecordable").on("click", function(){
      }
        
 });
-
 </script>
