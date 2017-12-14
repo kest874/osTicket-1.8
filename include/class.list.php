@@ -1419,28 +1419,19 @@ implements CustomListItem, TemplateVariable, Searchable {
     function display() {
         
         switch ($this->getLocalName()){
-            case "Assigned":
+            case "Submitted":
             $badge = 'badge label-table bg-primary';
             break;
-            case "Awaiting Submitter Reply":
+            case "Active":
             $badge = 'badge label-table bg-success';
             break;
-            case "Awaiting Agent Reply":
-            $badge = 'badge label-table bg-danger';
-            break;
-            case "Hold":
+            case "Parking Lot":
             $badge = 'badge label-table badge-warning';
             break;
-            case "Awaiting Implementation":
-            $badge = 'badge label-table bg-purple';
-            break;
-            case "Awaiting Quote":
-            $badge = 'badge label-table bg-flatpurple';
-            break;
-            case "Auto-Closed":
+            case "Not Implemented":
             $badge = 'badge label-table bg-flatgreenalt2';
             break;
-            case "Closed":
+            case "Implemented":
             $badge = 'badge label-table badge-success';
             break;
             case "Unassigned":

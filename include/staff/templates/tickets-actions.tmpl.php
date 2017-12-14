@@ -1,6 +1,4 @@
-
-    
-    <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
+<div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
 
    <a class="btn btn-icon waves-effect waves-light btn-success" id="tickets-helptopic" data-placement="bottom"
     data-toggle="tooltip" title="<?php echo __('New Ticket'); ?>"
@@ -11,16 +9,12 @@ if (!$count) {
 // Status change
 if ($agent->canManageTickets())
     echo TicketStatus::status_options();
-
-
-
-
 // Mass Priority Change
 if ($agent->hasPerm(Ticket::PERM_EDIT, false)) { ?>
 
 
 <div class="btn-group btn-group-sm" role="group">
-        <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" 
+        <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
          title="<?php echo __('Change Priority'); ?>"><i class="icon-exclamation"></i>
         </button>
@@ -40,8 +34,8 @@ if ($agent->hasPerm(Ticket::PERM_EDIT, false)) { ?>
 // Mass Topic Change
 if ($agent->hasPerm(Ticket::PERM_EDIT, false)) {?>
 
-        <a class="btn btn-secondary tickets-action" id="tickets-helptopic" data-placement="bottom"
-    data-toggle="tooltip" title="<?php echo __('Change Help Topic'); ?>"
+        <a class="btn btn-light tickets-action" id="tickets-helptopic" data-placement="bottom"
+    data-toggle="tooltip" title="<?php echo __('Change Category'); ?>"
    href="#tickets/mass/topic"><i class="icon-bookmark"></i></a>
 
 <?php } ?>
@@ -50,39 +44,22 @@ if ($agent->hasPerm(Ticket::PERM_EDIT, false)) {?>
 // Mass Claim/Assignment
 if ($agent->hasPerm(Ticket::PERM_ASSIGN, false)) {?>
 
-<div class="btn-group btn-group-sm" role="group">
-        <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" 
-        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Assign'); ?>"><i class="icon-user"></i>
-        </button>
-    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1" id="action-dropdown-change-priority">
-
-   <a class="dropdown-item no-pjax tickets-action"
-        href="#tickets/mass/claim"><i
-        class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
-     <a class="dropdown-item no-pjax tickets-action"
-        href="#tickets/mass/assign/agents"><i
-        class="icon-user"></i> <?php echo __('Agent'); ?></a>
-      <a class="dropdown-item no-pjax tickets-action"
+      <a class="btn btn-light no-pjax tickets-action"
         href="#tickets/mass/assign/teams"><i
-        class="icon-group"></i> <?php echo __('Team'); ?></a>
+        class="icon-group"></i></a>
     
-    </div>
-</div>
-
+    
 <?php
 }
-
 // Mass Transfer
 if ($agent->hasPerm(Ticket::PERM_TRANSFER, false)) {?>
 
- <a class="btn btn-secondary tickets-action" id="tickets-transfer" data-placement="bottom"
+ <a class="btn btn-light tickets-action" id="tickets-transfer" data-placement="bottom"
     data-toggle="tooltip" title="<?php echo __('Transfer'); ?>"
     href="#tickets/mass/transfer"><i class="icon-share"></i></a>
 
 <?php
 }
-
 // Mass Delete
 if ($agent->hasPerm(Ticket::PERM_DELETE, false)) {?>
 
@@ -98,7 +75,6 @@ if ($agent->hasPerm(Ticket::PERM_DELETE, false)) {?>
 </div>
 <script type="text/javascript">
 $(function() {
-
     $(document).off('.tickets');
     $(document).on('click.tickets', 'a.tickets-action', function(e) {
         e.preventDefault();
@@ -122,5 +98,4 @@ $(function() {
         return false;
     });
 });
-
 </script>

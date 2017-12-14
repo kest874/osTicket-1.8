@@ -1,6 +1,5 @@
 <?php
 if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path');
-
 ?>
 <div class="subnav">
    
@@ -17,7 +16,7 @@ if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path')
       
       
                           <div class="btn-group btn-group-sm" role="group">
-            <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" 
+            <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
             data-toggle="dropdown" data-placement="bottom" data-toggle="tooltip" 
              title="<?php echo __('More'); ?>"><i class="fa fa-cog"></i>
             </button>
@@ -36,13 +35,28 @@ if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path')
                     </div>
       
       <?php if ($thisstaff->hasPerm(Organization::PERM_DELETE)) { ?>
-            <a id="org-delete" class="btn btn-secondary org-action"
+            <a id="org-delete" class="btn btn-light org-action"
             href="#orgs/<?php echo $org->getId(); ?>/delete"  data-placement="bottom"
                     data-toggle="tooltip" title="<?php echo __('Delete Organization'); ?>"><i class="fa fa-trash-o"></i>
             </a>
 <?php } ?>
+<<<<<<< HEAD
+              </ul>
+            </div>
+        </td>
+    </tr>
+</table>
+<table class="ticket_info" cellspacing="0" cellpadding="0" width="940" border="0">
+    <tr>
+        <td width="50%">
+            <table border="0" cellspacing="" cellpadding="4" width="100%">
+                <tr>
+                    <th width="200"><?php echo __('Name'); ?>:</th>
+                    <td>
+<?php if ($thisstaff->hasPerm(Organization::PERM_EDIT)) { ?>
+=======
       
-        <a class="btn btn-secondary"
+        <a class="btn btn-light"
             href="orgs.php"  data-placement="bottom"
                     data-toggle="tooltip" title="<?php echo __('Organizations'); ?>"><i class="fa fa-list-alt"></i>
         </a>
@@ -60,6 +74,7 @@ if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path')
         <div>
             <label><?php echo __('Name'); ?>:</label>
         <?php if ($thisstaff->hasPerm(Organization::PERM_EDIT)) { ?>
+>>>>>>> support/bootstrap
                     <b><a href="#orgs/<?php echo $org->getId();
                     ?>/edit" class="org-action"><i
                         class="icon-edit"></i>
@@ -68,6 +83,38 @@ if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path')
     if ($thisstaff->hasPerm(Organization::PERM_EDIT)) { ?>
                     </a></b>
 <?php } ?>
+<<<<<<< HEAD
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php echo __('Auto Assign to Members of'); ?>:</th>
+                    <td><?php echo $org->getAccountManager(); ?>&nbsp;</td>
+                </tr>
+				<tr>
+                    <th><?php echo __('AI Team to Auto Assign'); ?>:</th>
+                    <td><?php echo $org->getDepartmentName(); ?>&nbsp;</td>
+                </tr>
+            </table>
+        </td>
+        <td width="50%" style="vertical-align:top">
+            <table border="0" cellspacing="" cellpadding="4" width="100%">
+                <tr>
+                    <th width="150"><?php echo __('Created'); ?>:</th>
+                    <td><?php echo Format::datetime($org->getCreateDate()); ?></td>
+                </tr>
+                <tr>
+                    <th><?php echo __('Last Updated'); ?>:</th>
+                    <td><?php echo Format::datetime($org->getUpdateDate()); ?></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<br>
+<div class="clear"></div>
+<ul class="clean tabs" id="orgtabs">
+    <li class="active"><a href="#users"><i
+=======
         </div>
         <div>
             <label><?php echo __('Account Manager'); ?>: </label>
@@ -89,6 +136,7 @@ if(!defined('OSTSCPINC') || !$thisstaff || !is_object($org)) die('Invalid path')
 
 <ul class="nav nav-tabs" id="orgtabs"  style="margin-top:10px;">
     <li class="nav-item"><a class="nav-link active" href="#users" role="tab" data-toggle="tab"><i
+>>>>>>> support/bootstrap
     class="icon-user"></i>&nbsp;<?php echo __('Users'); ?></a></li>
     <li class="nav-item"><a  class="nav-link" href="#tickets" role="tab" data-toggle="tab"><i
     class="icon-list-alt"></i>&nbsp;<?php echo __('Tickets'); ?></a></li>

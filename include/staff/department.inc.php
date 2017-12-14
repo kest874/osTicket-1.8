@@ -3,7 +3,7 @@ if(!defined('OSTADMININC') || !$thisstaff || !$thisstaff->isAdmin()) die('Access
 $info = $qs = array();
 if($dept && $_REQUEST['a']!='add') {
     //Editing Department.
-    $title=__('Update Department');
+    $title=__('Update Team');
     $action='update';
     $submit_text=__('Save Changes');
     $info = $dept->getInfo();
@@ -12,9 +12,9 @@ if($dept && $_REQUEST['a']!='add') {
 } else {
     if (!$dept)
         $dept = Dept::create();
-    $title=__('Add New Department');
+    $title=__('Add New Team');
     $action='create';
-    $submit_text=__('Create Dept');
+    $submit_text=__('Create Team');
     $info['ispublic']=isset($info['ispublic'])?$info['ispublic']:1;
     $info['ticket_auto_response']=isset($info['ticket_auto_response'])?$info['ticket_auto_response']:1;
     $info['message_auto_response']=isset($info['message_auto_response'])?$info['message_auto_response']:1;
@@ -26,47 +26,68 @@ if($dept && $_REQUEST['a']!='add') {
 
 $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
 ?>
+
+<div class="subnav">
+
+    <div class="float-left subnavtitle" id="ticketviewtitle">
+       <?php echo __('Update Team');?> <?php if (isset($info['name'])) { ?>
+    -  <span class ="text-pink"><?php echo $info['name']; ?><span>
+    <?php } ?>
+    </div>
+
+    <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
+    &nbsp;
+    </div>
+    <div class="clearfix"></div>
+</div>
+
+<div class="card-box">
+
+<div class="row">
+    <div class="col">
 <form action="departments.php?<?php echo Http::build_query($qs); ?>" method="post" class="save">
  <?php csrf_token(); ?>
  <input type="hidden" name="do" value="<?php echo $action; ?>">
  <input type="hidden" name="a" value="<?php echo Format::htmlchars($_REQUEST['a']); ?>">
  <input type="hidden" name="id" value="<?php echo $info['id']; ?>">
-<h2><?php echo $title; ?>
-    <?php if (isset($info['name'])) { ?><small>
-    — <?php echo $info['name']; ?></small>
-    <?php } ?>
-</h2>
-<ul class="clean tabs">
-    <li class="active"><a href="#settings">
-        <i class="icon-file"></i> <?php echo __('Settings'); ?></a></li>
-    <li><a href="#access">
-      <i class="icon-user"></i> <?php echo __('Access'); ?></a></li>
+
+ 
+ <ul class="nav nav-tabs" role="tablist" style="margin-top:10px;">
+  <li class="nav-item">
+    <a class="nav-link active" href="#settings" role="tab" data-toggle="tab"><i class="icon-list-alt"></i>&nbsp;<?php echo __('Settings'); ?></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#access" role="tab" data-toggle="tab"><i class="icon-pushpin"></i>&nbsp;<?php echo __('Access'); ?></a>
+  </li>
 </ul>
-<div id="settings" class="tab_content">
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane active" id="settings">
  <table class="form_table" width="940" border="0" cellspacing="0" cellpadding="2">
     <thead>
         <tr>
             <th colspan="2">
-                <em><?php echo __('Department Information');?></em>
+                <em><?php echo __('Team Information');?></em>
             </th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td width="180">
-                <?php echo __('Parent');?>:
+            <td width="180"  class="required">
+                <?php echo __('Location');?>:
             </td>
             <td>
                 <select name="pid">
-                    <option value="">&mdash; <?php echo __('Top-Level Department'); ?> &mdash;</option>
-<?php foreach (Dept::getDepartments() as $id=>$name) {
+                    <option value="">&mdash; <?php echo __('Team Location'); ?> &mdash;</option>
+<?php foreach (Dept::getDepartments(array('privateonly' =>1)) as $id=>$name) {
     if ($info['id'] && $id == $info['id'])
         continue; ?>
                     <option value="<?php echo $id; ?>" <?php
                     if ($info['pid'] == $id) echo 'selected="selected"';
                     ?>><?php echo $name; ?></option>
+                    
 <?php } ?>
                 </select>
+                &nbsp;<span class="error">*&nbsp;<?php echo $errors['pid']; ?></span>
             </td>
         </tr>
         <tr>
@@ -116,7 +137,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         </tr>
         <tr>
             <td width="180">
-                <?php echo __('Manager'); ?>:
+                <strong><?php echo __('Mentor'); ?>:</strong>
             </td>
             <td>
                 <span>
@@ -140,76 +161,27 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
             </td>
         </tr>
         <tr>
-            <td><?php echo __('Ticket Assignment'); ?>:</td>
-            <td>
-                <label>
-                <input type="checkbox" name="assign_members_only" <?php echo
-                $info['assign_members_only']?'checked="checked"':''; ?>>
-                <?php echo __('Restrict ticket assignment to department members'); ?>
-                </label>
-                <i class="help-tip icon-question-sign" href="#sandboxing"></i>
-            </td>
-        </tr>
-
-        <tr>
-            <td><?php echo __('Claim on Response'); ?>:</td>
-            <td>
-                <label>
-                <input type="checkbox" name="disable_auto_claim" <?php echo
-                 $info['disable_auto_claim'] ? 'checked="checked"' : ''; ?>>
-                <?php echo sprintf('<strong>%s</strong> %s',
-                        __('Disable'),
-                        __('auto claim')); ?>
-                </label>
-                <i class="help-tip icon-question-sign"
-                href="#disable_auto_claim"></i>
-            </td>
-        </tr>
-
-        <tr>
-            <th colspan="2">
-                <em><strong><?php echo __('Outgoing Email Settings'); ?></strong>:</em>
-            </th>
-        </tr>
-        <tr>
             <td width="180">
-                <?php echo __('Outgoing Email'); ?>:
+                <strong><?php echo __('Team Leader'); ?>:</strong>
             </td>
             <td>
-                <select name="email_id">
-                    <option value="0">&mdash; <?php echo __('System Default'); ?> &mdash;</option>
+                <span>
+                <select name="teamleader_id">
+                    <option value="0">&mdash; <?php echo __('None'); ?> &mdash;</option>
                     <?php
-                    $sql='SELECT email_id,email,name FROM '.EMAIL_TABLE.' email ORDER by name';
-                    if(($res=db_query($sql)) && db_num_rows($res)){
-                        while(list($id,$email,$name)=db_fetch_row($res)){
-                            $selected=($info['email_id'] && $id==$info['email_id'])?'selected="selected"':'';
-                            if($name)
-                                $email=Format::htmlchars("$name <$email>");
-                            echo sprintf('<option value="%d" %s>%s</option>',$id,$selected,$email);
-                        }
-                    }
-                    ?>
-                </select>
-                &nbsp;<span class="error">&nbsp;<?php echo $errors['email_id']; ?></span>&nbsp;<i class="help-tip icon-question-sign" href="#email"></i>
-            </td>
-        </tr>
-        <tr>
-            <td width="180">
-                <?php echo __('Template Set'); ?>:
-            </td>
-            <td>
-                <select name="tpl_id">
-                    <option value="0">&mdash; <?php echo __('System Default'); ?> &mdash;</option>
-                    <?php
-                    $sql='SELECT tpl_id,name FROM '.EMAIL_TEMPLATE_GRP_TABLE.' tpl WHERE isactive=1 ORDER by name';
-                    if(($res=db_query($sql)) && db_num_rows($res)){
+                    $sql='SELECT staff_id,CONCAT_WS(", ",lastname, firstname) as name '
+                        .' FROM '.STAFF_TABLE.' staff '
+                        .' ORDER by name';
+                    if(($res=db_query($sql)) && db_num_rows($res)) {
                         while(list($id,$name)=db_fetch_row($res)){
-                            $selected=($info['tpl_id'] && $id==$info['tpl_id'])?'selected="selected"':'';
+                            $selected=($info['teamleader_id'] && $id==$info['teamleader_id'])?'selected="selected"':'';
                             echo sprintf('<option value="%d" %s>%s</option>',$id,$selected,$name);
                         }
                     }
                     ?>
                 </select>
+                &nbsp;<span class="error"><?php echo $errors['teamleader_id']; ?></span>
+                <i class="help-tip icon-question-sign" href="#manager"></i>
                 &nbsp;<span class="error">&nbsp;<?php echo $errors['tpl_id']; ?></span>&nbsp;<i class="help-tip icon-question-sign" href="#template"></i>
             </td>
         </tr>
@@ -271,6 +243,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
                 </span>
             </td>
         </tr>
+        
         <tr>
             <th colspan="2">
                 <em><strong><?php echo __('Alerts and Notices'); ?>:</strong>
@@ -279,15 +252,15 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         </tr>
         <tr>
             <td width="180">
-                <?php echo __('Recipients'); ?>:
+                <strong><?php echo __('Recipients'); ?>:</strong>
             </td>
             <td>
                 <span>
                 <select name="group_membership">
 <?php foreach (array(
     Dept::ALERTS_DISABLED =>        __("No one (disable Alerts and Notices)"),
-    Dept::ALERTS_DEPT_ONLY =>       __("Department members only"),
-    Dept::ALERTS_DEPT_AND_EXTENDED => __("Department and extended access members"),
+    Dept::ALERTS_DEPT_ONLY =>       __("Team members only"),
+    Dept::ALERTS_DEPT_AND_EXTENDED => __("Team and extended access members"),
 ) as $mode=>$desc) { ?>
     <option value="<?php echo $mode; ?>" <?php
         if ($info['group_membership'] == $mode) echo 'selected="selected"';
@@ -300,13 +273,14 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         </tr>
         <tr>
             <th colspan="2">
-                <em><strong><?php echo __('Department Signature'); ?></strong>:
+                <em><strong><?php echo __('Team Signature'); ?></strong>:
                 <span class="error">&nbsp;<?php echo $errors['signature']; ?></span>
                 <i class="help-tip icon-question-sign" href="#department_signature"></i></em>
             </th>
         </tr>
         <tr>
             <td colspan=2>
+        
                 <textarea class="richtext no-bar" name="signature" cols="21"
                     rows="5" style="width: 60%;"><?php echo $info['signature']; ?></textarea>
             </td>
@@ -315,21 +289,21 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
 </table>
 </div>
 
-<div id="access" class="hidden tab_content">
+<div role="tabpanel" class="tab-pane" id="access" >
   <table class="two-column table" width="100%">
     <tbody>
         <tr class="header" id="primary-members">
             <td colspan="2">
-                <?php echo __('Department Members'); ?>
+                <?php echo __('Team Members'); ?>
                 <div><small>
-                <?php echo sprintf(__('Agents who are primary members of %s'), __('this department')); ?>
+                <?php echo __('Associates who are primary members of this Team'); ?>
                 </small></div>
             </td>
         </tr>
         <?php
         if (!count($dept->members)) { ?>
         <tr><td colspan=2><em><?php
-            echo __('Department does not have primary members'); ?>
+            echo __('Team does not have primary members'); ?>
            </em> </td>
         </tr>
         <?php
@@ -339,7 +313,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         <tr class="header" id="extended-access-members">
             <td colspan="2">
                 <div><small>
-                <?php echo sprintf(__('Agents who have extended access to %s'), __('this department')); ?>
+                <?php echo __('Associates who have extended access to this Team'); ?>      
                 </small></div>
             </td>
         </tr>
@@ -352,7 +326,7 @@ foreach ($dept->getMembers() as $member) {
         <td colspan="2">
           <i class="icon-plus-sign"></i>
           <select id="add_access" data-quick-add="staff">
-            <option value="0">&mdash; <?php echo __('Select Agent');?> &mdash;</option>
+            <option value="0">&mdash; <?php echo __('Select Associate');?> &mdash;</option>
             <?php
             foreach ($agents as $id=>$name) {
               echo sprintf('<option value="%d">%s</option>',$id,Format::htmlchars($name));
@@ -393,15 +367,15 @@ foreach ($dept->getMembers() as $member) {
     </tbody>
   </table>
 </div>
-
-<p style="text-align:center">
-    <input type="submit" name="submit" value="<?php echo $submit_text; ?>">
-    <input type="reset"  name="reset"  value="<?php echo __('Reset');?>">
-    <input type="button" name="cancel" value="<?php echo __('Cancel');?>"
+</div>
+</br>
+    <input type="submit" name="submit" value="<?php echo $submit_text; ?>" class=" btn btn-sm btn-primary">
+    <input type="reset"  name="reset"  value="<?php echo __('Reset');?>" class=" btn btn-sm btn-warning">
+    <input type="button" name="cancel" value="<?php echo __('Cancel');?>"class=" btn btn-sm btn-danger"
         onclick='window.location.href="?"'>
-</p>
-</form>
 
+</form>
+</div></div></div>
 <script type="text/javascript">
 var addAccess = function(staffid, name, role, alerts, primary, error) {
 

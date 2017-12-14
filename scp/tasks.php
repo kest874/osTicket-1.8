@@ -146,7 +146,6 @@ $open_name = _P('queue-name',
     /* This is the name of the open tasks queue */
     'Open');
 
-
 $ost->addExtraHeader('<script type="text/javascript" src="js/ticket.js"></script>');
 $ost->addExtraHeader('<script type="text/javascript" src="js/thread.js"></script>');
 $ost->addExtraHeader('<meta name="tip-namespace" content="tasks.queue" />',

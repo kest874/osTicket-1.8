@@ -1,256 +1,226 @@
 <?php
-//Total Open
-$OpenTicket = Ticket::objects()
-        ->filter(array('status_id__ne' => '3')) //closed
-        ->filter(array('status_id__ne' => '12')) //autoclosed
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($OpenTicket as $cOpenTicket) { 
-            $OpenTickets = $cOpenTicket["count"];
-        }
-$AssignedTicket = Ticket::objects()
-        ->filter(array('status_id' => '11')) //assigned
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($AssignedTicket as $cAssignedTicket) { 
-            $AssignedTickets = $cAssignedTicket["count"];
-        }        
+
+//Team Members Count
+$DeptMembers = Staff::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('isactive' => '1'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('staff_id')));
  
-$HeldTicket = Ticket::objects()
-        ->filter(array('status_id' => '8')) //held
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
+        foreach ($DeptMembers as $row)
+                $DeptMembers  = $row;
+//Department Information
+$Dept= Dept::objects()
+        ->filter(array('id' => $thisstaff->dept_id));
+        foreach ($Dept as $row)
+                $Dept  = $row;
+    
+$Manager = $Dept->manager;
+$Teamleader = $Dept->teamleader;
+//Submitted Suggestions
+$SubmittedSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '1'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($HeldTicket as $cHeldTicket) { 
-            $HeldTickets = $cHeldTicket["count"];
-        }        
-        
-$ReplyTicket = Ticket::objects()
-        ->filter(array('status_id' => '7')) //Awaiting Agent Reply
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($ReplyTicket as $cReplyTicket) { 
-            $ReplyTickets = $cReplyTicket["count"];
-        }              
-
-$TheirReplyTicket = Ticket::objects()
-        ->filter(array('status_id' => '6')) //Awaiting Submitter Reply
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($TheirReplyTicket as $cTheirReplyTicket) { 
-            $TheirReplyTickets = $cTheirReplyTicket["count"];
-        }           
-        
-$ImplementationTicket = Ticket::objects()
-        ->filter(array('status_id' => '9')) //Awaiting Implementation
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($ImplementationTicket as $cImplementationTicket) { 
-            $ImplementationTickets = $cImplementationTicket["count"];
-        }
-
-$AwaitingQuoteTicket = Ticket::objects()
-        ->filter(array('status_id' => '10')) //Awaiting Quote
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($AwaitingQuoteTicket as $cAwaitingQuoteTicket) { 
-            $AwaitingQuoteTickets = $cAwaitingQuoteTicket["count"];
-        }
-        
-//My Tickets 
-$MyOpenTicket = Ticket::objects()
-        ->filter(array('staff_id' => $thisstaff->staff_id)) //this staff
-        ->filter(array('status_id__ne' => '3')) //closed
-        ->filter(array('status_id__ne' => '12')) //autoclosed
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($MyOpenTicket as $cMyOpenTicket) { 
-            $MyOpenTickets = $cMyOpenTicket["count"];
-        }       
-$MyAssignedTicket = Ticket::objects()
-        ->filter(array('staff_id' => $thisstaff->staff_id)) //this staff
-        ->filter(array('status_id' => '11')) //assigned
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($MyAssignedTicket as $cMyAssignedTicket) { 
-            $MyAssignedTickets = $cMyAssignedTicket["count"];
-        }        
  
-$MyHeldTicket = Ticket::objects()
-        ->filter(array('staff_id' => $thisstaff->staff_id)) //this staff
-        ->filter(array('status_id' => '8')) //held
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
+        foreach ($SubmittedSuggestions as $row)
+                $SubmittedSuggestions  = $row;
+                
+//Submitted Suggestions
+$AssignedSubmittedSuggestions = Ticket::objects()
+        ->filter(array('team_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '1'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($MyHeldTicket as $cMyHeldTicket) { 
-            $MyHeldTickets = $cMyHeldTicket["count"];
-        }        
-        
-$MyReplyTicket = Ticket::objects()
-        ->filter(array('staff_id' => $thisstaff->staff_id)) //this staff
-        ->filter(array('status_id' => '7')) //Awaiting Agent Reply
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
+ 
+        foreach ($AssignedSubmittedSuggestions as $row)
+                $AssignedSubmittedSuggestions  = $row;                
+                
+//Active Suggestions
+$ActiveSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '8'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($MyReplyTicket as $cMyReplyTicket) { 
-            $MyReplyTickets = $cMyReplyTicket["count"];
-        }              
-
-$MyTheirReplyTicket = Ticket::objects()
-        ->filter(array('staff_id' => $thisstaff->staff_id)) //this staff
-        ->filter(array('status_id' => '6')) //Awaiting Submitter Reply
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
+ 
+        foreach ($ActiveSuggestions as $row)
+                $ActiveSuggestions  = $row;
+                
+//Active Suggestions
+$AssignedActiveSuggestions = Ticket::objects()
+        ->filter(array('team_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '8'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($MyTheirReplyTicket as $cMyTheirReplyTicket) { 
-            $MyTheirReplyTickets = $cMyTheirReplyTicket["count"];
-        }           
-        
-$MyImplementationTicket = Ticket::objects()
-        ->filter(array('staff_id' => $thisstaff->staff_id)) //this staff
-        ->filter(array('status_id' => '9')) //Awaiting Implementation
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
+ 
+        foreach ($AssignedActiveSuggestions as $row)
+                $AssignedActiveSuggestions  = $row;
+                
+//Parking Lot Suggestions
+$ParkedSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '7'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($MyImplementationTicket as $cMyImplementationTicket) { 
-            $MyImplementationTickets = $cMyImplementationTicket["count"];
-        }
-
-$MyAwaitingQuoteTicket = Ticket::objects()
-        ->filter(array('staff_id' => $thisstaff->staff_id)) //this staff
-        ->filter(array('status_id' => '10')) //Awaiting Quote
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
+ 
+        foreach ($ParkedSuggestions as $row)
+                $ParkedSuggestions  = $row;
+                
+//Parking Lot Suggestions
+$AssignedParkedSuggestions = Ticket::objects()
+        ->filter(array('team_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '7'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($MyAwaitingQuoteTicket as $cMyAwaitingQuoteTicket) { 
-            $MyAwaitingQuoteTickets = $cMyAwaitingQuoteTicket["count"];
-        }
-        
-//Issues
-$OpenIssuesTicket = Ticket::objects()
-        ->filter(array('status_id__ne' => '3')) //Awaiting Quote
-        ->filter(array('topic_id' => '12')) //open issue
+ 
+        foreach ($AssignedParkedSuggestions as $row)
+                $AssignedParkedSuggestions  = $row;
+//Open Owned Suggestions
+$OwnedSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id__ne' => '3'))
+        ->filter(array('status_id__ne' => '6'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($OpenIssuesTicket as $cOpenIssuesTicket) { 
-            $OpenIssuesTickets = $cOpenIssuesTicket["count"];
-        }       
-
-$MyOpenIssuesTicket = Ticket::objects()
-        ->filter(array('staff_id' => $thisstaff->staff_id)) //this staff
-        ->filter(array('status_id__ne' => '3')) //Awaiting Quote
-        ->filter(array('topic_id' => '12')) //open issue
+ 
+        foreach ($OwnedSuggestions as $row)
+                $OwnedSuggestions  = $row;
+                
+//Open Assigned Suggestions
+$AssignedSuggestions = Ticket::objects()
+        ->filter(array('team_id' => $thisstaff->dept_id))
+        ->filter(array('status_id__ne' => '3'))
+        ->filter(array('status_id__ne' => '6'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($MyOpenIssuesTicket as $cMyOpenIssuesTicket) { 
-            $MyOpenIssuesTickets = $cMyOpenIssuesTicket["count"];
-        }        
-
-$UnassignedTicket = Ticket::objects()
-        ->filter(array('status_id' => '1')) //Awaiting Quote
-        ->filter(array('topic_id__ne' => '12')) //open issue
+ 
+        foreach ($AssignedSuggestions as $row)
+                $AssignedSuggestions  = $row;
+                
+//Implmented
+$ImplmentedSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '3'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($UnassignedTicket as $cUnassignedTicket) { 
-            $UnassignedTickets = $cUnassignedTicket["count"];
-        } 
-        
-$SuggestionAssignedTicket = Ticket::objects()
-        ->filter(array('status_id' => '11')) //assigned
-        ->filter(array('topic_id' => '14')) //suggestion
+ 
+        foreach ($ImplmentedSuggestions as $row)
+                $ImplmentedSuggestions  = $row;
+//Not Implmented
+$NotImplmentedSuggestions = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '6'))
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($SuggestionAssignedTicket as $cSuggestionAssignedTicket) { 
-            $SuggestionAssignedTickets = $cSuggestionAssignedTicket["count"];
-        }
-        
-$SuggestionImplementationTicket = Ticket::objects()
-        ->filter(array('status_id' => '9')) //Awaiting Implementation
-        ->filter(array('topic_id' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($SuggestionImplementationTicket as $cSuggestionImplementationTicket) { 
-            $SuggestionImplementationTickets = $cSuggestionImplementationTicket["count"];
-        }
-
-$SuggestionAwaitingQuoteTicket = Ticket::objects()
-        ->filter(array('status_id' => '10')) //Awaiting Quote
-        ->filter(array('topic_id' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
-         
-         foreach ($SuggestionAwaitingQuoteTicket as $cSuggestionAwaitingQuoteTicket) { 
-            $SuggestionAwaitingQuoteTickets = $cSuggestionAwaitingQuoteTicket["count"];
-        }
-$OpenTask = Task::objects()
-        ->filter(array('flags' => '1')) //Awaiting Quote
-        
+ 
+        foreach ($NotImplmentedSuggestions as $row)
+                $NotImplmentedSuggestions  = $row;
+//Previous Month Submitted
+$PMonthSubmitted= Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('created__year' => date("Y")))
+        ->filter(array('created__month' => date("m")-1))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+                 
+        foreach ($PMonthSubmitted as $row)
+                $PMonthSubmitted = $row;
+                //Current Month Submitted
+$CMonthSubmitted= Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('created__year' => date("Y")))
+        ->filter(array('created__month' => date("m")))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+            
+        foreach ($CMonthSubmitted as $row)
+                $CMonthSubmitted = $row;
+//YTD Submitted
+$YearToDateSubmitted = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('created__year' => date("Y")))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+               
+        foreach ($YearToDateSubmitted as $row)
+                $YearToDateSubmitted = $row;
+//Previous Month Implemented
+$PMonthImplemented= Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '3'))
+        ->filter(array('closed__year' => date("Y")))
+        ->filter(array('closed__month' => date("m")-1))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+           
+        foreach ($PMonthImplemented as $row)
+                $PMonthImplemented = $row;
+//Current Month Implemented
+$CMonthImplemented= Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '3'))
+        ->filter(array('closed__year' => date("Y")))
+        ->filter(array('closed__month' => date("m")))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+               
+        foreach ($CMonthImplemented as $row)
+                $CMonthImplemented = $row;
+                
+//YTD Implemented
+$YearToDateImplemented = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '3'))
+        ->filter(array('closed__year' => date("Y")))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+               
+        foreach ($YearToDateImplemented as $row)
+                $YearToDateImplemented = $row;
+//Open Tasks Count
+$tasks = Task::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('flags' => '1'))
+        ->values_flat('dept_id')
         ->aggregate(array('count' => SqlAggregate::COUNT('id')));
-         
-         foreach ($OpenTask as $cOpenTask) { 
-            $OpenTasks = $cOpenTask["count"];
-        }
-$CloseTask = Task::objects()
-        ->filter(array('flags' => '0')) //Awaiting Quote
-        
-        ->aggregate(array('count' => SqlAggregate::COUNT('id')));
-         
-         foreach ($CloseTask as $cCloseTask) { 
-            $CloseTasks = $cCloseTask["count"];
-        }
-//Backlog     
-$BacklogTickets = array(); 
-$bl_orgs = Organization::objects();
-   
-   $bl_orgs->values('id','name');
-   foreach ($bl_orgs as $bl_org) {
-     //echo $org['id'];  
-   
-
-    $OpenTicket = Ticket::objects()
-        ->filter(array('user__org_id' => $bl_org['id']))
-        ->filter(array('status_id__ne' => '8')) //hold
-        ->filter(array('status_id__ne' => '3')) //closed
-        ->filter(array('status_id__ne' => '12')) //autoclosed
-        ->filter(array('topic_id__ne' => '12')) //open issue
-        ->filter(array('topic_id__ne' => '14')) //suggestion
-        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
- 
-        foreach ($OpenTicket as $orgOpenTicket) { 
-            $BacklogTickets[$bl_org['name']] = $orgOpenTicket["count"];
-        }
-}        
-         
-$BacklogTotal = $BacklogTickets["CAN"]+
-$BacklogTickets["IND"]+
-$BacklogTickets["EXT"]+
-$BacklogTickets["SS"]+
-$BacklogTickets["MEX"]+
-$BacklogTickets["OH"]+
-$BacklogTickets["NTC"]+
-$BacklogTickets["TNN1"]+
-$BacklogTickets["TNN2"]+
-$BacklogTickets["TNS"];   
+                   
+        foreach ($tasks as $row)
+                $OpenTasks = $row;
+                
+$MemberCount = $DeptMembers["count"];
+$OwnedSuggestions = $OwnedSuggestions["count"];
+$AssignedSuggestions = $AssignedSuggestions["count"];
+$SubmittedSuggestions = $SubmittedSuggestions["count"];
+$AssignedSubmittedSuggestions = $AssignedSubmittedSuggestions["count"];
+$ActiveSuggestions = $ActiveSuggestions["count"];
+$AssignedActiveSuggestions = $AssignedActiveSuggestions["count"];
+$ParkedSuggestions = $ParkedSuggestions["count"];
+$AssignedParkedSuggestions = $AssignedParkedSuggestions["count"];
+$ImplmentedSuggestions = $ImplmentedSuggestions["count"];
+$NotImplmentedSuggestions = $NotImplmentedSuggestions["count"];
+$PMSubmitted = (int)$PMonthSubmitted["count"];
+$PMTargetSuggestions =  round(($MemberCount * 17) /12 * (int) date('m', strtotime(date('Y-m')." -1 month")));
+$PMSugAheadBehind = $PMSubmitted - $PMTargetSuggestions;
+$PMSugAheadBehindColor = ($PMSugAheadBehind > -1 ? 'lightgreen':'#ff9999');
+$PMSugGoal = number_format($PMSubmitted / $PMTargetSuggestions * 100,2).'%';
+            
+$PMImplemented = (int)$PMonthImplemented["count"];
+$PMTargetImplemented = $MemberCount * 12/12 * (int) date('m', strtotime(date('Y-m')." -1 month"));
+$PMImpAheadBehind = $PMImplemented - $PMTargetImplemented;
+$PMImpAheadBehindColor = ($PMImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
+$PMImpGoal = number_format($PMImplemented / $PMTargetImplemented * 100,2).'%';
+            
+$CMSubmitted = (int)$CMonthSubmitted["count"];
+$CMTargetSuggestions =  round(($MemberCount * 17) /12 * (int) date('m', strtotime(date('Y-m'))));
+$CMSugAheadBehind = $CMSubmitted - $CMTargetSuggestions;
+$CMSugAheadBehindColor = ($CMSugAheadBehind > -1 ? 'lightgreen':'#ff9999');
+$CMSugGoal = number_format($CMSubmitted / $CMTargetSuggestions * 100,2).'%';
+            
+$CMImplemented = (int)$CMonthImplemented["count"];
+$CMTargetImplemented = $MemberCount * 12/12 * (int) date('m', strtotime(date('Y-m')));
+$CMImpAheadBehind = $CMImplemented - $CMTargetImplemented;
+$CMImpAheadBehindColor = ($CMImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
+$CMImpGoal = number_format($CMImplemented / $CMTargetImplemented * 100,2).'%';
+$YTDSubmitted = (int)$YearToDateSubmitted["count"];
+$YTDTargetSuggestions =  round(($MemberCount * 17));
+$YTDSugAheadBehind = $YTDSubmitted - $YTDTargetSuggestions;
+$YTDSugAheadBehindColor = ($YTDSugAheadBehind > -1 ? 'lightgreen':'#ff9999');
+$YTDSugGoal = number_format($YTDSubmitted / $YTDTargetSuggestions * 100,2).'%';
+$YTDImplemented = (int)$YearToDateImplemented["count"];
+$YTDTargetImplemented = $MemberCount * 12;
+$YTDImpAheadBehind = $YTDImplemented - $YTDTargetImplemented;
+$YTDImpAheadBehindColor = ($YTDImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
+$YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%';
+$OpenTasks = ($OpenTasks["count"]) ? $OpenTasks["count"] : 0
 
 ?>

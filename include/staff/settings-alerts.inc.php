@@ -22,21 +22,22 @@
         <tr>
             <td>
                 <input type="checkbox" name="ticket_alert_dept_manager" <?php echo $config['ticket_alert_dept_manager']?'checked':''; ?>>
-                <?php echo __('Department Manager'); ?>
+                <?php echo __('Mentor'); ?>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="checkbox" name="ticket_alert_dept_teamleader" <?php echo $config['ticket_alert_dept_teamleader']?'checked':''; ?>>
+                <?php echo __('Team Leader'); ?>
             </td>
         </tr>
         <tr>
             <td>
                 <input type="checkbox" name="ticket_alert_dept_members" <?php echo $config['ticket_alert_dept_members']?'checked':''; ?>>
-                <?php echo __('Department Members'); ?>
+                <?php echo __('Team Members'); ?>
             </td>
         </tr>
-        <tr>
-            <td>
-                <input type="checkbox" name="ticket_alert_acct_manager" <?php echo $config['ticket_alert_acct_manager']?'checked':''; ?>>
-                <?php echo __('Organization Account Manager'); ?>
-            </td>
-        </tr>
+
         <tr><th><em><b><?php echo __('New Message Alert'); ?></b>:
             <i class="help-tip icon-question-sign" href="#message_alert"></i>
             </em></th></tr>
@@ -67,15 +68,17 @@
             <td>
               <input type="checkbox" name="message_alert_dept_manager" <?php
               echo $config['message_alert_dept_manager']?'checked':''; ?>>
-              <?php echo __('Department Manager'); ?>
+              <?php echo __('Mentor'); ?>
             </td>
         </tr>
-        <tr>
+         <tr>
             <td>
-                <input type="checkbox" name="message_alert_acct_manager" <?php echo $config['message_alert_acct_manager']?'checked':''; ?>>
-                <?php echo __('Organization Account Manager'); ?>
+              <input type="checkbox" name="message_alert_dept_teamleader" <?php
+              echo $config['message_alert_dept_teamleader']?'checked':''; ?>>
+              <?php echo __('Team Leader'); ?>
             </td>
         </tr>
+
         <tr><th><em><b><?php echo __('New Internal Activity Alert'); ?></b>:
             <i class="help-tip icon-question-sign" href="#internal_note_alert"></i>
             </em></th></tr>
@@ -104,7 +107,13 @@
         <tr>
             <td>
               <input type="checkbox" name="note_alert_dept_manager" <?php echo $config['note_alert_dept_manager']?'checked':''; ?>>
-                <?php echo __('Department Manager'); ?>
+                <?php echo __('Mentor'); ?>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <input type="checkbox" name="note_alert_dept_teamleader" <?php echo $config['note_alert_dept_teamleader']?'checked':''; ?>>
+                <?php echo __('Team Leader'); ?>
             </td>
         </tr>
         <tr><th><em><b><?php echo __('Ticket Assignment Alert'); ?></b>:
@@ -122,14 +131,14 @@
         </tr>
         <tr>
             <td>
-              <input type="checkbox" name="assigned_alert_staff" <?php echo
-              $config['assigned_alert_staff']?'checked':''; ?>> <?php echo __('Assigned Agent'); ?>
+              <input type="checkbox" name="assigned_alert_dept_manager" <?php echo
+              $config['assigned_alert_dept_manager']?'checked':''; ?>> <?php echo __('Mentor'); ?>
             </td>
         </tr>
         <tr>
             <td>
-              <input type="checkbox"name="assigned_alert_team_lead" <?php
-              echo $config['assigned_alert_team_lead']?'checked':''; ?>> <?php echo __('Team Lead'); ?>
+              <input type="checkbox"name="assigned_alert_teamleader" <?php
+              echo $config['assigned_alert_teamleader']?'checked':''; ?>> <?php echo __('Team Leader'); ?>
             </td>
         </tr>
         <tr>
@@ -159,13 +168,19 @@
         <tr>
             <td>
               <input type="checkbox" name="transfer_alert_dept_manager" <?php echo $config['transfer_alert_dept_manager']?'checked':''; ?>>
-                <?php echo __('Department Manager'); ?>
+                <?php echo __('Mentor'); ?>
+            </td>
+        </tr>
+                <tr>
+            <td>
+              <input type="checkbox" name="transfer_alert_dept_teamleader" <?php echo $config['transfer_alert_dept_teamleader']?'checked':''; ?>>
+                <?php echo __('Team Leader'); ?>
             </td>
         </tr>
         <tr>
             <td>
               <input type="checkbox" name="transfer_alert_dept_members" <?php echo $config['transfer_alert_dept_members']?'checked':''; ?>>
-                <?php echo __('Department Members'); ?>
+                <?php echo __('Team Members'); ?>
             </td>
         </tr>
         <tr><th><em><b><?php echo __('Overdue Ticket Alert'); ?></b>:
@@ -183,19 +198,25 @@
         <tr>
             <td>
               <input type="checkbox" name="overdue_alert_assigned" <?php
-                echo $config['overdue_alert_assigned']?'checked':''; ?>> <?php echo __('Assigned Agent / Team'); ?>
+                echo $config['overdue_alert_assigned']?'checked':''; ?>> <?php echo __('Assigned Team'); ?>
             </td>
         </tr>
         <tr>
             <td>
               <input type="checkbox" name="overdue_alert_dept_manager" <?php
-                echo $config['overdue_alert_dept_manager']?'checked':''; ?>> <?php echo __('Department Manager'); ?>
+                echo $config['overdue_alert_dept_manager']?'checked':''; ?>> <?php echo __('Mentor'); ?>
+            </td>
+        </tr>
+                <tr>
+            <td>
+              <input type="checkbox" name="overdue_alert_dept_teamleader" <?php
+                echo $config['overdue_alert_dept_teamleader']?'checked':''; ?>> <?php echo __('Team Leader'); ?>
             </td>
         </tr>
         <tr>
             <td>
               <input type="checkbox" name="overdue_alert_dept_members" <?php
-                echo $config['overdue_alert_dept_members']?'checked':''; ?>> <?php echo __('Department Members'); ?>
+                echo $config['overdue_alert_dept_members']?'checked':''; ?>> <?php echo __('Team Members'); ?>
             </td>
         </tr>
         <tr><th>

@@ -3,11 +3,9 @@ if(!defined('ADMINPAGE')) { ?>
                                 
     <li ><a class="waves-effect waves-primary" href="/scp/dashboard.php" ><i class=" ti-dashboard"></i> Dashboard </a> </li>
     <li class=" has_sub ">
-        <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-user"></i>  <span class="menu-arrow"></span> Users </a> 
+        <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-user"></i>  <span class="menu-arrow"></span> Associates </a> 
         <ul class="list-unstyled">
-            <li><a href="/scp/directory.php" title="" id="nav1">Agent Directory</a></li>
-            <li><a href="/scp/users.php" title="" id="nav0">User Directory</a></li>
-            <li><a href="/scp/orgs.php" title="" id="nav1">Organizations</a></li>
+            <li><a href="/scp/directory.php" title="" id="nav1">Associate Directory</a></li>
         </ul>
     </li>
     <li class=" has_sub "><a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-list"></i>  <span class="menu-arrow"></span> Tasks </a> <ul class="list-unstyled">
@@ -29,16 +27,12 @@ if(!defined('ADMINPAGE')) { ?>
 
     switch ($q->getName()){
         
-        case "Suggestions":
+        case "All Teams":
             $icon ='ti-light-bulb';
             $badgecolor='badge-success';
             break;
-        case "Issues":
-            $icon ='ti-info-alt';
-            $badgecolor='badge-warning';
-            break;
-            
-        case "My Tickets":
+                    
+        case "My Team(s)":
         $icon ='ti-check-box';
         $badgecolor='badge-pink';
             break;
@@ -56,7 +50,7 @@ if(!defined('ADMINPAGE')) { ?>
         <a href=
         <?php if (count($children)) {echo '"javascript:void(0);"';} else {
          
-        echo '"tickets.php?queue='. $q->getId().'&p=1&l=0&s=0"';
+        echo '"tickets.php?queue='. $q->getId().'&p=1&l=0&t=0&s=0"';
             
         }
 
@@ -116,7 +110,7 @@ if(!defined('ADMINPAGE')) { ?>
 
 
     <!-- Admin -->
-
+<?php  if ($thisstaff->GetId() == 42){ ?>
      <li class=" has_sub ">
         <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-info-alt"></i><span class="menu-arrow"></span> System </a>
         <ul class="list-unstyled">
@@ -132,7 +126,7 @@ if(!defined('ADMINPAGE')) { ?>
             <li><a href="/scp/settings.php?t=tickets" title="" id="nav2">Tickets</a></li>
             <li><a href="/scp/settings.php?t=tasks" title="" id="nav3">Tasks</a></li>
             <li><a href="/scp/settings.php?t=agents" title="" id="nav4">Agents</a></li>
-            <li><a href="/scp/settings.php?t=users" title="" id="nav5">Users</a></li>
+            <li><a href="/scp/settings.php?t=users" title="" id="nav5">Associates</a></li>
             <li><a href="/scp/settings.php?t=kb" title="" id="nav6">Knowledgebase</a></li>
         </ul>
     </li>
@@ -154,12 +148,12 @@ if(!defined('ADMINPAGE')) { ?>
             <li><a href="/scp/emailtest.php" title="Email Diagnostic" id="nav4">Diagnostic</a></li>
         </ul>
     </li>
-    <li class=" has_sub "><a class="waves-effect waves-primary" href="javascript:void(0);" ><i class=" ti-user"></i><span class="menu-arrow"></span> Agents </a> 
+<?php } ?>
+    <li class=" has_sub "><a class="waves-effect waves-primary" href="javascript:void(0);" ><i class=" ti-user"></i><span class="menu-arrow"></span> Associates </a> 
         <ul class="list-unstyled">
-            <li><a href="/scp/staff.php" title="" id="nav0">Agents</a></li>
-            <li><a href="/scp/teams.php" title="" id="nav1">Teams</a></li>
+            <li><a href="/scp/staff.php" title="" id="nav0">Associates</a></li>
             <li><a href="/scp/roles.php" title="" id="nav2">Roles</a></li>
-            <li><a href="/scp/departments.php" title="" id="nav3">Departments</a></li>
+            <li><a href="/scp/departments.php" title="" id="nav3">Teams</a></li>
         </ul>
     </li>
 

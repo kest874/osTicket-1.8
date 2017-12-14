@@ -36,11 +36,11 @@ $queue_columns = array(
             'heading' => __('Task'),
             ),
         'parent' => array(
-            'width' => '8%',
-            'heading' => __('Parent Ticket'),
+             'width' => '8%',
+             'heading' => __('Suggestion'),
             ),
         'date' => array(
-            'width' => '20%',
+            'width' => '100px',
             'heading' => __('Date Created'),
             'sort_col' => 'created',
             ),
@@ -51,12 +51,12 @@ $queue_columns = array(
             ),
         'dept' => array(
             'width' => '16%',
-            'heading' => __('Department'),
+            'heading' => __('Team'),
             'sort_col'  => 'dept__name',
             ),
         'assignee' => array(
             'width' => '16%',
-            'heading' => __('Agent'),
+            'heading' => __('Associate'),
             ),
         );
 
@@ -139,7 +139,7 @@ $visibility = array(
 if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
     $visibility[] = new Q(array('dept_id__in' => $depts));
 // -- Open and assigned to a team of mine
-if (($teams = $thisstaff->getTeams()) && count(array_filter($teams)))
+if (($teams = $thisstaff->getDepartments()) && count(array_filter($teams)))
     $visibility[] = new Q(array(
         'team_id__in' => array_filter($teams),
         'flags__hasbit' => TaskModel::ISOPEN
@@ -336,7 +336,6 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
  <input type="hidden" name="do" id="action" value="" >
  <input type="hidden" name="status" value="<?php echo
  Format::htmlchars($_REQUEST['status'], true); ?>" >
-
     <thead>
         <tr>
             <?php if ($thisstaff->canManageTickets()) { ?>
@@ -399,7 +398,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                         Format::truncate((string) $staff, 40));
             } elseif($T['team_id']) {
                 $assignee = sprintf('<span class="Icon teamAssigned">%s</span>',
-                    Format::truncate(Team::getLocalById($T['team_id'], 'name', $T['team__name']),40));
+                    Format::truncate(Dept::getLocalById($T['team_id'], 'name', $T['team__name']),40));
             }
 
             $threadcount=$T['thread_count'];
@@ -423,9 +422,8 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                 </td>
                 <?php } ?>
                 <td nowrap>
-                  <a class="preview"
+                  <a 
                     href="tasks.php?id=<?php echo $T['id']; ?>"
-                    data-preview="#tasks/<?php echo $T['id']; ?>/preview"
                     ><?php echo $number; ?></a></td>
 				
 				<?php if(empty($T['ticket__number'])) {?>				
@@ -433,11 +431,8 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
 				<?php }
 				else { ?>
 				<td title="<?php echo $T['user__default_email__address']; ?>" nowrap>
-                  <a class="Icon <?php echo strtolower($T['ticket__source']); ?>Ticket preview"
-                    title="Preview Ticket"
-                    href="tickets.php?id=<?php echo $T['ticket']; ?>"
-                    data-preview="#tickets/<?php echo $T['ticket']; ?>/preview"
-                    ><?php echo $T['ticket__number']; ?></a></td>
+                  <a href="tickets.php?id=<?php echo $T['ticket']; ?>">     
+                    <?php echo $T['ticket__number']; ?></a></td>
 	
 				<?php } ?>
 				<td align="left" nowrap><?php echo

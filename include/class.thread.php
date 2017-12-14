@@ -137,7 +137,7 @@ implements Searchable {
 		$collaborators->filter(array('role' => 'N'));
 		
         // TODO: sort by name of the user
-        $collaborators->order_by('user__name');
+        $collaborators->order_by('staff__username');
 
         if (!$criteria)
             $this->_collaborators = $collaborators;
@@ -337,7 +337,6 @@ implements Searchable {
 			'role' => 'M',
 	        'autorespond' => !isset($mailinfo['passive']),
             );
-
 
         // XXX: Is this necessary?
         if ($object instanceof Ticket)
@@ -622,7 +621,7 @@ implements Searchable {
                 'label' => __('Last Message'),
             )),
             'lastresponse' => new DatetimeField(array(
-                'label' => __('Last Response'),
+            'label' => __('Last Response'),
             )),
         );
     }
@@ -704,7 +703,7 @@ implements TemplateVariable {
                 'null' => true,
             ),
             'user' => array(
-                'constraint' => array('user_id' => 'User.id'),
+                'constraint' => array('user_id' => 'staff.staff_id'),
                 'null' => true,
             ),
         ),
@@ -1939,7 +1938,7 @@ class AssignmentEvent extends ThreadEvent {
             $desc = __('<b>{somebody}</b> assigned this to <strong>{<Staff>data.staff}</strong> {timestamp}');
             break;
         case isset($data['team']):
-            $desc = __('<b>{somebody}</b> assigned this to <strong>{<Team>data.team}</strong> {timestamp}');
+            $desc = __('<b>{somebody}</b> assigned this to <strong>{<Dept>data.team}</strong> {timestamp}');
             break;
         case isset($data['claim']):
             $desc = __('<b>{somebody}</b> claimed this {timestamp}');
@@ -2069,7 +2068,7 @@ class EditEvent extends ThreadEvent {
                 'topic_id' => array(__('Help Topic'), array('Topic', 'getTopicName')),
                 'sla_id' => array(__('SLA'), array('SLA', 'getSLAName')),
                 'duedate' => array(__('Due Date'), array('Format', 'date')),
-                'user_id' => array(__('Ticket Owner'), array('User', 'getNameById')),
+                'user_id' => array(__('Ticket Owner'), array('Staff', 'getFullNameById')),
                 'source' => array(__('Source'), null)
             ) as $f => $info) {
                 if (isset($data[$f])) {
@@ -2462,7 +2461,7 @@ class HtmlThreadEntryBody extends ThreadEntryBody {
 
 /* Message - Ticket thread entry of type message */
 class MessageThreadEntry extends ThreadEntry {
-
+	
     const ENTRY_TYPE = 'M';
 
     function getSubject() {
@@ -2483,7 +2482,7 @@ class MessageThreadEntry extends ThreadEntry {
 
         if (!$vars['poster']
                 && $vars['userId']
-                && ($user = User::lookup($vars['userId'])))
+                && ($user = staff::lookup($vars['userId'])))
             $vars['poster'] = (string) $user->getName();
 
         return parent::add($vars);
@@ -2503,8 +2502,8 @@ class ResponseThreadEntry extends ThreadEntry {
 
     function getActivity() {
         return new ThreadActivity(
-                _S('New Response'),
-                _S('New response posted'));
+                _S('New Update'),
+                _S('New update posted'));
     }
 
     function getSubject() {
@@ -2520,7 +2519,7 @@ class ResponseThreadEntry extends ThreadEntry {
         if (!$vars || !is_array($vars) || !$vars['threadId'])
             $errors['err'] = __('Missing or invalid data');
         elseif (!$vars['response'])
-            $errors['response'] = __('Response content is required');
+            $errors['response'] = __('Update content is required');
 
         if ($errors) return false;
         $vars['type'] = self::ENTRY_TYPE;
@@ -2693,18 +2692,7 @@ implements TemplateVariable {
 
         //Add ticket Id.
         $vars['threadId'] = $this->getId();
-
-		// add agent as collaborator
-		if ($vars['staffId'] !== 0 && $vars['staffId'] !== $vars['assignToStaffId'] && $vars['staffId'] !==8){
-			$vars['flags'] = ThreadEntry::FLAG_COLLABORATOR;
-			$info['threadId'] = $vars['threadId'];
-			$info['userId'] = Staff::getStaffUserId($vars['staffId']);
-			$info['role'] = 'N';
-			$info['noerrors'] = 'N';
-			Collaborator::add($info, $errors);	
-		}		
-		
-       return NoteThreadEntry::add($vars, $errors);
+        return NoteThreadEntry::add($vars, $errors);
 
     }
 

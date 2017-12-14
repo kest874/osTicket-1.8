@@ -58,7 +58,7 @@ class Export {
         }
         // Reset the $sql query
         $tickets = $sql->models()
-            ->select_related('user', 'user__default_email', 'dept', 'staff',
+            ->select_related('dept', 'staff',
                 'team', 'staff', 'cdata', 'topic', 'status', 'cdata__:priority')
             ->options(QuerySet::OPT_NOCACHE)
             ->annotate(array(
@@ -85,8 +85,8 @@ class Export {
                 'number' =>         __('Ticket Number'),
                 'created' =>        __('Date Created'),
                 'cdata.subject' =>  __('Subject'),
-                'user.name' =>      __('From'),
-                'user.default_email.address' => __('From Email'),
+                'staff.name' =>      __('From'),
+                //'user.default_email.address' => __('From Email'),
                 'cdata.:priority.priority_desc' => __('Priority'),
                 'dept::getLocalName' => __('Department'),
                 'topic::getName' => __('Help Topic'),

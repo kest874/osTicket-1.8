@@ -4,7 +4,10 @@
 }
 .filedrop .dropzone {
     border: 2px dashed rgba(0, 0, 0, 0.2);
-    padding: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     border-radius: 5px;
     background-color: rgba(0, 0, 0, 0.05);
     color: #999;
@@ -15,17 +18,20 @@
     color: rgba(24, 78, 129, 0.7);
 }
 .filedrop .files:not(:empty) {
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 5px 5px 0 0;
+    border-left: 1px solid rgba(0, 0, 0, 0.2);
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+    /*border-radius: 5px 5px 0 0;*/
     padding: 5px;
+    margin-top: -6px;
 }
 .filedrop .files:not(:empty) + .dropzone {
     border-top: none;
     border-radius: 0 0 5px 5px;
+    
 }
 .filedrop .files .file {
     display: block;
-    padding: 5px 10px 5px 20px;
+    padding: 0px 5px 0px 5px;
     margin: 0;
     border-radius: 5px;
     height:25px;
@@ -42,7 +48,7 @@
   color: #999;
 }
 .filedrop .files .file > span {
-    padding:4px 0 0 0;
+    /*padding:4px 0 0 0;*/
     display:block;
 }
 .filedrop .files .file .upload-rate {

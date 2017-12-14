@@ -9,7 +9,7 @@ if ($thisstaff && !strcasecmp($thisstaff->datetime_format, 'relative')) {
 
 $entryTypes = array('M'=>'message', 'R'=>'response', 'N'=>'note');
 $user = $entry->getUser() ?: $entry->getStaff();
-$name = $user ? $user->getName() : $entry->poster;
+$name = $user ? staff::getFullNameById($user->getId()) : $entry->poster;
 $avatar = '';
 if ($user && $cfg->isAvatarsEnabled())
     $avatar = $user->getAvatar();
@@ -56,7 +56,7 @@ if ($user && $cfg->isAvatarsEnabled())
 		<span class="label label-bare"><?php echo __('Message'); ?></span>
 <?php } ?>	
 <?php if ($entry->type == 'R') { ?>
-		<span class="label label-bare"><?php echo __('Response'); ?></span>
+		<span class="label label-bare"><?php echo __('Update'); ?></span>
 <?php } ?>	
 <?php   if ($entry->flags & ThreadEntry::FLAG_EDITED) { ?>
             <span class="label label-bare" title="<?php
