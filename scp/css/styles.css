@@ -13,7 +13,7 @@
     padding-bottom: 0px;
     width: 240px;
     z-index: 1;
-    background-color: #24292e; }
+    background-color: #dd2c00  ; }
     .topbar .topbar-left-sm {
     width: 180px; }
   .topbar .topbar-left-sm + .navbar-custom {
@@ -43,7 +43,7 @@
     display: none; }
 
 .navbar-custom {
-  background-color: #24292e;
+  background-color: #dd2c00   ;
   border-radius: 0;
   margin-bottom: 0;
   padding: 0 10px 0 0;
