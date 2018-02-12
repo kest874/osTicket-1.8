@@ -33,7 +33,7 @@ if ($_POST)
 
     <div class="float-left subnavtitle">
                           
-   <?php echo __('Open a New Ticket');?>                       
+   <?php echo __('Open a New Incident');?>                       
     
     </div>
     <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
@@ -129,7 +129,7 @@ if ($_POST)
             <label><?php echo __('Ticket Notice'); ?>:</label>
          <div class="form-check">    
             <label class="form-check-label">
-      <input class="form-check-input" type="checkbox" name="alertuser" <?php echo (!$errors || $info['alertuser'])? 'checked="checked"': ''; ?>>
+      <input class="form-check-input" type="checkbox" name="alertuser">
       <?php
                 echo __('Send alert to user.'); ?>
     </label>
@@ -143,12 +143,12 @@ if ($_POST)
     
         <div class="form-group">
             
-                <em><strong><?php echo __('Ticket Information');?></strong>:</em>
+                <em><strong><?php echo __('Incident Information');?></strong>:</em>
            
         </div>
         <div class="form-group">
             <label>
-                <?php echo __('Ticket Source');?>:
+                <?php echo __('Incident Source');?>:
             </label>
             
                 <select name="source" class="form-control form-control-sm requiredfield">
@@ -170,7 +170,7 @@ if ($_POST)
         </div>
         <div class="form-group">
             <label>
-                <?php echo __('Help Topic'); ?>:
+                <?php echo __('Type of Incident'); ?>:
             </label>
             
                     <input id="cc" name="topicId" class="easyui-combotree "  style="width:95%;  border-radius: 2px !important;"></input>
@@ -407,7 +407,7 @@ $(document).ready(function(){
               return getParentArry(tree,parent,nodeLevel,parentArry);
             }
         }
-    $('#cc').combotree('setText', '— <?php echo __('Select Help Topic'); ?> —');
+    $('#cc').combotree('setText', '— <?php echo __('Select Incident Type'); ?> —');
     
     $('#datepicker1').datetimepicker({
                    useCurrent: false,

@@ -3081,14 +3081,14 @@ static function formatTime($time) {
         //post the message.
         $vars['title'] = $vars['subject']; //Use the initial subject as title of the post.
         $vars['userId'] = $ticket->getUserId();
-        $message = $ticket->postMessage($vars , $origin, '0');
+        // $message = $ticket->postMessage($vars , $origin, '0');
         // If a message was posted, flag it as the orignal message. This
         // needs to be done on new ticket, so as to otherwise separate the
         // concept from the first message entry in a thread.
-        if ($message instanceof ThreadEntry) {
-            $message->setFlag(ThreadEntry::FLAG_ORIGINAL_MESSAGE);
-            $message->save();
-        }
+        // if ($message instanceof ThreadEntry) {
+            // $message->setFlag(ThreadEntry::FLAG_ORIGINAL_MESSAGE);
+            // $message->save();
+        // }
         // Configure service-level-agreement for this ticket
         $ticket->selectSLAId($vars['slaId']);
         // Set status
@@ -3201,8 +3201,8 @@ static function formatTime($time) {
         $vars['note'] = ThreadEntryBody::clean($vars['note']);
         $create_vars = $vars;
         $tform = TicketForm::objects()->one()->getForm($create_vars);
-        $create_vars['cannedattachments']
-            = $tform->getField('message')->getWidget()->getAttachments()->getClean();
+        // $create_vars['cannedattachments']
+            // = $tform->getField('message')->getWidget()->getAttachments()->getClean();
         
     if ($vars['response']) {$alertstaff = false; } else {$alertstaff = true;}
            

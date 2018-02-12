@@ -29,7 +29,7 @@
             </div>
         </div>
         <input type="hidden" name="do" value="mass_process" />
-        <h3><?php echo __('Ticket Queues');?></h3>
+        <h3><?php echo __('Incident Queues');?></h3>
     </div>
     <div class="clear"></div>
  <?php csrf_token(); ?>

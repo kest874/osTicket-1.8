@@ -3602,7 +3602,7 @@ class TextareaWidget extends Widget {
         </div>   
        
        <?php } else { ?>
-        <textarea style="display:none;" <?php echo $rows." ".$cols." ".$maxlength." ".$disabled. "" .$class
+        <textarea  <?php echo $rows." ".$cols." ".$maxlength." ".$disabled. "" .$class
                 .' '.Format::array_implode('=', ' ', $attrs)
                 .' placeholder="'.$config['placeholder'].'"'; ?>
             id="<?php echo $this->id; ?>"

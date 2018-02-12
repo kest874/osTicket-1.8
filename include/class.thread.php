@@ -2517,8 +2517,8 @@ class ResponseThreadEntry extends ThreadEntry {
 
     function getActivity() {
         return new ThreadActivity(
-                _S('New Response'),
-                _S('New response posted'));
+                _S('New Update'),
+                _S('New update posted'));
     }
 
     function getSubject() {
@@ -2534,7 +2534,7 @@ class ResponseThreadEntry extends ThreadEntry {
         if (!$vars || !is_array($vars) || !$vars['threadId'])
             $errors['err'] = __('Missing or invalid data');
         elseif (!$vars['response'])
-            $errors['response'] = __('Response content is required');
+            $errors['response'] = __('Update content is required');
 
         if ($errors) return false;
         $vars['type'] = self::ENTRY_TYPE;
