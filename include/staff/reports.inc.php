@@ -2,6 +2,7 @@
 if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
 
 ?>
+
 <div class="subnav">
 
     <div class="float-left subnavtitle">
@@ -24,12 +25,12 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
     <div>
         
             <strong>
-                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fIT%2fIT+Performance" target="_blank">
-                IT Performance</a>
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_AssociateActivity&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
+                Associate Activity</a>
             </strong>
     </div>
     <div>
-            <em>&nbsp; Report showing IT performance.</em>
+            <em>&nbsp; Report showing associate system activity.</em>
         
     </div>
 </div>    
@@ -37,13 +38,13 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
     <div>
         
             <strong>
-                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fIT%2fOpenTicketsAge" target="_blank">
-                Open Ticket Age</a>
+                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_AssociateSummary&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
+                Associate Suggestion Summary</a>
             </strong>
      </div>
     <div>       
         
-            <em>&nbsp; Report showing Open Ticket by age.</em>
+            <em>&nbsp; Report showing associate activity by month.</em>
         
     </div>
 </div> 
@@ -51,14 +52,14 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
     <div>
         
             <strong>
-                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fIT%2fOpen+Issues+and+Suggestions" target="_blank">
-                Open Issues and Suggesitons</a>
+               <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_OpenSuggesitonAge&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
+                Suggestions Open Age</a>
             </strong>
     </div>
 
     <div>        
         
-            <em>&nbsp; Report showing Open Issues and Suggestions.</em>
+            <em>&nbsp; Report showing Suggestions By Age<</em>
         
     </div>
 </div>
@@ -66,13 +67,28 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
         <div>
         
             <strong>
-                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fIT%2fManagement+Review+Data&rs:Format=Excel" target="_blank">
-                Management Review Data</a>
+                 <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_Suggestions&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
+                Suggestions</a>
             </strong>
      </div>
     <div>       
         
-            <em>&nbsp; Export Management Review Data (Excel).</em>
+            <em>&nbsp; Report showing Suggestions with filters (Catagory, Status)</em>
+        
+    </div>
+    
+ </div>
+ <div class="row table">
+        <div>
+        
+            <strong>
+                 <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_Statistics&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
+                Suggestions Statistics</a>
+            </strong>
+     </div>
+    <div>       
+        
+            <em>&nbsp; Report showing Suggestions Statistics</em>
         
     </div>
     
@@ -80,4 +96,5 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
 
 
  </div> </div> </div>
+
 

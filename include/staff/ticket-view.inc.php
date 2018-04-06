@@ -31,6 +31,11 @@ if (!$errors['err']) {
         $errors['err'] = __('EndUser email address is not valid! Consider updating it before responding');
 }
 $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
+
+$staffpermission = $ticket->checkStaffPerm($thisstaff);
+$assigned = ($team->id == $thisstaff->dept_id ? 1:0);
+$haspermission = ($staffpermission == true || $assigned == true ? 1:0);
+
 ?>
 
 
@@ -38,7 +43,7 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
 
     <div class="float-left subnavtitle" id="ticketviewtitle">
         <a href="tickets.php?id=<?php echo $ticket->getId(); ?>" title="<?php echo __('Reload'); ?>"><i class="icon-refresh"></i>
-            <?php echo sprintf(__('Incident #%s'), $ticket->getNumber()); ?></a>
+            <?php echo sprintf(__('Ticket #%s'), $ticket->getNumber()); ?></a>
                 
                 <span  class=""> - <span style="color: <?php echo $ticket->isOpen() ? '#51c351;' : '#f00;'; ?>">
                 <?php echo sprintf(__('%s'), $ticket->getStatus()); ?></span></span>
@@ -53,14 +58,14 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
         <div class="btn-group btn-group-sm hidden-xs-down" role="group">
             <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle waves-effect " 
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-            title="<?php echo __('Print'); ?>"><i class="icon-print"></i>
+            title="<?php echo __('Print'); ?>"><i class="fa fa-print"></i>
             </button>
                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                         
                 <a class="dropdown-item" target="_blank" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=print&notes=0"><i
-                            class="icon-file-alt"></i> <?php echo __('Incident Thread'); ?></a>
+                            class="far fa-file"></i> <?php echo __('Incident Timeline'); ?></a>
                             <a class="dropdown-item" target="_blank" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=print&notes=1"><i
-                            class="icon-file-text-alt"></i> <?php echo __('Thread + Internal Notes'); ?></a>
+                            class="far fa-file-alt"></i> <?php echo __('Thread + Internal Notes'); ?></a>
                 
                 </div>
         </div>
@@ -79,7 +84,7 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
             <div class="btn-group btn-group-sm" role="group">
             <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle waves-effect" 
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-            title="<?php echo $ticket->isAssigned() ? __('Assign') : __('Reassign'); ?>"><i class="icon-user"></i>
+            title="<?php echo $ticket->isAssigned() ? __('Assign') : __('Reassign'); ?>"><i class="far fa-user"></i>
             </button>
                 <div class="dropdown-menu " aria-labelledby="btnGroupDrop1">
                     
@@ -92,30 +97,30 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
                     <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/claim"><i class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
                     <?php
                     } ?>
-                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/agents"><i class="icon-user"></i> <?php echo __('Agent'); ?></a>
-                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/teams"><i class="icon-group"></i> <?php echo __('Team'); ?></a>
+                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/agents"><i class="far fa-user"></i> <?php echo __('Agent'); ?></a>
+                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/teams"><i class="fa fa-users"></i> <?php echo __('Team'); ?></a>
             
                 </div>
             </div>
       <?php } ?>
                 
             <a  class="btn btn-light waves-effect" id="savebutton" onclick="document.getElementById('save').submit();" 
-            data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Save'); ?>"><i class="fa fa-floppy-o"></i></a>
+            data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Save'); ?>"><i class="far fa-save"></i></a>
          
             <a class="btn btn-light waves-effect" id="cancelbutton" href="" onclick="window.location.href="tickets.php?id=<?php echo $ticket->getId(); ?>" 
-            data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Cancel');?>" ><i class="fa fa-times"></i></a>		
+            data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Cancel');?>" ><i class="fa fa-ban"></i></a>		
                     
             <?php If  ($topic) { ?>
                 
                 <?php if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
                     
                     <a class="btn btn-light waves-effect" href="#reply" class="post-response" id="post-reply" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Post Update'); ?>">
-                    <i class="fa fa-reply"></i></a>
+                    <i class="far fa-share-square fa-flip-horizontal"></i></a>
                          
                 <?php }  ?> 
                 
                     <a class="btn btn-light waves-effect" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Post Internal Note'); ?>">
-                    <i class="fa fa-pencil-square-o"></i></a>
+                    <i class="far fa-sticky-note"></i></a>
                 
             <?php	}
                 
@@ -126,39 +131,39 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
                     <div class="btn-group btn-group-sm" role="group">
                     <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle waves-effect" 
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-                    title="<?php echo __('More'); ?>"> <i class="icon-cog"></i>
+                    title="<?php echo __('More'); ?>"> <i class="fa fa-cog"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1">
                 
                 <?php
                      if ($role->hasPerm(Ticket::PERM_EDIT)) { ?>
                         <a class="dropdown-item ticket-action" href="#tickets/<?php
-                        echo $ticket->getId(); ?>/change-user"><i class="icon-user"></i> <?php
+                        echo $ticket->getId(); ?>/change-user"><i class="far fa-user"></i> <?php
                         echo __('Change Owner'); ?></a>
                     <?php
                      }
                      if($ticket->isOpen() && ($dept && $dept->isManager($thisstaff))) {
                         if($ticket->isAssigned()) { ?>
-                            <a class="dropdown-item " id="ticket-release" href="#release"><i class="icon-user"></i> <?php
+                            <a class="dropdown-item " id="ticket-release" href="#release"><i class="far fa-user"></i> <?php
                                 echo __('Release (unassign) Ticket'); ?></a>
                         <?php
                         }
                         if(!$ticket->isOverdue()) { ?>
-                            <a class="dropdown-item" id="ticket-overdue" href="#overdue"><i class="icon-bell"></i> <?php
+                            <a class="dropdown-item" id="ticket-overdue" href="#overdue"><i class="fa fa-bell"></i> <?php
                                 echo __('Mark as Overdue'); ?></a>
                         <?php
                         }
                         if($ticket->isOverdue()) { ?>
-                            <a class="dropdown-item" id="ticket-overdue" href="#overdue"><i class="icon-bell"></i> <?php
+                            <a class="dropdown-item" id="ticket-overdue" href="#overdue"><i class="fa fa-bell"></i> <?php
                                 echo __('Unmark as Overdue'); ?></a>
                         <?php
                         }
                         if($ticket->isAnswered()) { ?>
-                        <a class="dropdown-item" id="ticket-unanswered" href="#unanswered"><i class="icon-circle-arrow-left"></i> <?php
+                        <a class="dropdown-item" id="ticket-unanswered" href="#unanswered"><i class="fa fa-circle-arrow-left"></i> <?php
                                 echo __('Mark as Unanswered'); ?></a>
                         <?php
                         } else { ?>
-                        <a class="dropdown-item" id="ticket-answered" href="#answered"><i class="icon-circle-arrow-right"></i> <?php
+                        <a class="dropdown-item" id="ticket-answered" href="#answered"><i class="fa fa-circle-arrow-right"></i> <?php
                                 echo __('Mark as Answered'); ?></a>
                         <?php
                         }
@@ -169,19 +174,19 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
                         ?>/forms/manage" onclick="javascript:
                         $.dialog($(this).attr('href').substr(1), 201);
                         return false"
-                        ><i class="icon-paste"></i> <?php echo __('Manage Forms'); ?></a>
+                        ><i class="fa fa-paste"></i> <?php echo __('Manage Forms'); ?></a>
                     <?php
                     } 
                     if ($thisstaff->hasPerm(Email::PERM_BANLIST)) {
                          if(!$emailBanned) {?>
                             <a class="dropdown-item ticket-action" id="ticket-banemail"
-                                href="#banemail"><i class="icon-ban-circle"></i> <?php echo sprintf(
+                                href="#banemail"><i class="fa fa-ban"></i> <?php echo sprintf(
                                     Format::htmlchars(__('Ban Email <%s>')),
                                     $ticket->getEmail()); ?></a>
                     <?php
                          } elseif($unbannable) { ?>
                             <a  class="dropdown-item ticket-action" id="ticket-banemail"
-                                href="#unbanemail"><i class="icon-undo"></i> <?php echo sprintf(
+                                href="#unbanemail"><i class="fa fa-undo"></i> <?php echo sprintf(
                                     Format::htmlchars(__('Unban Email <%s>')),
                                     $ticket->getEmail()); ?></a>
                         <?php
@@ -191,7 +196,7 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
                          ?>
                         <a class="dropdown-item ticket-action" href="#tickets/<?php
                         echo $ticket->getId(); ?>/status/delete"
-                        data-redirect="tickets.php"><i class="icon-trash"></i> <?php
+                        data-redirect="tickets.php"><i class="fa fa-trash"></i> <?php
                         echo __('Delete Ticket'); ?></a>
                     <?php
                      }
@@ -203,10 +208,10 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
                 }
                 ?>
         <a class="btn btn-light btn-sm waves-effect" href="#" data-stop="top" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Scroll Top'); ?>">
-                    <i class="icon-chevron-up"></i></a>	
+                    <i class="fa fa-chevron-up"></i></a>	
                     
-        <a class="btn btn-light btn-sm waves-effect" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Incidents'); ?>"
-                    href="tickets.php<?php ?>"><i class="icon-list-alt"></i></a>			
+        <a class="btn btn-light btn-sm waves-effect" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Tickets'); ?>"
+                    href="tickets.php<?php ?>"><i class="far fa-list-alt"></i></a>			
                 
     </div>
 <div class="clearfix"></div>
@@ -214,28 +219,28 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
 </div>
  <?php if (!$topic) { ?>
 <div class="alert alert-danger">
-      <strong>Incident Type!</strong> Please set the Incident Type..
+      <strong>Category!</strong> Please set the category..
 </div>
  <?php } ?>
 <?php if($ticket->isOverdue()) { ?>
 <div class="alert alert-warning">
-      <strong>Overdue!</strong> Ticket is maked overdue..
+      <strong>Overdue!</strong> Incident is maked overdue..
 </div>
  <?php } 
  
  
- if ($ticket->isClosed() && !$ticket->isReopenable())
-    $alerttext = sprintf(
-            __('<strong>Status!</strong> Current ticket status (%s) does not allow the end user to reply.'),
-            $ticket->getStatus());
-elseif ($ticket->isAssigned()
-        && (($staff && $staff->getId()!=$thisstaff->getId())
-            || ($team && !$team->hasMember($thisstaff))
-        ))
-    $alerttext.= sprintf('<strong>Assigned!</strong> &nbsp;&nbsp;<span class="Icon assignedTicket">%s</span>',
-            sprintf(__('Ticket is assigned to %s'),
-                implode('/', $ticket->getAssignees())
-                ));
+ // if ($ticket->isClosed() && !$ticket->isReopenable())
+    // $alerttext = sprintf(
+            // __('<strong>Status!</strong> Current ticket status (%s) does not allow the end user to reply.'),
+            // $ticket->getStatus());
+// elseif ($ticket->isAssigned()
+        // && (($staff && $staff->getId()!=$thisstaff->getId())
+            // || ($team && !$team->hasMember($thisstaff))
+        // ))
+    // $alerttext.= sprintf('<strong>Assigned!</strong> &nbsp;&nbsp;<span class="Icon assignedTicket">%s</span>',
+            // sprintf(__('Ticket is assigned to %s'),
+                // implode('/', $ticket->getAssignees())
+                // ));
                 
                 
   ?>              
@@ -268,7 +273,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
   
       <fieldset>
         
-        <div class="row ticketform boldlabels">
+        <div class="row m-t-10 boldlabels">
             <div class='col-sm-3'>    
                 <div class='form-group'>
                 <?php csrf_token(); ?>
@@ -279,9 +284,9 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
 				<input type="hidden" name="do" value="update">
 				<input type="hidden" name="a" value="edit">
 				<input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
-            <label width="100"><?php echo __('Status');?>:</label> 
-                <?php echo ($S = $ticket->getStatus()) ? $S->display() : ''; ?>
-        </div>  
+                <label width="100"><?php echo __('Status');?>:</label> 
+                    <?php echo ($S = $ticket->getStatus()) ? $S->display() : ''; ?>
+                </div>  
         <div>
                 <label><?php echo __('Priority');?>:</label>
                     <?php 
@@ -302,13 +307,19 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                     }
                     echo '<span class="badge label-table '.$badgecolor.'">'.$ticket->getPriority().'</span>'; ?>
         </div>
+                </div>
+            </div>
+            <div class='col-sm-3'>    
+                <div class='form-group'>
         <div>
-            <label><?php echo __('Department');?>:</label>
+            <label><?php echo __('Division');?>:</label>
                     <?php echo Format::htmlchars($ticket->getdeptName()); ?></div>
         <div> 
-            <label><?php echo __('Opened');?>:</label>
+            <label><?php echo __('Create Date');?>:</label>
                 <?php echo Format::datetime($ticket->getCreateDate()); ?></div>
-                
+         </div></div>
+<div class='col-sm-3'>    
+                <div class='form-group'>         
         <?php if($ticket->isOpen()) { ?>
         <div> 
             <label label="180"><?php echo __('Assigned To');?>:</label>
@@ -323,9 +334,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                
                 <?php
                 } else { ?>
-        <div> 
-            <label><?php echo __('Closed');?>:</label>
-                <?php echo Format::datetime($ticket->getCloseDate()); ?></div>        
+                
         <div> 
             <label width="100"><?php echo __('Closed By');?>:</label>
                     
@@ -338,134 +347,43 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
         </div>
                 
         <?php } ?>
-                </div>
-            </div>
-            <div class='col-sm-3'>
-                <div class='form-group'>
-            <div>                
-                <label width="180"><?php echo __('User'); ?>:</label>
-                    <a href="#tickets/<?php echo $ticket->getId(); ?>/user"
-                        onclick="javascript:
-                            $.userLookup('ajax.php/tickets/<?php echo $ticket->getId(); ?>/user',
-                                    function (user) {
-                                        $('#user-'+user.id+'-name').text(user.name);
-                                        $('#user-'+user.id+'-email').text(user.email);
-                                        $('#user-'+user.id+'-phone').text(user.phone);
-                                        $('select#emailreply option[value=1]').text(user.name+' <'+user.email+'>');
-                                    });
-                            return false;
-                            "><i class="icon-user"></i> <span id="user-<?php echo $ticket->getOwnerId(); ?>-name"
-                            ><span class="notranslate"><?php echo Format::htmlchars($ticket->getName());?></span></span></a>
-                        <?php
-                        if ($user) { ?>
-                            <a href="tickets.php?<?php echo Http::build_query(array(
-                                'status'=>'open', 'a'=>'search', 'uid'=> $user->getId()
-                            )); ?>" title="<?php echo __('Related Tickets'); ?>"
-                            data-dropdown="#action-dropdown-stats">
-                            <span class="badge badge-primary badge-pill"><?php echo $user->getNumTickets(); ?></span>
-                            </a>
-                            <div id="action-dropdown-stats" class="action-dropdown">
-                                <ul>
-                                    <?php
-                                    if(($open=$user->getNumOpenTickets()))
-                                        echo sprintf('<li><a href="tickets.php?a=search&status=open&uid=%s"><i class="icon-folder-open-alt icon-fixed-width"></i> %s</a>',
-                                                $user->getId(), sprintf(_N('%d Open Ticket', '%d Open Tickets', $open), $open));
-                                    if(($closed=$user->getNumClosedTickets()))
-                                        echo sprintf('<li><a href="tickets.php?a=search&status=closed&uid=%d"><i
-                                                class="icon-folder-close-alt icon-fixed-width"></i> %s</a>',
-                                                $user->getId(), sprintf(_N('%d Closed Ticket', '%d Closed Tickets', $closed), $closed));
-                                    ?>
-                                    <li><a href="tickets.php?a=search&uid=<?php echo $ticket->getOwnerId(); ?>"><i class="icon-double-angle-right icon-fixed-width"></i> <?php echo __('All Tickets'); ?></a>
-            <?php   if ($thisstaff->hasPerm(User::PERM_DIRECTORY)) { ?>
-                                    <li><a href="users.php?id=<?php echo
-                                    $user->getId(); ?>"><i class="icon-user
-                                    icon-fixed-width"></i> <?php echo __('Manage User'); ?></a>
-            <?php   } ?>
-                                </ul>
-                            </div>
-            <?php                   } # end if ($user) ?>
-        </div>
-        <div>
-            <label><?php echo __('Email'); ?>:</label>
-                <span id="user-<?php echo $ticket->getOwnerId(); ?>-email"><?php echo $ticket->getEmail(); ?></span>
-        </div>
-        <div>
-            <?php   if ($user->getOrganization()) { ?>
-                
-                    <label><?php echo __('Organization'); ?>:</label>
-                    <i class="icon-building"></i>
-                    <?php echo Format::htmlchars($user->getOrganization()->getName()); ?>
-                        <a href="tickets.php?<?php echo Http::build_query(array(
-                            'status'=>'open', 'a'=>'search', 'orgid'=> $user->getOrgId()
-                        )); ?>" title="<?php echo __('Related Tickets'); ?>"
-                        data-dropdown="#action-dropdown-org-stats">
-                        <span class="badge badge-primary badge-pill"><?php echo $user->getNumOrganizationTickets(); ?></span>
-                        </a>
-                            <div id="action-dropdown-org-stats" class="action-dropdown">
-                                <ul>
-                    <?php   if ($open = $user->getNumOpenOrganizationTickets()) { ?>
-                                    <li><a href="tickets.php?<?php echo Http::build_query(array(
-                                        'a' => 'search', 'status' => 'open', 'orgid' => $user->getOrgId()
-                                    )); ?>"><i class="icon-folder-open-alt icon-fixed-width"></i>
-                                    <?php echo sprintf(_N('%d Open Ticket', '%d Open Tickets', $open), $open); ?>
-                                    </a>
-                    <?php   }
-                            if ($closed = $user->getNumClosedOrganizationTickets()) { ?>
-                                                        <li><a href="tickets.php?<?php echo Http::build_query(array(
-                                        'a' => 'search', 'status' => 'closed', 'orgid' => $user->getOrgId()
-                                    )); ?>"><i class="icon-folder-close-alt icon-fixed-width"></i>
-                                    <?php echo sprintf(_N('%d Closed Ticket', '%d Closed Tickets', $closed), $closed); ?>
-                                    </a>
-                                    <li><a href="tickets.php?<?php echo Http::build_query(array(
-                                        'a' => 'search', 'orgid' => $user->getOrgId()
-                                    )); ?>"><i class="icon-double-angle-right icon-fixed-width"></i> <?php echo __('All Tickets'); ?></a>
-                    <?php   }
-                            if ($thisstaff->hasPerm(User::PERM_DIRECTORY)) { ?>
-                                    <li><a href="orgs.php?id=<?php echo $user->getOrgId(); ?>"><i
-                                        class="icon-building icon-fixed-width"></i> <?php
-                                        echo __('Manage Organization'); ?></a>
-                    <?php   } ?>
-                                </ul>
-                            </div>
-                   
-            <?php   } # end if (user->org) ?>
-        </div>
-        
-        
-        <div>
-            <label><?php echo __('Days Open');?>:</label>
-               <span class="badge badge-danger "><?php echo $ticket->getDaysOpen(); ?></span>
-        </div>
-        
         <div>
             <label><?php echo __('Last Update');?>:</label>
-                <?php echo Format::datetime($ticket->getLastMsgDate()); ?>
+                <?php echo Format::datetime($ticket->lastupdate); ?>
         </div>
                 </div>
             </div>
-            <div class='col-sm-3'>
-            <div class='form-group'>
-              <div>
-            <label><?php echo __('Incident Source');?>: </label>
+            <div class='col-sm-3 '>
+                <div class='form-group'>
             
-            <select name="source" class="form-control form-control-sm requiredfield">
-							<option value="" selected >&mdash; <?php
-								echo __('Select Source');?> &mdash;</option>
-							<?php
-							$source = Format::htmlchars($ticket->getSource()) ?: 'Phone';
-							foreach (Ticket::getSources() as $k => $v) {
-								echo sprintf('<option value="%s" %s>%s</option>',
-										$k,
-										($source == $k ) ? 'selected="selected"' : '',
-										$v);
-							}
-							?>
-            </select>
-            <?php if($errors['source']) {?>
-            <span>&nbsp;<font class="error">&nbsp;<?php echo $errors['source']; ?></font></span>
-            <?php }?>
+            <label><?php echo __('Submitter'); ?>:</label>
+           
+            <select id="user_id" name="user_id"  class="form-control form-control-sm requiredfield" <?php if (!$haspermission) echo "disabled";?> >
+                    
+                    <?php
+                    $associate = $ticket->GetOwnerId();
+                    
+                    if(($users=Staff::getAvailableStaffMembers())) {
+                        
+                        foreach ($users as $k => $v)
+                        echo sprintf('<option value="%s" %s>%s</option>',
+                                $k,
+                                ($associate == $k ) ? 'selected="selected"' : '',
+                                $v);
+                    
+                        }
+                     ?>
+                </select><?php if ($errors['submitter']){ echo '<span class="error">&nbsp;'.$errors['submitter'].'</span>';}?>
+            
         </div>
-               
+                </div>
+            
+            
+            </div>
+            <div class="row boldlabels">
+            <div class="col-sm-3 hidden">
+            <div class="form-group">
+
         <div>
         <?php  
             $duedate = date("m/d/Y", strtotime($ticket->getEstDueDate()));
@@ -474,7 +392,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
         
         <?php
             if($ticket->isOpen()){ ?>
-            <div class=" <?php if ($errors['duedate']){ echo 'has-danger';}?>">
+            <div class=" <?php if ($errors['duedate']){ echo 'has-danger';}?> hidden">
                                                 
             <label class="form-control-label"><?php echo __('Due Date');?>:</label>
             
@@ -499,54 +417,41 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                 ?>
              
             </div>
-                  <div>
-            <div class=" <?php if ($errors['topicId'] || !$topic){ echo 'has-danger';}?>">
-            <label><?php echo __('Incident Type');?>:</label>
-            	<input id="cc" name="topicId" class="easyui-combotree " style="width:95%;  border-radius: 2px !important;"></input>
-				<?php if ($errors['topicId'] || !$topic){ ?>
-                <div class="form-control-feedback-danger"><?php echo __('Help topic selection is required');?></div>
-                <?php }?>
-					  </div>    
-        </div></div>
+            </div> </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                      <div>
+                        <div class=" <?php if ($errors['topicId'] || !$topic){ echo 'has-danger';}?>">
+                        <label><?php echo __('Category');?>:</label>
+                            <input id="cc" name="topicId" class="easyui-combotree " style="width:95%;  border-radius: 2px !important;"></input>
+                            <?php if ($errors['topicId'] || !$topic){ ?>
+                            <div class="form-control-feedback-danger"><?php echo __('Help topic selection is required');?></div>
+                            <?php }?>
+                                  </div>    
+                        </div>
+                    </div>
             </div>
-            <div class='col-sm-3'>
-            <div>
-            <label><?php echo __('SLA Plan');?>:</label>
-                <?php $id = $ticket->getSLAId() ?>
-					<select name="slaId" class="form-control form-control-sm">
-						<option value="0" selected="selected" >&mdash; <?php echo __('None');?> &mdash;</option>
-						<?php
-						if($slas=SLA::getSLAs()) {
-							foreach($slas as $id =>$name) {
-								echo sprintf('<option value="%d" %s>%s</option>',
-										$id, ($ticket->getSLAId()==$id)?'selected="selected"':'',$name);
-							}
-						}
-						//$sla?Format::htmlchars($sla->getName()):'<span class="faded">&mdash; '.__('None').' &mdash;</span>' ?>
-					</select>
-					<?php if ($errors['slaId']) {?><font class="error">&nbsp;<?php echo $errors['slaId']; ?></font><?php } ?>
-        </div>
-                <div class='form-group form-group-sm'>
+        
+            
+            
                      <?php 
 			foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
 				$form->render(true, false, array('mode'=>'edit','modal'=>'ticketedit','width'=>140,'entry'=>$form));
 		} ?>
-                </div>
-            </div>
-        </div>
+             
         
     </fieldset>
   </form>
-</div>
-<div class="card-box p-b-0">
+
+<div class="card-box m-t-10">
 <?php
 $tcount = $ticket->getThreadEntries($types)->count();
 ?>
 <ul class="nav nav-tabs" id="ticket_tabs" >
     <li class="nav-item "><a class="nav-link active" id="ticket-thread-tab" href="#ticket_thread"  data-toggle="tab"><?php
-        echo sprintf(__('Incident History <span class="badge badge-primary badge-pill">%d</span>'), $tcount); ?></a>
+        echo sprintf(__('Incident Timeline <span class="badge badge-primary badge-pill">%d</span>'), $tcount); ?></a>
     <li class="nav-item"><a class="nav-link" id="ticket-tasks-tab" href="#tasks" data-toggle="tab" ><?php
-        echo __('Tasks');
+        echo __('Countermeasures');
         if ($ticket->getNumTasks())
             echo sprintf('&nbsp; <span class="badge badge-primary badge-pill">%d</span>', $ticket->getNumTasks());
         ?></a>
@@ -612,14 +517,40 @@ $tcount = $ticket->getThreadEntries($types)->count();
                                         $ticket->getReplyToEmail());
                                 $emailReply = (!isset($info['emailreply']) || $info['emailreply']);
                                 ?>
-                                <select id="emailreply" name="emailreply" >
+                                <select id="emailreply" name="emailreply">
                                     <option class="notranslate" value="1" <?php echo $emailReply ?  'selected="selected"' : ''; ?>><?php echo $to; ?></option>
                                     <option value="0" <?php echo !$emailReply ? 'selected="selected"' : ''; ?>
                                     >&mdash; <?php echo __('Do Not Email Reply'); ?> &mdash;</option>
                                 </select>
                         </div>
         
-                      
+                      <?php
+                        if(1) { //Make CC optional feature? NO, for now.
+                            ?>
+                        <div class="form-group">
+                            
+                                <label><strong><?php echo __('Collaborators'); ?>:</strong></label>
+                         
+                                <input type='checkbox' value='1' name="emailcollab"
+                                id="t<?php echo $ticket->getThreadId(); ?>-emailcollab"
+                                    <?php echo ((!$info['emailcollab'] && !$errors) || isset($info['emailcollab']))?'checked="checked"':''; ?>
+                                    style="display:<?php echo $ticket->getThread()->getNumCollaborators() ? 'inline-block': 'none'; ?>;"
+                                    >
+                                <?php
+                                $recipients = __('Add Recipients');
+                                if ($ticket->getThread()->getNumCollaborators())
+                                    $recipients = sprintf(__('Recipients (%d of %d)'),
+                                            $ticket->getThread()->getNumActiveCollaborators(),
+                                            $ticket->getThread()->getNumCollaborators());
+                                echo sprintf('<span><a class="collaborators preview"
+                                        href="#thread/%d/collaborators"><span id="t%d-recipients">%s</span></a></span>',
+                                        $ticket->getThreadId(),
+                                        $ticket->getThreadId(),
+                                        $recipients);
+                               ?>
+                        <?php
+                        } ?>
+                        </div>
                         <?php
                             if($errors['response']) {?>
                           <div class="alert alert-danger">
@@ -630,16 +561,41 @@ $tcount = $ticket->getThreadEntries($types)->count();
                            
                             <div  class="form-group">
                                
-                                    <label><strong><?php echo __('Update');?>:</strong></label>
-
-
+                                    <label><strong><?php echo __('Response');?>:</strong></label>
+                                
+                <?php if ($cfg->isCannedResponseEnabled()) { ?>
+                                    <select id="cannedResp" name="cannedResp">
+                                        <option value="0" selected="selected"><?php echo __('Select a canned response');?></option>
+                                        <option value='original'><?php echo __('Original Message'); ?></option>
+                                        <option value='lastmessage'><?php echo __('Last Message'); ?></option>
+                                        <?php
+                                        if(($cannedResponses=Canned::responsesByDeptId($ticket->getDeptId()))) {
+                                            echo '<option value="0" disabled="disabled">
+                                                ------------- '.__('Premade Replies').' ------------- </option>';
+                                            foreach($cannedResponses as $id =>$title)
+                                                echo sprintf('<option value="%d">%s</option>',$id,$title);
+                                        }
+                                        ?>
+                                    </select>
+                           
+                <?php } # endif (canned-resonse-enabled)
+                                    $signature = '';
+                                    switch ($thisstaff->getDefaultSignatureType()) {
+                                    case 'dept':
+                                        if ($dept && $dept->canAppendSignature())
+                                           $signature = $dept->getSignature();
+                                       break;
+                                    case 'mine':
+                                        $signature = $thisstaff->getSignature();
+                                        break;
+                                    } ?>
                                     <input type="hidden" name="draft_id" value=""/>
-                                    <textarea name="response" id="response" cols="50"
+                                    <textarea style="display:none;" name="response" id="response" cols="50"
                                         data-signature-field="signature" data-dept-id="<?php echo $dept->getId(); ?>"
                                         data-signature="<?php
                                             echo Format::htmlchars(Format::viewableImages($signature)); ?>"
                                         placeholder="<?php echo __(
-                                        'Enter your update here.'
+                                        'Start writing your response here. Use canned responses from the drop-down above'
                                         ); ?>"
                                         rows="9" wrap="soft"
                                         class="<?php if ($cfg->isRichTextEnabled()) echo 'richtext';
@@ -653,11 +609,31 @@ $tcount = $ticket->getThreadEntries($types)->count();
                                 ?>
                                 </div>
                             </div>
-                           
+                            <div class="form-group">
+                                    <label for="signature" class="left"><?php echo __('Signature');?>:</label>
+                                
+                                    <?php
+                                    $info['signature']=$info['signature']?$info['signature']:$thisstaff->getDefaultSignatureType();
+                                    ?>
+                                    <label><input type="radio" name="signature" value="none" checked="checked"> <?php echo __('None');?></label>
+                                    <?php
+                                    if($thisstaff->getSignature()) {?>
+                                    <label><input type="radio" name="signature" value="mine"
+                                        <?php echo ($info['signature']=='mine')?'checked="checked"':''; ?>> <?php echo __('My Signature');?></label>
+                                    <?php
+                                    } ?>
+                                    <?php
+                                    if($dept && $dept->canAppendSignature()) { ?>
+                                    <label><input type="radio" name="signature" value="dept"
+                                        <?php echo ($info['signature']=='dept')?'checked="checked"':''; ?>>
+                                        <?php echo sprintf(__('Department Signature (%s)'), Format::htmlchars($dept->getName())); ?></label>
+                                    <?php
+                                    } ?>
+                           </div>
                            <div  class="form-group">
                             
                                
-                                    <label><strong><?php echo __('Incident Status');?>:</strong></label>
+                                    <label><strong><?php echo __('Ticket Status');?>:</strong></label>
                                 
   
                                     <select name="reply_status_id">
@@ -683,9 +659,8 @@ $tcount = $ticket->getThreadEntries($types)->count();
                                     </select>
                                 
                             </div>
-           
                             <div>
-                            <input class="btn btn-primary btn-sm" type="submit" value="<?php echo __('Post Update');?>">
+                            <input class="btn btn-primary btn-sm" type="submit" value="<?php echo __('Post Reply');?>">
                             </div>
                         </form>
                                 </div>
@@ -749,7 +724,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                 </div>
                 </div>
             <div class="form-group">
-                    <label><?php echo __('Incident Status');?>:</label>
+                    <label><?php echo __('Ticket Status');?>:</label>
                 
                     <div class="faded"></div>
                     <select name="note_status_id">
@@ -774,7 +749,6 @@ $tcount = $ticket->getThreadEntries($types)->count();
                     </select>
                     &nbsp;<span class='error'>*&nbsp;<?php echo $errors['note_status_id']; ?></span>
                </div>
-                
         <div>
            <input class="btn btn-primary btn-sm" type="submit" value="<?php echo __('Post Note');?>">
            <input class="btn btn-warning btn-sm" type="reset" value="<?php echo __('Reset');?>">
@@ -864,9 +838,9 @@ $tcount = $ticket->getThreadEntries($types)->count();
     <p class="confirm-action" style="display:none;" id="changeuser-confirm">
         <span id="msg_warning" style="display:block;vertical-align:top">
         <?php echo sprintf(Format::htmlchars(__('%s <%s> will longer have access to the ticket')),
-            '<b><span class="notranslate">'.Format::htmlchars($ticket->getName()).'</span></b>', Format::htmlchars($ticket->getEmail())); ?>
+            '<b>'.Format::htmlchars($ticket->getName()).'</b>', Format::htmlchars($ticket->getEmail())); ?>
         </span>
-        <?php echo sprintf(__('Are you sure you want to <b>change</b> ticket owner to <span class="notranslate">%s</span>?'),
+        <?php echo sprintf(__('Are you sure you want to <b>change</b> ticket owner to %s?'),
             '<b><span id="newuser">this guy</span></b>'); ?>
     </p>
     <p class="confirm-action" style="display:none;" id="delete-confirm">
@@ -893,8 +867,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
     </div>
 </div>
 <script type="text/javascript">
-$(function() {
-    var savetrigger = false;
+    var keytrigger = false;     
             
  $("#datepicker1").on("dp.change", function (e) {
   
@@ -913,7 +886,7 @@ $(function() {
                 $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
                 $("#updatearea").css("display", "none");
                 $("#detailschanged").css("display", "inherit");
-                if (!savetrigger) {
+                if (!keytrigger) {
                 $.notify({
                     text: 'Changes made please click the save <i class="icon-save"></i> or cancel <i //class="icon-remove"></i> button on the ribbon.',
                     image: '<i class="icon-save"></i>'
@@ -925,12 +898,12 @@ $(function() {
                 });
                         }
                         
-                savetrigger = true;
+                keytrigger = true;
              }
         };
  });       
             
-    
+$(function() {
     $(document).on('click', 'a.change-user', function(e) {
         e.preventDefault();
         var tid = <?php echo $ticket->getOwnerId(); ?>;
@@ -951,7 +924,11 @@ $(function() {
         });
     });
     
-    
+    $('.nav-tabs li a').click(function(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  $(this).tab('show');
+});
     
     $('#post-note').click(function(e){
     	e.preventDefault();
@@ -992,7 +969,7 @@ $(function() {
                 if (node){
                 t.tree('expandTo', node.target);
                 } else {
-                $('#cc').combotree('setText', '— <?php echo __('Select Incident Type'); ?> —');   
+                $('#cc').combotree('setText', '— <?php echo __('Select Help Topic'); ?> —');   
                 };
                 
                 
@@ -1029,7 +1006,6 @@ $(function() {
                 
                 }
              $('#cc').combotree('setText', parentStr + node.text);
-             //keytrigger = true;
             
                 
             }
@@ -1084,7 +1060,6 @@ $(function() {
             $("#detailschanged").css("display", "inherit");
             
             $("#help-topic-error").css("display", "none"); 
-            if (!savetrigger) {
             $.notify({
             text: 'Changes made please click the save <i class="icon-save"></i> or cancel <i //class="icon-remove"></i> button on the ribbon.',
             image: '<i class="icon-save"></i>'
@@ -1093,11 +1068,10 @@ $(function() {
             className: 'error',
             autoHide: false,
             clickToHide: true
-        }); 
-        }
-       savetrigger = true;       
+        });            
         } 
     });
+});
 // Hide form buttons By Default
 $('#save').find('input, select, text').change(function(){
     $("#savebutton").css("background-color", "#52bb56");
@@ -1108,8 +1082,8 @@ $('#save').find('input, select, text').change(function(){
     $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
     $("#updatearea").css("display", "none");
     $("#detailschanged").css("display", "inherit");
+    if (!keytrigger) {
    
-   if (!savetrigger) {
     $.notify({
             text: 'Changes made please click the save <i class="icon-save"></i> or cancel <i //class="icon-remove"></i> button on the ribbon.',
             image: '<i class="icon-save"></i>'
@@ -1119,8 +1093,8 @@ $('#save').find('input, select, text').change(function(){
             autoHide: false,
             clickToHide: true
         });
-   }
-    savetrigger = true;
+    }
+    keytrigger = true;
 });
 $("#save").keyup(function(e){
     var charCode = e.which || e.keyCode; 
@@ -1134,7 +1108,7 @@ $("#save").keyup(function(e){
         $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
         $("#updatearea").css("display", "none");
         $("#detailschanged").css("display", "inherit");
-    if (!savetrigger) {
+    if (!keytrigger) {
    
     $.notify({
             text: 'Changes made please click the save <i class="icon-save"></i> or cancel <i //class="icon-remove"></i> button on the ribbon.',
@@ -1146,7 +1120,7 @@ $("#save").keyup(function(e){
             clickToHide: true
         });
     }
-    savetrigger = true;
+    keytrigger = true;
    }
 });
 $('#reply').find('input, select').change(function(){
@@ -1173,38 +1147,4 @@ $('#note').keyup(function(e){
 $(".dropdown-menu a").click(function() {
     $(this).closest(".dropdown-menu").prev().dropdown("toggle");
 });
-});
-
-
-// START - Ticket Time Timer
-<?php if ($cfg->isThreadTimer()) { ?>
-$('input[name=time_spent]').val(0);        // sets default value to 0 minutes
-$('i.fa-play').hide();
-var timerOn = true;                        // var to store if the timer is on or off
-
-setInterval(function() {
-    $('input[name=time_spent]').each(function() {
-        if (timerOn) $(this).val(parseInt($(this).val()) + 1);
-    });
-}, 60000);
-
-$('i.fa-undo').click(function() {
-    $('input[name=time_spent]').val(0);        // sets default value to 0 minutes
-    return false;
-});
-
-$('i.fa-play').click(function() {
-    timerOn = true;
-    $('i.fa-play').hide();
-    $('i.fa-pause').show();
-    return false;
-});
-$('i.fa-pause').click(function() {
-    timerOn = false;
-    $('i.fa-pause').hide();
-    $('i.fa-play').show();
-    return false;
-});
-<?php } ?>
-// END - Ticket Time Timer
 </script>

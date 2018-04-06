@@ -31,7 +31,6 @@ if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
 }
 
 ?>
-<div class="card-box">
 <div class="row">
 <div class="page-title">
 	<h1><?php echo __('Open a New Ticket');?></h1>
@@ -92,17 +91,17 @@ if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
   <p class="buttons" >
         <input class="btn btn-success" type="submit" value="<?php echo __('Create Ticket');?>">
         <input class="btn btn-warning" type="reset" name="reset" value="<?php echo __('Reset');?>">
-        <input class="btn btn-danger" type="button" name="cancel" value="<?php echo __('Cancel'); ?>" onclick="javascript:
+        <input class="btn btn-default" type="button" name="cancel" value="<?php echo __('Cancel'); ?>" onclick="javascript:
             $('.richtext').each(function() {
                 var redactor = $(this).data('redactor');
                 if (redactor && redactor.opts.draftDelete)
                     redactor.deleteDraft();
             });
-            window.history.back();">
+            window.location.href='index.php';">
   </p>
 </form>
 <div class="clearfix"></div>
-</div>
+
 <script type="text/javascript">
 $.extend($.fn.tree.methods,{
     getLevel: function(jq, target){

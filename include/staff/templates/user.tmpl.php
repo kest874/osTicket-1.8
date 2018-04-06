@@ -1,6 +1,6 @@
 <?php
 if (!isset($info['title']))
-    $info['title'] = '<span class="notranslate">'.Format::htmlchars($user->getName()).'/span>';
+    $info['title'] = Format::htmlchars($user->getName());
 
 if ($info['title']) { ?>
 <h3 class="drag-handle"><?php echo $info['title']; ?></h3>
@@ -26,8 +26,8 @@ if ($info['error']) {
         <?php echo __('Change User'); ?></a>
     <?php
     } ?>
-    <div><b><span class="notranslate"><?php
-    echo Format::htmlchars($user->getName()->getOriginal()); ?></span></b></div>
+    <div><b><?php
+    echo Format::htmlchars($user->getName()->getOriginal()); ?></b></div>
     <div class="faded">&lt;<?php echo $user->getEmail(); ?>&gt;</div>
     <?php
     if (($org=$user->getOrganization())) { ?>

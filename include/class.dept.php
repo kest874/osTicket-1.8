@@ -38,6 +38,10 @@ implements TemplateVariable, Searchable {
                 'null' => true,
                 'constraint' => array('manager_id' => 'Staff.staff_id'),
             ),
+            'teamleader' => array(
+                'null' => true,
+                'constraint' => array('teamleader_id' => 'Staff.staff_id'),
+            ),
             'members' => array(
                 'null' => true,
                 'list' => true,
@@ -91,6 +95,15 @@ implements TemplateVariable, Searchable {
             'signature' => 'Department signature',
         );
     }
+        /**** Static functions ********/
+    static function lookup($var) {
+        if (is_array($var))
+            return parent::lookup($var);
+        elseif (is_numeric($var))
+            return parent::lookup(array('id'=>$var));
+        else
+            return null;
+    }
 
     function getVar($tag) {
         switch ($tag) {
@@ -117,7 +130,10 @@ implements TemplateVariable, Searchable {
     function getId() {
         return $this->id;
     }
-
+    
+    function getPId() {
+        return $this->pid;
+    }
     function getName() {
         return $this->name;
     }
@@ -226,15 +242,13 @@ implements TemplateVariable, Searchable {
                 if (!$member->staff)
                     continue;
                 // Annoted the staff model with alerts and role
-                $extended[] = new AnnotatedModel($member->staff, array(
+                $extended[] = new AnnotatedDeptModel($member->staff, array(
                     'alerts'  => $member->isAlertsEnabled(),
                     'role_id' => $member->role_id,
                 ));
             }
-
             $this->_extended_members = $extended;
         }
-
         return $this->_extended_members;
     }
 
@@ -331,7 +345,21 @@ implements TemplateVariable, Searchable {
 
         return ($this->getManagerId() && $this->getManagerId()==$staff);
     }
+   
+   function getTeamLeaderId() {
+        return $this->teamleader_id;
+    }
 
+    function getTeamLeader() {
+        return $this->teamleader;
+    }
+
+    function isTeamLeader($staff) {
+        if (is_object($staff))
+            $staff = $staff->getId();
+
+        return ($this->getTeamLeaderId() && $this->getTeamLeaderId()==$staff);
+    }
     function isMember($staff) {
         if (is_object($staff))
             $staff = $staff->getId();
@@ -495,7 +523,35 @@ implements TemplateVariable, Searchable {
 
         return $row ? $row[0] : 0;
     }
+    
+    static function getDNamebyId($Id) {
+        $row = static::objects()
+            ->filter(array(
+                        'id' => $Id))
+            ->values_flat('name')
+            ->first();
 
+        return $row ? $row[0] : 0;
+    }
+        
+    static function getParentName($Id) {
+        $row = static::objects()
+            ->filter(array(
+                        'id' => $Id))
+            ->values_flat('name')
+            ->first();
+
+        return $row ? $row[0] : 0;
+    }
+    static function getParentId($Id) {
+        $row = static::objects()
+            ->filter(array(
+                        'id' => $Id))
+            ->values_flat('pid')
+            ->first();
+
+        return $row ? $row[0] : 0;
+    }    
     function getNameById($id) {
         $names = static::getDepartments();
         return $names[$id];
@@ -513,19 +569,27 @@ implements TemplateVariable, Searchable {
 
     static function getDepartments( $criteria=null, $localize=true) {
         static $depts = null;
+      
 
         if (!isset($depts) || $criteria) {
             // XXX: This will upset the static $depts array
             $depts = array();
             $query = self::objects();
+        
             if (isset($criteria['publiconly']))
                 $query->filter(array(
                             'ispublic' => ($criteria['publiconly'] ? 1 : 0)));
-
+            
+            if (isset($criteria['privateonly']))
+                $query->filter(array(
+                            'ispublic' => ($criteria['privateonly'] ? 0 : 1)));
+              
             if ($manager=$criteria['manager'])
                 $query->filter(array(
                             'manager_id' => is_object($manager)?$manager->getId():$manager));
-
+            if ($teamleader=$criteria['teamleader'])
+                $query->filter(array(
+                            'teamleader_id' => is_object($teamleader)?$teamleader->getId():$teamleader));
             if (isset($criteria['nonempty'])) {
                 $query->annotate(array(
                     'user_count' => SqlAggregate::COUNT('members')
@@ -533,7 +597,8 @@ implements TemplateVariable, Searchable {
                     'user_count__gt' => 0
                 ));
             }
-
+                            
+            
             $query->order_by('name')
                 ->values('id', 'pid', 'name', 'parent');
 
@@ -618,6 +683,9 @@ implements TemplateVariable, Searchable {
             $errors['err']=__('Missing or invalid Dept ID.')
                 .' '.__('Internal error occurred');
 
+        if ($vars['pid'] == 0) {
+            $errors['pid']=__('Location required');
+        }   
         if (!$vars['name']) {
             $errors['name']=__('Name required');
         } elseif (($did = static::getIdByName($vars['name'], $vars['pid']))
@@ -651,6 +719,7 @@ implements TemplateVariable, Searchable {
         $this->sla_id = isset($vars['sla_id'])?$vars['sla_id']:0;
         $this->autoresp_email_id = isset($vars['autoresp_email_id'])?$vars['autoresp_email_id']:0;
         $this->manager_id = $vars['manager_id'] ?: 0;
+        $this->teamleader_id = $vars['teamleader_id'] ?: 0;
         $this->name = Format::striptags($vars['name']);
         $this->signature = Format::sanitize($vars['signature']);
         $this->group_membership = $vars['group_membership'];
@@ -732,6 +801,56 @@ implements TemplateVariable, Searchable {
       $this->members->saveAll();
 
       return true;
+    }
+    
+        
+     // Function to create hierarchy tree
+    static function getDeptsTree($publicOnly=false, $disabled=false) {
+        global $cfg;
+        static $names, $names = array();
+        if (!$names) {
+            $sql = 'SELECT id, pid, ispublic, name FROM '.DEPT_TABLE.' order by name';
+         
+            $res = db_query($sql);
+            // Fetch information for all names, in declared sort order
+            $names = array();
+            while (list($id, $pid, $pub, $name) = db_fetch_row($res)){
+                if ($publicOnly && !$pub)
+                    continue;
+                //if (!$disabled && !$act)
+                //    continue;
+                //if ($disabled === self::DISPLAY_DISABLED && !$act)
+               //     $name.= " &mdash; ".__("(disabled)");
+                
+                
+                $names[] = array('id'=>$id,'pid'=>$pid, 'text'=>$name, 'children' =>array(), 'public'=>$pub,'disabled'=>!$act);
+            }
+        }
+        return self::generateTree($names);
+    }
+    
+    
+    // Recursive function for Help Topics tree
+    static function generateTree($datas, $parent = 0, $depth=0){
+        if($depth > 1000) return ''; // Make sure not to have an endless recursion
+        $tree = '[';
+        for($i=0, $ni=count($datas); $i < $ni; $i++){
+            if($datas[$i]['pid'] == $parent){
+                $tree .= '{';
+                $tree .= '"id" : '.$datas[$i]['id'].',';
+                $tree .= '"text" : "'.$datas[$i]['text'].'",';
+                //Add folder icon
+                $children = self::generateTree($datas, $datas[$i]['id'], $depth+1);
+                $tree .= ($children != "[]") ? '"state" : "closed",' : '';
+                $tree .= '"children" : '.$children;
+                $tree .= '},';
+            }
+        }
+        //remove trailing comma
+        $tree = rtrim($tree, ',');
+        $tree .= ']';
+        return $tree;
+        
     }
 }
 

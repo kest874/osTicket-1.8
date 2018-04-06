@@ -2,7 +2,11 @@
 $error=$msg=$warn=null;
 
 if (!$task->checkStaffPerm($thisstaff))
+<<<<<<< HEAD
+    $warn.= sprintf(__('You do not have access to %s'), __('this task'));
+=======
      $warn.= sprintf(__('You do not have access to %s'), __('this task'));
+>>>>>>> support/bootstrap
 elseif ($task->isOverdue())
     $warn.='&nbsp;<span class="Icon overdueTicket">'.__('Marked overdue!').'</span>';
 
@@ -80,7 +84,7 @@ if ($task->isOpen()) {
 echo sprintf(
     '
         <tr>
-            <th width="100">'.__('Department').':</th>
+            <th width="100">'.__('Owned By').':</th>
             <td>%s</td>
         </tr>',
     Format::htmlchars($task->dept->getName())

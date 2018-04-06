@@ -28,9 +28,8 @@ if($faq){
             }
         }
     }
-    
-$category=$faq->getCategory();
-$view = $category->isPublic()?__('Public'):__('Internal');
+    $category=$faq->getCategory();
+    $view = $category->isPublic()?__('Public'):__('Internal');
 }else {
     $title=__('Add New FAQ');
     $action='create';

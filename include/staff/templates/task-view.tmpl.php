@@ -32,7 +32,7 @@ if ($task->isOpen() && $role->hasPerm(Task::PERM_ASSIGN)) {
             'assign/agents' => array(
                 'href' => sprintf('#tasks/%d/assign/agents', $task->getId()),
                 'icon' => 'icon-user',
-                'label' => __('Assign to Agent'),
+                'label' => __('Assign to Associate'),
                 'redirect' => 'tasks.php'
             ));
 
@@ -50,7 +50,7 @@ if ($role->hasPerm(Task::PERM_TRANSFER)) {
             'transfer' => array(
                 'href' => sprintf('#tasks/%d/transfer', $task->getId()),
                 'icon' => 'icon-share',
-                'label' => __('Transfer'),
+                'label' => __('Transfer Ownership'),
                 'redirect' => 'tasks.php'
             ));
 }
@@ -73,16 +73,30 @@ if ($role->hasPerm(Task::PERM_EDIT)) {
             ));
 }
 
-if ($role->hasPerm(Task::PERM_DELETE)) {
-    $actions += array(
-            'delete' => array(
-                'href' => sprintf('#tasks/%d/delete', $task->getId()),
-                'icon' => 'icon-trash',
-                'class' => 'red button',
-                'label' => __('Delete'),
-                'redirect' => 'tasks.php'
-            ));
+if (!$ticket) {
+    if ($role->hasPerm(Task::PERM_DELETE)) {
+        $actions += array(
+                'delete' => array(
+                    'href' => sprintf('#tasks/%d/delete', $task->getId()),
+                    'icon' => 'icon-trash',
+                    'class' => 'red button',
+                    'label' => __('Delete'),
+                    'redirect' => 'tasks.php'
+                ));
+    } 
+} else {       
+        if ($role->hasPerm(Task::PERM_DELETE)) {
+        $actions += array(
+                'delete' => array(
+                    'href' => sprintf('#tasks/%d/delete', $task->getId()),
+                    'icon' => 'icon-trash',
+                    'class' => 'danger',
+                    'label' => __('Delete'),
+                    'redirect' => 'tasks.php'
+                ));
+    }
 }
+
 
 $info=($_POST && $errors)?Format::input($_POST):array();
 
@@ -90,25 +104,16 @@ if ($task->isOverdue())
     $warn.='&nbsp;&nbsp;<span class="Icon overdueTicket">'.__('Marked overdue!').'</span>';
 
 ?>
-
-    
             <?php
             if ($ticket) { ?>
          <div class="row">
          <div style="width:100%">
           <div class="pull-left subnavtitle">
                 <strong>
-                <a id="all-ticket-tasks" href="#">
-                <?php
-                    echo sprintf(__('All Tasks (%s)'),
-                            $ticket->getNumTasks());
-                 ?></a>
-                &nbsp;/&nbsp;
-                <a id="reload-task" class="preview"
+                <h2>
+                <a id="reload-task" 
                     <?php
-                    echo ' class="preview" ';
-                    echo sprintf('data-preview="#tasks/%d/preview" ', $task->getId());
-                    echo sprintf('href="#tickets/%s/tasks/%d/view" ',
+                        echo sprintf('href="#tickets/%s/tasks/%d/view" ',
                             $ticket->getId(), $task->getId()
                             );
                     ?>><?php echo sprintf(__('Task #%s'), $task->getNumber()); ?></a>
@@ -152,7 +157,7 @@ if ($task->isOverdue())
                 class="btn btn-light btn-nbg"
                 href="tasks.php?id=<?php
                  echo $task->getId(); ?>"><i class="icon-share"  data-placement="bottom" data-toggle="tooltip" 
-                 title="<?php echo __('View Task'); ?>"></i></a>
+                 title="<?php echo __('View Countermeasure'); ?>"></i></a>
            
                 <div class="btn-group btn-group-sm" role="group">
                 
@@ -199,7 +204,7 @@ if ($task->isOverdue())
                             ><i class="<?php
                             echo $action['icon'] ?: 'icon-tag'; ?>"></i> <?php
                             echo  $action['label']; ?></a>
-                    
+                  
                 <?php
                 } ?>
                 
@@ -208,7 +213,7 @@ if ($task->isOverdue())
            
                 <a class="btn btn-light btn-nbg" id="all-ticket-tasks" href="#" >
                 <i class="fa fa-list-alt"  data-placement="bottom" data-toggle="tooltip" 
-                 title="<?php echo __('All Tasks'); ?>"></i></a>
+                 title="<?php echo __('All Countermeasures'); ?>"></i></a>
 
                  
            </div>
@@ -277,7 +282,7 @@ if ($task->isOverdue())
                      <a class="dropdown-item no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/assign/agents"><i
-                        class="icon-user"></i> <?php echo __('Agent'); ?></a>
+                        class="icon-user"></i> <?php echo __('Associate'); ?></a>
                      <a class="dropdown-item no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/assign/teams"><i
@@ -304,7 +309,7 @@ if ($task->isOverdue())
                         data-toggle="tooltip"
                         title="<?php echo $action['label']; ?>"></i>
                     </a>
-                
+       
            <?php
                 }
                 ?>
@@ -353,7 +358,7 @@ if (!$ticket) { ?>
     </div>
     <div class="col-md-3">
     
-    <div><label><?php echo __('Department');?>:</label>
+    <div><label><?php echo __('Owned By');?>:</label>
                         <?php echo Format::htmlchars($task->dept->getName()); ?></div>
     
     <?php
@@ -470,7 +475,7 @@ if ($ticket)
 else
     $action = 'tasks.php?id='.$task->getId();
 ?>
-<div class="card-box <?php echo $ticket ? 'ticket_task_actions' : ''; ?> ">
+<div class="card-box  p-b-0 <?php echo $ticket ? 'ticket_task_actions' : ''; ?> ">
 <div id="ReponseTabs" >
     <ul class="nav nav-pills">
         <?php
@@ -496,25 +501,7 @@ else
         <input type="hidden" name="a" value="postreply">
         <input type="hidden" name="lockCode" value="<?php echo ($mylock) ? $mylock->getCode() : ''; ?>">
         <span class="error"></span>
-         <div  class="form-group">
-                    <input type='checkbox' value='1' name="emailcollab" id="emailcollab"
-                        <?php echo ((!$info['emailcollab'] && !$errors) || isset($info['emailcollab']))?'checked="checked"':''; ?>
-                        style="display:<?php echo $thread->getNumCollaborators() ? 'inline-block': 'none'; ?>;"
-                        >
-                    <?php
-                    $recipients = __('Add Participants');
-                    if ($thread->getNumCollaborators())
-                        $recipients = sprintf(__('Recipients (%d of %d)'),
-                                $thread->getNumActiveCollaborators(),
-                                $thread->getNumCollaborators());
 
-                    echo sprintf('<span><a class="collaborators preview"
-                            href="#thread/%d/collaborators"><span id="t%d-recipients">%s</span></a></span>',
-                            $thread->getId(),
-                            $thread->getId(),
-                            $recipients);
-                   ?>
-         </div>
         <div  class="form-group">
                     <div class="error"><?php echo $errors['response']; ?></div>
                     <input type="hidden" name="draft_id" value=""/>

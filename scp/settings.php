@@ -27,12 +27,12 @@ $settingOptions=array(
         array(__('Agent Settings and Options'), 'settings.agents'),
     'users' =>
         array(__('User Settings and Options'), 'settings.users'),
-    'tickettime' =>
-        array(__('Ticket Time Settings'), 'settings.tickettime'),
     'pages' =>
         array(__('Site Pages'), 'settings.pages'),
     'kb' =>
         array(__('Knowledgebase Settings'), 'settings.kb'),
+    'targets' =>
+        array(__('Targets'), 'settings.targets'),
 );
 //Handle a POST.
 $target=($_REQUEST['t'] && $settingOptions[$_REQUEST['t']])?$_REQUEST['t']:'system';

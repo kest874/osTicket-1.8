@@ -1,5 +1,4 @@
 <?php
-
 $info=array();
 if($form && $_REQUEST['a']!='add') {
     $title = __('Update form section');

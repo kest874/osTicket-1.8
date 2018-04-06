@@ -1,5 +1,4 @@
- <form action="roles.php" method="POST" name="roles">
- <div class="subnav">
+<div class="subnav">
 
 
                         <div class="float-left subnavtitle">
@@ -7,7 +6,7 @@
                             <span ><a href="<?php echo $refresh_url; ?>"
                                 title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i> 
                                 </a> &nbsp;
-            <?php echo __('Roles');?>
+            <?php echo __('Teams');?>
                                 
                                 </span>
                         
@@ -29,16 +28,15 @@
             </button>
                     <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1" id="actions">
                     
-                   <a class="confirm" data-name="enable" href="roles.php?a=enable">
-                        <i class="icon-ok-sign icon-fixed-width"></i>
-                        <?php echo __('Enable'); ?></a>
+                   <a class="confirm" data-form-id="mass-actions" data-name="enable" href="roles.php?a=enable">
+                                <i class="icon-ok-sign icon-fixed-width"></i>
+                                <?php echo __( 'Enable'); ?>
+                            </a>
                        
-                           <a class="confirm" data-name="disable" href="roles.php?a=disable">
-                        <i class="icon-ban-circle icon-fixed-width"></i>
-                        <?php echo __('Disable'); ?></a>
-                    <li class="danger"><a class="confirm" data-name="delete" href="roles.php?a=delete">
-                        <i class="icon-trash icon-fixed-width"></i>
-                        <?php echo __('Delete'); ?></a>
+                            <a class="confirm" data-form-id="mass-actions" data-name="disable" href="roles.php?a=disable">
+                                <i class="icon-ban-circle icon-fixed-width"></i>
+                                <?php echo __( 'Disable'); ?>
+                            </a>
                                
                     </div>
             </div>                    
@@ -46,12 +44,11 @@
         
         <div class="clearfix"></div>                      
  </div>
- 
  <div class="card-box">
 
 <div class="row">
     <div class="col">
-
+ <form action="roles.php" method="POST" name="roles">
 
 <?php
 $page = ($_GET['p'] && is_numeric($_GET['p'])) ? $_GET['p'] : 1;
@@ -137,8 +134,8 @@ csrf_token(); ?>
           <span class="faded"><?php echo $pageNav->showing(); ?></span>
     </div>  
 </div></div>
-
-</div></div></div></form>
+</form>
+</div></div></div>
 <div style="display:none;" class="dialog" id="confirm-action">
     <h3><?php echo __('Please Confirm'); ?></h3>
     <a class="close" href=""><i class="icon-remove-circle"></i></a>
@@ -161,10 +158,10 @@ csrf_token(); ?>
     <hr style="margin-top:1em"/>
     <p class="full-width">
         <span class="buttons pull-left">
-            <input type="button" value="<?php echo __('No, Cancel'); ?>" class="btn btn-sm btn-warning close">
+            <input type="button" value="<?php echo __('No, Cancel'); ?>" class="close">
         </span>
         <span class="buttons pull-right">
-            <input type="button" value="<?php echo __('Yes, Do it!'); ?>" class="btn btn-sm btn-danger confirm">
+            <input type="button" value="<?php echo __('Yes, Do it!'); ?>" class="confirm">
         </span>
     </p>
     <div class="clear"></div>

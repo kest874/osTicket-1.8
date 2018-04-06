@@ -1,4 +1,4 @@
 <?php
-header('Location: settings.php');
-require('./settings.php');
+header('Location: staff.php');
+require('./staff.php');
 ?>

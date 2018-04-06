@@ -3,12 +3,12 @@ global $thisstaff, $ticket;
 // Map states to actions
 $actions= array(
         'closed' => array(
-            'icon'  => 'icon-ok-circle',
+            'icon'  => 'fa fa-check-circle',
             'action' => 'close',
             'href' => 'tickets.php'
             ),
         'open' => array(
-            'icon'  => 'icon-undo',
+            'icon'  => 'fa fa-undo',
             'action' => 'reopen'
             ),
         );
@@ -35,7 +35,7 @@ if (!$nextStatuses)
         <div class="btn-group btn-group-sm" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Change Status'); ?>"><i class="icon-flag"></i>
+         title="<?php echo __('Change Status'); ?>"><i class="far fa-flag"></i>
         </button>
             <div class="dropdown-menu " aria-labelledby="btnGroupDrop1">
                 
@@ -54,7 +54,7 @@ if (!$nextStatuses)
                             $actions[$status->getState()]['href']);
                 ?>
                 ><i class="<?php
-                        echo $actions[$status->getState()]['icon'] ?: 'icon-tag';
+                        echo $actions[$status->getState()]['icon'] ?: 'fa fa-undo';
                     ?>"></i> <?php
                         echo __($status->getName()); ?></a>
       

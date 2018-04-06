@@ -506,6 +506,13 @@ class Format {
 
         return $tstring;
     }
+    
+    function money($money, $fromDb=true, $timezone=false, $user=false) {
+        global $cfg;
+
+        return '$'.number_format($money);
+                
+    }
 
     function __formatDate($timestamp, $format, $fromDb, $dayType, $timeType,
             $strftimeFallback, $timezone, $user=false) {
@@ -599,7 +606,7 @@ class Format {
             IDF_SHORT, IDF_NONE,
             '%x', $timezone ?: $cfg->getTimezone(), $user);
     }
-
+    
     function datetime($timestamp, $fromDb=true, $timezone=false, $user=false) {
         global $cfg;
 
@@ -608,7 +615,8 @@ class Format {
                 IDF_SHORT, IDF_SHORT,
                 '%x %X', $timezone ?: $cfg->getTimezone(), $user);
     }
-
+    
+      
     function daydatetime($timestamp, $fromDb=true, $timezone=false, $user=false) {
         global $cfg;
 

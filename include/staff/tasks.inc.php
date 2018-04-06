@@ -21,7 +21,7 @@ $sort_options = array(
     'updated' =>            __('Most Recently Updated'),
     'created' =>            __('Most Recently Created'),
     'due' =>                __('Due Soon'),
-    'number' =>             __('Task Number'),
+    'number' =>             __('Countermeasure Number'),
     'closed' =>             __('Most Recently Closed'),
     'hot' =>                __('Longest Thread'),
 	'ticketnumber' =>       __('Ticker Number'),
@@ -33,14 +33,14 @@ $sort_options = array(
 $queue_columns = array(
         'number' => array(
             'width' => '8%',
-            'heading' => __('Task'),
+            'heading' => __('Countermeasure'),
             ),
         'parent' => array(
-            'width' => '8%',
-            'heading' => __('Parent Ticket'),
+             'width' => '8%',
+             'heading' => __('Incident'),
             ),
         'date' => array(
-            'width' => '20%',
+            'width' => '100px',
             'heading' => __('Date Created'),
             'sort_col' => 'created',
             ),
@@ -51,12 +51,12 @@ $queue_columns = array(
             ),
         'dept' => array(
             'width' => '16%',
-            'heading' => __('Department'),
+            'heading' => __('Team'),
             'sort_col'  => 'dept__name',
             ),
         'assignee' => array(
             'width' => '16%',
-            'heading' => __('Agent'),
+            'heading' => __('Associate'),
             ),
         );
 
@@ -69,21 +69,21 @@ $queue_name = $_SESSION[$queue_key] ?: '';
 switch ($queue_name) {
 case 'closed':
     $status='closed';
-    $results_type=__('Closed Tasks');
+    $results_type=__('Closed Countermeasures');
     $showassigned=true; //closed by.
     $queue_sort_options = array('closed', 'updated', 'created', 'number','ticketnumber', 'hot');
 
     break;
 case 'overdue':
     $status='open';
-    $results_type=__('Overdue Tasks');
+    $results_type=__('Overdue Countermeasures');
     $tasks->filter(array('isoverdue'=>1));
     $queue_sort_options = array('updated', 'created', 'number','ticketnumber', 'hot');
     break;
 case 'assigned':
     $status='open';
     $staffId=$thisstaff->getId();
-    $results_type=__('My Tasks');
+    $results_type=__('My Countermeasures');
     $tasks->filter(array('staff_id'=>$thisstaff->getId()));
     $queue_sort_options = array('updated', 'created', 'hot', 'number','ticketnumber');
     break;
@@ -111,7 +111,7 @@ case 'search':
     // Fall-through and show open tickets
 case 'open':
     $status='open';
-    $results_type=__('Open Tasks');
+    $results_type=__('Open Countermeasures');
     $queue_sort_options = array('created', 'updated', 'due', 'number','ticketnumber', 'hot');
     break;
 }
@@ -139,7 +139,7 @@ $visibility = array(
 if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
     $visibility[] = new Q(array('dept_id__in' => $depts));
 // -- Open and assigned to a team of mine
-if (($teams = $thisstaff->getTeams()) && count(array_filter($teams)))
+if (($teams = $thisstaff->getDepartments()) && count(array_filter($teams)))
     $visibility[] = new Q(array(
         'team_id__in' => array_filter($teams),
         'flags__hasbit' => TaskModel::ISOPEN
@@ -262,7 +262,7 @@ if ($thisstaff->hasPerm(Task::PERM_ASSIGN, false)) {
     $actions += array(
             'assign' => array(
                 'icon' => 'icon-user',
-                'action' => __('Assign Tasks')
+                'action' => __('Assign Countermeasures')
             ));
 }
 
@@ -270,7 +270,7 @@ if ($thisstaff->hasPerm(Task::PERM_TRANSFER, false)) {
     $actions += array(
             'transfer' => array(
                 'icon' => 'icon-share',
-                'action' => __('Transfer Tasks')
+                'action' => __('Transfer Countermeasures')
             ));
 }
 
@@ -278,7 +278,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
     $actions += array(
             'delete' => array(
                 'icon' => 'icon-trash',
-                'action' => __('Delete Tasks')
+                'action' => __('Delete Countermeasures')
             ));
 }
 
@@ -295,8 +295,8 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
     
     </div>
     <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
-    <a class="btn btn-icon waves-effect waves-light btn-success newTicket new-task" href="#tasks/add" title="Open a New Task" id="new-task" data-dialog-config="{&quot;size&quot;:&quot;large&quot;}"><i class="fa fa-plus-square" data-placement="bottom"
-        data-toggle="tooltip" title="<?php echo __('New Task'); ?>"></i></a>
+    <a class="btn btn-icon waves-effect waves-light btn-success newTicket new-task" href="#tasks/add" title="Open a New Countermeasure" id="new-task" data-dialog-config="{&quot;size&quot;:&quot;large&quot;}"><i class="fa fa-plus-square" data-placement="bottom"
+        data-toggle="tooltip" title="<?php echo __('New Countermeasure'); ?>"></i></a>
            <?php
            if ($count)
                 echo Task::getAgentActions($thisstaff, array('status' => $status));
@@ -319,7 +319,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                  <input type="hidden" name="a" value="search">
                     <input type="text" class="form-control form-control-sm basic-search" data-url="ajax.php/tasks/lookup" name="query"
                      value="<?php echo Format::htmlchars($_REQUEST['query'], true); ?>"
-                   autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Tasks" >
+                   autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Countermeasures" >
                 <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
                     <button type="submit"  class="input-group-addon" ><i class="fa fa-search"></i>
                     </button>
@@ -336,7 +336,6 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
  <input type="hidden" name="do" id="action" value="" >
  <input type="hidden" name="status" value="<?php echo
  Format::htmlchars($_REQUEST['status'], true); ?>" >
-
     <thead>
         <tr>
             <?php if ($thisstaff->canManageTickets()) { ?>
@@ -399,7 +398,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                         Format::truncate((string) $staff, 40));
             } elseif($T['team_id']) {
                 $assignee = sprintf('<span class="Icon teamAssigned">%s</span>',
-                    Format::truncate(Team::getLocalById($T['team_id'], 'name', $T['team__name']),40));
+                    Format::truncate(Dept::getLocalById($T['team_id'], 'name', $T['team__name']),40));
             }
 
             $threadcount=$T['thread_count'];
@@ -423,9 +422,8 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                 </td>
                 <?php } ?>
                 <td nowrap>
-                  <a class="preview"
+                  <a 
                     href="tasks.php?id=<?php echo $T['id']; ?>"
-                    data-preview="#tasks/<?php echo $T['id']; ?>/preview"
                     ><?php echo $number; ?></a></td>
 				
 				<?php if(empty($T['ticket__number'])) {?>				
@@ -433,11 +431,8 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
 				<?php }
 				else { ?>
 				<td title="<?php echo $T['user__default_email__address']; ?>" nowrap>
-                  <a class="Icon <?php echo strtolower($T['ticket__source']); ?>Ticket preview"
-                    title="Preview Ticket"
-                    href="tickets.php?id=<?php echo $T['ticket']; ?>"
-                    data-preview="#tickets/<?php echo $T['ticket']; ?>/preview"
-                    ><?php echo $T['ticket__number']; ?></a></td>
+                  <a href="tickets.php?id=<?php echo $T['ticket']; ?>">     
+                    <?php echo $T['ticket__number']; ?></a></td>
 	
 				<?php } ?>
 				<td align="left" nowrap><?php echo
@@ -461,7 +456,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
             <?php
             } //end of foreach
         if (!$total)
-            $ferror=__('There are no tasks matching your criteria.');
+            $ferror=__('There are no countermeasures matching your criteria.');
         ?>
     </tbody>
     <tfoot>

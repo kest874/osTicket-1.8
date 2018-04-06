@@ -1,6 +1,5 @@
 <?php
 global $cfg;
-
 $form = $form ?: TopicForm::instantiate($info);
 ?>
 <h3 class="drag-handle"><?php echo $info[':title']; ?></h3>
@@ -18,7 +17,6 @@ if ($info['error']) {
    echo sprintf('<p id="msg_info"><i class="icon-info-sign"></i> %s</p>',
            $info['notice']);
 }
-
 $action = $info[':action'] ?: ('#');
 ?>
 <div style="display:block; margin:5px;">
@@ -61,4 +59,3 @@ $action = $info[':action'] ?: ('#');
 </form>
 </div>
 <div class="clear"></div>
-

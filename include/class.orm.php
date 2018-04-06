@@ -751,6 +751,44 @@ class VerySimpleModel {
  * annotated fields retrieved from the database. Instances of this class
  * will delegate most all of the heavy lifting to the wrapped Model instance.
  */
+ class AnnotatedDeptModel {
+
+    var $model;
+    var $annotations;
+
+    function __construct($model, $annotations) {
+        $this->model = $model;
+        $this->annotations = $annotations;
+    }
+
+    function __get($what) {
+        return $this->get($what);
+    }
+    function get($what) {
+        if (isset($this->annotations[$what]))
+            return $this->annotations[$what];
+        return $this->model->get($what, null);
+    }
+
+    function __set($what, $to) {
+        return $this->set($what, $to);
+    }
+    function set($what, $to) {
+        if (isset($this->annotations[$what]))
+            throw new OrmException('Annotated fields are read-only');
+        return $this->model->set($what, $to);
+    }
+
+    function __isset($what) {
+        return isset($this->annotations[$what]) || $this->model->__isset($what);
+    }
+
+    // Delegate everything else to the model
+    function __call($what, $how) {
+        return call_user_func_array(array($this->model, $what), $how);
+    }
+}
+
 class AnnotatedModel {
     static function wrap(VerySimpleModel $model, $extras=array(), $class=false) {
         static $classes;
@@ -2760,8 +2798,8 @@ class MySqlCompiler extends SqlCompiler {
         // XXX: Crash if $b is not array of two items
         return sprintf('%s BETWEEN %s AND %s', $a, $this->input($b[0]), $this->input($b[1]));
     }
-
-    //conveet field to year
+    
+    //convert field to year
     function __year($a, $b) {
         // XXX: Crash if $b is not array of two items
         return sprintf('YEAR(%s) = %s', $a,$b);
@@ -3123,7 +3161,7 @@ class MySqlCompiler extends SqlCompiler {
             $sql .= ' LOCK IN SHARE MODE';
             break;
         }
-
+        //var_dump($sql);
         return new MysqlExecutor($sql, $this->params, $fieldMap);
     }
 
@@ -3408,7 +3446,7 @@ class MySqlExecutor
 extends MySqlPreparedExecutor {
     function execute() {
         $sql = $this->__toString();
-		if (!($this->stmt = db_query($sql, true, !$this->unbuffered)))
+        if (!($this->stmt = db_query($sql, true, !$this->unbuffered)))
             throw new InconsistentModelException(
                 'Unable to prepare query: '.db_error().' '.$sql);
         // mysqli_query() return TRUE for UPDATE queries and friends

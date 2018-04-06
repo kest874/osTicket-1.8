@@ -211,10 +211,6 @@ class OsticketConfig extends Config {
         'verify_email_addrs' => 1,
         'client_avatar' => 'gravatar.mm',
         'agent_avatar' => 'gravatar.mm',
-        'isclienttime' => 0,
-        'istickettime' => 0,
-        'isthreadtime' => 0,
-        'isthreadtimer' => 0,
         'ticket_lock' => 2, // Lock on activity
         'autoclose_duration' => 72,
         'autoclose_status_id' => 0,
@@ -265,23 +261,8 @@ class OsticketConfig extends Config {
         require_once(INCLUDE_DIR.'class.faq.php');
         return ($this->get('enable_kb') && FAQ::countPublishedFAQs());
     }
-    
-    function isClientTime() {
-		// determines if Client Time View is on or not
-		return ($this->get('isclienttime'));
-	}
-	
-	function isThreadTime() {
-		// determines if Ticket Time via Threads is Enabled
-		return ($this->get('isthreadtime'));
-	}
-	
-	function isThreadTimer() {
-		// determines if Ticket Thread Timer is Enabled
-		return ($this->get('isthreadtimer'));
-	}
-	
-	function isCannedResponseEnabled() {
+
+    function isCannedResponseEnabled() {
         return $this->get('enable_premade');
     }
 
@@ -848,6 +829,9 @@ class OsticketConfig extends Config {
     function alertDeptManagerONNewMessage() {
         return ($this->get('message_alert_dept_manager'));
     }
+        function alertDeptTeamLeaderONNewMessage() {
+        return ($this->get('message_alert_dept_teamleader'));
+    }
 
     function alertAcctManagerONNewMessage() {
         return ($this->get('message_alert_acct_manager'));
@@ -869,7 +853,9 @@ class OsticketConfig extends Config {
     function alertDeptManagerONNewActivity() {
         return ($this->get('note_alert_dept_manager'));
     }
-
+    function alertDeptTeamLeaderONNewActivity() {
+        return ($this->get('note_alert_dept_teamleader'));
+    }
     function alertONNewTicket() {
         return ($this->get('ticket_alert_active'));
     }
@@ -880,6 +866,9 @@ class OsticketConfig extends Config {
 
     function alertDeptManagerONNewTicket() {
         return ($this->get('ticket_alert_dept_manager'));
+    }
+    function alertDeptTeamLeaderONNewTicket() {
+        return ($this->get('ticket_alert_dept_teamleader'));
     }
 
     function alertDeptMembersONNewTicket() {
@@ -901,6 +890,9 @@ class OsticketConfig extends Config {
     function alertDeptManagerONTransfer() {
         return ($this->get('transfer_alert_dept_manager'));
     }
+        function alertDeptTeamLeaderONTransfer() {
+        return ($this->get('transfer_alert_dept_teamleader'));
+    }
 
     function alertDeptMembersONTransfer() {
         return ($this->get('transfer_alert_dept_members'));
@@ -911,11 +903,11 @@ class OsticketConfig extends Config {
     }
 
     function alertStaffONAssignment() {
-        return ($this->get('assigned_alert_staff'));
+        return ($this->get('assigned_alert_dept_manager'));
     }
 
-    function alertTeamLeadONAssignment() {
-        return ($this->get('assigned_alert_team_lead'));
+    function alertTeamLeaderONAssignment() {
+        return ($this->get('assigned_alert_teamleader'));
     }
 
     function alertTeamMembersONAssignment() {
@@ -934,7 +926,9 @@ class OsticketConfig extends Config {
     function alertDeptManagerONOverdueTicket() {
         return ($this->get('overdue_alert_dept_manager'));
     }
-
+    function alertDeptTeamLeaderONOverdueTicket() {
+        return ($this->get('overdue_alert_dept_teamleader'));
+    }
     function alertDeptMembersONOverdueTicket() {
         return ($this->get('overdue_alert_dept_members'));
     }
@@ -975,6 +969,10 @@ class OsticketConfig extends Config {
     function alertDeptManagerONNewTask() {
         return ($this->get('task_alert_dept_manager'));
     }
+    
+    function alertDeptTeamLeaderONNewTask() {
+        return ($this->get('task_alert_dept_teamleader'));
+    }
 
     function alertDeptMembersONNewTask() {
         return ($this->get('task_alert_dept_members'));
@@ -995,7 +993,9 @@ class OsticketConfig extends Config {
     function alertDeptManagerONTaskActivity() {
         return ($this->get('task_activity_alert_dept_manager'));
     }
-
+    function alertDeptTeamLeaderONTaskActivity() {
+        return ($this->get('task_activity_alert_dept_teamleader'));
+    }
     function alertONTaskTransfer() {
         return ($this->get('task_transfer_alert_active'));
     }
@@ -1007,7 +1007,9 @@ class OsticketConfig extends Config {
     function alertDeptManagerONTaskTransfer() {
         return ($this->get('task_transfer_alert_dept_manager'));
     }
-
+    function alertDeptTeamLeaderONTaskTransfer() {
+        return ($this->get('task_transfer_alert_dept_teamleader'));
+    }
     function alertDeptMembersONTaskTransfer() {
         return ($this->get('task_transfer_alert_dept_members'));
     }
@@ -1039,7 +1041,9 @@ class OsticketConfig extends Config {
     function alertDeptManagerONOverdueTask() {
         return ($this->get('task_overdue_alert_dept_manager'));
     }
-
+    function alertDeptTeamLeaderONOverdueTask() {
+        return ($this->get('task_overdue_alert_dept_teamleader'));
+    }
     function alertDeptMembersONOverdueTask() {
         return ($this->get('task_overdue_alert_dept_members'));
     }
@@ -1051,7 +1055,13 @@ class OsticketConfig extends Config {
     function alertONLoginError() {
         return ($this->get('send_login_errors'));
     }
-
+    
+    function getSugPerYr() {
+        return $this->get('sug_per_yr');
+    }
+    function getImpPerYr() {
+        return $this->get('imp_per_yr');
+    }
 
 
     /* Attachments */
@@ -1120,10 +1130,12 @@ class OsticketConfig extends Config {
             case 'kb':
                 return $this->updateKBSettings($vars, $errors);
                 break;
-            case 'tickettime':
-				return $this->updateTimeSettings($vars, $errors);
-				break;
             default:
+            case 'targets':
+                return $this->updateTargetsSettings($vars, $errors);
+                break;
+            default:
+            
                 $errors['err']=sprintf('%s - %s', __('Unknown setting option'), __('Get technical help!'));
         }
 
@@ -1324,6 +1336,7 @@ class OsticketConfig extends Config {
         if ($vars['task_alert_active']
                 && (!isset($vars['task_alert_admin'])
                     && !isset($vars['task_alert_dept_manager'])
+                    && !isset($vars['task_alert_dept_teamleader'])
                     && !isset($vars['task_alert_dept_members'])
                     && !isset($vars['task_alert_acct_manager']))) {
             $errors['task_alert_active'] = __('Select recipient(s)');
@@ -1332,13 +1345,15 @@ class OsticketConfig extends Config {
         if ($vars['task_activity_alert_active']
                 && (!isset($vars['task_activity_alert_laststaff'])
                     && !isset($vars['task_activity_alert_assigned'])
-                    && !isset($vars['task_activity_alert_dept_manager']))) {
+                    && !isset($vars['task_activity_alert_dept_manager'])
+                    && !isset($vars['task_activity_alert_dept_teamleader']))) {
             $errors['task_activity_alert_active'] = __('Select recipient(s)');
         }
 
         if ($vars['task_transfer_alert_active']
                 && (!isset($vars['task_transfer_alert_assigned'])
                     && !isset($vars['task_transfer_alert_dept_manager'])
+                    && !isset($vars['task_transfer_alert_dept_teamleader'])
                     && !isset($vars['task_transfer_alert_dept_members']))) {
             $errors['task_transfer_alert_active'] = __('Select recipient(s)');
         }
@@ -1346,6 +1361,7 @@ class OsticketConfig extends Config {
         if ($vars['task_overdue_alert_active']
                 && (!isset($vars['task_overdue_alert_assigned'])
                     && !isset($vars['task_overdue_alert_dept_manager'])
+                    && !isset($vars['task_overdue_alert_dept_teamleader'])
                     && !isset($vars['task_overdue_alert_dept_members']))) {
             $errors['task_overdue_alert_active'] = __('Select recipient(s)');
         }
@@ -1368,11 +1384,13 @@ class OsticketConfig extends Config {
             'task_alert_active'=>$vars['task_alert_active'],
             'task_alert_admin'=>isset($vars['task_alert_admin']) ? 1 : 0,
             'task_alert_dept_manager'=>isset($vars['task_alert_dept_manager']) ? 1 : 0,
+            'task_alert_dept_teamleader'=>isset($vars['task_alert_dept_teamleader']) ? 1 : 0,
             'task_alert_dept_members'=>isset($vars['task_alert_dept_members']) ? 1 : 0,
             'task_activity_alert_active'=>$vars['task_activity_alert_active'],
             'task_activity_alert_laststaff'=>isset($vars['task_activity_alert_laststaff']) ? 1 : 0,
             'task_activity_alert_assigned'=>isset($vars['task_activity_alert_assigned']) ? 1 : 0,
             'task_activity_alert_dept_manager'=>isset($vars['task_activity_alert_dept_manager']) ? 1 : 0,
+            'task_activity_alert_dept_teamleader'=>isset($vars['task_activity_alert_dept_teamleader']) ? 1 : 0,
             'task_assignment_alert_active'=>$vars['task_assignment_alert_active'],
             'task_assignment_alert_staff'=>isset($vars['task_assignment_alert_staff']) ? 1 : 0,
             'task_assignment_alert_team_lead'=>isset($vars['task_assignment_alert_team_lead']) ? 1 : 0,
@@ -1380,10 +1398,12 @@ class OsticketConfig extends Config {
             'task_transfer_alert_active'=>$vars['task_transfer_alert_active'],
             'task_transfer_alert_assigned'=>isset($vars['task_transfer_alert_assigned']) ? 1 : 0,
             'task_transfer_alert_dept_manager'=>isset($vars['task_transfer_alert_dept_manager']) ? 1 : 0,
+            'task_transfer_alert_dept_teamleader'=>isset($vars['task_transfer_alert_dept_teamleader']) ? 1 : 0,
             'task_transfer_alert_dept_members'=>isset($vars['task_transfer_alert_dept_members']) ? 1 : 0,
             'task_overdue_alert_active'=>$vars['task_overdue_alert_active'],
             'task_overdue_alert_assigned'=>isset($vars['task_overdue_alert_assigned']) ? 1 : 0,
             'task_overdue_alert_dept_manager'=>isset($vars['task_overdue_alert_dept_manager']) ? 1 : 0,
+            'task_overdue_alert_dept_teamleader'=>isset($vars['task_overdue_alert_dept_teamleader']) ? 1 : 0,
             'task_overdue_alert_dept_members'=>isset($vars['task_overdue_alert_dept_members']) ? 1 : 0,
         ));
     }
@@ -1454,6 +1474,7 @@ class OsticketConfig extends Config {
     function isAuthRequiredForFiles() {
         return $this->get('files_req_auth');
     }
+    
 
     function updatePagesSettings($vars, &$errors) {
         global $ost;
@@ -1552,25 +1573,27 @@ class OsticketConfig extends Config {
             'enable_premade'=>isset($vars['enable_premade'])?1:0,
         ));
     }
-    
-    
-    function updateTimeSettings($vars, &$errors) {
+    function updateTargetsSettings($vars, &$errors) {
 
-        if($errors) return false;
+        // if ($vars['sug_per_yr'] && !$this->isClientRegistrationEnabled())
+            // $errors['sug_per_yr'] =
+                // __('The knowledge base cannot be restricted unless client registration is enabled');
+
+        // if ($errors) return false;
 
         return $this->updateAll(array(
-            'isclienttime'=>isset($vars['isclienttime'])?1:0,
-			'isthreadtime'=>isset($vars['isthreadtime'])?1:0,
-			'isthreadtimer'=>isset($vars['isthreadtimer'])?1:0,
+            'sug_per_yr'=>$vars['sug_per_yr'],
+            'imp_per_yr'=>$vars['imp_per_yr'],
+            
         ));
     }
-
 
     function updateAlertsSettings($vars, &$errors) {
 
        if($vars['ticket_alert_active']
                 && (!isset($vars['ticket_alert_admin'])
                     && !isset($vars['ticket_alert_dept_manager'])
+                    && !isset($vars['ticket_alert_dept_teamleader'])
                     && !isset($vars['ticket_alert_dept_members'])
                     && !isset($vars['ticket_alert_acct_manager']))) {
             $errors['ticket_alert_active']=__('Select recipient(s)');
@@ -1579,6 +1602,7 @@ class OsticketConfig extends Config {
                 && (!isset($vars['message_alert_laststaff'])
                     && !isset($vars['message_alert_assigned'])
                     && !isset($vars['message_alert_dept_manager'])
+                    && !isset($vars['message_alert_dept_teamleader'])
                     && !isset($vars['message_alert_acct_manager']))) {
             $errors['message_alert_active']=__('Select recipient(s)');
         }
@@ -1586,27 +1610,30 @@ class OsticketConfig extends Config {
         if($vars['note_alert_active']
                 && (!isset($vars['note_alert_laststaff'])
                     && !isset($vars['note_alert_assigned'])
-                    && !isset($vars['note_alert_dept_manager']))) {
+                    && !isset($vars['note_alert_dept_manager'])
+                    && !isset($vars['note_alert_dept_teamleader']))) {
             $errors['note_alert_active']=__('Select recipient(s)');
         }
 
         if($vars['transfer_alert_active']
                 && (!isset($vars['transfer_alert_assigned'])
                     && !isset($vars['transfer_alert_dept_manager'])
-                    && !isset($vars['transfer_alert_dept_members']))) {
+                    && !isset($vars['transfer_alert_dept_members'])
+                    && !isset($vars['transfer_alert_dept_teamleader']))) {
             $errors['transfer_alert_active']=__('Select recipient(s)');
         }
 
         if($vars['overdue_alert_active']
                 && (!isset($vars['overdue_alert_assigned'])
                     && !isset($vars['overdue_alert_dept_manager'])
+                    && !isset($vars['overdue_alert_dept_teamleader'])
                     && !isset($vars['overdue_alert_dept_members']))) {
             $errors['overdue_alert_active']=__('Select recipient(s)');
         }
 
         if($vars['assigned_alert_active']
-                && (!isset($vars['assigned_alert_staff'])
-                    && !isset($vars['assigned_alert_team_lead'])
+                && (!isset($vars['assigned_alert_dept_manager'])
+                    && !isset($vars['assigned_alert_teamleader'])
                     && !isset($vars['assigned_alert_team_members']))) {
             $errors['assigned_alert_active']=__('Select recipient(s)');
         }
@@ -1617,28 +1644,33 @@ class OsticketConfig extends Config {
             'ticket_alert_active'=>$vars['ticket_alert_active'],
             'ticket_alert_admin'=>isset($vars['ticket_alert_admin'])?1:0,
             'ticket_alert_dept_manager'=>isset($vars['ticket_alert_dept_manager'])?1:0,
+            'ticket_alert_dept_teamleader'=>isset($vars['ticket_alert_dept_teamleader'])?1:0,
             'ticket_alert_dept_members'=>isset($vars['ticket_alert_dept_members'])?1:0,
             'ticket_alert_acct_manager'=>isset($vars['ticket_alert_acct_manager'])?1:0,
             'message_alert_active'=>$vars['message_alert_active'],
             'message_alert_laststaff'=>isset($vars['message_alert_laststaff'])?1:0,
             'message_alert_assigned'=>isset($vars['message_alert_assigned'])?1:0,
             'message_alert_dept_manager'=>isset($vars['message_alert_dept_manager'])?1:0,
+            'message_alert_dept_teamleader'=>isset($vars['message_alert_dept_teamleader'])?1:0,
             'message_alert_acct_manager'=>isset($vars['message_alert_acct_manager'])?1:0,
             'note_alert_active'=>$vars['note_alert_active'],
             'note_alert_laststaff'=>isset($vars['note_alert_laststaff'])?1:0,
             'note_alert_assigned'=>isset($vars['note_alert_assigned'])?1:0,
             'note_alert_dept_manager'=>isset($vars['note_alert_dept_manager'])?1:0,
+            'note_alert_dept_teamleader'=>isset($vars['note_alert_dept_teamleader'])?1:0,
             'assigned_alert_active'=>$vars['assigned_alert_active'],
-            'assigned_alert_staff'=>isset($vars['assigned_alert_staff'])?1:0,
-            'assigned_alert_team_lead'=>isset($vars['assigned_alert_team_lead'])?1:0,
+            'assigned_alert_dept_manager'=>isset($vars['assigned_alert_dept_manager'])?1:0,
+            'assigned_alert_teamleader'=>isset($vars['assigned_alert_teamleader'])?1:0,
             'assigned_alert_team_members'=>isset($vars['assigned_alert_team_members'])?1:0,
             'transfer_alert_active'=>$vars['transfer_alert_active'],
             'transfer_alert_assigned'=>isset($vars['transfer_alert_assigned'])?1:0,
             'transfer_alert_dept_manager'=>isset($vars['transfer_alert_dept_manager'])?1:0,
+            'transfer_alert_dept_teamleader'=>isset($vars['transfer_alert_dept_teamleader'])?1:0,
             'transfer_alert_dept_members'=>isset($vars['transfer_alert_dept_members'])?1:0,
             'overdue_alert_active'=>$vars['overdue_alert_active'],
             'overdue_alert_assigned'=>isset($vars['overdue_alert_assigned'])?1:0,
             'overdue_alert_dept_manager'=>isset($vars['overdue_alert_dept_manager'])?1:0,
+            'overdue_alert_dept_teamleader'=>isset($vars['overdue_alert_dept_teamleader'])?1:0,
             'overdue_alert_dept_members'=>isset($vars['overdue_alert_dept_members'])?1:0,
             'send_sys_errors'=>isset($vars['send_sys_errors'])?1:0,
             'send_sql_errors'=>isset($vars['send_sql_errors'])?1:0,

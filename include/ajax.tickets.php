@@ -1,4 +1,4 @@
-<?php
+ <?php
 /*********************************************************************
     ajax.tickets.php
     AJAX interface for tickets
@@ -17,25 +17,20 @@ include_once INCLUDE_DIR . 'class.thread_actions.php';
 class TicketsAjaxAPI extends AjaxController {
     function lookup() {
         global $thisstaff;
-
         $limit = isset($_REQUEST['limit']) ? (int) $_REQUEST['limit']:25;
         $tickets=array();
         // Bail out of query is empty
         if (!$_REQUEST['q'])
             return $this->json_encode($tickets);
-
         $visibility = Q::any(array(
             'staff_id' => $thisstaff->getId(),
-            'team_id__in' => $thisstaff->teams->values_flat('team_id'),
+            
         ));
-
         if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts())) {
             $visibility->add(array('dept_id__in' => $depts));
         }
-
         $hits = Ticket::objects()
-            ->filter($visibility)
-            ->values('user__default_email__address')
+            ->values('staff__name')
             ->annotate(array(
                 'number' => new SqlCode('null'),
                 'tickets' => SqlAggregate::COUNT('ticket_id', true),
@@ -46,16 +41,14 @@ class TicketsAjaxAPI extends AjaxController {
         if (strlen($q) < 3)
             return $this->encode(array());
         global $ost;
-
         $hits = $ost->searcher->find($q, $hits, false);
-
         if (preg_match('/\d{2,}[^*]/', $q, $T = array())) {
             $hits = Ticket::objects()
-                ->values('user__default_email__address', 'number')
+                ->values('staff_id', 'number')
                 ->annotate(array(
                     'tickets' => new SqlCode('1'),
                 ))
-                ->filter($visibility)
+                                
                 ->filter(array('number__startswith' => $q))
                 ->order_by('number')
                 ->limit($limit)
@@ -66,8 +59,9 @@ class TicketsAjaxAPI extends AjaxController {
             $_REQUEST['q'] = $q.'*';
             return $this->lookup();
         }
+       
         foreach ($hits as $T) {
-            $email = $T['user__default_email__address'];
+            $email = $T['staff__name'];
             $count = $T['tickets'];
             if ($T['number']) {
                 $tickets[] = array('id'=>$T['number'], 'value'=>$T['number'],
@@ -76,7 +70,7 @@ class TicketsAjaxAPI extends AjaxController {
             }
             else {
                 $tickets[] = array('email'=>$email, 'value'=>$email,
-                    'info'=>"$email <span class='badge badge-pill badge-default  pull-right'>$count</span>", 'matches'=>$_REQUEST['q']);
+                    'info'=>"$email ($count)", 'matches'=>$_REQUEST['q']);
             }
         }
         return $this->json_encode($tickets);
@@ -159,14 +153,14 @@ class TicketsAjaxAPI extends AjaxController {
     function previewTicket ($tid) {
         global $thisstaff;
         if(!$thisstaff || !($ticket=Ticket::lookup($tid))
-                || !$ticket->checkStaffPerm($thisstaff))
+                )
             Http::response(404, __('No such ticket'));
         include STAFFINC_DIR . 'templates/ticket-preview.tmpl.php';
     }
 	    function previewThread ($tid) {
         global $thisstaff;
         if(!$thisstaff || !($ticket=Ticket::lookup($tid))
-                || !$ticket->checkStaffPerm($thisstaff))
+                )
             Http::response(404, __('No such ticket'));
         include STAFFINC_DIR . 'templates/thread-preview.tmpl.php';
     }
@@ -179,7 +173,7 @@ class TicketsAjaxAPI extends AjaxController {
         if(!($user = User::lookup($ticket->getOwnerId())))
             Http::response(404, 'Unknown user');
         $info = array(
-            'title' => sprintf(__('Ticket #%s: <span class="notranslate">%s</span>'), $ticket->getNumber(),
+            'title' => sprintf(__('Ticket #%s: %s'), $ticket->getNumber(),
                 Format::htmlchars($user->getName()))
             );
         ob_start();
@@ -231,14 +225,12 @@ class TicketsAjaxAPI extends AjaxController {
     }
     function manageForms($ticket_id) {
         global $thisstaff;
-
         if (!$thisstaff)
             Http::response(403, "Login required");
         elseif (!($ticket = Ticket::lookup($ticket_id)))
             Http::response(404, "No such ticket");
         elseif (!$ticket->checkStaffPerm($thisstaff, Ticket::PERM_EDIT))
             Http::response(403, "Access Denied");
-
         $forms = DynamicFormEntry::forTicket($ticket->getId());
         $info = array('action' => '#tickets/'.$ticket->getId().'/forms/manage');
         include(STAFFINC_DIR . 'templates/form-manage.tmpl.php');
@@ -314,12 +306,11 @@ class TicketsAjaxAPI extends AjaxController {
             Http::response(404, __('No such ticket'));
         if (!$ticket->checkStaffPerm($thisstaff, Ticket::PERM_TRANSFER))
             Http::response(403, __('Permission denied'));
-
         $errors = array();
         $info = array(
                 ':title' => sprintf(__('Ticket #%s: %s'),
                     $ticket->getNumber(),
-                    __('Transfer')),
+                    __('Transfer Ownership')),
                 ':action' => sprintf('#tickets/%d/transfer',
                     $ticket->getId())
                 );
@@ -347,19 +338,17 @@ class TicketsAjaxAPI extends AjaxController {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid)))
             Http::response(404, __('No such ticket'));
-        if (!$ticket->checkStaffPerm($thisstaff, Ticket::PERM_ASSIGN)
-                || !($form = $ticket->getAssignmentForm($_POST,
+        if (!($form = $ticket->getAssignmentForm($_POST,
                         array('target' => $target))))
             Http::response(403, __('Permission denied'));
-
         $errors = array();
         $info = array(
-                ':title' => sprintf(__('Ticket #%s: %s'),
+                ':title' => sprintf(__('Suggestion #%s: %s'),
                     $ticket->getNumber(),
                     sprintf('%s %s',
                         $ticket->isAssigned() ?
                             __('Reassign') :  __('Assign'),
-                        !strcasecmp($target, 'agents') ?
+                        !strcasecmp($target, 'selected tickets') ?
                             __('to an Agent') : __('to a Team')
                     )),
                 ':action' => sprintf('#tickets/%d/assign%s',
@@ -383,7 +372,7 @@ class TicketsAjaxAPI extends AjaxController {
                         sprintf(
                             __('%s assigned to %s'),
                             __("Ticket #<a href=\"tickets.php?queue=30&id={$ticket->getId()}\"\><b>{$ticket->getNumber()}</b></a>"),
-                            $form->getAssignee())
+                            $form->getDept())
                         );
                 Http::response(201, $ticket->getId());
             }
@@ -402,7 +391,6 @@ class TicketsAjaxAPI extends AjaxController {
                 || $ticket->getStaff() // cannot claim assigned ticket
                 || !($form = $ticket->getClaimForm($_POST)))
             Http::response(403, __('Permission denied'));
-
         $errors = array();
         $info = array(
                 ':title' => sprintf(__('Ticket #%s: %s'),
@@ -416,7 +404,6 @@ class TicketsAjaxAPI extends AjaxController {
                 $assigned = __('you');
             else
                 $assigned = $ticket->getAssigned();
-
             $info['error'] = sprintf(__('%s is currently assigned to <b>%s</b>'),
                     __('This ticket'),
                     $assigned);
@@ -489,7 +476,7 @@ class TicketsAjaxAPI extends AjaxController {
             $inc = 'assign.tmpl.php';
             $info[':action'] = "#tickets/mass/assign/$w";
             $info[':title'] = sprintf('Assign %s',
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
             $form = AssignmentForm::instantiate($_POST);
             $assignCB = function($t, $f, $e) {
                 return $t->assign($f, $e);
@@ -531,17 +518,17 @@ class TicketsAjaxAPI extends AjaxController {
                     default:
                         $members->order_by('firstname', 'lastname');
                     }
-                    $prompt  = __('Select an Agent');
+                    $prompt  = __('Select an Associate');
                     $assignees = array();
                     foreach ($members as $member)
                          $assignees['s'.$member->getId()] = $member->getName();
                     if (!$assignees)
-                        $info['warn'] =  __('No agents available for assignment');
+                        $info['warn'] =  __('No Associates available for assignment');
                     break;
                 case 'teams':
                     $assignees = array();
                     $prompt = __('Select a Team');
-                    foreach (Team::getActiveTeams() as $id => $name)
+                    foreach (dept::getDepartments() as $id => $name)
                         $assignees['t'.$id] = $name;
                     if (!$assignees)
                         $info['warn'] =  __('No teams available for assignment');
@@ -549,10 +536,10 @@ class TicketsAjaxAPI extends AjaxController {
                 case 'me':
                     $info[':action'] = '#tickets/mass/claim';
                     $info[':title'] = sprintf('Claim %s',
-                            _N('selected ticket', 'selected tickets', $count));
+                            _N('selected suggestion', 'selected suggestions', $count));
                     $info['warn'] = sprintf(
                             __('Are you sure you want to CLAIM %s?'),
-                            _N('selected ticket', 'selected tickets', $count));
+                            _N('selected sugestion', 'selected suggestions', $count));
                     $verb = sprintf('%s, %s', __('Yes'), __('Claim'));
                     $id = sprintf('s%s', $thisstaff->getId());
                     $assignees = array($id => $thisstaff->getName());
@@ -572,17 +559,18 @@ class TicketsAjaxAPI extends AjaxController {
                     if (($t=Ticket::lookup($tid))
                             // Make sure the agent is allowed to
                             // access and assign the task.
-                            && $t->checkStaffPerm($thisstaff, Ticket::PERM_ASSIGN)
+                            
                             // Do the assignment
-                            && $assignCB($t, $form, $e)
+                            && $t->assign($form, $e)
                             )
+
                         $i++;
                 }
                 if (!$i) {
                     $info['error'] = sprintf(
                             __('Unable to %1$s %2$s'),
                             __('assign'),
-                            _N('selected ticket', 'selected tickets', $count));
+                            _N('selected suggestion', 'selected suggestions', $count));
                 }
             }
             break;
@@ -590,7 +578,7 @@ class TicketsAjaxAPI extends AjaxController {
             $inc = 'transfer.tmpl.php';
             $info[':action'] = '#tickets/mass/transfer';
             $info[':title'] = sprintf('Transfer %s',
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
             $form = TransferForm::instantiate($_POST);
             if ($_POST && $form->isValid()) {
                 foreach ($_POST['tids'] as $tid) {
@@ -607,7 +595,7 @@ class TicketsAjaxAPI extends AjaxController {
                     $info['error'] = sprintf(
                             __('Unable to %1$s %2$s'),
                             __('transfer'),
-                            _N('selected ticket', 'selected tickets', $count));
+                            _N('selected suggestion', 'selected suggestions', $count));
                 }
             }
             break;
@@ -615,13 +603,13 @@ class TicketsAjaxAPI extends AjaxController {
             $inc = 'delete.tmpl.php';
             $info[':action'] = '#tickets/mass/delete';
             $info[':title'] = sprintf('Delete %s',
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
             $info[':placeholder'] = sprintf(__(
                         'Optional reason for deleting %s'),
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
             $info['warn'] = sprintf(__(
                         'Are you sure you want to DELETE %s?'),
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
             $info[':extra'] = sprintf('<strong>%s</strong>',
                         __('Deleted tickets CANNOT be recovered, including any associated attachments.')
                         );
@@ -630,7 +618,6 @@ class TicketsAjaxAPI extends AjaxController {
                 $errors['err'] = sprintf(
                         __('You do not have permission %s'),
                         __('to delete tickets'));
-
             if ($_POST && !$errors) {
                 foreach ($_POST['tids'] as $tid) {
                     if (($t=Ticket::lookup($tid))
@@ -643,7 +630,7 @@ class TicketsAjaxAPI extends AjaxController {
                     $info['error'] = sprintf(
                             __('Unable to %1$s %2$s'),
                             __('delete'),
-                            _N('selected ticket', 'selected tickets', $count));
+                            _N('selected suggestion', 'selected suggestions', $count));
                 }
             }
             break;
@@ -653,11 +640,11 @@ class TicketsAjaxAPI extends AjaxController {
                 $info[':action'] = "#tickets/mass/priority/{$w}";
                 $verb = __('Update');
                 $info[':title'] = sprintf('Change Priority On %s',
-                        _N('selected ticket', 'selected tickets', $count));
+                        _N('selected suggestion', 'selected suggestions', $count));
     
                 $info[':placeholder'] = sprintf(__(
                             'Optional reason for changing priority on %s'),
-                        _N('selected ticket', 'selected tickets', $count));
+                        _N('selected suggestion', 'selected suggestions', $count));
     
                 if (!($P = Priority::lookup($w)))
                     Http::response(422, 'No such priority');
@@ -690,12 +677,11 @@ class TicketsAjaxAPI extends AjaxController {
                     }
                 }
                 break;
-
                 case 'topic':
                 $inc = 'topic.tmpl.php';
                 $info[':action'] = '#tickets/mass/topic';
                 $info[':title'] = sprintf('Change Help Topic On %s',
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
                 $form = TopicForm::instantiate($_POST);
                
                 if ($_POST && $form->isValid()) {
@@ -713,7 +699,7 @@ class TicketsAjaxAPI extends AjaxController {
                         $info['error'] = sprintf(
                                 __('Unable to %1$s %2$s'),
                                 __('topic'),
-                                _N('selected ticket', 'selected tickets', $count));
+                                _N('selected suggestion', 'selected suggestions', $count));
                     }
                 }
                 break;
@@ -729,15 +715,15 @@ class TicketsAjaxAPI extends AjaxController {
                         $actions[$action]['verbed'],
                         sprintf('%1$d %2$s',
                             $count,
-                            _N('selected ticket', 'selected tickets', $count))
+                            _N('selected suggestion', 'selected suggestions', $count))
                         );
                 $_SESSION['::sysmsgs']['msg'] = $msg;
             } else {
                 $warn = sprintf(
                         __('%1$d of %2$d %3$s %4$s'
-                        /* Tokens are <x> of <y> <selected ticket(s)> <actioned> */),
+                        /* Tokens are <x> of <y> <selected suggestion(s)> <actioned> */),
                         $i, $count,
-                        _N('selected ticket', 'selected tickets',
+                        _N('selected suggestion', 'selected suggestions',
                             $count),
                         $actions[$action]['verbed']);
                 $_SESSION['::sysmsgs']['warn'] = $warn;
@@ -747,7 +733,7 @@ class TicketsAjaxAPI extends AjaxController {
             $info['error'] = $errors['err'] ?: sprintf(
                     __('Unable to %1$s %2$s'),
                     __('process'),
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
         }
         if ($_POST)
             $info = array_merge($info, Format::htmlchars($_POST));
@@ -772,10 +758,9 @@ class TicketsAjaxAPI extends AjaxController {
         if (!$thisstaff)
             Http::response(403, 'Access denied');
         elseif (!$tid
-                || !($ticket=Ticket::lookup($tid))
-                || !$ticket->checkStaffPerm($thisstaff))
+                || !($ticket=Ticket::lookup($tid)))
             Http::response(404, 'Unknown ticket #');
-        $role = $thisstaff->getRole($ticket->getDeptId());
+        
         $info = array();
         $state = null;
         switch($status) {
@@ -784,16 +769,14 @@ class TicketsAjaxAPI extends AjaxController {
                 $state = 'open';
                 break;
             case 'close':
-                if (!$role->hasPerm(Ticket::PERM_CLOSE))
-                    Http::response(403, 'Access denied');
+                
                 $state = 'closed';
                 // Check if ticket is closeable
                 if (is_string($closeable=$ticket->isCloseable()))
                     $info['warn'] =  $closeable;
                 break;
             case 'delete':
-                if (!$role->hasPerm(Ticket::PERM_DELETE))
-                    Http::response(403, 'Access denied');
+                
                 $state = 'deleted';
                 break;
             default:
@@ -809,31 +792,26 @@ class TicketsAjaxAPI extends AjaxController {
         if (!$thisstaff)
             Http::response(403, 'Access denied');
         elseif (!$tid
-                || !($ticket=Ticket::lookup($tid))
-                || !$ticket->checkStaffPerm($thisstaff))
-            Http::response(404, 'Unknown ticket #');
+                || !($ticket=Ticket::lookup($tid)))
+            Http::response(404, 'Unknown suggestion #');
         $errors = $info = array();
         if (!$_POST['status_id']
                 || !($status= TicketStatus::lookup($_POST['status_id'])))
             $errors['status_id'] = sprintf('%s %s',
                     __('Unknown or invalid'), __('status'));
         elseif ($status->getId() == $ticket->getStatusId())
-            $errors['err'] = sprintf(__('Ticket already set to %s status'),
+            $errors['err'] = sprintf(__('Suggestion already set to %s status'),
                     __($status->getName()));
         elseif (($role = $thisstaff->getRole($ticket->getDeptId()))) {
             // Make sure the agent has permission to set the status
             switch(mb_strtolower($status->getState())) {
                 case 'open':
-                    if (!$role->hasPerm(Ticket::PERM_CLOSE)
-                            && !$role->hasPerm(Ticket::PERM_CREATE))
+                    if (!$role->hasPerm(Ticket::PERM_CREATE))
                         $errors['err'] = sprintf(__('You do not have permission %s'),
-
-                                __('to reopen tickets'));
+                                __('to reopen suggesitons'));
                     break;
                 case 'closed':
-                    if (!$role->hasPerm(Ticket::PERM_CLOSE))
-                        $errors['err'] = sprintf(__('You do not have permission %s'),
-                                __('to resolve/close tickets'));
+                   
                     break;
                 case 'deleted':
                     if (!$role->hasPerm(Ticket::PERM_DELETE))
@@ -851,7 +829,7 @@ class TicketsAjaxAPI extends AjaxController {
         if (!$errors && $ticket->setStatus($status, $_REQUEST['comments'], $errors)) {
             if ($state == 'deleted') {
                 $msg = sprintf('%s %s',
-                        sprintf(__('Ticket #%s'), $ticket->getNumber()),
+                        sprintf(__('Suggesiton #%s'), $ticket->getNumber()),
                         __('deleted sucessfully')
                         );
             } elseif ($state != 'open') {
@@ -861,7 +839,7 @@ class TicketsAjaxAPI extends AjaxController {
             } else {
                 $msg = sprintf(
                         __('%s status changed to %s'),
-                        __('Ticket'),
+                        __('Suggesiton'),
                         $status->getName());
             }
             $_SESSION['::sysmsgs']['msg'] = $msg;
@@ -886,8 +864,6 @@ class TicketsAjaxAPI extends AjaxController {
                 $state = 'open';
                 break;
             case 'close':
-                if (!$thisstaff->hasPerm(Ticket::PERM_CLOSE, false))
-                    Http::response(403, 'Access denied');
                 $state = 'closed';
                 break;
             case 'delete':
@@ -905,7 +881,7 @@ class TicketsAjaxAPI extends AjaxController {
     function setSelectedTicketsStatus($state) {
         global $thisstaff, $ost;
         $errors = $info = array();
-        if (!$thisstaff || !$thisstaff->canManageTickets())
+        if (!$thisstaff)
             $errors['err'] = sprintf('%s %s',
                     sprintf(__('You do not have permission %s'),
                         __('to mass manage tickets')),
@@ -926,9 +902,7 @@ class TicketsAjaxAPI extends AjaxController {
                                 __('to reopen tickets'));
                     break;
                 case 'closed':
-                    if (!$thisstaff->hasPerm(Ticket::PERM_CLOSE, false))
-                        $errors['err'] = sprintf(__('You do not have permission %s'),
-                                __('to resolve/close tickets'));
+
                     break;
                 case 'deleted':
                     if (!$thisstaff->hasPerm(Ticket::PERM_DELETE, false))
@@ -947,28 +921,27 @@ class TicketsAjaxAPI extends AjaxController {
             foreach ($_REQUEST['tids'] as $tid) {
                 if (($ticket=Ticket::lookup($tid))
                         && $ticket->getStatusId() != $status->getId()
-                        && $ticket->checkStaffPerm($thisstaff)
                         && $ticket->setStatus($status, $comments, $errors))
                     $i++;
             }
             if (!$i) {
                 $errors['err'] = $errors['err']
                     ?: sprintf(__('Unable to change status for %s'),
-                        _N('selected ticket', 'selected tickets', $count));
+                        _N('the selected suggestion', 'any of the selected suggestions', $count));
             }
             else {
                 // Assume success
                 if ($i==$count) {
                     if (!strcasecmp($status->getState(), 'deleted')) {
                         $msg = sprintf(__( 'Successfully deleted %s.'),
-                                _N('selected ticket', 'selected tickets',
+                                _N('selected suggestion', 'selected suggestions',
                                     $count));
                     } else {
                        $msg = sprintf(
                             __(
-                                /* 1$ will be 'selected ticket(s)', 2$ is the new status */
+                                /* 1$ will be 'selected suggestion(s)', 2$ is the new status */
                                 'Successfully changed status of %1$s to %2$s'),
-                            _N('selected ticket', 'selected tickets',
+                            _N('selected suggestion', 'selected suggestions',
                                 $count),
                             $status->getName());
                     }
@@ -976,13 +949,13 @@ class TicketsAjaxAPI extends AjaxController {
                 } else {
                     if (!strcasecmp($status->getState(), 'deleted')) {
                         $warn = sprintf(__('Successfully deleted %s.'),
-                                sprintf(__('%1$d of %2$d selected tickets'),
+                                sprintf(__('%1$d of %2$d selected suggestions'),
                                     $i, $count)
                                 );
                     } else {
                         $warn = sprintf(
                                 __('%1$d of %2$d %3$s status changed to %4$s'),$i, $count,
-                                _N('selected ticket', 'selected tickets',
+                                _N('selected suggestion', 'selected suggestions',
                                     $count),
                                 $status->getName());
                     }
@@ -1014,23 +987,21 @@ class TicketsAjaxAPI extends AjaxController {
     private function _changeSelectedTicketsStatus($state, $info=array(), $errors=array()) {
         $count = $_REQUEST['count'] ?:
             ($_REQUEST['tids'] ?  count($_REQUEST['tids']) : 0);
-
         $info['title'] = sprintf(__('Change Status &mdash; %1$d %2$s selected'),
                  $count,
                  _N('ticket', 'tickets', $count)
                  );
-
 				 if (!strcasecmp($state, 'deleted')) {
             $info['warn'] = sprintf(__(
                         'Are you sure you want to DELETE %s?'),
-                    _N('selected ticket', 'selected tickets', $count)
+                    _N('selected suggestion', 'selected suggestions', $count)
                     );
             $info['extra'] = sprintf('<strong>%s</strong>', __(
                         'Deleted tickets CANNOT be recovered, including any associated attachments.')
                     );
             $info['placeholder'] = sprintf(__(
                         'Optional reason for deleting %s'),
-                    _N('selected ticket', 'selected tickets', $count));
+                    _N('selected suggestion', 'selected suggestions', $count));
         }
         $info['status_id'] = $info['status_id'] ?: $_REQUEST['status_id'];
         $info['comments'] = Format::htmlchars($_REQUEST['comments']);
@@ -1041,7 +1012,7 @@ class TicketsAjaxAPI extends AjaxController {
         $info['action'] = sprintf('#tickets/%d/status', $ticket->getId());
         $info['title'] = sprintf(__(
                     /* 1$ will be a verb, like 'open', 2$ will be the ticket number */
-                    '%1$s Ticket #%2$s'),
+                    '%1$s Suggestion #%2$s'),
                 $verb ?: $state,
                 $ticket->getNumber()
                 );
@@ -1071,8 +1042,7 @@ class TicketsAjaxAPI extends AjaxController {
     }
     function tasks($tid) {
         global $thisstaff;
-        if (!($ticket=Ticket::lookup($tid))
-                || !$ticket->checkStaffPerm($thisstaff))
+        if (!($ticket=Ticket::lookup($tid)))
             Http::response(404, 'Unknown ticket');
          include STAFFINC_DIR . 'ticket-tasks.inc.php';
     }
@@ -1080,8 +1050,7 @@ class TicketsAjaxAPI extends AjaxController {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid)))
             Http::response(404, 'Unknown ticket');
-        if (!$ticket->checkStaffPerm($thisstaff, Task::PERM_CREATE))
-            Http::response(403, 'Permission denied');
+        
         $info=$errors=array();
         if ($_POST) {
             Draft::deleteForNamespace(
@@ -1119,9 +1088,9 @@ class TicketsAjaxAPI extends AjaxController {
         }
         $info['action'] = sprintf('#tickets/%d/add-task', $ticket->getId());
         $info['title'] = sprintf(
-                __( 'Ticket #%1$s: %2$s'),
+                __( 'Incident #%1$s: %2$s'),
                 $ticket->getNumber(),
-                __('Add New Task')
+                __('Add New Countermeasure')
                 );
          include STAFFINC_DIR . 'templates/task.tmpl.php';
     }
@@ -1129,11 +1098,11 @@ class TicketsAjaxAPI extends AjaxController {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid))
                 || !$ticket->checkStaffPerm($thisstaff))
-            Http::response(404, 'Unknown ticket');
+            Http::response(404, 'Unknown incident');
         // Lookup task and check access
         if (!($task=Task::lookup($id))
                 || !$task->checkStaffPerm($thisstaff))
-            Http::response(404, 'Unknown task');
+            Http::response(404, 'Unknown countermeasure');
         $info = $errors = array();
         $note_attachments_form = new SimpleForm(array(
             'attachments' => new FileUploadField(array('id'=>'attach',

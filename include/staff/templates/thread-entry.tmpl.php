@@ -9,7 +9,7 @@ if ($thisstaff && !strcasecmp($thisstaff->datetime_format, 'relative')) {
 
 $entryTypes = array('M'=>'message', 'R'=>'response', 'N'=>'note');
 $user = $entry->getUser() ?: $entry->getStaff();
-$name = $user ? $user->getName() : $entry->poster;
+$name = $user ? staff::getFullNameById($user->getId()) : $entry->poster;
 $avatar = '';
 if ($user && $cfg->isAvatarsEnabled())
     $avatar = $user->getAvatar();
@@ -22,8 +22,27 @@ if ($user && $cfg->isAvatarsEnabled())
     </span>
 <?php } ?>
     <div class="header">
-        <div class="float-right">
-
+        <div class="pull-right">
+<?php   if ($entry->hasActions()) {
+            $actions = $entry->getActions(); ?>
+        <span class="muted-button pull-right" data-dropdown="#entry-action-more-<?php echo $entry->getId(); ?>">
+            <i class="fa fa-chevron-down"></i>
+        </span>
+        <div id="entry-action-more-<?php echo $entry->getId(); ?>" class="action-dropdown anchor-right">
+            <ul class="title">
+<?php       foreach ($actions as $group => $list) {
+                foreach ($list as $id => $action) { ?>
+                <li>
+                    <a class="no-pjax" href="#" onclick="javascript:
+                    <?php echo str_replace('"', '\\"', $action->getJsStub()); ?>; return false;">
+                    <i class="<?php echo $action->getIcon(); ?>"></i> <?php
+                    echo $action->getName();
+                ?></a></li>
+<?php           }
+            } ?>
+            </ul>
+        </div>
+<?php   } ?>
         <span class="textra light">
 
 <?php if (!$user) { ?>
@@ -52,29 +71,9 @@ if ($user && $cfg->isAvatarsEnabled())
             <span class="label label-bare"><?php echo __('Collaborator'); ?> </span>
 <?php   } ?>
         </span>
-        
-<?php   if ($entry->hasActions()) {
-            $actions = $entry->getActions(); ?>
-        <div class="btn-group btn-group-sm">
-        <button type="button" class="btn btn-sm btn-secondary dropdown-toggle waves-effect" data-toggle="dropdown" aria-expanded="false" data-dropdown="#entry-action-more-<?php echo $entry->getId(); ?>"style="margin-top: -5px;line-height: 0.5;"><span class="caret" ></span> </button>
-        <div class="dropdown-menu dropdown-menu-right">
-<?php       foreach ($actions as $group => $list) {
-                foreach ($list as $id => $action) { ?>
-                
-                    <a class="dropdown-item" href="#" onclick="javascript:
-                    <?php echo str_replace('"', '\\"', $action->getJsStub()); ?>; return false;">
-                    <i class="<?php echo $action->getIcon(); ?>"></i> <?php
-                    echo $action->getName();
-                ?></a>
-<?php           }
-            } ?>
-            
-        </div>
-        </div>
-<?php   } ?>        
         </div>
 <?php
-        echo sprintf(__('<b><span class="notranslate">%s</span></b> posted %s'), $name,
+        echo sprintf(__('<b>%s</b> posted %s'), $name,
             sprintf('<a name="entry-%d" href="#entry-%1$s"><time %s
                 datetime="%s" data-toggle="tooltip" title="%s">%s</time></a>',
                 $entry->id,
@@ -87,13 +86,6 @@ if ($user && $cfg->isAvatarsEnabled())
         <span style="max-width:400px" class="faded title truncate"><?php
             echo $entry->title; ?></span>
         </span>
-        <?php if ($cfg->isThreadTime()) {
-			if ($entry->time_spent > 0) { ?>
-				<span style="display:inline-block">
-					<?php echo Ticket::formatTime($entry->time_spent) .' - '. Ticket::convTimeType($entry->time_type); ?>
-				</span>
-            <?php }
-		} ?>
     </div>
     <div class="thread-body no-pjax">
         <div><?php echo $entry->getBody()->toHtml(); ?></div>

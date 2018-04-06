@@ -10,7 +10,6 @@ if (isset($options['entry']) && $options['mode'] == 'edit'
 if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
 
 <?php } ?>
-   
 <?php
 // Keep up with the entry id in a hidden field to decide what to add and
 // delete when the parent form is submitted
@@ -21,8 +20,8 @@ if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
 <?php 
 if ($options['modal'] !== 'ticketedit'){
 if ($form->getTitle()) { ?>
-    <div>
-        <em>
+  
+     
 <?php if ($options['mode'] == 'edit') { ?> 
         <div class="pull-right">
     <?php if ($options['entry']
@@ -37,11 +36,9 @@ if ($form->getTitle()) { ?>
 
 
 ?>
-        <strong><?php echo Format::htmlchars($form->getTitle()); ?></strong>:
-        <div><?php echo Format::display($form->getInstructions()); ?></div>
-        </em> 
+        
 
-    </div>
+
     <?php
     }
     
@@ -55,34 +52,88 @@ if ($form->getTitle()) { ?>
                 continue;
         }
         catch (Exception $e) {
-            // Not connected to a DynamicFormField
+            // Not connected to a DynamicFormField 
         }
-       
-		?>
-		
+        //echo get_class($field);
+
+        $render = 1;
         
-		
-			<?php if ($field->isBlockLevel()) { ?>
+        switch (get_class($field)){
+            
+            case 'RowStartField':
+                echo '<div class="row boldlabels">'."\n"; 
+                $render = 0;
+                break;
+                
+            case 'CardStartField':
+                echo '<div class="card card-body m-t-10">'."\n"; 
+                $render = 0;
+                break;
+                
+            case 'ThreeColumnStartField':
+                echo '<div class="col-sm-3">'."\n".'<div class="form-group">'."\n";
+                $render = 0;
+                break;
+                
+            case 'SixColumnStartField':
+                echo '<div class="col-sm-6">'."\n".'<div class="form-group">'."\n";
+                $render = 0;
+                break;
+                
+            case 'NineColumnStartField':
+                echo '<div class="col-sm-9">'."\n".'<div class="form-group">'."\n";
+                $render = 0;
+                break;
+            
+            case 'TwelveColumnStartField':
+                echo '<div class="col-sm-12">'."\n".'<div class="form-group">'."\n";
+                $render = 0;
+                break;
+            
+            case 'ColumnEndField':
+                echo '</div>'."\n".'</div>'."\n";
+                $render = 0;
+                break;
+            
+            case 'CarorRowEndField':
+                echo '</div>'."\n";
+                $render = 0;
+                break;
+            
+        }
+
+       
+        if ($render == 1) {
+            
+		    if ($field->isBlockLevel()) { ?>
                 <div <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'id="requiredfield"';
                 ?> > <td style="padding-right:16px;" <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'id="requiredfield"';
-                ?>> &nbsp
+                ?>> 
                 <?php
             }
             
-			else { ?>
-                <div class="multi-line dynamicformdatamulti <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'required';
-                ?>" style="min-width:120px;" <?php if ($options['width'])
+			else {
+
+                
+            ?>
+                
+                
+                <div class="multi-line dynamicformdatamulti <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'required ';
+                ?>" <?php if ($options['width'])
                     echo "width=\"{$options['width']}\""; ?>>
-                <label><?php echo Format::htmlchars($field->getLocal('label')); ?>:</label>
-                <div <?php if ($field->errors()){echo ' class="has-danger"';}?>style="position:relative" <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'id="requiredfield"';
+                <label <?php if (get_class($field) == 'BooleanField' || get_class($field) == 'FileUploadField'){echo 'style="display: none;"';}?>><?php echo Format::htmlchars($field->getLocal('label')); ?>:</label>
+                <?php if ($a && !$a->getValue() && $field->isRequiredForClose()) { ?>
+                    <i class="icon-warning-sign help-tip warning"
+                        data-title="<?php echo __('Required to close ticket'); ?>"
+                        data-content="<?php echo __('Data is required in this field in order to close the related ticket'); ?>"
+                    /></i>
+                <?php } ?>
+            <div <?php if ($field->errors()){echo ' class="has-danger"';}?>style="position:relative" <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'id="requiredfield"';
                 ?>><?php
             }
 			
-            $field->render($options); ?>
-            <?php if (!$field->isBlockLevel() && $field->isRequiredForStaff()) { ?>
-                <span class="error "></span>
-            <?php
-            }
+            $field->render($options); 
+           
             if ($field->isStorable() && ($a = $field->getAnswer()) && $a->isDeleted()) {
                 ?><a class="action-button float-right danger overlay" title="Delete this data"
                     href="#delete-answer"
@@ -99,14 +150,9 @@ if ($form->getTitle()) { ?>
                 ?>" data-entry-id="<?php echo $field->getAnswer()->get('entry_id');
                 ?>"> <i class="icon-trash"></i> </a></div><?php
             }
-            if ($a && !$a->getValue() && $field->isRequiredForClose()) {
-?><i class="icon-warning-sign help-tip warning"
-    data-title="<?php echo __('Required to close ticket'); ?>"
-    data-content="<?php echo __('Data is required in this field in order to close the related ticket'); ?>"
-/></i><?php
-            }
+
             if ($field->get('hint') && !$field->isBlockLevel()) { ?>
-                <em style="color:gray;display:inline-block"><?php
+                <em class="field-hint"><?php
                     echo Format::viewableImages($field->getLocal('hint')); ?></em>
             <?php
             }
@@ -114,9 +160,16 @@ if ($form->getTitle()) { ?>
             foreach ($field->errors() as $e) { ?>
                 <div class="form-control-feedback-danger "><?php echo Format::htmlchars($e); ?></div>
             <?php } ?>
-            </div>
+            </div></div>
         
-    <?php }
+    <?php 
+        }
+
+    $render = 1;
+    
+    }
 if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
 
 <?php } ?>
+                         
+                            

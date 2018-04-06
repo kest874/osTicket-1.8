@@ -531,7 +531,8 @@ class FormField {
             'text'  => array(   /* @trans */ 'Short Answer', 'TextboxField'),
             'memo' => array(    /* @trans */ 'Long Answer', 'TextareaField'),
             'thread' => array(  /* @trans */ 'Thread Entry', 'ThreadEntryField', false),
-            'datetime' => array(/* @trans */ 'Date and Time', 'DatetimeField'),
+            'datetime' => array(/* @trans */ 'Date', 'DatetimeField'),
+            'time' => array(/* @trans */ 'Time', 'TimeField'),
             'phone' => array(   /* @trans */ 'Phone Number', 'PhoneField'),
             'bool' => array(    /* @trans */ 'Checkbox', 'BooleanField'),
             'choices' => array( /* @trans */ 'Choices', 'ChoiceField'),
@@ -2186,6 +2187,278 @@ class DatetimeField extends FormField {
     }
 }
 
+class TimeField extends FormField {
+    static $widget = 'TimePickerWidget';
+
+    function to_database($value) {
+        // Store time in gmt time, unix epoch format
+        return $value ? date('H:i:s', $value) : $value;
+    }
+
+    function to_php($value) {
+        if (!$value)
+            return $value;
+        else
+            return (int) strtotime($value);
+    }
+
+    function asVar($value, $id=false) {
+        if (!$value) return null;
+        return new FormattedDate((int) $value, 'UTC', false, false);
+    }
+    function asVarType() {
+        return 'FormattedDate';
+    }
+
+    function toString($value) {
+        // If GMT is set, convert to local time zone. Otherwise, leave
+        // unchanged (default TZ is UTC)
+        $config = $this->getConfiguration();
+        $fromDb = @$config['fromdb'] ?: false;
+
+        if (!$value)
+            return '';
+        if (is_array($value) && isset($value['until'])) {
+            $n = $value['until'];
+            $intervals = array(
+                'i' => _N('minute', 'minutes', $n),
+                'h' => _N('hour', 'hours', $n),
+                'd' => _N('day', 'days', $n),
+                'w' => _N('week', 'weeks', $n),
+                'm' => _N('month', 'months', $n),
+            );
+            return sprintf('%d %s', $n, $intervals[$value['int'] ?: 'd']);
+        }
+        if ($config['time'])
+            return Format::datetime($value, $fromDb, !$config['gmt'] ? 'UTC' : false);
+        else
+            return Format::date($value, $fromDb, false, !$config['gmt'] ? 'UTC' : false);
+    }
+
+    function getConfigurationOptions() {
+        return array(
+            'time' => new BooleanField(array(
+                'id'=>1, 'label'=>__('Time'), 'required'=>false, 'default'=>false,
+                'configuration'=>array(
+                    'desc'=>__('Show time selection with date picker')))),
+            'gmt' => new BooleanField(array(
+                'id'=>2, 'label'=>__('Timezone Aware'), 'required'=>false,
+                'configuration'=>array(
+                    'desc'=>__("Show date/time relative to user's timezone")))),
+            
+            
+        );
+    }
+
+    // function validateEntry($value) {
+        // $config = $this->getConfiguration();
+        // parent::validateEntry($value);
+        // if (!$value) return;
+        // if ($config['min'] and $value < $config['min'])
+            // $this->_errors[] = __('Selected date is earlier than permitted');
+        // elseif ($config['max'] and $value > $config['max'])
+            // $this->_errors[] = __('Selected date is later than permitted');
+        ////strtotime returns -1 on error for PHP < 5.1.0 and false thereafter
+        // elseif ($value === -1 or $value === false)
+            // $this->_errors[] = __('Enter a valid date');
+    // }
+
+    // SearchableField interface ------------------------------
+    function getSearchMethods() {
+        return array(
+            'set' =>        __('has a value'),
+            'nset' =>       __('does not have a value'),
+            'equal' =>      __('on'),
+            'nequal' =>     __('not on'),
+            'before' =>     __('before'),
+            'after' =>      __('after'),
+            'between' =>    __('between'),
+            
+        );
+    }
+
+    function getSearchMethodWidgets() {
+        $config_notime = $config = $this->getConfiguration();
+        $config_notime['time'] = false;
+        $nday_form = function() {
+            $intervals = array(
+                'i' => _N('minute', 'minutes', 5),
+                'h' => _N('hour', 'hours', 5),
+                
+            );
+            return array(
+                'until' => new TextboxField(array(
+                    'configuration' => array('validator'=>'number', 'size'=>4))
+                ),
+                'int' => new ChoiceField(array(
+                    'default' => 'd',
+                    'choices' => $intervals,
+                )),
+            );
+        };
+        return array(
+            'set' => null,
+            'nset' => null,
+            'equal' => array('TimeField', array(
+                'configuration' => $config_notime,
+            )),
+            'nequal' => array('TimeField', array(
+                'configuration' => $config_notime,
+            )),
+            'before' => array('TimeField', array(
+                'configuration' => $config,
+            )),
+            'after' => array('TimeField', array(
+                'configuration' => $config,
+            )),
+            'between' => array('InlineformField', array(
+                'form' => array(
+                    'left' => new TimeField(),
+                    'text' => new FreeTextField(array(
+                        'configuration' => array('content' => 'and'))
+                    ),
+                    'right' => new TimeField(),
+                ),
+            )),
+            
+        );
+    }
+
+    function getSearchQ($method, $value, $name=false) {
+        static $intervals = array(
+            'h' => 'HOUR',
+            'i' => 'MINUTE',
+        );
+        $name = $name ?: $this->get('name');
+        $now = SqlFunction::NOW();
+        $config = $this->getConfiguration();
+        $value = is_int($value)
+            ? DateTime::createFromFormat('U', !$config['gmt'] ? Misc::gmtime($value) : $value) ?: $value
+            : $value;
+        switch ($method) {
+        case 'equal':
+            $l = clone $value;
+            $r = $value->add(new DateInterval('P1D'));
+            return new Q(array(
+                "{$name}__gte" => $l,
+                "{$name}__lt" => $r
+            ));
+        case 'nequal':
+            $l = clone $value;
+            $r = $value->add(new DateInterval('P1D'));
+            return Q::any(array(
+                "{$name}__lt" => $l,
+                "{$name}__gte" => $r,
+            ));
+        
+        case 'after':
+            return new Q(array("{$name}__gte" => $value));
+       
+        case 'before':
+            return new Q(array("{$name}__lt" => $value));
+        case 'between':
+            foreach (array('left', 'right') as $side) {
+                $value[$side] = is_int($value[$side])
+                    ? DateTime::createFromFormat('U', !$config['gmt']
+                        ? Misc::gmtime($value[$side]) : $value[$side]) ?: $value[$side]
+                    : $value[$side];
+            }
+            return new Q(array(
+                "{$name}__gte" => $value['left'],
+                "{$name}__lte" => $value['right'],
+            ));
+       
+        default:
+            return parent::getSearchQ($method, $value, $name);
+        }
+    }
+
+    function describeSearchMethod($method) {
+        switch ($method) {
+        case 'before':
+            return __('%1$s before %2$s' /* occurs before a time */);
+        case 'after':
+            return __('%1$s after %2$s' /* occurs after a date and time */);
+        
+        case 'between':
+            return __('%1$s between %2$s and %3$s');
+        
+        default:
+            return parent::describeSearchMethod($method);
+        }
+    }
+
+    function describeSearch($method, $value, $name=false) {
+        if ($method === 'between') {
+            $l = $this->toString($value['left']);
+            $r = $this->toString($value['right']);
+            $desc = $this->describeSearchMethod($method);
+            return sprintf($desc, $name, $l, $r);
+        }
+        return parent::describeSearch($method, $value, $name);
+    }
+
+    function supportsQuickFilter() {
+        return true;
+    }
+
+    function getQuickFilterChoices() {
+        return array(
+            // 'h' => __('Today'),
+            // 'm' => __('Tomorrow'),
+            // 'g' => __('Yesterday'),
+            // 'l7' => __('Last 7 days'),
+            // 'l30' => __('Last 30 days'),
+            // 'n7' => __('Next 7 days'),
+            // 'n30' => __('Next 30 days'),
+            /* Ugh. These boundaries are so difficult in SQL
+            'w' =>  __('This Week'),
+            'm' =>  __('This Month'),
+            'lw' => __('Last Week'),
+            'lm' => __('Last Month'),
+            'nw' => __('Next Week'),
+            'nm' => __('Next Month'),
+            */
+        );
+    }
+
+    function applyQuickFilter($query, $qf_value, $name=false) {
+        $name = $name ?: $this->get('name');
+        $now = SqlFunction::NOW();
+        $midnight = Misc::dbtime(time() - (time() % 86400));
+        switch ($qf_value) {
+        case 'l7':
+            return $query->filter([
+                "{$name}__range" => array($now->minus(SqlInterval::DAY(7)), $now),
+            ]);
+        case 'l30':
+            return $query->filter([
+                "{$name}__range" => array($now->minus(SqlInterval::DAY(30)), $now),
+            ]);
+        case 'n7':
+            return $query->filter([
+                "{$name}__range" => array($now, $now->minus(SqlInterval::DAY(7))),
+            ]);
+        case 'n30':
+            return $query->filter([
+                "{$name}__range" => array($now, $now->minus(SqlInterval::DAY(30))),
+            ]);
+        case 'g':
+            $midnight -= 86400;
+             // Fall through to the today case
+        case 'm':
+            if ($qf_value === 'm') $midnight += 86400;
+             // Fall through to the today case
+        case 'h':
+            $midnight = DateTime::createFromFormat('U', $midnight);
+            return $query->filter([
+                "{$name}__range" => array($midnight,
+                    SqlExpression::plus($midnight, SqlInterval::DAY(1))),
+            ]);
+        }
+    }
+}
+
 /**
  * This is kind-of a special field that doesn't have any data. It's used as
  * a field to provide a horizontal section break in the display of a form
@@ -2211,7 +2484,9 @@ class SectionBreakField extends FormField {
 }
 class RowStartField extends FormField {
     static $widget = 'RowStartWidget';
-
+    function isConfigurable() {
+        return false;
+    }
     function hasData() {
         return false;
     }
@@ -2230,7 +2505,9 @@ class RowStartField extends FormField {
 }
 class CarorRowEndField extends FormField {
     static $widget = 'CarorRowEndWidget';
-
+    function isConfigurable() {
+        return false;
+    }
     function hasData() {
         return false;
     }
@@ -2251,7 +2528,9 @@ class CarorRowEndField extends FormField {
 
 class CardStartField extends FormField {
     static $widget = 'CardStartWidget';
-
+    function isConfigurable() {
+        return false;
+    }
     function hasData() {
         return false;
     }
@@ -2271,7 +2550,9 @@ class CardStartField extends FormField {
 
 class ThreeColumnStartField extends FormField {
     static $widget = 'ThreeColumnStartWidget';
-
+    function isConfigurable() {
+        return false;
+    }
     function hasData() {
         return false;
     }
@@ -2290,7 +2571,9 @@ class ThreeColumnStartField extends FormField {
 }
 class SixColumnStartField extends FormField {
     static $widget = 'SixColumnStartWidget';
-
+    function isConfigurable() {
+        return false;
+    }
     function hasData() {
         return false;
     }
@@ -2309,7 +2592,9 @@ class SixColumnStartField extends FormField {
 }
 class NineColumnStartField extends FormField {
     static $widget = 'NineColumnStartWidget';
-
+    function isConfigurable() {
+        return false;
+    }
     function hasData() {
         return false;
     }
@@ -2328,7 +2613,9 @@ class NineColumnStartField extends FormField {
 }
 class TwelveColumnStartField extends FormField {
     static $widget = 'TwelveColumnStartWidget';
-
+    function isConfigurable() {
+        return false;
+    }
     function hasData() {
         return false;
     }
@@ -2347,7 +2634,10 @@ class TwelveColumnStartField extends FormField {
 }
 class ColumnEndField extends FormField {
     static $widget = 'ColumnEndWidget';
-
+    
+    function isConfigurable() {
+        return false;
+    }
     function hasData() {
         return false;
     }
@@ -4203,29 +4493,157 @@ class DatetimePickerWidget extends Widget {
             $this->value = Format::date($this->value, false, false, 'UTC');
         }
         ?>
-        <input type="text" name="<?php echo $this->name; ?>"
-            id="<?php echo $this->id; ?>" style="display:inline-block;width:auto"
-            value="<?php echo Format::htmlchars($this->value); ?>" size="12"
-            autocomplete="off" class="dp" />
-        <script type="text/javascript">
-            $(function() {
-                $('input[name="<?php echo $this->name; ?>"]').datepicker({
-                    <?php
-                    if ($config['min'])
-                        echo "minDate: new Date({$config['min']}000),";
-                    if ($config['max'])
-                        echo "maxDate: new Date({$config['max']}000),";
-                    elseif (!$config['future'])
-                        echo "maxDate: new Date().getTime(),";
-                    ?>
-                    numberOfMonths: 2,
-                    showButtonPanel: true,
-                    buttonImage: './images/cal.png',
-                    showOn:'both',
-                    dateFormat: $.translate_format('<?php echo $cfg->getDateFormat(true); ?>')
+            <div class="form-group">
+                <div class="input-group input-group-sm date" id="<?php echo $this->id; ?>" data-target-input="nearest">
+                    <input type="text" name="<?php echo $this->name; ?>" value="<?php echo Format::htmlchars($this->value); ?>" class="form-control form-control-sm datetimepicker-input" data-target="#<?php echo $this->id; ?>"/>
+                    <div class="input-group-addon" data-target="#<?php echo $this->id; ?>" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="far fa-calendar"></i></div>
+                    </div>
+                </div>
+            </div>
+    
+            <script type="text/javascript">
+                $(function () {
+                    $('#<?php echo $this->id; ?>').datetimepicker({
+                    format: 'L',
+                    });
                 });
-            });
-        </script>
+                $(function() {
+                var savetrigger = false;
+                        
+                $("#<?php echo $this->id; ?>").on("change.datetimepicker", function (e) {
+                              
+                    var charCode = e.which || e.keyCode; 
+                         if (!(charCode === 9)){
+                            $("#savebutton").css("background-color", "#52bb56");
+                            $("#savebutton").css("color", "#fff");
+                            $("#cancelbutton").css("background-color", "#ef5350");
+                            $("#cancelbutton").css("color", "#fff");
+                            $("i.fa.fa-reply").css("color", "#eeeeee");
+                            $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
+                            $("#updatearea").css("display", "none");
+                            $("#detailschanged").css("display", "inherit");
+                            if (!savetrigger) {
+                            $.notify({
+                                text: 'Changes made please click the save <i class="fa fa-save"></i> or cancel <i //class="fa fa-remove"></i> button on the ribbon.',
+                                image: '<i class="icon-save"></i>'
+                            }, {
+                                style: 'metro',
+                                className: 'error',
+                                autoHide: false,
+                                clickToHide: true
+                            });
+                                    }
+                                    
+                            savetrigger = true;
+                         }
+                    });
+             });       
+            </script>
+        <?php
+        if ($config['time'])
+            // TODO: Add time picker -- requires time picker or selection with
+            //       Misc::timeDropdown
+            echo '&nbsp;' . Misc::timeDropdown($hr, $min, $this->name . ':time');
+    }
+
+    /**
+     * Function: getValue
+     * Combines the datepicker date value and the time dropdown selected
+     * time value into a single date and time string value.
+     */
+    function getValue() {
+        global $cfg;
+
+        $data = $this->field->getSource();
+        $config = $this->field->getConfiguration();
+        if ($datetime = parent::getValue()) {
+            $datetime = is_int($datetime) ? $datetime :
+                strtotime($datetime);
+            if ($datetime && isset($data[$this->name . ':time'])) {
+                list($hr, $min) = explode(':', $data[$this->name . ':time']);
+                $datetime += $hr * 3600 + $min * 60;
+            }
+            if ($datetime && $config['gmt']) {
+                // Convert to GMT time
+                $tz = new DateTimeZone($cfg->getTimezone());
+                $D = DateTime::createFromFormat('U', $datetime);
+                $datetime -= $tz->getOffset($D);
+            }
+        }
+        return $datetime;
+    }
+}
+
+
+class TimePickerWidget extends Widget {
+    function render($options=array()) {
+        global $cfg;
+
+        $config = $this->field->getConfiguration();
+        if ($this->value) {
+            $this->value = is_int($this->value) ? $this->value :
+                strtotime($this->value);
+
+            if ($config['gmt']) {
+                // Convert to GMT time
+                $tz = new DateTimeZone($cfg->getTimezone());
+                $D = DateTime::createFromFormat('U', $this->value);
+                $this->value += $tz->getOffset($D);
+            }
+            list($hr, $min) = explode(':', date('H:i', $this->value));
+            $this->value = Format::time($this->value, false, false, 'UTC');
+        }
+        ?>
+            <div class="form-group">
+                <div class="input-group input-group-sm  date" id="<?php echo $this->id; ?>" data-target-input="nearest">
+                    <input type="text" name="<?php echo $this->name; ?>" value="<?php echo Format::htmlchars($this->value); ?>" class="form-control form-control-sm datetimepicker-input" data-target="#<?php echo $this->id; ?>"/>
+                    <div class="input-group-addon" data-target="#<?php echo $this->id; ?>" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="far fa-clock"></i></div>
+                    </div>
+                </div>
+            </div>
+    
+            <script type="text/javascript">
+                $(function () {
+                    $('#<?php echo $this->id; ?>').datetimepicker({
+                    format: 'LT',
+                  });
+                });
+                
+                $(function() {
+                var savetrigger = false;
+                        
+                $("#<?php echo $this->id; ?>").on("change.datetimepicker", function (e) {
+                              
+                    var charCode = e.which || e.keyCode; 
+                         if (!(charCode === 9)){
+                            $("#savebutton").css("background-color", "#52bb56");
+                            $("#savebutton").css("color", "#fff");
+                            $("#cancelbutton").css("background-color", "#ef5350");
+                            $("#cancelbutton").css("color", "#fff");
+                            $("i.fa.fa-reply").css("color", "#eeeeee");
+                            $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
+                            $("#updatearea").css("display", "none");
+                            $("#detailschanged").css("display", "inherit");
+                            if (!savetrigger) {
+                            $.notify({
+                                text: 'Changes made please click the save <i class="fa fa-save"></i> or cancel <i //class="fa fa-remove"></i> button on the ribbon.',
+                                image: '<i class="icon-save"></i>'
+                            }, {
+                                style: 'metro',
+                                className: 'error',
+                                autoHide: false,
+                                clickToHide: true
+                            });
+                                    }
+                                    
+                            savetrigger = true;
+                         }
+                    });
+             });       
+                
+            </script>
         <?php
         if ($config['time'])
             // TODO: Add time picker -- requires time picker or selection with

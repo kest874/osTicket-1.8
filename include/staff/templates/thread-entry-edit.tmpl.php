@@ -4,12 +4,10 @@
 
 <form method="post" action="<?php echo $this->getAjaxUrl(true); ?>">
 
-    
 <input type="text" style="width:100%;font-size:14px" placeholder="<?php
     echo __('Title'); ?>" name="title" value="<?php
     echo Format::htmlchars($this->entry->title); ?>"/>
 <hr style="height:0"/>
-
 <textarea style="display: block; width: 100%; height: auto; min-height: 150px;"
 <?php if ($poster && $this->entry->type == 'R') {
     $signature_type = $poster->getDefaultSignatureType();
@@ -65,44 +63,18 @@
     } ?>
 </div>
 <?php } # end of type == 'R' ?>
-   
-<table><tr>
-                <td width="120">
-                    <label><strong>Time Spent:</strong></label>
-                </td>
-                <td>
-                    <input type="text" name="time_spent" size="5"
-                    value="<?php echo $this->entry->time_spent;?>" />
-                    (Minutes)
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="time_type"><strong>Time Type:</strong></label>
-                </td>
-                <td>
-                    <select id="time_type" name="time_type">
-                    <?php
-                    $list = DynamicList::lookup(['type' => 'time-type']);
-                    foreach ($list->getAllItems() as $item) { ?>
-                        <option value="<?php echo $item->getId(); ?>" <?php if ($item->getId() == $this->entry->time_type) {echo "selected";} ?>> <?php echo $item->getValue(); ?>  </option>
-<?php               } ?>
-                    </select>
-                    
-                </td>
-            </tr></table>
-				
+
 <hr>
 <div class="full-width">
     <span class="buttons pull-left">
-        <input type="button" name="cancel" class="btn close"
+        <input type="button" name="cancel" class="close"
             value="<?php echo __('Cancel'); ?>">
     </span>
     <span class="buttons pull-right">
-        <button type="submit" name="commit" value="save" class="btn btn-sm"
+        <button type="submit" name="commit" value="save" class="button"
             ><?php echo __('Save'); ?></button>
 <?php if ($this->entry->type == 'R') { ?>
-        <button type="submit" name="commit" value="resend" class="btn btn-sm"
+        <button type="submit" name="commit" value="resend" class="button"
             ><?php echo __('Save and Resend'); ?></button>
 <?php } ?>
     </span>

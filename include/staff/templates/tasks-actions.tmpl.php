@@ -18,7 +18,7 @@ if ($agent->hasPerm(Task::PERM_ASSIGN, false)) {
      $actions += array(
             'assign/agents' => array(
                 'icon' => 'icon-user',
-                'action' => __('Assign to Agent')
+                'action' => __('Assign to Associate')
             ));
     $actions += array(
             'assign/teams' => array(
@@ -31,7 +31,7 @@ if ($agent->hasPerm(Task::PERM_TRANSFER, false)) {
     $actions += array(
             'transfer' => array(
                 'icon' => 'icon-share',
-                'action' => __('Transfer')
+                'action' => __('Transfer Ownership')
             ));
 }
 
@@ -131,7 +131,7 @@ if ($actions && !isset($options['status'])) {
             class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
          <a class="dropdown-item no-pjax tasks-action"
             href="#tasks/mass/assign/agents"><i
-            class="icon-user"></i> <?php echo __('Agent'); ?></a>
+            class="icon-user"></i> <?php echo __('Associate'); ?></a>
          <a class="dropdown-item no-pjax tasks-action"
             href="#tasks/mass/assign/teams"><i
             class="icon-group"></i> <?php echo __('Team'); ?></a>
@@ -144,9 +144,9 @@ if ($actions && !isset($options['status'])) {
 
     // Mass Transfer
     if ($agent->hasPerm(Task::PERM_TRANSFER, false)) {?>
-    
+ 
      <a class="btn btn-light btn-sm  waves-effect  tasks-action" id="tasks-transfer" data-placement="bottom"
-        data-toggle="tooltip" title="<?php echo __('Transfer'); ?>"
+        data-toggle="tooltip" title="<?php echo __('Transfer Ownership'); ?>"
         href="#tasks/mass/transfer"><i class="icon-share"></i></a>
     
     <?php

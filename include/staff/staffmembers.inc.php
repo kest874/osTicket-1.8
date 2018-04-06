@@ -89,7 +89,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                             <span ><a href="<?php echo $refresh_url; ?>"
                                 title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i> 
                                 </a> &nbsp;
-            <?php echo __('Agents');?>
+            <?php echo __('Associates');?>
                                 
                                 </span>
                         
@@ -101,7 +101,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                     
                     <a class="btn btn-icon waves-effect waves-light btn-success"
                        href="staff.php?a=add" data-placement="bottom"
-                    data-toggle="tooltip" title="<?php echo __('Add Agent'); ?>">
+                    data-toggle="tooltip" title="<?php echo __('Add Associate'); ?>">
                         <i class="fa fa-plus-square"></i>
                     </a>
             

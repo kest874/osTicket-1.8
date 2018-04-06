@@ -44,7 +44,7 @@ if ($info['error']) {
     <div>
         <textarea class="richtext no-bar" name="note" cols="21" rows="6"
             style="width:80%;"
-            placeholder="<?php echo __('Reason for editing the task (optional)'); ?>"
+            placeholder="<?php echo __('Reason for editing the countermeasure (optional)'); ?>"
             >
             <?php echo $info['note'];
             ?></textarea>

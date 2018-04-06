@@ -1,8 +1,8 @@
 <?php
 /*********************************************************************
-    ajax.tasks.php
+    ajax.countermeasures.php
 
-    AJAX interface for tasks
+    AJAX interface for countermeasures
 
     Peter Rotich <peter@osticket.com>
     Copyright (c)  20014 osTicket
@@ -26,7 +26,7 @@ class TasksAjaxAPI extends AjaxController {
         global $thisstaff;
 
         $limit = isset($_REQUEST['limit']) ? (int) $_REQUEST['limit']:25;
-        $tasks = array();
+        $countermeasures = array();
 
         $visibility = Q::any(array(
             'staff_id' => $thisstaff->getId(),
@@ -44,17 +44,17 @@ class TasksAjaxAPI extends AjaxController {
             )))
             ->filter($visibility)
             ->values('number')
-            ->annotate(array('tasks' => SqlAggregate::COUNT('id')))
+            ->annotate(array('countermeasures' => SqlAggregate::COUNT('id')))
             ->order_by('-created')
             ->limit($limit);
 
         foreach ($hits as $T) {
-            $tasks[] = array('id'=>$T['number'], 'value'=>$T['number'],
+            $countermeasures[] = array('id'=>$T['number'], 'value'=>$T['number'],
                 'info'=>"{$T['number']}",
                 'matches'=>$_REQUEST['q']);
         }
 
-        return $this->json_encode($tasks);
+        return $this->json_encode($countermeasures);
     }
 
     function add() {
@@ -90,7 +90,7 @@ class TasksAjaxAPI extends AjaxController {
                     Http::response(201, $task->getId());
             }
 
-            $info['error'] = sprintf('%s - %s', __('Error adding task'), __('Please try again!'));
+            $info['error'] = sprintf('%s - %s', __('Error adding countermeasure'), __('Please try again!'));
         }
 
         include STAFFINC_DIR . 'templates/task.tmpl.php';
@@ -103,7 +103,7 @@ class TasksAjaxAPI extends AjaxController {
         // No perm. check -- preview allowed for staff
         // XXX: perhaps force preview via parent object?
         if(!$thisstaff || !($task=Task::lookup($tid)))
-            Http::response(404, __('No such task'));
+            Http::response(404, __('No such countermeasure'));
 
         include STAFFINC_DIR . 'templates/task-preview.tmpl.php';
     }
@@ -112,7 +112,7 @@ class TasksAjaxAPI extends AjaxController {
         global $thisstaff;
 
         if(!($task=Task::lookup($tid)))
-            Http::response(404, __('No such task'));
+            Http::response(404, __('No such countermeasure'));
 
         if (!$task->checkStaffPerm($thisstaff, Task::PERM_EDIT))
             Http::response(403, __('Permission denied'));
@@ -126,10 +126,10 @@ class TasksAjaxAPI extends AjaxController {
 
             // Validate dynamic meta-data
             if ($task->update($forms, $_POST, $errors)) {
-                Http::response(201, 'Task updated successfully');
+                Http::response(201, 'Countermeasure updated successfully');
             } elseif(!$errors['err']) {
                 $errors['err'] = sprintf('%s %s',
-                    sprintf(__('Unable to update %s.'), __('this task')),
+                    sprintf(__('Unable to update %s.'), __('this countermeasure')),
                     __('Correct any errors below and try again.'));
             }
             $info = Format::htmlchars($_POST);
@@ -173,7 +173,7 @@ class TasksAjaxAPI extends AjaxController {
             if (!$_POST['tids'] || !($count=count($_POST['tids'])))
                 $errors['err'] = sprintf(
                         __('You must select at least %s.'),
-                        __('one task'));
+                        __('one countermeasure'));
         } else {
             $count  =  $_REQUEST['count'];
         }
@@ -183,9 +183,9 @@ class TasksAjaxAPI extends AjaxController {
             $w = 'me';
         case 'assign':
             $inc = 'assign.tmpl.php';
-            $info[':action'] = "#tasks/mass/assign/$w";
+            $info[':action'] = "#tasks/massassign/$w";
             $info[':title'] = sprintf('Assign %s',
-                    _N('selected task', 'selected tasks', $count));
+                    _N('selected countermeasure', 'selected countermeasures', $count));
 
             $form = AssignmentForm::instantiate($_POST);
 
@@ -200,10 +200,10 @@ class TasksAjaxAPI extends AjaxController {
                 $tids = $_POST['tids'] ?: array_filter(
                         explode(',', @$_REQUEST['tids'] ?: ''));
                 if ($tids) {
-                    $tasks = Task::objects()
+                    $countermeasures = Task::objects()
                         ->distinct('dept_id')
                         ->filter(array('id__in' => $tids));
-                    $depts = $tasks->values_flat('dept_id');
+                    $depts = $countermeasures->values_flat('dept_id');
                 }
 
                 $members = Staff::objects()
@@ -254,12 +254,12 @@ class TasksAjaxAPI extends AjaxController {
                     $info['warn'] =  __('No teams available for assignment');
                 break;
             case 'me':
-                $info[':action'] = '#tasks/mass/claim';
+                $info[':action'] = '#tasks/massclaim';
                 $info[':title'] = sprintf('Claim %s',
-                        _N('selected task', 'selected tasks', $count));
+                        _N('selected countermeasure', 'selected countermeasures', $count));
                 $info['warn'] = sprintf(
                         __('Are you sure you want to CLAIM %s?'),
-                        _N('selected task', 'selected tasks', $count));
+                        _N('selected countermeasure', 'selected countermeasures', $count));
                 $verb = sprintf('%s, %s', __('Yes'), __('Claim'));
                 $id = sprintf('s%s', $thisstaff->getId());
                 $assignees = array($id => $thisstaff->getName());
@@ -292,15 +292,15 @@ class TasksAjaxAPI extends AjaxController {
                 if (!$i) {
                     $info['error'] = sprintf(
                             __('Unable to assign %s' /* %s may be pluralized */),
-                            _N('selected task', 'selected tasks', $count));
+                            _N('selected countermeasure', 'selected countermeasures', $count));
                 }
             }
             break;
         case 'transfer':
             $inc = 'transfer.tmpl.php';
-            $info[':action'] = '#tasks/mass/transfer';
+            $info[':action'] = '#tasks/masstransfer';
             $info[':title'] = sprintf('Transfer %s',
-                    _N('selected task', 'selected tasks', $count));
+                    _N('selected countermeasure', 'selected countermeasures', $count));
             $form = TransferForm::instantiate($_POST);
             if ($_POST && $form->isValid()) {
                 foreach ($_POST['tids'] as $tid) {
@@ -317,7 +317,7 @@ class TasksAjaxAPI extends AjaxController {
                 if (!$i) {
                     $info['error'] = sprintf(
                             __('Unable to transfer %s' /* %s may be pluralized */),
-                            _N('selected task', 'selected tasks', $count));
+                            _N('selected countermeasure', 'selected countermeasures', $count));
                 }
             }
             break;
@@ -325,7 +325,7 @@ class TasksAjaxAPI extends AjaxController {
             $info['status'] = 'open';
         case 'close':
             $inc = 'task-status.tmpl.php';
-            $info[':action'] = "#tasks/mass/$action";
+            $info[':action'] = "#tasks/mass$action";
             $info['status'] = $info['status'] ?: 'closed';
             $perm = $action = '';
             switch ($info['status']) {
@@ -334,19 +334,19 @@ class TasksAjaxAPI extends AjaxController {
                 // reopen closed ones.
                 $perm = Task::PERM_CREATE;
                 $info[':title'] = sprintf('Reopen %s',
-                         _N('selected task', 'selected tasks', $count));
+                         _N('selected countermeasure', 'selected countermeasures', $count));
 
                 $info['warn'] = sprintf(__('Are you sure you want to REOPEN %s?'),
-                             _N('selected task', 'selected tasks', $count)
+                             _N('selected countermeasure', 'selected countermeasures', $count)
                              );
                 break;
             case 'closed':
                 $perm = Task::PERM_CLOSE;
                 $info[':title'] = sprintf('Close %s',
-                         _N('selected task', 'selected tasks', $count));
+                         _N('selected countermeasure', 'selected countermeasures', $count));
 
                 $info['warn'] = sprintf(__('Are you sure you want to CLOSE %s?'),
-                             _N('selected task', 'selected tasks', $count)
+                             _N('selected countermeasure', 'selected countermeasures', $count)
                              );
                 break;
             default:
@@ -356,7 +356,7 @@ class TasksAjaxAPI extends AjaxController {
             // will be checked below.
             if ($perm && !$thisstaff->hasPerm($perm, false))
                 $errors['err'] = sprintf(
-                        __('You do not have permission to %s tasks'
+                        __('You do not have permission to %s countermeasures'
                             /* %s will be an action verb */ ),
                         __($action));
 
@@ -376,24 +376,24 @@ class TasksAjaxAPI extends AjaxController {
                     if (!$i) {
                         $info['error'] = sprintf(
                                 __('Unable to change status of %1$s'),
-                                _N('selected task', 'selected tasks', $count));
+                                _N('selected countermeasure', 'selected countermeasures', $count));
                     }
                 }
             }
             break;
         case 'delete':
             $inc = 'delete.tmpl.php';
-            $info[':action'] = '#tasks/mass/delete';
+            $info[':action'] = '#tasks/massdelete';
             $info[':title'] = sprintf('Delete %s',
-                    _N('selected task', 'selected tasks', $count));
+                    _N('selected countermeasure', 'selected countermeasures', $count));
             $info[':placeholder'] = sprintf(__(
                         'Optional reason for deleting %s'),
-                    _N('selected task', 'selected tasks', $count));
+                    _N('selected countermeasure', 'selected countermeasures', $count));
             $info['warn'] = sprintf(__(
                         'Are you sure you want to DELETE %s?'),
-                    _N('selected task', 'selected tasks', $count));
+                    _N('selected countermeasure', 'selected countermeasures', $count));
             $info[':extra'] = sprintf('<strong>%s</strong>',
-                        __('Deleted tasks CANNOT be recovered, including any associated attachments.')
+                        __('Deleted countermeasures CANNOT be recovered, including any associated attachments.')
                         );
 
             if ($_POST && !$errors) {
@@ -409,7 +409,7 @@ class TasksAjaxAPI extends AjaxController {
                 if (!$i) {
                     $info['error'] = sprintf(
                             __('Unable to delete %s.'),
-                            _N('selected task', 'selected tasks', $count));
+                            _N('selected countermeasure', 'selected countermeasures', $count));
                 }
             }
             break;
@@ -422,17 +422,17 @@ class TasksAjaxAPI extends AjaxController {
 
             // Assume success
             if ($i==$count) {
-                $msg = sprintf(__('Successfully %1$s %2$s.' /* Tokens are <actioned> <x selected task(s)> */),
+                $msg = sprintf(__('Successfully %1$s %2$s.' /* Tokens are <actioned> <x selected countermeasure(s)> */),
                         $actions[$action]['verbed'],
                         sprintf('%1$d %2$s',
                             $count,
-                            _N('selected task', 'selected tasks', $count))
+                            _N('selected countermeasure', 'selected countermeasures', $count))
                         );
                 $_SESSION['::sysmsgs']['msg'] = $msg;
             } else {
                 $warn = sprintf(
                         __('%1$d of %2$d %3$s %4$s'), $i, $count,
-                        _N('selected task', 'selected tasks',
+                        _N('selected countermeasure', 'selected countermeasures',
                             $count),
                         $actions[$action]['verbed']);
                 $_SESSION['::sysmsgs']['warn'] = $warn;
@@ -442,7 +442,7 @@ class TasksAjaxAPI extends AjaxController {
             $info['error'] = $errors['err'] ?: sprintf(
                     __('Unable to %1$s %2$s'),
                     __('process'),
-                    _N('selected task', 'selected tasks', $count));
+                    _N('selected countermeasure', 'selected countermeasures', $count));
         }
 
         if ($_POST)
@@ -450,11 +450,11 @@ class TasksAjaxAPI extends AjaxController {
 
 
         include STAFFINC_DIR . "templates/$inc";
-        //  Copy checked tasks to the form.
+        //  Copy checked countermeasures to the form.
         echo "
         <script type=\"text/javascript\">
         $(function() {
-            $('form#tasks input[name=\"tids[]\"]:checkbox:checked')
+            $('form#countermeasures input[name=\"tids[]\"]:checkbox:checked')
             .each(function() {
                 $('<input>')
                 .prop('type', 'hidden')
@@ -478,7 +478,7 @@ class TasksAjaxAPI extends AjaxController {
         $errors = array();
 
         $info = array(
-                ':title' => sprintf(__('Task #%s: %s'),
+                ':title' => sprintf(__('Countermeasure #%s: %s'),
                     $task->getNumber(),
                     __('Transfer')),
                 ':action' => sprintf('#tasks/%d/transfer',
@@ -492,7 +492,7 @@ class TasksAjaxAPI extends AjaxController {
                         __('%s successfully'),
                         sprintf(
                             __('%s transferred to %s department'),
-                            __('Task'),
+                            __('Countermeasure'),
                             $task->getDept()
                             )
                         );
@@ -500,7 +500,7 @@ class TasksAjaxAPI extends AjaxController {
             }
 
             $form->addErrors($errors);
-            $info['error'] = $errors['err'] ?: __('Unable to transfer task');
+            $info['error'] = $errors['err'] ?: __('Unable to transfer countermeasure');
         }
 
         $info['dept_id'] = $info['dept_id'] ?: $task->getDeptId();
@@ -512,7 +512,7 @@ class TasksAjaxAPI extends AjaxController {
         global $thisstaff;
 
         if (!($task=Task::lookup($tid)))
-            Http::response(404, __('No such task'));
+            Http::response(404, __('No such countermeasure'));
 
         if (!$task->checkStaffPerm($thisstaff, Task::PERM_ASSIGN)
                 || !($form=$task->getAssignmentForm($_POST, array(
@@ -521,7 +521,7 @@ class TasksAjaxAPI extends AjaxController {
 
         $errors = array();
         $info = array(
-                ':title' => sprintf(__('Task #%s: %s'),
+                ':title' => sprintf(__('Countermeasure #%s: %s'),
                     $task->getNumber(),
                     $task->isAssigned() ? __('Reassign') :  __('Assign')),
                 ':action' => sprintf('#tasks/%d/assign%s',
@@ -530,7 +530,7 @@ class TasksAjaxAPI extends AjaxController {
                 );
         if ($task->isAssigned()) {
             $info['notice'] = sprintf(__('%s is currently assigned to <b>%s</b>'),
-                    __('Task'),
+                    __('Countermeasure'),
                     $task->getAssigned());
         }
 
@@ -540,7 +540,7 @@ class TasksAjaxAPI extends AjaxController {
                         __('%s successfully'),
                         sprintf(
                             __('%s assigned to %s'),
-                            __('Task'),
+                            __('Countermeasure'),
                             $form->getAssignee())
                         );
                 Http::response(201, $task->getId());
@@ -582,11 +582,11 @@ class TasksAjaxAPI extends AjaxController {
                 $assigneed = $task->getAssigned();
 
             $info['error'] = sprintf(__('%s is currently assigned to <b>%s</b>'),
-                    __('This task'),
+                    __('This countermeasure'),
                     $assigned);
         } else {
             $info['warn'] = sprintf(__('Are you sure you want to CLAIM %s?'),
-                    __('this task'));
+                    __('this countermeasure'));
         }
 
         if ($_POST && $form->isValid()) {
@@ -595,14 +595,14 @@ class TasksAjaxAPI extends AjaxController {
                         __('%s successfully'),
                         sprintf(
                             __('%s assigned to %s'),
-                            __('Task'),
+                            __('Countermeasure'),
                             __('you'))
                         );
                 Http::response(201, $task->getId());
             }
 
             $form->addErrors($errors);
-            $info['error'] = $errors['err'] ?: __('Unable to claim task');
+            $info['error'] = $errors['err'] ?: __('Unable to claim countermeasure');
         }
 
         $verb = sprintf('%s, %s', __('Yes'), __('Claim'));
@@ -615,14 +615,14 @@ class TasksAjaxAPI extends AjaxController {
         global $thisstaff;
 
         if(!($task=Task::lookup($tid)))
-            Http::response(404, __('No such task'));
+            Http::response(404, __('No such countermeasure'));
 
         if (!$task->checkStaffPerm($thisstaff, Task::PERM_DELETE))
             Http::response(403, __('Permission denied'));
 
         $errors = array();
         $info = array(
-                ':title' => sprintf(__('Task #%s: %s'),
+                ':title' => sprintf(__('Countermeasure #%s: %s'),
                     $task->getNumber(),
                     __('Delete')),
                 ':action' => sprintf('#tasks/%d/delete',
@@ -633,7 +633,7 @@ class TasksAjaxAPI extends AjaxController {
             if ($task->delete($_POST,  $errors)) {
                 $_SESSION['::sysmsgs']['msg'] = sprintf(
                             __('%s #%s deleted successfully'),
-                            __('Task'),
+                            __('Countermeasure'),
                             $task->getNumber(),
                             $task->getDept());
                 Http::response(201, 0);
@@ -648,7 +648,7 @@ class TasksAjaxAPI extends AjaxController {
                     'Are you sure you want to DELETE %s?'),
                     __('this task'));
         $info[':extra'] = sprintf('<strong>%s</strong>',
-                    __('Deleted tasks CANNOT be recovered, including any associated attachments.')
+                    __('Deleted countermeasures CANNOT be recovered, including any associated attachments.')
                     );
 
         include STAFFINC_DIR . 'templates/delete.tmpl.php';
@@ -662,7 +662,7 @@ class TasksAjaxAPI extends AjaxController {
                 );
 
         if(!($task=Task::lookup($tid)) || !$task->checkStaffPerm($thisstaff))
-            Http::response(404, __('No such task'));
+            Http::response(404, __('No such countermeasure'));
 
         $perm = null;
         $info = $errors = array();
@@ -670,7 +670,7 @@ class TasksAjaxAPI extends AjaxController {
         case 'open':
             $perm = Task::PERM_CREATE;
             $info = array(
-                    ':title' => sprintf(__('Reopen Task #%s'),
+                    ':title' => sprintf(__('Reopen Countermeasure #%s'),
                         $task->getNumber()),
                     ':action' => sprintf('#tasks/%d/reopen',
                         $task->getId())
@@ -679,7 +679,7 @@ class TasksAjaxAPI extends AjaxController {
         case 'closed':
             $perm = Task::PERM_CLOSE;
             $info = array(
-                    ':title' => sprintf(__('Close Task #%s'),
+                    ':title' => sprintf(__('Close Countermeasure #%s'),
                         $task->getNumber()),
                     ':action' => sprintf('#tasks/%d/close',
                         $task->getId())
@@ -689,7 +689,7 @@ class TasksAjaxAPI extends AjaxController {
                 $errors['err'] = $info['error'] = $m;
             else
                 $info['warn'] = sprintf(__('Are you sure you want to change status of %s?'),
-                        __('this task'));
+                        __('this countermeasure'));
             break;
         default:
             Http::response(404, __('Unknown status'));
@@ -697,14 +697,14 @@ class TasksAjaxAPI extends AjaxController {
 
         if (!$errors && (!$perm || !$task->checkStaffPerm($thisstaff, $perm)))
             $errors['err'] = sprintf(
-                        __('You do not have permission to %s tasks'),
+                        __('You do not have permission to %s countermeasures'),
                         $statuses[$status]);
 
         if ($_POST && !$errors) {
             if ($task->setStatus($status, $_POST['comments'], $errors))
                 Http::response(201, 0);
 
-            $info['error'] = $errors['err'] ?: __('Unable to change status of the task');
+            $info['error'] = $errors['err'] ?: __('Unable to change status of the countermeasure');
         }
 
         $info['status'] = $status;

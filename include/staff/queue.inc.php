@@ -167,7 +167,6 @@ else {
   </div>
 
   <div class="hidden tab-pane fade" id="columns">
-
     <div>
       <h3 class="title"><?php echo __("Manage columns in this queue"); ?>
         <div class="sub-title"><?php echo __(
@@ -177,7 +176,6 @@ else {
     </div>
     <?php include STAFFINC_DIR . "templates/queue-columns.tmpl.php"; ?>
   </div>
-
   <div class="hidden tab-pane fade" id="sorting-tab">
     <h3 class="title"><?php echo __("Manage Queue Sorting"); ?>
       <div class="sub-title"><?php echo __(
