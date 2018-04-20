@@ -101,13 +101,7 @@ if(!defined('ADMINPAGE')) { ?>
     <!-- Queues -->
 
 
-    <li class=" has_sub "><a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-book"></i>  <span class="menu-arrow"></span> Knowledgebase </a> 
-        <ul class="list-unstyled">
-            <li><a href="/scp/kb.php" title="" id="nav0">FAQs</a></li>
-            <li><a href="/scp/categories.php" title="" id="nav1">Categories</a></li>
-            <li><a href="/scp/canned.php" title="" id="nav2">Canned Responses</a></li>
-        </ul>
-    </li>
+    
     <li class="  ">
     <a class="waves-effect waves-primary" href="/scp/reports.php" ><i class="ti-stats-up"></i>   Reports </a> 
     </li>
