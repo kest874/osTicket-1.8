@@ -23,19 +23,18 @@ $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
    ?>
 </div>
 <div class="pull-right">
-    <?php
-    if (!$count) { ?>
+   
         <a
-        class="btn btn-sm btn-success  ticket-task-action"
+        class="btn btn-sm btn-success  ticket-task-action" title="Add New Countermeasure" 
         data-url="tickets.php?id=<?php echo $ticket->getId(); ?>#tasks"
         data-dialog-config='{"size":"large"}'
         href="#tickets/<?php
             echo $ticket->getId(); ?>/add-task">
-            <i class="fas fa-plus"></i> <?php
-            print __('Add New Countermeasure'); ?></a>
+            <i class="fas fa-plus"></i>
+            </a>
             
     <?php
-    }
+   
     if ($count)
         Task::getAgentActions($thisstaff, array(
                     'container' => '#tasks_content',
