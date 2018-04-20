@@ -1,6 +1,6 @@
 <?php
 global $thisstaff;
-$role = $thisstaff->getRole($ticket->getDeptId());
+//$role = $thisstaff->getRole($ticket->getDeptId());
 $tasks = Task::objects()
     ->select_related('dept', 'staff', 'team')
     ->order_by('-created');
@@ -72,19 +72,17 @@ if ($count) { ?>
     <?php
     foreach($tasks as $task) {
         $id = $task->getId();
-        $access = $task->checkStaffPerm($thisstaff);
+        //$access = $task->checkStaffPerm($thisstaff);
         $assigned='';
         if ($task->staff)
             $assigned=sprintf('<span class="Icon staffAssigned">%s</span>',
                     Format::truncate($task->staff->getName(),40));
         $status = $task->isOpen() ? '<strong>open</strong>': 'closed';
         $title = Format::htmlchars(Format::truncate($task->getTitle(),40));
-        $threadcount = $task->getThread() ?
-            $task->getThread()->getNumEntries() : 0;
-        if ($access)
+        //$threadcount = $task->getThread() ? $task->getThread()->getNumEntries() : 0;
+       
             $viewhref = sprintf('#tickets/%d/tasks/%d/view', $ticket->getId(), $id);
-        else
-            $viewhref = '#';
+       
         ?>
         <tr id="<?php echo $id; ?>">
             <td align="center" class="nohover">

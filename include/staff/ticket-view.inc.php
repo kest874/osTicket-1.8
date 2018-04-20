@@ -2,7 +2,7 @@
 //Note that ticket obj is initiated in tickets.php.
 if(!defined('OSTSCPINC') || !$thisstaff || !is_object($ticket) || !$ticket->getId()) die('Invalid path');
 //Make sure the staff is allowed to access the page.
-if(!@$thisstaff->isStaff() || !$ticket->checkStaffPerm($thisstaff)) die('Access Denied');
+//if(!@$thisstaff->isStaff() || !$ticket->checkStaffPerm($thisstaff)) die('Access Denied');
 //Re-use the post info on error...savekeyboards.org (Why keyboard? -> some people care about objects than users!!)
 $info=($_POST && $errors)?Format::input($_POST):array();
 					
@@ -222,28 +222,8 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
       <strong>Category!</strong> Please set the category..
 </div>
  <?php } ?>
-<?php if($ticket->isOverdue()) { ?>
-<div class="alert alert-warning">
-      <strong>Overdue!</strong> Incident is maked overdue..
-</div>
- <?php } 
+
  
- 
- // if ($ticket->isClosed() && !$ticket->isReopenable())
-    // $alerttext = sprintf(
-            // __('<strong>Status!</strong> Current ticket status (%s) does not allow the end user to reply.'),
-            // $ticket->getStatus());
-// elseif ($ticket->isAssigned()
-        // && (($staff && $staff->getId()!=$thisstaff->getId())
-            // || ($team && !$team->hasMember($thisstaff))
-        // ))
-    // $alerttext.= sprintf('<strong>Assigned!</strong> &nbsp;&nbsp;<span class="Icon assignedTicket">%s</span>',
-            // sprintf(__('Ticket is assigned to %s'),
-                // implode('/', $ticket->getAssignees())
-                // ));
-                
-                
-  ?>              
  <?php if($alerttext) { ?>
 <div class="alert alert-warning">
       <?php echo $alerttext ;?>

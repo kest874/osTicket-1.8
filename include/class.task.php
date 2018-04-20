@@ -265,26 +265,10 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
 
         // Must be a valid staff
         if (!$staff instanceof Staff && !($staff=Staff::lookup($staff)))
-            return false;
-
-        // Check access based on department or assignment
-        if (!$staff->canAccessDept($this->getDeptId())
-                && $this->isOpen()
-                && $staff->getId() != $this->getStaffId()
-                && !$staff->isTeamMember($this->getTeamId()))
-            return false;
-
-        // At this point staff has access unless a specific permission is
-        // requested
-        if ($perm === null)
             return true;
 
-        // Permission check requested -- get role.
-        if (!($role=$staff->getRole($this->getDeptId())))
-            return false;
-
-        // Check permission based on the effective role
-        return $role->hasPerm($perm);
+        
+    
     }
 
     function getAssignee() {
@@ -1319,12 +1303,10 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
         $task->logEvent('created', null, $thisstaff);
 
         // Get role for the dept
-        $role = $thisstaff->getRole($task->dept_id);
+       // $role = $thisstaff->getRole($task->dept_id);
         // Assignment
         $assignee = $vars['internal_formdata']['assignee'];
-        if ($assignee
-                // skip assignment if the user doesn't have perm.
-                && $role->hasPerm(Task::PERM_ASSIGN)) {
+        if ($assignee) {
             $_errors = array();
             $assigneeId = sprintf('%s%d',
                     ($assignee  instanceof Staff) ? 's' : 't',

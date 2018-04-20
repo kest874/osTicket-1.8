@@ -4503,7 +4503,7 @@ class DatetimePickerWidget extends Widget {
             </div>
     
             <script type="text/javascript">
-                $(function () {
+                $(document).ready(function () {
                     $('#<?php echo $this->id; ?>').datetimepicker({
                     format: 'L',
                     });
@@ -4605,7 +4605,7 @@ class TimePickerWidget extends Widget {
             </div>
     
             <script type="text/javascript">
-                $(function () {
+                $(document).ready(function () {
                     $('#<?php echo $this->id; ?>').datetimepicker({
                     format: 'LT',
                   });
