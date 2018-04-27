@@ -3927,12 +3927,12 @@ class PhoneNumberWidget extends Widget {
         $config = $this->field->getConfiguration();
         list($phone, $ext) = explode("X", $this->value);
         ?>
-        <input id="<?php echo $this->id; ?>" type="tel" name="<?php echo $this->name; ?>" value="<?php
+        <input id="<?php echo $this->id; ?>" type="tel" class="form-control form-control-sm " name="<?php echo $this->name; ?>" value="<?php
         echo Format::htmlchars($phone); ?>"/><?php
         // Allow display of extension field even if disabled if the phone
         // number being edited has an extension
-        if ($ext || $config['ext']) { ?> <?php echo __('Ext'); ?>:
-            <input type="text" name="<?php
+        if ($ext || $config['ext']) { ?> <?php echo __('<label>Ext</label>'); ?>:
+            <input type="text" class="form-control form-control-sm " name="<?php
             echo $this->name; ?>-ext" value="<?php echo Format::htmlchars($ext);
                 ?>" size="5"/>
         <?php }
@@ -4006,7 +4006,7 @@ class ChoicesWidget extends Widget {
             $values = $have_def ? array($def_key => $choices[$def_key]) : array();
 
         //if (isset($config['classes']))
-            $classes = 'class="form-control form-control-sm '.$config['classes'].'"';
+            $classes = 'class="select2 select2-multiple '.$config['classes'].'"';
         ?>
         <select <?php echo $disabled ?> name="<?php echo $this->name; ?>[]"
             <?php echo implode(' ', array_filter(array($classes))); ?>
@@ -4030,9 +4030,9 @@ class ChoicesWidget extends Widget {
          ?>
         <script type="text/javascript">
         $(function() {
-            $("#<?php echo $this->id; ?>")
-            .select2({'minimumResultsForSearch':10, 'width': '350px'});
+            $(".select2").select2();
         });
+         
         </script>
        <?php
         }
