@@ -65,7 +65,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                 <a class="dropdown-item" target="_blank" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=print&notes=0"><i
                             class="far fa-file"></i> <?php echo __('Incident Timeline'); ?></a>
                             <a class="dropdown-item" target="_blank" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=print&notes=1"><i
-                            class="far fa-file-alt"></i> <?php echo __('Thread + Internal Notes'); ?></a>
+                            class="far fa-file-alt"></i> <?php echo __('Thread + Notes'); ?></a>
                 
                 </div>
         </div>
@@ -113,7 +113,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
             <?php If  ($topic) { ?>
                 
                                 
-                    <a class="btn btn-light waves-effect" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Post Internal Note'); ?>">
+                    <a class="btn btn-light waves-effect" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Add Note'); ?>">
                     <i class="far fa-sticky-note"></i></a>
                 
             <?php	}
@@ -477,7 +477,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
            
             <div class="form-group">
                
-                    <label><strong><?php echo __('Internal Note'); ?>:</strong><span class='error'>&nbsp;*</span></label>
+                    <label><strong><?php echo __('Note'); ?>:</strong><span class='error'>&nbsp;*</span></label>
                
                         <div class="faded" style="padding-left:0.15em"><?php
                         echo __('Note title - summary of the note (optional)'); ?></div>
@@ -576,7 +576,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
         <fieldset class="notes">
             <label class="fixed-size" for="notes"><?php echo __('Print Notes');?>:</label>
             <label class="inline checkbox">
-            <input type="checkbox" id="notes" name="notes" value="1"> <?php echo __('Print <b>Internal</b> Notes/Comments');?>
+            <input type="checkbox" id="notes" name="notes" value="1"> <?php echo __('Print Notes/Comments');?>
             </label>
         </fieldset>
         <fieldset>
