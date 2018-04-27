@@ -199,11 +199,11 @@ implements RestrictedAccess, Threadable, Searchable {
         if ($this->getMissingRequiredFields()) {
             $warning = sprintf(
                     __( '%1$s is missing data on %2$s one or more required fields %3$s and cannot be closed'),
-                    __('This ticket'),
+                    __('This incident'),
                     '', '');
         } elseif (($num=$this->getNumOpenTasks())) {
-            $warning = sprintf(__('%1$s has %2$d open tasks and cannot be closed'),
-                    __('This ticket'), $num);
+            $warning = sprintf(__('%1$s has %2$d open countermeasures and cannot be closed'),
+                    __('This incident'), $num);
         }
         return $warning ?: true;
     }
@@ -1123,7 +1123,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
     function onOpenLimit($sendNotice=true) {
         global $ost, $cfg;
         //Log the limit notice as a warning for admin.
-        $msg=sprintf(_S('Maximum open tickets (%1$d) reached for %2$s'),
+        $msg=sprintf(_S('Maximum open incidents (%1$d) reached for %2$s'),
             $cfg->getMaxOpenTickets(), $this->getEmail());
         $ost->logWarning(sprintf(_S('Maximum Open Tickets Limit (%s)'),$this->getEmail()),
             $msg);
@@ -1143,7 +1143,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         }
         $user = $this->getOwner();
         // Alert admin...this might be spammy (no option to disable)...but it is helpful..I think.
-        $alert=sprintf(__('Maximum open tickets reached for %s.'), $this->getEmail())."\n"
+        $alert=sprintf(__('Maximum open incidents reached for %s.'), $this->getEmail())."\n"
               .sprintf(__('Open tickets: %d'), $user->getNumOpenTickets())."\n"
               .sprintf(__('Max allowed: %d'), $cfg->getMaxOpenTickets())
               ."\n\n".__("Notice sent to the user.");
