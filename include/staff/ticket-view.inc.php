@@ -43,7 +43,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
 
     <div class="float-left subnavtitle" id="ticketviewtitle">
         <a href="tickets.php?id=<?php echo $ticket->getId(); ?>" title="<?php echo __('Reload'); ?>"><i class="icon-refresh"></i>
-            <?php echo sprintf(__('Ticket #%s'), $ticket->getNumber()); ?></a>
+            <?php echo sprintf(__('Incident #%s'), $ticket->getNumber()); ?></a>
                 
                 <span  class=""> - <span style="color: <?php echo $ticket->isOpen() ? '#51c351;' : '#f00;'; ?>">
                 <?php echo sprintf(__('%s'), $ticket->getStatus()); ?></span></span>
@@ -191,7 +191,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                         <a class="dropdown-item ticket-action" href="#tickets/<?php
                         echo $ticket->getId(); ?>/status/delete"
                         data-redirect="tickets.php"><i class="fa fa-trash"></i> <?php
-                        echo __('Delete Ticket'); ?></a>
+                        echo __('Delete Incident'); ?></a>
                     <?php
                      }
                     ?>
@@ -519,7 +519,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                 </div>
                 </div>
             <div class="form-group">
-                    <label><?php echo __('Ticket Status');?>:</label>
+                    <label><?php echo __('Incident Status');?>:</label>
                 
                     <div class="faded"></div>
                     <select name="note_status_id">
@@ -545,7 +545,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                     &nbsp;<span class='error'>*&nbsp;<?php echo $errors['note_status_id']; ?></span>
                </div>
         <div>
-           <input class="btn btn-primary btn-sm" type="submit" value="<?php echo __('Post Note');?>">
+           <input class="btn btn-primary btn-sm" type="submit" value="<?php echo __('Add Note');?>">
            <input class="btn btn-warning btn-sm" type="reset" value="<?php echo __('Reset');?>">
         </div>
       
