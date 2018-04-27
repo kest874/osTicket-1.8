@@ -22,7 +22,7 @@ if ($task->isOpen() && $role->hasPerm(Task::PERM_ASSIGN)) {
         $actions += array(
                 'claim' => array(
                     'href' => sprintf('#tasks/%d/claim', $task->getId()),
-                    'icon' => 'icon-user',
+                    'icon' => 'far fa-user',
                     'label' => __('Claim'),
                     'redirect' => 'tasks.php'
                 ));
@@ -31,25 +31,19 @@ if ($task->isOpen() && $role->hasPerm(Task::PERM_ASSIGN)) {
     $actions += array(
             'assign/agents' => array(
                 'href' => sprintf('#tasks/%d/assign/agents', $task->getId()),
-                'icon' => 'icon-user',
+                'icon' => 'far fa-user',
                 'label' => __('Assign to Associate'),
                 'redirect' => 'tasks.php'
             ));
 
-    $actions += array(
-            'assign/teams' => array(
-                'href' => sprintf('#tasks/%d/assign/teams', $task->getId()),
-                'icon' => 'icon-user',
-                'label' => __('Assign to Team'),
-                'redirect' => 'tasks.php'
-            ));
+    
 }
 
 if ($role->hasPerm(Task::PERM_TRANSFER)) {
     $actions += array(
             'transfer' => array(
                 'href' => sprintf('#tasks/%d/transfer', $task->getId()),
-                'icon' => 'icon-share',
+                'icon' => 'far fa-share-square',
                 'label' => __('Transfer Ownership'),
                 'redirect' => 'tasks.php'
             ));
@@ -59,7 +53,7 @@ $actions += array(
         'print' => array(
             'href' => sprintf('tasks.php?id=%d&a=print', $task->getId()),
             'class' => 'no-pjax',
-            'icon' => 'icon-print',
+            'icon' => 'fas fa-print',
             'label' => __('Print')
         ));
 
@@ -67,7 +61,7 @@ if ($role->hasPerm(Task::PERM_EDIT)) {
     $actions += array(
             'edit' => array(
                 'href' => sprintf('#tasks/%d/edit', $task->getId()),
-                'icon' => 'icon-edit',
+                'icon' => 'far fa-edit',
                 'dialog' => '{"size":"large"}',
                 'label' => __('Edit')
             ));
@@ -78,7 +72,7 @@ if (!$ticket) {
         $actions += array(
                 'delete' => array(
                     'href' => sprintf('#tasks/%d/delete', $task->getId()),
-                    'icon' => 'icon-trash',
+                    'icon' => 'far fa-trash-alt',
                     'class' => 'red button',
                     'label' => __('Delete'),
                     'redirect' => 'tasks.php'
@@ -89,7 +83,7 @@ if (!$ticket) {
         $actions += array(
                 'delete' => array(
                     'href' => sprintf('#tasks/%d/delete', $task->getId()),
-                    'icon' => 'icon-trash',
+                    'icon' => 'far fa-trash-alt',
                     'class' => 'danger',
                     'label' => __('Delete'),
                     'redirect' => 'tasks.php'
@@ -156,7 +150,7 @@ if ($task->isOverdue())
                 target="_blank"
                 class="btn btn-light btn-nbg"
                 href="tasks.php?id=<?php
-                 echo $task->getId(); ?>"><i class="icon-share"  data-placement="bottom" data-toggle="tooltip" 
+                 echo $task->getId(); ?>"><i class="far fa-share-square"  data-placement="bottom" data-toggle="tooltip" 
                  title="<?php echo __('View Countermeasure'); ?>"></i></a>
            
                 <div class="btn-group btn-group-sm" role="group">
@@ -172,7 +166,7 @@ if ($task->isOverdue())
                     
                         <a class="dropdown-item no-pjax task-action"
                             href="#tasks/<?php echo $task->getId(); ?>/reopen"><i
-                            class="icon-fixed-width icon-undo"></i> <?php
+                            class="fa fa-undo"></i> <?php
                             echo __('Reopen');?> </a>
                    
                     <?php
@@ -181,7 +175,7 @@ if ($task->isOverdue())
                    
                         <a class="dropdown-item  no-pjax task-action"
                             href="#tasks/<?php echo $task->getId(); ?>/close"><i
-                            class="icon-fixed-width icon-ok-circle"></i> <?php
+                            class="fa fa-check-circle"></i> <?php
                             echo __('Close');?> </a>
                    
                     <?php
@@ -212,7 +206,7 @@ if ($task->isOverdue())
            </div>
            
                 <a class="btn btn-light btn-nbg" id="all-ticket-tasks" href="#" >
-                <i class="fa fa-list-alt"  data-placement="bottom" data-toggle="tooltip" 
+                <i class="far fa-list-alt"  data-placement="bottom" data-toggle="tooltip" 
                  title="<?php echo __('All Countermeasures'); ?>"></i></a>
 
                  
@@ -228,7 +222,7 @@ if ($task->isOverdue())
                 <div class="btn-group btn-group-sm" role="group">
                 
                 <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
-                data-toggle="dropdown"><i class="fa fa-flag" data-placement="bottom" data-toggle="tooltip" 
+                data-toggle="dropdown"><i class="far fa-flag" data-placement="bottom" data-toggle="tooltip" 
                  title="<?php echo __('Change Status'); ?>"></i>
                 </button>
                     <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1">
@@ -237,7 +231,7 @@ if ($task->isOverdue())
                         if ($task->isClosed()) { ?>
                                 <a class="dropdown-item no-pjax task-action"
                                 href="#tasks/<?php echo $task->getId(); ?>/reopen"><i
-                                class="icon-fixed-width icon-undo"></i> <?php
+                                class="fa fa-undo"></i> <?php
                                 echo __('Reopen');?> </a>
                       
                         <?php
@@ -246,7 +240,7 @@ if ($task->isOverdue())
                        
                             <a class="dropdown-item no-pjax task-action"
                                 href="#tasks/<?php echo $task->getId(); ?>/close"><i
-                                class="icon-fixed-width icon-ok-circle"></i> <?php
+                                class="fa fa-check-circle"></i> <?php
                                 echo __('Close');?> </a>
                        
                         <?php
@@ -262,7 +256,7 @@ if ($task->isOverdue())
                 <div class="btn-group btn-group-sm" role="group">
                 
                 <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
-                data-toggle="dropdown"><i class="fa fa-user" data-placement="bottom" data-toggle="tooltip" 
+                data-toggle="dropdown"><i class="far fa-user" data-placement="bottom" data-toggle="tooltip" 
                  title="<?php echo __('Assign'); ?>"></i>
                 </button>
                     <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1">
@@ -276,17 +270,14 @@ if ($task->isOverdue())
                      <a class="dropdown-item no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/claim"><i
-                        class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
+                        class="fa fa-chevron-down"></i> <?php echo __('Claim'); ?></a>
                     <?php
                     } ?>
                      <a class="dropdown-item no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/assign/agents"><i
-                        class="icon-user"></i> <?php echo __('Associate'); ?></a>
-                     <a class="dropdown-item no-pjax task-action"
-                        data-redirect="tasks.php"
-                        href="#tasks/<?php echo $task->getId(); ?>/assign/teams"><i
-                        class="icon-group"></i> <?php echo __('Team'); ?></a>
+                        class="far fa-user"></i> <?php echo __('Associate'); ?></a>
+                     
                  
                 </div>
                 </div>
@@ -313,7 +304,7 @@ if ($task->isOverdue())
            <?php
                 }
                 ?>
-                 <a class="btn btn-light" href="tasks.php" ><i class="fa fa-list-alt" data-placement="bottom"
+                 <a class="btn btn-light" href="tasks.php" ><i class="far fa-list-alt" data-placement="bottom"
                         data-toggle="tooltip"
                         title="<?php echo __('Tasks'); ?>"></i></a>
                 

@@ -30,7 +30,7 @@ if ($agent->hasPerm(Task::PERM_ASSIGN, false)) {
 if ($agent->hasPerm(Task::PERM_TRANSFER, false)) {
     $actions += array(
             'transfer' => array(
-                'icon' => 'icon-share',
+                'icon' => 'far fa-share-square',
                 'action' => __('Transfer Ownership')
             ));
 }
@@ -39,7 +39,7 @@ if ($agent->hasPerm(Task::PERM_DELETE, false)) {
     $actions += array(
             'delete' => array(
                 'class' => 'danger',
-                'icon' => 'icon-trash',
+                'icon' => 'far fa-trash-alt',
                 'action' => __('Delete')
             ));
 }
@@ -91,7 +91,7 @@ if ($actions && !isset($options['status'])) {
    if ($agent->hasPerm(Task::PERM_CLOSE, false)) { ?>
     <div class="btn-group btn-group-sm" role="group">
             <button id="btnGroupDrop1" type="button" class="btn btn-light waves-effect dropdown-toggle" 
-            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-flag" data-placement="bottom" data-toggle="tooltip" 
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="far fa-flag" data-placement="bottom" data-toggle="tooltip" 
              title="<?php echo __('Change Status'); ?>"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1" id="action-dropdown-change-priority">
@@ -121,20 +121,18 @@ if ($actions && !isset($options['status'])) {
    if ($agent->hasPerm(Task::PERM_ASSIGN, false)) { ?>
  <div class="btn-group btn-group-sm" role="group">
             <button id="btnGroupDrop1" type="button" class="btn btn-light waves-effect dropdown-toggle" 
-            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user" data-placement="bottom" data-toggle="tooltip" 
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="far fa-user" data-placement="bottom" data-toggle="tooltip" 
              title="<?php echo __('Assign'); ?>"></i>
             </button>
                     <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1" id="action-dropdown-change-priority">
                     
                     <a class="dropdown-item no-pjax tasks-action"
             href="#tasks/mass/claim"><i
-            class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
+            class="fa fa-chevron-down"></i> <?php echo __('Claim'); ?></a>
          <a class="dropdown-item no-pjax tasks-action"
             href="#tasks/mass/assign/agents"><i
-            class="icon-user"></i> <?php echo __('Associate'); ?></a>
-         <a class="dropdown-item no-pjax tasks-action"
-            href="#tasks/mass/assign/teams"><i
-            class="icon-group"></i> <?php echo __('Team'); ?></a>
+            class="far fa-user"></i> <?php echo __('Associate'); ?></a>
+        
                     
             </div>
         </div>                   
@@ -147,7 +145,7 @@ if ($actions && !isset($options['status'])) {
  
      <a class="btn btn-light btn-sm  waves-effect  tasks-action" id="tasks-transfer" data-placement="bottom"
         data-toggle="tooltip" title="<?php echo __('Transfer Ownership'); ?>"
-        href="#tasks/mass/transfer"><i class="icon-share"></i></a>
+        href="#tasks/mass/transfer"><i class="far fa-share-square"></i></a>
     
     <?php
     }
@@ -158,7 +156,7 @@ if ($actions && !isset($options['status'])) {
     
      <a class="btn btn-icon waves-effect waves-light btn-danger tasks-action" id="tasks-delete" data-placement="bottom"
         data-toggle="tooltip" title="<?php echo __('Delete'); ?>"
-        href="#tasks/mass/delete"><i class="icon-trash"></i></a>
+        href="#tasks/mass/delete"><i class="far fa-trash-alt"></i></a>
    
 <?php
     }
