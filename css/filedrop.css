@@ -25,7 +25,7 @@
 }
 .filedrop .files .file {
     display: block;
-    padding: 5px 10px 5px 20px;
+    padding: 2px 10px 5px 20px;
     margin: 0;
     border-radius: 5px;
     height:25px;
@@ -42,7 +42,7 @@
   color: #999;
 }
 .filedrop .files .file > span {
-    padding:4px 0 0 0;
+    /*padding:4px 0 0 0;*/
     display:block;
 }
 .filedrop .files .file .upload-rate {

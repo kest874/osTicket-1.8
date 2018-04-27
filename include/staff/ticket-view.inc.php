@@ -223,7 +223,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
       <?php echo $alerttext ;?>
 </div>
  <?php } ?>
-  
+ <form action="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit" method="post" id="save"  enctype="multipart/form-data" > 
 <div class="card-box">
 <?php 
  
@@ -243,7 +243,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
   } ?>
   
  
-  <form action="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit" method="post" id="save"  enctype="multipart/form-data" >
+  
   
       <fieldset>
         
