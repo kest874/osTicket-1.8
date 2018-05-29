@@ -34,7 +34,7 @@ else {
 <div class="subnav">
 
     <div class="float-left subnavtitle" id="ticketviewtitle">
-       <?php echo __('Manage Associate');?> <?php if ($staff->staff_id) { ?>
+       <?php echo $title;?> <?php if ($staff->staff_id) { ?>
     -  <span class ="text-pink"><?php echo $staff->getName(); ?><span>
     <?php } ?>
     </div>
@@ -149,7 +149,7 @@ foreach (StaffAuthenticationBackend::allRegistered() as $ab) {
 }
 if (count($bks) > 1) {
 ?>
-        <tr>
+        <tr class="hidden">
           <td><?php echo __('Authentication Backend'); ?>:</td>
           <td>
             <select name="backend" id="backend-selection"
@@ -224,17 +224,17 @@ if (count($bks) > 1) {
           <th colspan="3">
             <?php echo __('Access'); ?>
             <div><small><?php echo __(
-            "Select the Team(s) the associate is allowed to access and the corresponding effective role."
+            "Select the Location(s) the associate is allowed to access and the corresponding effective role."
           ); ?>
             </small></div><br>
-            <div><?php echo __('Primary Team'); ?> <span
+            <div><?php echo __('Primary Location'); ?> <span
             class="error">*</span></div>
           </th>
         </tr>
         <tr>
           <td style="vertical-align:top">
             <select name="dept_id" id="dept_id" data-quick-add="department">
-              <option value="0">&mdash; <?php echo __('Select Department');?> &mdash;</option>
+              <option value="0">&mdash; <?php echo __('Select Location');?> &mdash;</option>
               <?php
               foreach (Dept::getDepartments() as $id=>$name) {
                 $sel=($staff->dept_id==$id)?'selected="selected"':'';
@@ -295,14 +295,14 @@ if (count($bks) > 1) {
               <?php echo __('Alerts'); ?>
             </label>
             <a href="#" class="pull-right drop-access" title="<?php echo __('Delete');
-              ?>"><i class="icon-trash"></i></a>
+              ?>"><i class="fa fa-trash"></i></a>
           </td>
         </tr>
       </tbody>
       <tbody>
         <tr class="header">
           <th colspan="3">
-            <?php echo __('Extended Team(s) Access'); ?>
+            <?php echo __('Extended Locaiton(s) Access'); ?>
           </th>
         </tr>
 <?php
@@ -315,7 +315,7 @@ foreach ($staff->dept_access as $dept_access) {
           <td colspan="2">
             <i class="icon-plus-sign"></i>
             <select id="add_access" data-quick-add="department">
-              <option value="0">&mdash; <?php echo __('Select Team');?> &mdash;</option>
+              <option value="0">&mdash; <?php echo __('Select Location');?> &mdash;</option>
               <?php
               foreach ($depts as $id=>$name) {
                 echo sprintf('<option value="%d">%s</option>',$id,Format::htmlchars($name));

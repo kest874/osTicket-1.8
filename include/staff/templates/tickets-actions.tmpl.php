@@ -23,7 +23,7 @@ if ($agent->hasPerm(Ticket::PERM_EDIT, false)) { ?>
            <?php foreach (Priority::getPriorities() as $Pid => $Pname) { ?>
      <a class="dropdown-item no-pjax tickets-action"
         href="#tickets/mass/priority/<?php echo $Pid; ?>"><i
-        class="fas fa-level-up-alt"></i> <?php echo $Pname; ?></a>
+        class="fa fa-level-up"></i> <?php echo $Pname; ?></a>
 <?php } ?>
            
         <?php } ?>   
@@ -36,7 +36,7 @@ if ($agent->hasPerm(Ticket::PERM_EDIT, false)) {?>
 
         <a class="btn btn-light tickets-action" id="tickets-helptopic" data-placement="bottom"
     data-toggle="tooltip" title="<?php echo __('Change Category'); ?>"
-   href="#tickets/mass/topic"><i class="far fa-bookmark"></i></a>
+   href="#tickets/mass/topic"><i class="fa fa-bookmark"></i></a>
 
 <?php } ?>
 
@@ -47,7 +47,7 @@ if ($agent->hasPerm(Ticket::PERM_ASSIGN, false)) {?>
 <div class="btn-group btn-group-sm" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Assign'); ?>"><i class="far fa-user"></i>
+         title="<?php echo __('Assign'); ?>"><i class="fa fa-user"></i>
         </button>
     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1" id="action-dropdown-change-priority">
 
@@ -56,7 +56,7 @@ if ($agent->hasPerm(Ticket::PERM_ASSIGN, false)) {?>
         class="fa fa-chevron-down"></i> <?php echo __('Claim'); ?></a>
      <a class="dropdown-item no-pjax tickets-action"
         href="#tickets/mass/assign/agents"><i
-        class="far fa-user"></i> <?php echo __('Agent'); ?></a>
+        class="fa fa-user"></i> <?php echo __('Agent'); ?></a>
       <a class="dropdown-item no-pjax tickets-action"
         href="#tickets/mass/assign/teams"><i
         class="fa fa-users"></i> <?php echo __('Team'); ?></a>
@@ -70,7 +70,7 @@ if ($agent->hasPerm(Ticket::PERM_TRANSFER, false)) {?>
 
  <a class="btn btn-light tickets-action" id="tickets-transfer" data-placement="bottom"
     data-toggle="tooltip" title="<?php echo __('Transfer'); ?>"
-    href="#tickets/mass/transfer"><i class="far fa-share-square"></i></a>
+    href="#tickets/mass/transfer"><i class="fa fa-share-square"></i></a>
 
 <?php
 }
@@ -79,7 +79,7 @@ if ($agent->hasPerm(Ticket::PERM_DELETE, false)) {?>
 
  <a class="btn btn-icon waves-effect waves-light btn-danger tickets-action" id="tickets-delete" data-placement="bottom"
     data-toggle="tooltip" title="<?php echo __('Delete'); ?>"
-    href="#tickets/mass/delete"><i class="far fa-trash-alt"></i></a>
+    href="#tickets/mass/delete"><i class="fa fa-trash"></i></a>
 
 <?php
 }

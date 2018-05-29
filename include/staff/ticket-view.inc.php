@@ -63,9 +63,9 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                         
                 <a class="dropdown-item" target="_blank" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=print&notes=0"><i
-                            class="far fa-file"></i> <?php echo __('Incident Timeline'); ?></a>
+                            class="fa fa-file"></i> <?php echo __('Incident Timeline'); ?></a>
                             <a class="dropdown-item" target="_blank" href="tickets.php?id=<?php echo $ticket->getId(); ?>&a=print&notes=1"><i
-                            class="far fa-file-alt"></i> <?php echo __('Thread + Notes'); ?></a>
+                            class="fa fa-file-alt"></i> <?php echo __('Thread + Notes'); ?></a>
                 
                 </div>
         </div>
@@ -84,7 +84,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
             <div class="btn-group btn-group-sm" role="group">
             <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle waves-effect" 
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-            title="<?php echo $ticket->isAssigned() ? __('Assign') : __('Reassign'); ?>"><i class="far fa-user"></i>
+            title="<?php echo $ticket->isAssigned() ? __('Assign') : __('Reassign'); ?>"><i class="fa fa-user"></i>
             </button>
                 <div class="dropdown-menu " aria-labelledby="btnGroupDrop1">
                     
@@ -97,7 +97,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                     <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/claim"><i class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
                     <?php
                     } ?>
-                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/agents"><i class="far fa-user"></i> <?php echo __('Agent'); ?></a>
+                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/agents"><i class="fa fa-user"></i> <?php echo __('Agent'); ?></a>
                     <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/teams"><i class="fa fa-users"></i> <?php echo __('Team'); ?></a>
             
                 </div>
@@ -105,7 +105,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
       <?php } ?>
                 
             <a  class="btn btn-light waves-effect" id="savebutton" onclick="document.getElementById('save').submit();" 
-            data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Save'); ?>"><i class="far fa-save"></i></a>
+            data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Save'); ?>"><i class="fa fa-save"></i></a>
          
             <a class="btn btn-light waves-effect" id="cancelbutton" href="" onclick="window.location.href="tickets.php?id=<?php echo $ticket->getId(); ?>" 
             data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Cancel');?>" ><i class="fa fa-ban"></i></a>		
@@ -114,7 +114,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                 
                                 
                     <a class="btn btn-light waves-effect" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Add Note'); ?>">
-                    <i class="far fa-sticky-note"></i></a>
+                    <i class="fa fa-sticky-note"></i></a>
                 
             <?php	}
                 
@@ -132,13 +132,13 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                 <?php
                      if ($role->hasPerm(Ticket::PERM_EDIT)) { ?>
                         <a class="dropdown-item ticket-action" href="#tickets/<?php
-                        echo $ticket->getId(); ?>/change-user"><i class="far fa-user"></i> <?php
+                        echo $ticket->getId(); ?>/change-user"><i class="fa fa-user"></i> <?php
                         echo __('Change Owner'); ?></a>
                     <?php
                      }
                      if($ticket->isOpen() && ($dept && $dept->isManager($thisstaff))) {
                         if($ticket->isAssigned()) { ?>
-                            <a class="dropdown-item " id="ticket-release" href="#release"><i class="far fa-user"></i> <?php
+                            <a class="dropdown-item " id="ticket-release" href="#release"><i class="fa fa-user"></i> <?php
                                 echo __('Release (unassign) Ticket'); ?></a>
                         <?php
                         }
@@ -205,7 +205,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                     <i class="fa fa-chevron-up"></i></a>	
                     
         <a class="btn btn-light btn-sm waves-effect" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Tickets'); ?>"
-                    href="tickets.php<?php ?>"><i class="far fa-list-alt"></i></a>			
+                    href="tickets.php<?php ?>"><i class="fa fa-list-alt"></i></a>			
                 
     </div>
 <div class="clearfix"></div>

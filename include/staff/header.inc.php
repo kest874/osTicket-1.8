@@ -50,21 +50,6 @@ if ($lang) {
     
     <link type="text/css" href="<?php echo ROOT_PATH; ?>css/ui-lightness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" media="screen" />
     
-    
-    <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/fa-brands.min.css">
-    <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/fa-regular.min.css">
-    <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/fa-solid.min.css">
-    <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/fa-svg-with-js.min.css">
-    <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/fontawesome.min.css">
-    <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/fontawesome-all.min.css">
-    
-    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>assets/js/fa-brands.min.js"></script>
-    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>assets/js/fa-regular.min.js"></script>
-    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>assets/js/fa-solid.min.js"></script>
-    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>assets/js/fontawesome-all.min.js"></script>
-    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>assets/js/fontawesome.min.js"></script>
-    
-    
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/dropdown.css">
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/loadingbar.css"/>
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/flags.css">
@@ -175,7 +160,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                         <li class="list-inline-item dropdown notification-list  mr-0">
                             <a class="nav-link dropdown-toggle waves-effect waves-light nav-user" data-toggle="dropdown" href="#" role="button"
                                aria-haspopup="false" aria-expanded="false">
-                                 <i class="far fa-user" style="font-size: 16px;"></i>
+                                 <i class="fa fa-user-o" style="font-size: 16px;"></i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right profile-dropdown " aria-labelledby="Preview">
                                <!-- item-->

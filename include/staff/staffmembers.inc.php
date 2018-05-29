@@ -89,7 +89,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                             <span ><a href="<?php echo $refresh_url; ?>"
                                 title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i> 
                                 </a> &nbsp;
-            <?php echo __('Associates');?>
+            <?php echo __('Agents');?>
                                 
                                 </span>
                         
@@ -101,7 +101,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                     
                     <a class="btn btn-icon waves-effect waves-light btn-success"
                        href="staff.php?a=add" data-placement="bottom"
-                    data-toggle="tooltip" title="<?php echo __('Add Associate'); ?>">
+                    data-toggle="tooltip" title="<?php echo __('Add Agent'); ?>">
                         <i class="fa fa-plus-square"></i>
                     </a>
             
@@ -158,11 +158,11 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
        <button type="submit" class="input-group-addon"  ><i class="fa fa-search"></i>
                 </button>
                 
-                    <select name="did" id="did" class="form-control form-control-sm" style="height: 34px;">
-             <option value="0">&mdash; <?php echo __( 'All Teams');?> &mdash;</option>
-                    <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) if (strlen($name) > 5 ){  $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
+            <select name="did" id="did" class="form-control form-control-sm" style="height: 34px;">
+             <option value="0">&mdash; <?php echo __( 'All Locations');?> &mdash;</option>
+                    <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) if (strlen($name) > 1 ){  $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
                     <option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
-             <input type="submit" name="submit" value="&#xf0b0;" class="input-group-addon fa" style="padding-top: 7px"/>
+             <input type="submit" name="submit" value="&#xf0b0;" class="input-group-addon fa" />
         
             </div>
             &nbsp;<i class="help-tip icon-question-sign" href="#apply_filtering_criteria"></i>
