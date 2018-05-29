@@ -22,7 +22,7 @@ if ($task->isOpen() && $role->hasPerm(Task::PERM_ASSIGN)) {
         $actions += array(
                 'claim' => array(
                     'href' => sprintf('#tasks/%d/claim', $task->getId()),
-                    'icon' => 'far fa-user',
+                    'icon' => 'fa fa-user',
                     'label' => __('Claim'),
                     'redirect' => 'tasks.php'
                 ));
@@ -31,7 +31,7 @@ if ($task->isOpen() && $role->hasPerm(Task::PERM_ASSIGN)) {
     $actions += array(
             'assign/agents' => array(
                 'href' => sprintf('#tasks/%d/assign/agents', $task->getId()),
-                'icon' => 'far fa-user',
+                'icon' => 'fa fa-user',
                 'label' => __('Assign to Associate'),
                 'redirect' => 'tasks.php'
             ));
@@ -43,7 +43,7 @@ if ($role->hasPerm(Task::PERM_TRANSFER)) {
     $actions += array(
             'transfer' => array(
                 'href' => sprintf('#tasks/%d/transfer', $task->getId()),
-                'icon' => 'far fa-share-square',
+                'icon' => 'fa fa-share-square',
                 'label' => __('Transfer Ownership'),
                 'redirect' => 'tasks.php'
             ));
@@ -53,7 +53,7 @@ $actions += array(
         'print' => array(
             'href' => sprintf('tasks.php?id=%d&a=print', $task->getId()),
             'class' => 'no-pjax',
-            'icon' => 'fas fa-print',
+            'icon' => 'fa fa-print',
             'label' => __('Print')
         ));
 
@@ -61,7 +61,7 @@ if ($role->hasPerm(Task::PERM_EDIT)) {
     $actions += array(
             'edit' => array(
                 'href' => sprintf('#tasks/%d/edit', $task->getId()),
-                'icon' => 'far fa-edit',
+                'icon' => 'fa fa-edit',
                 'dialog' => '{"size":"large"}',
                 'label' => __('Edit')
             ));
@@ -72,7 +72,7 @@ if (!$ticket) {
         $actions += array(
                 'delete' => array(
                     'href' => sprintf('#tasks/%d/delete', $task->getId()),
-                    'icon' => 'far fa-trash-alt',
+                    'icon' => 'fa fa-trash',
                     'class' => 'red button',
                     'label' => __('Delete'),
                     'redirect' => 'tasks.php'
@@ -83,7 +83,7 @@ if (!$ticket) {
         $actions += array(
                 'delete' => array(
                     'href' => sprintf('#tasks/%d/delete', $task->getId()),
-                    'icon' => 'far fa-trash-alt',
+                    'icon' => 'fa fa-trash-alt',
                     'class' => 'danger',
                     'label' => __('Delete'),
                     'redirect' => 'tasks.php'
@@ -150,7 +150,7 @@ if ($task->isOverdue())
                 target="_blank"
                 class="btn btn-light btn-nbg"
                 href="tasks.php?id=<?php
-                 echo $task->getId(); ?>"><i class="far fa-share-square"  data-placement="bottom" data-toggle="tooltip" 
+                 echo $task->getId(); ?>"><i class="fa fa-share-square"  data-placement="bottom" data-toggle="tooltip" 
                  title="<?php echo __('View Countermeasure'); ?>"></i></a>
            
                 <div class="btn-group btn-group-sm" role="group">
@@ -206,7 +206,7 @@ if ($task->isOverdue())
            </div>
            
                 <a class="btn btn-light btn-nbg" id="all-ticket-tasks" href="#" >
-                <i class="far fa-list-alt"  data-placement="bottom" data-toggle="tooltip" 
+                <i class="fa fa-list-alt"  data-placement="bottom" data-toggle="tooltip" 
                  title="<?php echo __('All Countermeasures'); ?>"></i></a>
 
                  
@@ -222,7 +222,7 @@ if ($task->isOverdue())
                 <div class="btn-group btn-group-sm" role="group">
                 
                 <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
-                data-toggle="dropdown"><i class="far fa-flag" data-placement="bottom" data-toggle="tooltip" 
+                data-toggle="dropdown"><i class="fa fa-flag" data-placement="bottom" data-toggle="tooltip" 
                  title="<?php echo __('Change Status'); ?>"></i>
                 </button>
                     <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1">
@@ -256,7 +256,7 @@ if ($task->isOverdue())
                 <div class="btn-group btn-group-sm" role="group">
                 
                 <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
-                data-toggle="dropdown"><i class="far fa-user" data-placement="bottom" data-toggle="tooltip" 
+                data-toggle="dropdown"><i class="fa fa-user" data-placement="bottom" data-toggle="tooltip" 
                  title="<?php echo __('Assign'); ?>"></i>
                 </button>
                     <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1">
@@ -276,7 +276,7 @@ if ($task->isOverdue())
                      <a class="dropdown-item no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/assign/agents"><i
-                        class="far fa-user"></i> <?php echo __('Associate'); ?></a>
+                        class="fa fa-user"></i> <?php echo __('Associate'); ?></a>
                      
                  
                 </div>
@@ -304,7 +304,7 @@ if ($task->isOverdue())
            <?php
                 }
                 ?>
-                 <a class="btn btn-light" href="tasks.php" ><i class="far fa-list-alt" data-placement="bottom"
+                 <a class="btn btn-light" href="tasks.php" ><i class="fa fa-list-alt" data-placement="bottom"
                         data-toggle="tooltip"
                         title="<?php echo __('Tasks'); ?>"></i></a>
                 
