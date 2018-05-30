@@ -549,7 +549,7 @@ class Format {
             else {
                 $formatter = $cache[$key];
             }
-            return $formatter->format($timestamp);
+            //return $formatter->format($timestamp);
         }
         // Fallback using strftime
         static $user_timezone;
