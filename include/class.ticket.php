@@ -3060,7 +3060,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         }
         
         $ticket->assignToTeam($vars['assignId'], false, !$vars['staffId']);
-        $ticket->assignToStaff($thisstaff->getId());
+        $ticket->assignToStaff($thisstaff->getId(),false);
         // Update the estimated due date in the database
         $ticket->updateEstDueDate();
         /**********   double check auto-response  ************/

@@ -2,11 +2,8 @@
 if(!defined('ADMINPAGE')) { ?>
                                 
     <li  class="has_sub">
-    <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class=" ti-dashboard"></i> <span class="menu-arrow"></span> Dashboard </a> 
-        <ul class="list-unstyled">
-            <li><a href="/scp/dashboard.php?a=0" title="" id="nav1">My Team</a></li>
-            <li><a href="/scp/dashboard.php?a=1" title="" id="nav1">All Teams</a></li>
-        </ul>
+    <a class="waves-effect waves-primary" href="dashboard.php" ><i class=" ti-dashboard"></i> </span> Dashboard </a> 
+       
     </li>
     <li class=" has_sub ">
         <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-user"></i>  <span class="menu-arrow"></span> Associates </a> 
