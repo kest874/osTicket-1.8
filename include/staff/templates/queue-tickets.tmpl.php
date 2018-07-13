@@ -55,30 +55,7 @@ $states = array('open');
 $states = array_merge($states, array('closed'));
 
     
-    $Location = Dept::objects()
-                ->order_by('name')
-                ->filter(array('ispublic' => '0'));
-   // var_dump($Team);           
-                     
-    foreach ($Location as $cLocation) {
-        $query = Ticket::objects();   
-        
-        $lqfilter = Q::any(new Q($qfs));
-       
-        if ($sta  >0){
-         $query->filter($lqfilter);
-         }     
-         
-        $Q = $queue->getBasicQuery();
-        $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
-        
-        $query->aggregate(array(
-            $queue->getId() => SqlAggregate::COUNT($expr)))
-            ->filter(array('dept__pid' => $cLocation->getId()));
-         if ($filters == 1){  
-            $lfiltercount[$cLocation->getId()] = $query->values()->one();
-         } 
-    }      
+   
     
     
  $Team = Dept::objects()
@@ -344,41 +321,11 @@ $pageNav->setURL('tickets.php', $args);
 
 
 <div class="btn-group btn-group-sm float-right m-b-10 <?php if ($filters == 0){ echo 'hidden';}?>" role="group" aria-label="Button group with nested dropdown">
-<?php
-      $lselected = Dept::getNamebyId($loc);
-     
-      if (!$lselected ) {$lselected = 'Location';}
-
-?>                     
- <div class="btn-group btn-group-sm" role="group">
-        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" 
-        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Filter Location'); ?>"><i class="fa fa-filter"></i> <?php echo $lselected;?>
-        </button>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
-              
-              <a href="tickets.php?l=0&t=<?php echo $_GET['t']?>&s=<?php echo $_GET['s'];?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
-              
-              <?php
-
-                $Location = Dept::objects()
-                ->order_by('name')
-               ->filter(array('ispublic' => '0'));
-          
-                     foreach ($Location as $cLocation) { 
-                     if ($lfiltercount[$cLocation->getId()]['__count'] > 0) {?>
-                
-                   <a href="tickets.php?l=<?php echo $cLocation->id ?>&t=<?php echo $_GET['t']?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cLocation->name?>
-                     <span class="badge badge-pill badge-default  pull-right"><?php echo $lfiltercount[$cLocation->getId()]['__count'] ?></span> </a>
-                     <?php }}      
-        ?>
-            </div>
-    </div>
     
 <?php
       $tselected = Dept::getNamebyId($tea);
      
-      if (!$tselected ) {$tselected = 'Owning Team';}
+      if (!$tselected ) {$tselected = 'Location';}
 ?>
 
 
