@@ -2432,12 +2432,12 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
     }
     function update($vars, &$errors) {
         global $cfg, $thisstaff;
-        if (!$cfg
-            || !($this->checkStaffPerm($thisstaff,
-                Ticket::PERM_EDIT))
-        ) {
-            return false;
-        }
+        // if (!$cfg
+            // || !($this->checkStaffPerm($thisstaff,
+                // Ticket::PERM_EDIT))
+        // ) {
+            // return false;
+        // }
         $vars['duedate'] = date("Y-m-d H:i:s", strtotime($vars['duedate']));
         if ($vars['duedate'] == '1970-01-01 00:00:00') $vars['duedate'] = null;
         
@@ -2451,14 +2451,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
                 __('Missing or invalid data'),
                 __('Correct any errors below and try again'));
         $vars['note'] = ThreadEntryBody::clean($vars['note']);
-        if ($vars['duedate']) {
-                if ($vars['duedate'] <= date("Y-m-d H:i:s"))
-                $errors['duedate']=__('Due date must be in the future');
-        }
-        if (isset($vars['source']) // Check ticket source if provided
-                && !array_key_exists($vars['source'], Ticket::getSources()))
-            $errors['source'] = sprintf( __('Invalid source given - %s'),
-                    Format::htmlchars($vars['source']));
+        
         // Validate dynamic meta-data
         $forms = DynamicFormEntry::forTicket($this->getId());
         foreach ($forms as $form) {

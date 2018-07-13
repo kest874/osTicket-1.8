@@ -258,6 +258,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
 				<input type="hidden" name="do" value="update">
 				<input type="hidden" name="a" value="edit">
 				<input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
+                
                 <label width="100"><?php echo __('Status');?>:</label> 
                     <?php echo ($S = $ticket->getStatus()) ? $S->display() : ''; ?>
                 </div>  
