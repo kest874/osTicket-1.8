@@ -99,7 +99,7 @@ if(!defined('ADMINPAGE')) { ?>
 
 
     
-    <li class="  ">
+    <li class="hidden">
     <a class="waves-effect waves-primary" href="/scp/reports.php" ><i class="ti-stats-up"></i>   Reports </a> 
     </li>
 
