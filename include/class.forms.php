@@ -2731,22 +2731,22 @@ class AssigneeField extends ChoiceField {
             $A = current($choices);
             $criteria = $this->getCriteria();
             $agents = array();
-            if (($dept=$config['dept']) && $dept->assignMembersOnly()) {
-                if (($members = $dept->getAvailableMembers()))
-                    foreach ($members as $member)
-                        $agents[$member->getId()] = $member;
-            } else {
+            // if (($dept=$config['dept']) && $dept->assignMembersOnly()) {
+                // if (($members = $dept->getAvailableMembers()))
+                    // foreach ($members as $member)
+                        // $agents[$member->getId()] = $member;
+            // } else {
                 $agents = Staff::getStaffMembers($criteria);
-            }
+            // }
 
             foreach ($agents as $id => $name)
                 $A['s'.$id] = $name;
 
             next($choices);
             $T = current($choices);
-            if (($teams = Dept::GetDepartments()))
-                foreach ($teams as $id => $name)
-                    $T['t'.$id] = $name;
+            // if (($teams = Dept::GetDepartments()))
+                // foreach ($teams as $id => $name)
+                    // $T['t'.$id] = $name;  
 
             $this->_choices = $choices;
         }

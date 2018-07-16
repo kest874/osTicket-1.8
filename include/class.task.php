@@ -296,8 +296,8 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
         if ($this->staff)
             return $this->staff;
 
-        if ($this->team)
-            return $this->team;
+        //if ($this->team)
+          //  return $this->team;
 
         return null;
     }
@@ -310,8 +310,8 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
         $id = '';
         if ($assignee instanceof Staff)
             $id = 's'.$assignee->getId();
-        elseif ($assignee instanceof Team)
-            $id = 't'.$assignee->getId();
+       // elseif ($assignee instanceof Team)
+       //     $id = 't'.$assignee->getId();
 
         return $id;
     }
@@ -323,8 +323,8 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             $assignees[] = $this->staff->getName();
 
         //Add team assignment
-        if ($this->team)
-            $assignees[] = $this->team->getName();
+      //  if ($this->team)
+      //     $assignees[] = $this->team->getName();
 
         return $assignees;
     }
@@ -465,16 +465,16 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
                     if (!$assignees)
                         $info['warn'] =  __('No Associates available for assignment');
                     break;
-            case 'teams':
-                if (($teams = Dept::GetDepartments()))
-                    foreach ($teams as $id => $name)
-                        if (strlen($name) > 5)
-                        $assignees['t'.$id] = $name;
+            // case 'teams':
+                // if (($teams = Dept::GetDepartments()))
+                    // foreach ($teams as $id => $name)
+                        // if (strlen($name) > 5)
+                        // $assignees['t'.$id] = $name;
 
-                if (!$source && $this->isOpen() && $this->team)
-                    $assignee = sprintf('t%d', $this->team->getId());
-                $prompt = __('Select a Team');
-                break;
+                // if (!$source && $this->isOpen() && $this->team)
+                    // $assignee = sprintf('t%d', $this->team->getId());
+                // $prompt = __('Select a Team');
+                // break;
         }
 
         // Default to current assignee if source is not set
@@ -484,7 +484,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
         $form = AssignmentForm::instantiate($source, $options);
 
         if ($assignees)
-            $form->setAssignees($assignees);
+            $form->setAssignees($assignees); 
 
         if ($prompt && ($f=$form->getField('assignee')))
             $f->configure('prompt', $prompt);
@@ -1520,16 +1520,9 @@ extends AbstractForm {
     function buildFields() {
     Global $thisstaff;
         $fields = array(
-                'dept_id' => new DepartmentField(array(
-                    'id'=>1,
-                    'label' => __('Owned By Team'),
-                    'required' => true,
-					'default' => $thisstaff ->getDeptId(),
-                    'layout' => new GridFluidCell(6),
-                    )),
                 'assignee' => new AssigneeField(array(
                     'id'=>2,
-                    'label' => __('Assigned To:'),
+                    'label' => __('Assigned To'),
                     'required' => false,
                     'layout' => new GridFluidCell(6),
                     )),
@@ -1549,7 +1542,7 @@ extends AbstractForm {
 
         $mode = @$this->options['mode'];
         if ($mode && $mode == 'edit') {
-            unset($fields['dept_id']);
+            //unset($fields['dept_id']);
             unset($fields['assignee']);
         }
 

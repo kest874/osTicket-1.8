@@ -1,34 +1,40 @@
 <?php
 global $thisstaff;
-
-$role = $thisstaff->getRole($ticket->getDeptId());
-
+//$role = $thisstaff->getRole($ticket->getDeptId());
 $tasks = Task::objects()
     ->select_related('dept', 'staff', 'team')
     ->order_by('-created');
-
 $tasks->filter(array(
             'object_id' => $ticket->getId(),
             'object_type' => 'T'));
-
 $count = $tasks->count();
 $pageNav = new Pagenate($count,1, 100000); //TODO: support ajax based pages
 $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
-
 ?>
-<div id="tasks_content" style="display:block;">
-<div class="pull-left subnavtitle">
+<div id="tasks_content" style="display:block;" class="m-b-20">
+<div class="pull-left">
    <?php
     if ($count) {
-         echo '<strong>'.$showing.'</strong>';
+        echo '<strong>'.$showing.'</strong>';
     } else {
-        echo sprintf(__('%s does not have any tasks'), $ticket? 'This ticket' :
+        echo sprintf(__('%s does not have any Countermeasures'), $ticket? 'This incident' :
                 'System');
     }
    ?>
 </div>
-<!--<div class="btn-group btn-group-sm pull-right ticketbuttons" role="group" aria-label="Button group with nested dropdown">-->
+<div class="pull-right">
+   
+        <a
+        class="btn btn-sm btn-success  ticket-task-action" title="Add New Countermeasure" 
+        data-url="tickets.php?id=<?php echo $ticket->getId(); ?>#tasks"
+        data-dialog-config='{"size":"large"}'
+        href="#tickets/<?php
+            echo $ticket->getId(); ?>/add-task">
+            <i class="fa fa-plus"></i>
+            </a>
+            
     <?php
+   
     if ($count)
         Task::getAgentActions($thisstaff, array(
                     'container' => '#tasks_content',
@@ -36,7 +42,7 @@ $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
                         $ticket->getId()),
                     'morelabel' => __('Options')));
     ?>
-<!--</div>-->
+</div>
 <div class="clear"></div>
 <div>
 <?php
@@ -46,7 +52,7 @@ if ($count) { ?>
 <?php csrf_token(); ?>
  <input type="hidden" name="a" value="mass_process" >
  <input type="hidden" name="do" id="action" value="" >
- <table class="table table-striped table-hover table-condensed table-sm">
+ <table class="list" border="0" cellspacing="1" cellpadding="2" width="940">
     <thead>
         <tr>
             <?php
@@ -66,37 +72,31 @@ if ($count) { ?>
     <?php
     foreach($tasks as $task) {
         $id = $task->getId();
-        $access = $task->checkStaffPerm($thisstaff);
+        //$access = $task->checkStaffPerm($thisstaff);
         $assigned='';
         if ($task->staff)
             $assigned=sprintf('<span class="Icon staffAssigned">%s</span>',
                     Format::truncate($task->staff->getName(),40));
-
         $status = $task->isOpen() ? '<strong>open</strong>': 'closed';
-
         $title = Format::htmlchars(Format::truncate($task->getTitle(),40));
-        $threadcount = $task->getThread() ?
-            $task->getThread()->getNumEntries() : 0;
-
-        if ($access)
+        //$threadcount = $task->getThread() ? $task->getThread()->getNumEntries() : 0;
+       
             $viewhref = sprintf('#tickets/%d/tasks/%d/view', $ticket->getId(), $id);
-        else
-            $viewhref = '#';
-
+       
         ?>
         <tr id="<?php echo $id; ?>">
             <td align="center" class="nohover">
                 <input class="ckb" type="checkbox" name="tids[]"
                 value="<?php echo $id; ?>" <?php echo $sel?'checked="checked"':''; ?>>
             </td>
-            <td nowrap>
+            <td align="center" nowrap>
               <a class="Icon no-pjax preview"
                 title="<?php echo __('Preview Task'); ?>"
                 href="<?php echo $viewhref; ?>"
                 data-preview="#tasks/<?php echo $id; ?>/preview"
                 ><?php echo $task->getNumber(); ?></a></td>
-            <td nowrap><?php echo
-            Format::datetime($task->created); ?></td>
+            <td align="center" nowrap><?php echo
+            Format::date($task->taskdate); ?></td>
             <td><?php echo $status; ?></td>
             <td>
                 <?php
@@ -135,7 +135,6 @@ if ($count) { ?>
 </div>
 <script type="text/javascript">
 $(function() {
-
     $(document).off('click.taskv');
     $(document).on('click.taskv', 'tbody.tasks a, a#reload-task', function(e) {
         e.preventDefault();
@@ -154,7 +153,6 @@ $(function() {
         } else {
             $(this).trigger('mouseenter');
         }
-
         return false;
      });
     // Ticket Tasks
@@ -183,7 +181,6 @@ $(function() {
         }, $options);
         return false;
     });
-
     $('#ticket-tasks-count').html(<?php echo $count; ?>);
 });
 </script>

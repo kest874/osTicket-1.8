@@ -23,7 +23,7 @@ $topic = $ticket->getHelpTopicId();
 //Useful warnings and errors the user might want to know!
 if ($ticket->isClosed() && !$ticket->isReopenable())
     $warn = sprintf(
-            __('Current ticket status (%s) does not allow the end user to reply.'),
+            __('Current suggestion status (%s) does not allow the end user to reply.'),
             $ticket->getStatus());
 elseif ($ticket->isAssigned()
         && (($staff && $staff->getId()!=$thisstaff->getId())
@@ -55,7 +55,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
 
     <div class="float-left subnavtitle" id="ticketviewtitle">
         <a href="tickets.php?id=<?php echo $ticket->getId(); ?>" title="<?php echo __('Reload'); ?>"><i class="icon-refresh"></i>
-            <?php echo sprintf(__('Ticket #%s'), $ticket->getNumber()); ?></a>
+            <?php echo sprintf(__('Suggestion #%s'), $ticket->getNumber()); ?></a>
                 
                 <span  class=""> - <span style="color: <?php echo $ticket->isOpen() ? '#51c351;' : '#f00;'; ?>">
                 <?php echo sprintf(__('%s'), $ticket->getStatus()); ?></span></span>
@@ -145,7 +145,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                      if($ticket->isOpen() && ($dept && $dept->isManager($thisstaff))) {
                         if($ticket->isAssigned()) { ?>
                             <a class="dropdown-item " id="ticket-release" href="#release"><i class="icon-user"></i> <?php
-                                echo __('Release (unassign) Ticket'); ?></a>
+                                echo __('Release (unassign) Suggestion'); ?></a>
                         <?php
                         }
                         if(!$ticket->isOverdue()) { ?>
@@ -197,7 +197,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                         <a class="dropdown-item ticket-action" href="#tickets/<?php
                         echo $ticket->getId(); ?>/status/delete"
                         data-redirect="tickets.php"><i class="icon-trash"></i> <?php
-                        echo __('Delete Ticket'); ?></a>
+                        echo __('Delete Suggestion'); ?></a>
                     <?php
                      }
                     ?>
@@ -256,7 +256,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
 </div>
  <?php } ?>
   
-<div class="card-box">
+<div class="card-box ">
 <?php 
  
 $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
@@ -433,7 +433,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
     </fieldset>
   </form>
 </div>
-<div class="card-box p-b-0">
+<div class="card-box m-t-10">
 <?php
 $tcount = $ticket->getThreadEntries($types)->count();
 ?>
@@ -518,32 +518,6 @@ $tcount = $ticket->getThreadEntries($types)->count();
                                
                                     <label><strong><?php echo __('Response');?>:</strong></label>
                                 
-                <?php if ($cfg->isCannedResponseEnabled()) { ?>
-                                    <select id="cannedResp" name="cannedResp">
-                                        <option value="0" selected="selected"><?php echo __('Select a canned response');?></option>
-                                        <option value='original'><?php echo __('Original Message'); ?></option>
-                                        <option value='lastmessage'><?php echo __('Last Message'); ?></option>
-                                        <?php
-                                        if(($cannedResponses=Canned::responsesByDeptId($ticket->getDeptId()))) {
-                                            echo '<option value="0" disabled="disabled">
-                                                ------------- '.__('Premade Replies').' ------------- </option>';
-                                            foreach($cannedResponses as $id =>$title)
-                                                echo sprintf('<option value="%d">%s</option>',$id,$title);
-                                        }
-                                        ?>
-                                    </select>
-                           
-                <?php } # endif (canned-resonse-enabled)
-                                    $signature = '';
-                                    switch ($thisstaff->getDefaultSignatureType()) {
-                                    case 'dept':
-                                        if ($dept && $dept->canAppendSignature())
-                                           $signature = $dept->getSignature();
-                                       break;
-                                    case 'mine':
-                                        $signature = $thisstaff->getSignature();
-                                        break;
-                                    } ?>
                                     <input type="hidden" name="draft_id" value=""/>
                                     <textarea style="display:none;" name="response" id="response" cols="50"
                                         data-signature-field="signature" data-dept-id="<?php echo $dept->getId(); ?>"
@@ -588,7 +562,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                            <div  class="form-group">
                             
                                
-                                    <label><strong><?php echo __('Ticket Status');?>:</strong></label>
+                                    <label><strong><?php echo __('Suggestion Status');?>:</strong></label>
                                 
   
                                     <select name="reply_status_id">
@@ -679,7 +653,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                 </div>
                 </div>
             <div class="form-group">
-                    <label><?php echo __('Ticket Status');?>:</label>
+                    <label><?php echo __('Suggestion Status');?>:</label>
                 
                     <div class="faded"></div>
                     <select name="note_status_id">
@@ -720,7 +694,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
  </div> <!-- update area -->
  </div>
 <div style="display:none;" class="dialog" id="print-options">
-    <h3><?php echo __('Ticket Print Options');?></h3>
+    <h3><?php echo __('Suggestion Print Options');?></h3>
     <a class="close" href=""><i class="icon-remove-circle"></i></a>
     <hr/>
     <form action="tickets.php?id=<?php echo $ticket->getId(); ?>
