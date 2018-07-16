@@ -30,7 +30,7 @@ $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
         data-dialog-config='{"size":"large"}'
         href="#tickets/<?php
             echo $ticket->getId(); ?>/add-task">
-            <i class="fas fa-plus"></i>
+            <i class="fa fa-plus"></i>
             </a>
             
     <?php

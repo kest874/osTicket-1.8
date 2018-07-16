@@ -1,5 +1,5 @@
 <?php
-global $cfg;
+global $cfg; 
 
 if (!$info['title'])
     $info['title'] = sprintf(__('%s Task #%s'),

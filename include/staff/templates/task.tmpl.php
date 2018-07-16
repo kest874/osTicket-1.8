@@ -30,7 +30,7 @@ if ($info['error']) {
                 );
 
         $iform = $iform ?: TaskForm::getInternalForm();
-        echo $iform->asTable(__("Countermeasure Visibility & Assignment"));
+        echo $iform->asTable(("")); 
 ?>
     <hr>
     <p class="full-width">

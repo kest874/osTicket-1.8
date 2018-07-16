@@ -350,7 +350,7 @@ if (!$ticket) { ?>
     <div class="col-md-3">
     
     <div><label><?php echo __('Owned By');?>:</label>
-                        <?php echo Format::htmlchars($task->dept->getName()); ?></div>
+                        <?php //echo Format::htmlchars($task->dept->getName()); ?></div>
     
     <?php
                     if ($task->isOpen()) { ?>
@@ -380,7 +380,7 @@ if (!$ticket) { ?>
                     <?php
                     } ?>
                     
-                    <div><label><?php echo __('Collaborators');?>:</label>
+                    <div class="hidden"><label><?php echo __('Collaborators');?>:</label> 
                         
                             <?php
                             $collaborators = __('Add Participants');
