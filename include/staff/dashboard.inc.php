@@ -46,14 +46,26 @@
     
     $sql="select distinct location from (SELECT count(ticket_id) as incidents, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
-    group by d.name, ht.topic) a";
+    group by d.name, ht.topic) a order by location";
         
     $locs = db_query($sql);
     
 
-    $sql="SELECT count(ticket_id) as COUNT, d.name as location, ht.topic   
+    $sql="select sum(count) as COUNT, location, topic from (SELECT count(ticket_id) as COUNT, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
-    group by d.name, ht.topic";
+    group by d.name, ht.topic 
+     
+     union all 
+     
+    select 0 as COUNT, d.location,  ht.topic from ost_help_topic ht join (
+    
+    select distinct location from (SELECT count(ticket_id) as incidents, d.name as location, ht.topic   
+    FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
+    group by d.name, ht.topic) a
+    
+    ) d on 1=1)data
+    
+    group by location, topic";
         
     $topicsdata = db_query($sql);
     
@@ -97,11 +109,10 @@ Highcharts.chart('IncidentLocationbyType', {
         }
     },
     legend: {
-        align: 'right',
-        x: -30,
-        verticalAlign: 'top',
-        y: 25,
-        floating: true,
+        align: 'center',
+        verticalAlign: 'bottom',
+        x: 0,
+        y: 0,
         backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
         borderColor: '#CCC',
         borderWidth: 1,
@@ -116,6 +127,14 @@ Highcharts.chart('IncidentLocationbyType', {
             stacking: 'normal',
             dataLabels: {
                 enabled: true,
+                formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
                 color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
             }
         }
@@ -140,20 +159,32 @@ Highcharts.chart('IncidentLocationbyType', {
 <?php
     $sql="select distinct topic from (SELECT count(ticket_id) as incidents, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
-    group by d.name, ht.topic) a";
+    group by d.name, ht.topic) a order by topic";
         
     $topics = db_query($sql);
     
     $sql="select distinct location from (SELECT count(ticket_id) as incidents, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
-    group by d.name, ht.topic) a";
+    group by d.name, ht.topic) a order by location";
         
     $locs = db_query($sql);
     
 
-    $sql="SELECT count(ticket_id) as COUNT, d.name as location, ht.topic   
+    $sql="select sum(count) as COUNT, location, topic from (SELECT count(ticket_id) as COUNT, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
-    group by d.name, ht.topic";
+    group by d.name, ht.topic 
+     
+     union all 
+     
+    select 0 as COUNT, d.location,  ht.topic from ost_help_topic ht join (
+    
+    select distinct location from (SELECT count(ticket_id) as incidents, d.name as location, ht.topic   
+    FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
+    group by d.name, ht.topic) a
+    
+    ) d on 1=1)data
+    
+    group by location, topic";
         
     $topicsdata = db_query($sql);
     
@@ -190,6 +221,13 @@ Highcharts.chart('IncidentTypebyLocation', {
         },
         stackLabels: {
             enabled: true,
+            formatter: function(){
+        var val = this.total;
+        if (val > 0) {
+            return val;
+        }
+        return '';
+    },
             style: {
                 fontWeight: 'bold',
                 color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
@@ -197,11 +235,10 @@ Highcharts.chart('IncidentTypebyLocation', {
         }
     },
     legend: {
-        align: 'right',
-        x: -30,
-        verticalAlign: 'top',
-        y: 25,
-        floating: true,
+       align: 'center',
+        verticalAlign: 'bottom',
+        x: 0,
+        y: 0,
         backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
         borderColor: '#CCC',
         borderWidth: 1,
@@ -216,7 +253,16 @@ Highcharts.chart('IncidentTypebyLocation', {
             stacking: 'normal',
             dataLabels: {
                 enabled: true,
-                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+                  formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                
             }
         }
     },
