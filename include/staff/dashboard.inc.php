@@ -35,6 +35,21 @@
     
 </div>
 
+<div class="row">
+    <div class="col-lg-6">
+        <div class="portlet" id="bodypartbylocation" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+     <div class="col-lg-6">
+        <div class="portlet" id="locationbybodypart" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+    
+    
+</div>
+
 <script>
 
 <?php
@@ -197,7 +212,7 @@ Highcharts.chart('IncidentTypebyLocation', {
         type: 'column'
     },
     title: {
-        text: 'Incident Type by Location',
+        text: 'Incident Location by Primary Body Part',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -281,9 +296,289 @@ Highcharts.chart('IncidentTypebyLocation', {
  });
 });      
 
-<?php $sql="SELECT * FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id
+<?php 
 
-where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 " ?>
-     
+$sql="select distinct name as location from (
+SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a";
+
+$locs = db_query($sql);
+
+$sql="select distinct value as bodypart  from (
+SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a order by bodypart";
+
+$bodyparts = db_query($sql);
+
+
+$sql="select sum(COUNT) as COUNT, bodypart, location from 
+	(select count(value) as COUNT, value as bodypart, name as location from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a
+
+	group by location, value 
+
+	union
+
+	select 0 as COUNT, bodypart, location  from 
+	(select distinct name as location from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )l)loc join
+
+
+	(select distinct value as bodypart  from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
+    
+	group by bodypart, location order by location, bodypart
+";
+
+$locsdata = db_query($sql);
+
+ ?>
+
+
+$(function () {
+Highcharts.chart('bodypartbylocation', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Primary Body Part by Location',
+        style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+    },
+    credits: false,
+    xAxis: {
+        categories: [
+        <?php
+  foreach ($bodyparts as $bodypart) {
+             
+             echo "'".preg_replace('/\s+/', ' ', $bodypart["bodypart"])."',";
+   }   
+   ?>]
+    },
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Total Incidents'
+        },
+        stackLabels: {
+            enabled: true,
+            formatter: function(){
+        var val = this.total;
+        if (val > 0) {
+            return val;
+        }
+        return '';
+    },
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+    },
+    legend: {
+       align: 'center',
+        verticalAlign: 'bottom',
+        x: 0,
+        y: 0,
+        backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+        borderColor: '#CCC',
+        borderWidth: 1,
+        shadow: false
+    },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+    },
+    plotOptions: {
+        column: {
+            stacking: 'normal',
+            dataLabels: {
+                enabled: true,
+                  formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                
+            }
+        }
+    },
+    series: [<?php
+        foreach ($locs as $loc) { ?>
+        
+        {
+            name: '<?php echo $loc["location"]?>',
+            data: [<?php foreach ($locsdata as $locdata) {
+
+                if ($loc["location"] == $locdata["location"]) echo $locdata["COUNT"].',';
+            }?>]
+        }, 
+        
+        <?php } ?>]
+ });
+});      
+
+
+<?php 
+
+$sql="select distinct name as location from (
+SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a";
+
+$locs = db_query($sql);
+
+$sql="select distinct value as bodypart  from (
+SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a order by bodypart";
+
+$bodyparts = db_query($sql);
+
+
+$sql="select sum(COUNT) as COUNT, bodypart, location from 
+	(select count(value) as COUNT, value as bodypart, name as location from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a
+
+	group by location, value 
+
+	union
+
+	select 0 as COUNT, bodypart, location  from 
+	(select distinct name as location from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )l)loc join
+
+
+	(select distinct value as bodypart  from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
+    
+	group by bodypart, location order by location, bodypart
+";
+
+$locsdata = db_query($sql);
+
+ ?>
+
+
+$(function () {
+Highcharts.chart('locationbybodypart', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Location by Primary Body Part',
+        style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+    },
+    credits: false,
+    xAxis: {
+        categories: [
+        <?php
+  foreach ($locs as $loc) {
+             
+             echo "'".preg_replace('/\s+/', ' ', $loc["location"])."',";
+   }   
+   ?>]
+    },
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Total Incidents'
+        },
+        stackLabels: {
+            enabled: true,
+            formatter: function(){
+        var val = this.total;
+        if (val > 0) {
+            return val;
+        }
+        return '';
+    },
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+    },
+    legend: {
+       align: 'center',
+        verticalAlign: 'bottom',
+        x: 0,
+        y: 0,
+        backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+        borderColor: '#CCC',
+        borderWidth: 1,
+        shadow: false
+    },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+    },
+    plotOptions: {
+        column: {
+            stacking: 'normal',
+            dataLabels: {
+                enabled: true,
+                  formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                
+            }
+        }
+    },
+    series: [<?php
+        foreach ($bodyparts as $bodypart) { ?>
+        
+        {
+            name: '<?php echo $bodypart["bodypart"]?>',
+            data: [<?php foreach ($locsdata as $locdata) {
+
+                if ($bodypart["bodypart"] == $locdata["bodypart"]) echo $locdata["COUNT"].',';
+            }?>]
+        }, 
+        
+        <?php } ?>]
+ });
+});           
 </script>
 
