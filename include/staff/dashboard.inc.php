@@ -37,6 +37,21 @@
 
 <div class="row">
     <div class="col-lg-6">
+        <div class="portlet" id="injurytypebylocation" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+     <div class="col-lg-6">
+        <div class="portlet" id="locationbyinjurytype" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+    
+    
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
         <div class="portlet" id="bodypartbylocation" ><!-- /primary heading -->
             
         </div>
@@ -302,7 +317,295 @@ $sql="select distinct name as location from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a";
+where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a";
+
+$locs = db_query($sql);
+
+$sql="select distinct value as injurytype  from (
+SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a order by injurytype";
+
+$injurytypes = db_query($sql);
+
+
+$sql="select sum(COUNT) as COUNT, injurytype, location from 
+	(select count(value) as COUNT, value as injurytype, name as location from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
+
+	group by location, value 
+
+	union
+
+	select 0 as COUNT, injurytype, location  from 
+	(select distinct name as location from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )l)loc join
+
+
+	(select distinct value as injurytype  from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
+    
+	group by injurytype, location order by location, injurytype
+";
+
+$locsdata = db_query($sql);
+
+ ?>
+
+
+$(function () {
+Highcharts.chart('injurytypebylocation', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Injury Type Part by Location',
+        style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+    },
+    credits: false,
+    xAxis: {
+        categories: [
+        <?php
+  foreach ($injurytypes as $injurytype) {
+             
+             echo "'".preg_replace('/\s+/', ' ', $injurytype["injurytype"])."',";
+   }   
+   ?>]
+    },
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Total Incidents'
+        },
+        stackLabels: {
+            enabled: true,
+            formatter: function(){
+        var val = this.total;
+        if (val > 0) {
+            return val;
+        }
+        return '';
+    },
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+    },
+    legend: {
+       align: 'center',
+        verticalAlign: 'bottom',
+        x: 0,
+        y: 0,
+        backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+        borderColor: '#CCC',
+        borderWidth: 1,
+        shadow: false
+    },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+    },
+    plotOptions: {
+        column: {
+            stacking: 'normal',
+            dataLabels: {
+                enabled: true,
+                  formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                
+            }
+        }
+    },
+    series: [<?php
+        foreach ($locs as $loc) { ?>
+        
+        {
+            name: '<?php echo $loc["location"]?>',
+            data: [<?php foreach ($locsdata as $locdata) {
+
+                if ($loc["location"] == $locdata["location"]) echo $locdata["COUNT"].',';
+            }?>]
+        }, 
+        
+        <?php } ?>]
+ });
+});      
+
+
+<?php 
+
+$sql="select distinct name as location from (
+SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a order by location";
+
+$locs = db_query($sql);
+
+$sql="select distinct value as injurytype  from (
+SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a order by injurytype";
+
+$injurytypes = db_query($sql);
+
+
+$sql="select sum(COUNT) as COUNT, injurytype, location from 
+	(select count(value) as COUNT, value as injurytype, name as location from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
+
+	group by location, value 
+
+	union
+
+	select 0 as COUNT, injurytype, location  from 
+	(select distinct name as location from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )l)loc join
+
+
+	(select distinct value as injurytype  from (
+	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
+    
+	group by injurytype, location order by location, injurytype
+";
+
+$locsdata = db_query($sql);
+
+ ?>
+
+
+$(function () {
+Highcharts.chart('locationbyinjurytype', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Location by Injury Type',
+        style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+    },
+    credits: false,
+    xAxis: {
+        categories: [
+        <?php
+  foreach ($locs as $loc) {
+             
+             echo "'".preg_replace('/\s+/', ' ', $loc["location"])."',";
+   }   
+   ?>]
+    },
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Total Incidents'
+        },
+        stackLabels: {
+            enabled: true,
+            formatter: function(){
+        var val = this.total;
+        if (val > 0) {
+            return val;
+        }
+        return '';
+    },
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+    },
+    legend: {
+       align: 'center',
+        verticalAlign: 'bottom',
+        x: 0,
+        y: 0,
+        backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+        borderColor: '#CCC',
+        borderWidth: 1,
+        shadow: false
+    },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+    },
+    plotOptions: {
+        column: {
+            stacking: 'normal',
+            dataLabels: {
+                enabled: true,
+                  formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                
+            }
+        }
+    },
+    series: [<?php
+        foreach ($injurytypes as $injurytype) { ?>
+        
+        {
+            name: '<?php echo $injurytype["injurytype"]?>',
+            data: [<?php foreach ($locsdata as $locdata) {
+
+                if ($injurytype["injurytype"] == $locdata["injurytype"]) echo $locdata["COUNT"].',';
+            }?>]
+        }, 
+        
+        <?php } ?>]
+ });
+}); 
+
+
+
+
+<?php 
+
+$sql="select distinct name as location from (
+SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
+FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
+
+where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a";
 
 $locs = db_query($sql);
 
@@ -310,7 +613,7 @@ $sql="select distinct value as bodypart  from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a order by bodypart";
+where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a order by bodypart";
 
 $bodyparts = db_query($sql);
 
@@ -320,7 +623,7 @@ $sql="select sum(COUNT) as COUNT, bodypart, location from
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a
+	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
 
 	group by location, value 
 
@@ -331,14 +634,14 @@ $sql="select sum(COUNT) as COUNT, bodypart, location from
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )l)loc join
+	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )l)loc join
 
 
 	(select distinct value as bodypart  from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
+	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
     
 	group by bodypart, location order by location, bodypart
 ";
@@ -445,7 +748,7 @@ $sql="select distinct name as location from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a order by location";
+where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a order by location";
 
 $locs = db_query($sql);
 
@@ -453,7 +756,7 @@ $sql="select distinct value as bodypart  from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a order by bodypart";
+where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a order by bodypart";
 
 $bodyparts = db_query($sql);
 
@@ -463,7 +766,7 @@ $sql="select sum(COUNT) as COUNT, bodypart, location from
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a
+	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
 
 	group by location, value 
 
@@ -474,14 +777,14 @@ $sql="select sum(COUNT) as COUNT, bodypart, location from
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )l)loc join
+	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )l)loc join
 
 
 	(select distinct value as bodypart  from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-	where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
+	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
     
 	group by bodypart, location order by location, bodypart
 ";
