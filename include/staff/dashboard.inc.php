@@ -168,7 +168,7 @@ $(function () {
         },
         yAxis: {
             title: {
-                text: 'Number of Tickets'
+                text: 'Number of Incidents'
             }
         },
         plotOptions: {
