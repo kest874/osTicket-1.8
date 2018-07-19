@@ -19,6 +19,13 @@
    <div class="clearfix"></div> 
 </div> 
 
+<div class="row">
+    <div class="col-lg-12">
+        <div class="portlet" id="YTDIncidents" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+</div>
 
 <div class="row">
     <div class="col-lg-6">
@@ -66,6 +73,133 @@
 </div>
 
 <script>
+
+<?php
+
+$sql="select distinct concat(MONTHNAME(STR_TO_DATE(CALENDARWEEK, '%m')),' ',CALENDARYEAR) as cat from
+(select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
+
+select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+
+from
+
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a)b
+
+group by cat, location order by CALENDARYEAR, CALENDARWEEK";
+
+$periods = db_query($sql);
+
+$sql="select distinct location from
+(select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
+
+select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+
+from
+
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a)b
+
+group by location order by location, CALENDARYEAR, CALENDARWEEK";
+
+$locs = db_query($sql);
+
+$sql="select sum(COUNT) as COUNT, concat(MONTHNAME(STR_TO_DATE(CALENDARWEEK, '%m')),' ',CALENDARYEAR) as cat, location from
+(select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
+
+select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+
+from
+
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a
+
+union all 
+select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
+(select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
+
+select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+
+from
+
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a)b
+
+group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
+
+(select distinct location from
+(select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
+
+select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+
+from
+
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a)b
+
+group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1
+
+
+
+)b
+
+group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
+
+
+$locsdata = db_query($sql);
+
+?>
+
+$(function () {
+    Highcharts.chart('YTDIncidents', {
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Incidents YTD by location',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+        },
+        xAxis: {
+            categories: [<?php
+      foreach ($periods as $period) {
+                 
+                 echo "'".preg_replace('/\s+/', ' ', $period["cat"])."',";
+       }   
+       ?>]
+        },
+        yAxis: {
+            title: {
+                text: 'Number of Tickets'
+            }
+        },
+        plotOptions: {
+        spline: {
+            marker: {
+                radius: 4,
+                lineColor: '#666666',
+                lineWidth: 1
+            }
+        }
+        },
+        
+               series: [
+        
+         <?php
+        foreach ($locs as $loc) { ?>
+        
+        {
+            name: '<?php echo $loc["location"]?>',
+            data: [<?php foreach ($locsdata as $locdata) {
+                if ($locdata["location"] == $loc["location"]) echo $locdata["COUNT"].',';
+            }?>]
+        }, 
+        
+        <?php } ?>
+        ]
+    });
+});      
+
+
+
 
 <?php
     $sql="select distinct topic from (SELECT count(ticket_id) as incidents, d.name as location, ht.topic   
