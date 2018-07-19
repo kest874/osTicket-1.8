@@ -445,7 +445,7 @@ $sql="select distinct name as location from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
 
-where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a";
+where fev.field_id = 148 /*or field_id = 149*/ and fev.value is not null and length(fev.value) > 7 )a order by location";
 
 $locs = db_query($sql);
 
