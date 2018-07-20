@@ -115,6 +115,9 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                                 
                     <a class="btn btn-light waves-effect" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Add Note'); ?>">
                     <i class="fa fa-sticky-note"></i></a>
+                    
+                    <a class="btn btn-light waves-effect" href="#note" id="countermeasures" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Countermeasures'); ?>">
+                    <i class="fa fa-check-square-o"></i></a>
                 
             <?php	}
                 
@@ -743,6 +746,17 @@ $(function() {
         // Scroll to the response section.
             var $stop = $(document).height();
             var $s = $('div#response_options');
+            if ($s.length)
+                $stop = $s.offset().top-125
+            $('html, body').animate({scrollTop: $stop}, 'fast');
+                        
+    })
+    $('#countermeasures').click(function(e){
+    	e.preventDefault();
+        $('#ticket_tabs a[href="#tasks"]').tab('show');
+        // Scroll to the response section.
+            var $stop = $(document).height();
+            var $s = $('div#ticket_tabs');
             if ($s.length)
                 $stop = $s.offset().top-125
             $('html, body').animate({scrollTop: $stop}, 'fast');
