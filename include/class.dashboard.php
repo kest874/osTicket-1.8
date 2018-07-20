@@ -168,14 +168,20 @@ $YearToDateImplemented = Ticket::objects()
         foreach ($YearToDateImplemented as $row)
                 $YearToDateImplemented = $row;
 //Open Tasks Count
-$tasks = Task::objects()
-        ->filter(array('dept_id' => $thisstaff->dept_id))
+$otasks = Task::objects()
         ->filter(array('flags' => '1'))
-        ->values_flat('dept_id')
         ->aggregate(array('count' => SqlAggregate::COUNT('id')));
                    
-        foreach ($tasks as $row)
+        foreach ($otasks as $row)
                 $OpenTasks = $row;
+$ctasks = Task::objects()
+        ->filter(array('flags' => '0'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('id')));
+                   
+        foreach ($ctasks as $row)
+                $ClosedTasks = $row;                
+                
+                
                 
 $MemberCount = $DeptMembers["count"];
 $OwnedSuggestions = $OwnedSuggestions["count"];
@@ -221,6 +227,7 @@ $YTDTargetImplemented = $MemberCount * 12;
 $YTDImpAheadBehind = $YTDImplemented - $YTDTargetImplemented;
 $YTDImpAheadBehindColor = ($YTDImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
 $YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%';
-$OpenTasks = ($OpenTasks["count"]) ? $OpenTasks["count"] : 0
+$OpenTasks = ($OpenTasks["count"]) ? $OpenTasks["count"] : 0;
+$ClosedTasks = ($ClosedTasks["count"]) ? $ClosedTasks["count"] : 0;
 
 ?>

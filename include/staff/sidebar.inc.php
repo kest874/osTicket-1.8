@@ -14,7 +14,7 @@ if(!defined('ADMINPAGE')) { ?>
     <li class=" has_sub "><a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-list"></i>  <span class="menu-arrow"></span> Countermeasures </a> <ul class="list-unstyled">
     
     <li><a href="/scp/tasks.php?status=open" title="" id="nav0">Open <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $OpenTasks; ?></span></a></li>
-    <li><a href="/scp/tasks.php?status=closed" title="" id="nav1">Closed <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $CloseTasks; ?></span></a></li></ul>
+    <li><a href="/scp/tasks.php?status=closed" title="" id="nav1">Closed <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $ClosedTasks; ?></span></a></li></ul>
     </li>
     <!-- Queues -->
     <?php
