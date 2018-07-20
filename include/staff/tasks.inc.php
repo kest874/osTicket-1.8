@@ -51,7 +51,7 @@ $queue_columns = array(
             ),
         'dept' => array(
             'width' => '16%',
-            'heading' => __('Team'),
+            'heading' => __('Location'),
             'sort_col'  => 'dept__name',
             ),
         'assignee' => array(
@@ -119,7 +119,7 @@ case 'open':
 // Apply filters
 $filters = array();
 if ($status) {
-    $SQ = new Q(array('flags__hasbit' => TaskModel::ISOPEN));
+    $SQ = new Q(array('flags' =>1));
     if (!strcasecmp($status, 'closed'))
         $SQ->negate();
 
@@ -129,22 +129,7 @@ if ($status) {
 if ($filters)
     $tasks->filter($filters);
 
-// Impose visibility constraints
-// ------------------------------------------------------------
-// -- Open and assigned to me
-$visibility = array(
-    new Q(array('flags__hasbit' => TaskModel::ISOPEN, 'staff_id' => $thisstaff->getId()))
-);
-// -- Routed to a department of mine
-if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
-    $visibility[] = new Q(array('dept_id__in' => $depts));
-// -- Open and assigned to a team of mine
-if (($teams = $thisstaff->getDepartments()) && count(array_filter($teams)))
-    $visibility[] = new Q(array(
-        'team_id__in' => array_filter($teams),
-        'flags__hasbit' => TaskModel::ISOPEN
-    ));
-$tasks->filter(Q::any($visibility));
+
 
 // Add in annotations
 $tasks->annotate(array(
@@ -304,9 +289,6 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
       </div>   
    <div class="clearfix"></div> 
 </div> 
-
-
-
 
 <div class="card-box">
 <div class="row">

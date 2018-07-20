@@ -113,6 +113,7 @@ class TaskModel extends VerySimpleModel {
                 /* @trans */ 'Ability to delete tasks'),
             );
 
+            
     const ISOPEN    = 0x0001;
     const ISOVERDUE = 0x0002;
 
