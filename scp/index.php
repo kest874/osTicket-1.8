@@ -14,5 +14,7 @@
     vim: expandtab sw=4 ts=4 sts=4:
 **********************************************************************/
 //Nothing for now...simply redirect to tickets page.
-require('tickets.php');
+header("Location: tickets.php?queue=1&p=1&l=0&t=0&s=0");
+die();
+//require('tickets.php'); 
 ?>
