@@ -17,15 +17,15 @@ $filters=$_SESSION['filter'];
 if ($_GET['a'] == 'search' || $_GET['queue'] == 'adhoc') $filters=0;
 
 if (is_numeric($l)) $_SESSION['loc'] = $l;
-if (is_numeric($t)) $_SESSION['tea'] = $t;
+if (is_numeric($t)) $_SESSION['top'] = $t;
 if (is_numeric($s)) $_SESSION['sta'] = $s;
 
 $loc = $_SESSION['loc'];
-$tea = $_SESSION['tea'];
+$top = $_SESSION['top'];
 $sta = $_SESSION['sta'];
 
 $_SESSION['loc'] = $loc;
-$_SESSION['tea'] = $tea;
+$_SESSION['top'] = $top;
 $_SESSION['sta'] = $sta;
 $_SESSION['filter'] = $filters;
 
@@ -34,10 +34,10 @@ $qft = array();
 $qfs = array();
 
 if ($loc !=='0')
-  $qfl =  array('dept__pid' => $loc );
+  $qfl =  array('dept__id' => $loc );
 
-if ($tea !=='0')
-  $qft =  array('dept_id' => $tea );
+if ($top !=='0')
+  $qft =  array('topic_id' => $top );
 
 if ($sta && $sta !==0)
   $qfs = array('status_id' => $sta);
@@ -47,7 +47,7 @@ if ($sta && $sta !==0)
   
  $qfilter = Q::any(new Q($qf));
 
-if (($loc && $loc !==0) || ($sta && $sta !==0) || ($tea && $tea !==0))
+if (($loc && $loc !==0) || ($top && $top !==0) || ($sta && $sta !==0))
 $tickets->filter($qfilter);
 
 
@@ -58,30 +58,66 @@ $states = array_merge($states, array('closed'));
    
     
     
- $Team = Dept::objects()
+ $Location = Dept::objects()
                 ->order_by('name');
-   // var_dump($Team);           
+   // var_dump($Location);           
                      
-    foreach ($Team as $cTeam) {
+    foreach ($Location as $cLocation) {
         $query = Ticket::objects();   
         
-        $lqfilter = Q::any(new Q($qfs));
+        $lqfilter = Q::any(new Q($qf1));
        
         if ($sta  >0){
-         $query->filter($lqfilter);
+         $query->filter($qfilter);
          }     
+         
+         if ($loc  >0){
+         $query->filter($qfilter);
+         }   
          
         $Q = $queue->getBasicQuery();
         $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
               
        $query->aggregate(array(
             $queue->getId() => SqlAggregate::COUNT($expr)))
-            ->filter(array('dept_id' => $cTeam->getId()));
+            ->filter(array('dept_id' => $cLocation->getId()));
          
         if ($filters == 1){ 
-           $tfiltercount[$cTeam->getId()] = $query->values()->one();
+           $lfiltercount[$cLocation->getId()] = $query->values()->one();
         }
-    }                     
+    }    
+
+
+ $Topic = Topic::objects()
+                ->order_by('topic');
+   // var_dump($Location);           
+                     
+   foreach ($Topic as $cTopic) {
+        $query = Ticket::objects();   
+        
+        $tqfilter = Q::any(new Q($qf1));
+       
+        if ($sta  >0){
+         $query->filter($qfilter);
+         }     
+         
+         if ($top  >0){
+         $query->filter($qfilter);
+         }   
+         
+        $Q = $queue->getBasicQuery();
+        $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
+              
+       $query->aggregate(array(
+            $queue->getId() => SqlAggregate::COUNT($expr)))
+            ->filter(array('topic_id' => $cTopic->getId()));
+         
+        if ($filters == 1){ 
+           $tfiltercount[$cTopic->getId()] = $query->values()->one();
+        }
+    }    
+
+    
 $Statuses = array();
 foreach (TicketStatusList::getStatuses(
             array('states' => $states)) as $status) {
@@ -98,17 +134,18 @@ foreach (TicketStatusList::getStatuses(
     foreach ($Statuses as $stat){
     
     $query = Ticket::objects();   
-    $sqfilter = Q::any(new Q($qft));
+   // $sqfilter = Q::any(new Q($qft));
    
     if ($loc  >0){
      $sqfilter = Q::any(new Q($qfl));
      $query->filter($sqfilter);
      }     
     
-    if ($tea  >0){
+    if ($top  >0){
      $sqfilter = Q::any(new Q($qft));
      $query->filter($sqfilter);
      }  
+     
     $Q = $queue->getBasicQuery();
     $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
           
@@ -203,7 +240,7 @@ $pageNav->setURL('tickets.php', $args);
             <?php if (isset($queue->id)) { ?> 
             <?php echo $queue->getFullName();} ?>
             <?php if (Dept::getNamebyId($l)){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo Dept::getNamebyId($loc) ?>)</span> <?php }?>
-            <?php if (Dept::getNamebyId($t)){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo Dept::getNamebyId($tea) ?>)</span> <?php }?>
+            <?php if (Topic::getTopicName($t)){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo Topic::getTopicName($top) ?>)</span> <?php }?>
                     
             <?php if ($sselected){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo $sselected; ?>)</span> <?php }?>            
                                 </span>
@@ -323,42 +360,83 @@ $pageNav->setURL('tickets.php', $args);
 <div class="btn-group btn-group-sm float-right m-b-10 <?php if ($filters == 0){ echo 'hidden';}?>" role="group" aria-label="Button group with nested dropdown">
     
 <?php
-      $tselected = Dept::getNamebyId($tea);
+      $lselected = Dept::getNamebyId($loc);
      
-      if (!$tselected ) {$tselected = 'Location';}
+      if (!$lselected ) {$lselected = 'Location';}
 ?>
 
 
  <div class="btn-group btn-group-sm" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" 
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Filter Owning Team'); ?>"><i class="fa fa-filter"></i> <?php echo $tselected;?>
+         title="<?php echo __('Filter Incident Location'); ?>"><i class="fa fa-filter"></i> <?php echo $lselected;?>
         </button>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
               
-              <a href="tickets.php?l=<?php echo $_GET['l']?>&t=0&s=<?php echo $_GET['s'];?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
+              <a href="tickets.php?t=<?php echo $_GET['t']?>&l=0&s=<?php echo $_GET['s'];?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
               
               <?php
     
                 if ($loc =='0'){
-                $Team = Dept::objects()
+                $Location = Dept::objects()
                 ->order_by('name');
                     
                 } else {
-                $Team = Dept::objects()
+                $Location = Dept::objects()
                 ->order_by('name') 
-                ->filter(array('pid' => $loc));
+                ->filter(array('id' => $loc));
                 }   
                      
-                     foreach ($Team as $cTeam) { 
-                     if ($tfiltercount[$cTeam->getId()]['__count'] > 0) {?>
+                     foreach ($Location as $cLocation) { 
+                     if ($lfiltercount[$cLocation->getId()]['__count'] > 0) {?>
                 
-                   <a href="tickets.php?l=<?php echo $_GET['l']?>&t=<?php echo $cTeam->id ?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cTeam->name?>
-                     <span class="badge badge-pill badge-default  pull-right"><?php echo $tfiltercount[$cTeam->getId()]['__count'] ?></span> </a>
+                   <a href="tickets.php?t=<?php echo $_GET['t']?>&l=<?php echo $cLocation->id ?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cLocation->name?>
+                     <span class="badge badge-pill badge-default  pull-right"><?php echo $lfiltercount[$cLocation->getId()]['__count'] ?></span> </a>
                      <?php }}      
         ?>
             </div>
     </div>
+    
+<?php
+      $tselected = Topic::getTopicName($t);
+     
+      if (!$tselected ) {$tselected = 'Type';}
+?>
+
+
+ <div class="btn-group btn-group-sm" role="group">
+        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" 
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
+         title="<?php echo __('Filter Incident Type'); ?>"><i class="fa fa-filter"></i> <?php echo $tselected;?>
+        </button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
+              
+              <a href="tickets.php?t=0&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s'];?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
+              
+              <?php
+    
+                if ($top =='0'){
+                $Topic = Topic::objects()
+                ->order_by('topic');
+                    
+                } else {
+                $Topic = Topic::objects()
+                ->order_by('topic') 
+                ->filter(array('topic_id' => $top));
+                }   
+                 
+                     
+                     foreach ($Topic as $cTopic) { 
+                     if ($tfiltercount[$cTopic->getId()]['__count'] > 0) {?>
+                
+                   <a href="tickets.php?t=<?php echo $cTopic->topic_id ?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cTopic->topic?>
+                     <span class="badge badge-pill badge-default  pull-right"><?php echo $tfiltercount[$cTopic->getId()]['__count'] ?></span> </a>
+                     <?php }}      
+        ?>
+            </div>
+    </div>
+    
+    
     <?php 
     if (!$Statuses)
     return;
