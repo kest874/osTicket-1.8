@@ -101,7 +101,7 @@ $states = array_merge($states, array('closed'));
          $query->filter($qfilter);
          }     
          
-         if ($top  >0){
+         if ($loc  >0){
          $query->filter($qfilter);
          }   
          
