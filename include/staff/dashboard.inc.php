@@ -361,7 +361,7 @@ Highcharts.chart('IncidentTypebyLocation', {
         type: 'column'
     },
     title: {
-        text: 'Incident Location by Primary Body Part',
+        text: 'Incident Type by Location',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -503,7 +503,7 @@ Highcharts.chart('injurytypebylocation', {
         type: 'column'
     },
     title: {
-        text: 'Injury Type Part by Location',
+        text: 'Injury Type by Location',
         style: {
             color: '#797979',
             fontSize: '14px',
