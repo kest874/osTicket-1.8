@@ -1301,8 +1301,14 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             'updated' => new SqlFunction('NOW'),
         ));
 
-        if ($vars['internal_formdata']['dept_id'])
-            $task->dept_id = $vars['internal_formdata']['dept_id'];
+            
+       $Ticket = Ticket::objects()
+        ->filter(array('ticket_id' => $vars['object_id']));
+                
+       foreach ($Ticket as $row)
+                $Ticket = $row;
+       
+            $task->dept_id = $Ticket->dept_id;
         if ($vars['internal_formdata']['duedate'])
 	    $task->duedate = date('Y-m-d G:i', Misc::dbtime($vars['internal_formdata']['duedate']));
 
