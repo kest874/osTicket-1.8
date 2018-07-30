@@ -1,23 +1,17 @@
 <?php
 /*********************************************************************
     class.template.php
-
     Email Template
-
     Peter Rotich <peter@osticket.com>
     Copyright (c)  2006-2013 osTicket
     http://www.osticket.com
-
     Released under the GNU General Public License WITHOUT ANY WARRANTY.
     See LICENSE.TXT for details.
-
     vim: expandtab sw=4 ts=4 sts=4:
 **********************************************************************/
 require_once INCLUDE_DIR.'class.i18n.php';
 require_once INCLUDE_DIR.'class.yaml.php';
-
 class EmailTemplateGroup {
-
     var $id;
     var $ht;
     var $_templates;
@@ -181,101 +175,73 @@ class EmailTemplateGroup {
             ),
         ),
     );
-
     function __construct($id){
         $this->id=0;
         $this->load($id);
     }
-
     function load($id) {
-
         if(!$id && !($id=$this->getId()))
             return false;
-
         $sql='SELECT tpl.*,count(dept.tpl_id) as depts '
             .' FROM '.EMAIL_TEMPLATE_GRP_TABLE.' tpl '
             .' LEFT JOIN '.DEPT_TABLE.' dept USING(tpl_id) '
             .' WHERE tpl.tpl_id='.db_input($id)
             .' GROUP BY tpl.tpl_id';
-
         if(!($res=db_query($sql))|| !db_num_rows($res))
             return false;
-
-
         $this->ht=db_fetch_array($res);
         $this->id=$this->ht['tpl_id'];
-
         return true;
     }
-
     function reload() {
         return $this->load($this->getId());
     }
-
     function getId(){
         return $this->id;
     }
-
     function getName(){
         return $this->ht['name'];
     }
-
     function getNotes(){
         return $this->ht['notes'];
     }
-
     function isEnabled() {
          return ($this->ht['isactive']);
     }
-
     function isActive(){
         return $this->isEnabled();
     }
-
     function getLanguage() {
         return $this->ht['lang'];
     }
-
     function isInUse(){
         global $cfg;
-
         return ($this->ht['depts'] || ($cfg && $this->getId()==$cfg->getDefaultTemplateId()));
     }
-
     function getHashtable() {
         return $this->ht;
     }
-
     function getInfo() {
         return $this->getHashtable();
     }
-
     function setStatus($status){
-
         $sql='UPDATE '.EMAIL_TEMPLATE_GRP_TABLE.' SET updated=NOW(), isactive='.db_input($status?1:0)
             .' WHERE tpl_id='.db_input($this->getId());
-
         return (db_query($sql) && db_affected_rows());
     }
-
     static function getTemplateDescription($name) {
         return static::$all_names[$name];
     }
-
     function getMsgTemplate($name) {
         global $ost;
-
         if ($tpl=EmailTemplate::lookupByName($this->getId(), $name, $this))
             return $tpl;
-
         if ($tpl=EmailTemplate::fromInitialData($name, $this))
             return $tpl;
-
         $ost->logWarning(_S('Template Fetch Error'),
             sprintf(_S('Unable to fetch "%1$s" template - id #%d'), $name, $this->getId()));
         return false;
     }
-
     function getTemplates() {
         if (!$this->_tempates) {
             $this->_templates = array();
@@ -288,118 +254,88 @@ class EmailTemplateGroup {
         }
         return $this->_templates;
     }
-
     function getUndefinedTemplateNames() {
         $list = static::$all_names;
         foreach ($this->getTemplates() as $cn=>$tpl)
             unset($list[$cn]);
         return $list;
     }
-
-
     function getNewTicketAlertMsgTemplate() {
         return $this->getMsgTemplate('ticket.alert');
     }
-
     function getNewMessageAlertMsgTemplate() {
         return $this->getMsgTemplate('message.alert');
     }
-
     function getNewTicketNoticeMsgTemplate() {
         return $this->getMsgTemplate('ticket.notice');
     }
-
     function getNewMessageAutorepMsgTemplate() {
         return $this->getMsgTemplate('message.autoresp');
     }
-
     function getAutoRespMsgTemplate() {
         return $this->getMsgTemplate('ticket.autoresp');
     }
-
     function getAutoReplyMsgTemplate() {
         return $this->getMsgTemplate('ticket.autoreply');
     }
-
     function getReplyMsgTemplate() {
         return $this->getMsgTemplate('ticket.reply');
     }
-
     function  getActivityNoticeMsgTemplate() {
         return $this->getMsgTemplate('ticket.activity.notice');
     }
-
     function getOverlimitMsgTemplate() {
         return $this->getMsgTemplate('ticket.overlimit');
     }
-
     function getNoteAlertMsgTemplate() {
         return $this->getMsgTemplate('note.alert');
     }
-
     function getTransferAlertMsgTemplate() {
         return $this->getMsgTemplate('transfer.alert');
     }
-
     function getAssignedAlertMsgTemplate() {
         return $this->getMsgTemplate('assigned.alert');
     }
-
     function getOverdueAlertMsgTemplate() {
         return $this->getMsgTemplate('ticket.overdue');
     }
-
     /* Tasks templates */
     function getNewTaskAlertMsgTemplate() {
         return $this->getMsgTemplate('task.alert');
     }
-
     function  getTaskActivityAlertMsgTemplate() {
         return $this->getMsgTemplate('task.activity.alert');
     }
-
     function  getTaskActivityNoticeMsgTemplate() {
         return $this->getMsgTemplate('task.activity.notice');
     }
-
     function getTaskTransferAlertMsgTemplate() {
         return $this->getMsgTemplate('task.transfer.alert');
     }
-
     function getTaskAssignmentAlertMsgTemplate() {
         return $this->getMsgTemplate('task.assignment.alert');
     }
-
     function getTaskOverdueAlertMsgTemplate() {
         return $this->getMsgTemplate('task.overdue.alert');
     }
-
     function update($vars,&$errors) {
         if(!$vars['isactive'] && $this->isInUse())
             $errors['isactive']=__('In-use template set cannot be disabled!');
-
         if(!$this->save($this->getId(),$vars,$errors))
             return false;
-
         $this->reload();
-
         return true;
     }
-
     function enable(){
         return ($this->setStatus(1));
     }
-
     function disable(){
         return (!$this->isInUse() && $this->setStatus(0));
     }
-
     function delete(){
         global $cfg;
-
         if($this->isInUse() || $cfg->getDefaultTemplateId()==$this->getId())
             return 0;
-
         $sql='DELETE FROM '.EMAIL_TEMPLATE_GRP_TABLE
             .' WHERE tpl_id='.db_input($this->getId()).' LIMIT 1';
         if(db_query($sql) && ($num=db_affected_rows())) {
@@ -412,68 +348,50 @@ class EmailTemplateGroup {
             db_query('DELETE FROM '.EMAIL_TEMPLATE_TABLE
                 .' WHERE tpl_id='.db_input($this->getId()));
         }
-
         return $num;
     }
-
     function create($vars,&$errors) {
         return EmailTemplateGroup::save(0,$vars,$errors);
     }
-
     function add($vars, &$errors) {
         return self::lookup(self::create($vars, $errors));
     }
-
     function getIdByName($name){
         $sql='SELECT tpl_id FROM '.EMAIL_TEMPLATE_GRP_TABLE.' WHERE name='.db_input($name);
         if(($res=db_query($sql)) && db_num_rows($res))
             list($id)=db_fetch_row($res);
-
         return $id;
     }
-
     function lookup($id){
         return ($id && is_numeric($id) && ($t= new EmailTemplateGroup($id)) && $t->getId()==$id)?$t:null;
     }
-
     function save($id, $vars, &$errors) {
         global $ost;
-
         $tpl=null;
         $vars['name']=Format::striptags(trim($vars['name']));
-
         if($id && $id!=$vars['tpl_id'])
             $errors['err']=__('Internal error occurred');
-
         if(!$vars['name'])
             $errors['name']=__('Name is required');
         elseif(($tid=EmailTemplateGroup::getIdByName($vars['name'])) && $tid!=$id)
             $errors['name']=__('Template name already exists');
-
         if(!$id && ($vars['tpl_id'] && !($tpl=EmailTemplateGroup::lookup($vars['tpl_id']))))
             $errors['tpl_id']=__('Invalid template set specified');
-
         if($errors) return false;
-
         $sql=' updated=NOW() '
             .' ,name='.db_input($vars['name'])
             .' ,isactive='.db_input($vars['isactive'])
             .' ,notes='.db_input(Format::sanitize($vars['notes']));
-
         if ($vars['lang_id'])
             // TODO: Validation of lang_id
             $sql .= ',lang='.db_input($vars['lang_id']);
-
         if($id) {
             $sql='UPDATE '.EMAIL_TEMPLATE_GRP_TABLE.' SET '.$sql.' WHERE tpl_id='.db_input($id);
             if(db_query($sql))
                 return true;
-
             $errors['err']=sprintf(__('Unable to update %s.'), __('this template set'))
                .' '.__('Internal error occurred');
-
         } else {
-
             if (isset($vars['id']))
                 $sql .= ', tpl_id='.db_input($vars['id']);
             $sql='INSERT INTO '.EMAIL_TEMPLATE_GRP_TABLE
@@ -483,7 +401,6 @@ class EmailTemplateGroup {
                    .' '.__('Internal error occurred');
                 return false;
             }
-
             if ($tpl && ($info=$tpl->getInfo())) {
                 $sql='INSERT INTO '.EMAIL_TEMPLATE_TABLE.'
                     (created, updated, tpl_id, code_name, subject, body)
@@ -491,55 +408,41 @@ class EmailTemplateGroup {
                     .' as tpl_id, code_name, subject, body
                     FROM '.EMAIL_TEMPLATE_TABLE
                     .' WHERE tpl_id='.db_input($tpl->getId());
-
                 if(!db_query($sql) || !db_insert_id())
                     return false;
             }
             return $new_id;
         }
-
         return false;
     }
 }
-
 class EmailTemplate {
-
     var $id;
     var $ht;
     var $_group;
-
     function __construct($id, $group=null){
         $this->id=0;
         if ($id) $this->load($id);
         if ($group) $this->_group = $group;
     }
-
     function load($id) {
-
         if(!$id && !($id=$this->getId()))
             return false;
-
         $sql='SELECT * FROM '.EMAIL_TEMPLATE_TABLE
             .' WHERE id='.db_input($id);
-
         if(!($res=db_query($sql))|| !db_num_rows($res))
             return false;
-
         $this->ht=db_fetch_array($res);
         $this->id=$this->ht['id'];
         $this->attachments = GenericAttachments::forIdAndType($this->id, 'T');
-
         return true;
     }
-
     function reload() {
         return $this->load($this->getId());
     }
-
     function getId(){
         return $this->id;
     }
-
     function asArray() {
         return array(
             'id' => $this->getId(),
@@ -547,41 +450,32 @@ class EmailTemplate {
             'body' => $this->getBody(),
         );
     }
-
     function getSubject() {
         return $this->ht['subject'];
     }
-
     function getBody() {
         return $this->ht['body'];
     }
-
     function getBodyWithImages() {
         return Format::viewableImages($this->getBody());
     }
     function getCodeName() {
         return $this->ht['code_name'];
     }
-
     function getLastUpdated() {
         return $this->ht['updated'];
     }
-
     function getTplId() {
         return $this->ht['tpl_id'];
     }
-
     function getGroup() {
         if (!isset($this->_group))
             $this->_group = EmailTemplateGroup::lookup($this->getTplId());
         return $this->_group;
-
     }
-
     function getDescription() {
         return $this->getGroup()->getTemplateDescription($this->ht['code_name']);
     }
-
     function getInvalidVariableUsage() {
         $context = VariableReplacer::getContextForRoot($this->ht['code_name']);
         $invalid = array();
@@ -597,48 +491,36 @@ class EmailTemplate {
         }
         return $invalid;
     }
-
     function update($vars, &$errors) {
-
         if(!$this->save($this->getId(),$vars,$errors))
             return false;
-
         $this->reload();
-
         // Inline images (attached to the draft)
         $keepers = Draft::getAttachmentIds($this->getBody());
         // Just keep the IDs only
         $keepers = array_map(function($i) { return $i['id']; }, $keepers);
         $this->attachments->keepOnlyFileIds($keepers, true);
-
         return true;
     }
-
     function save($id, $vars, &$errors) {
         if(!$vars['subject'])
             $errors['subject'] = __('Message subject is required');
-
         if(!$vars['body'])
             $errors['body'] = __('Message body is required');
-
         if (!$id) {
             if (!$vars['tpl_id'])
                 $errors['tpl_id'] = __('Template set is required');
             if (!$vars['code_name'])
                 $errors['code_name'] = __('Code name is required');
         }
-
         if ($errors)
             return false;
-
         $vars['body'] = Format::sanitize($vars['body'], false);
-
         if ($id) {
             $sql='UPDATE '.EMAIL_TEMPLATE_TABLE.' SET updated=NOW() '
                 .', subject='.db_input($vars['subject'])
                 .', body='.db_input($vars['body'])
                 .' WHERE id='.db_input($this->getId());
-
             return (db_query($sql));
         } else {
             $sql='INSERT INTO '.EMAIL_TEMPLATE_TABLE.' SET created=NOW(),
@@ -651,35 +533,27 @@ class EmailTemplate {
         }
         return null;
     }
-
     function create($vars, &$errors) {
         return self::save(0, $vars, $errors);
     }
-
     function add($vars, &$errors) {
         $inst = self::lookup(self::create($vars, $errors));
-
         // Inline images (attached to the draft)
         if ($inst)
             $inst->attachments->upload(Draft::getAttachmentIds($inst->getBody()), true);
-
         return $inst;
     }
-
     function lookupByName($tpl_id, $name, $group=null) {
         $sql = 'SELECT id FROM '.EMAIL_TEMPLATE_TABLE
             .' WHERE tpl_id='.db_input($tpl_id)
             .' AND code_name='.db_input($name);
         if (($res=db_query($sql)) && ($id=db_result($res)))
             return self::lookup($id, $group);
-
         return false;
     }
-
     function lookup($id, $group=null) {
         return ($id && is_numeric($id) && ($t= new EmailTemplate($id, $group)) && $t->getId()==$id)?$t:null;
     }
-
     /**
      * Load the template from the initial_data directory. The format of the
      * file should be free flow text. The first line is the subject and the

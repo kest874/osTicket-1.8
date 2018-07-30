@@ -1,6 +1,5 @@
 <?php
 $info=Format::htmlchars(($errors && $_POST)?$_POST:$_REQUEST);
-
 if (is_a($template, EmailTemplateGroup)) {
     // New template implementation
     $id = 0;
@@ -32,7 +31,6 @@ if (is_a($template, EmailTemplateGroup)) {
     $info=array_merge(array('subject'=>$template->getSubject(), 'body'=>$template->getBodyWithImages()),$info);
 }
 $tpl=$msgtemplates[$selected];
-
 ?>
 <form method="get" action="templates.php?">
 <h2>
@@ -101,12 +99,12 @@ $tpl=$msgtemplates[$selected];
 </div>
 
 <?php
-$invalid = array();
-if ($template instanceof EmailTemplate) {
-    if ($invalid = $template->getInvalidVariableUsage()) {
-    $invalid = array_unique($invalid); ?>
-    <div class="warning-banner"><?php echo sprintf(
-        __('Some variables may not be a valid for this context. Please check for spelling errors and correct usage for %s.'), __('this template')); ?>
+//$invalid = array();
+//if ($template instanceof EmailTemplate) {
+ //   if ($invalid = $template->getInvalidVariableUsage()) {
+ //   $invalid = array_unique($invalid); ?>
+    <!--<div class="warning-banner"><?php //echo
+       // __('Some variables may not be a valid for this context. Please check for spelling errors and correct usage for this template.') ?>
     <br/>
     <code><?php //echo implode(', ', $invalid); ?></code>
 </div> -->
@@ -130,10 +128,10 @@ if ($template instanceof EmailTemplate) {
 </div>
 
 <p style="text-align:center">
-    <input class="btn btn-primary" type="submit" name="submit" value="<?php echo __('Save Changes'); ?>">
-    <input class="btn btn-warning" type="reset" name="reset" value="<?php echo __('Reset Changes'); ?>" onclick="javascript:
+    <input class="button" type="submit" name="submit" value="<?php echo __('Save Changes'); ?>">
+    <input class="button" type="reset" name="reset" value="<?php echo __('Reset Changes'); ?>" onclick="javascript:
         setTimeout('location.reload()', 25);" />
-    <input class="btn btn-danger" type="button" name="cancel" value="<?php echo __('Cancel Changes'); ?>"
+    <input class="button" type="button" name="cancel" value="<?php echo __('Cancel Changes'); ?>"
         onclick='window.location.href="templates.php?tpl_id=<?php echo $tpl_id; ?>"'>
 </p>
 </form>

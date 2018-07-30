@@ -33,10 +33,7 @@ class TaskModel extends VerySimpleModel {
                 'constraint' => array('staff_id' => 'Staff.staff_id'),
                 'null' => true,
             ),
-            'team' => array(
-                'constraint' => array('team_id' => 'Dept.id'),
-                'null' => true,
-            ),
+            
             'thread' => array(
                 'constraint' => array(
                     'id'  => 'TaskThread.object_id',
