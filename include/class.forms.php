@@ -1699,7 +1699,12 @@ class ChoiceField extends FormField {
             return implode(', ', array_keys($value));
         return (string) $value;
     }
-
+    
+    function asVar($value, $id=false) {
+        $value = $this->to_php($value);
+        return $this->toString($this->getChoice($value));
+    }
+    
     function whatChanged($before, $after) {
         $B = (array) $before;
         $A = (array) $after;
