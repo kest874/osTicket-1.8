@@ -74,6 +74,9 @@ $states = array_merge($states, array('closed'));
          if ($loc  >0){
          $query->filter($qfilter);
          }   
+                  if ($top  >0){
+         $query->filter($qfilter);
+         }   
          
         $Q = $queue->getBasicQuery();
         $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
