@@ -26,7 +26,7 @@
                             <?php echo __( 'Disable'); ?>
                         </a>
                         <a class="queue-action no-pjax" data-action="delete" href="#queues.php">
-                            <i class="icon-trash icon-fixed-width"></i>
+                            <i class="fa fa-trash icon-fixed-width"></i>
                             <?php echo __( 'Delete'); ?>
                         </a>
                                

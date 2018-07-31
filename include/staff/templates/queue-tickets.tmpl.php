@@ -54,6 +54,7 @@ $tickets->filter($qfilter);
 $states = array('open');
 $states = array_merge($states, array('closed'));
 
+
     
    
     
@@ -310,7 +311,7 @@ $pageNav->setURL('tickets.php', $args);
                                         <a class="no-pjax confirm-action" href="#"
                                             data-dialog="ajax.php/queue/<?php
                                             echo $queue->id; ?>/delete"><i
-                                        class="icon-fixed-width icon-trash"></i>
+                                        class="icon-fixed-width fa fa-trash"></i>
                                         <?php echo __('Delete'); ?></a>
                                     </li>
             <?php } ?>
