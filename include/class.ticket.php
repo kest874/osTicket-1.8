@@ -216,6 +216,9 @@ implements RestrictedAccess, Threadable, Searchable {
     function isAssigned() {
         return $this->isOpen() && ($this->getStaffId() || $this->getTeamId());
     }
+    function isRecordable() {
+        return $this->ht['isrecordable'];
+    }
     function isOverdue() {
         return $this->ht['isoverdue'];
     }
@@ -1672,6 +1675,9 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
             'isoverdue' => new BooleanField(array(
                 'label' => __('Overdue'),
             )),
+            'isrecordable' => new BooleanField(array(
+                'label' => __('Recordable'),
+            )),
         );
         $tform = TicketForm::getInstance();
         foreach ($tform->getFields() as $F) {
@@ -2431,6 +2437,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         return parent::save($this->dirty || $refetch);
     }
     function update($vars, &$errors) {
+
         global $cfg, $thisstaff;
         // if (!$cfg
             // || !($this->checkStaffPerm($thisstaff,
@@ -2441,6 +2448,9 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         $vars['duedate'] = date("Y-m-d H:i:s", strtotime($vars['duedate']));
         if ($vars['duedate'] == '1970-01-01 00:00:00') $vars['duedate'] = null;
         
+        
+        if ($vars['isRecordable']) {$Recordable = 1;} else {$Recordable = 0;};        
+      
         $fields = array();
         $fields['topicId']  = array('type'=>'int',      'required'=>1, 'error'=>__('Help topic selection is required'));
         $fields['slaId']    = array('type'=>'int',      'required'=>0, 'error'=>__('Select a valid SLA'));
@@ -2471,7 +2481,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         // Decide if we need to keep the just selected SLA
         
         $this->topic_id = $vars['topicId'];
-       
+        $this->isrecordable = $Recordable;
         $this->source = $vars['source'];
         $this->duedate = $vars['duedate'];
         if ($vars['user_id'])
@@ -2483,6 +2493,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         foreach ($this->dirty as $F=>$old) {
             switch ($F) {
             case 'topic_id':
+            case 'isrecordable':
             case 'user_id':
             case 'source':
             case 'duedate':
@@ -2860,6 +2871,8 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
                 $errors['topicId'] = 'Invalid help topic selected';
             }
         }
+        
+        if ($vars['isRecordable']) {$Recordable = 1;} else {$Recordable = 0;}; 
         // Any errors above are fatal.
         if ($errors)
             return 0;
@@ -2960,6 +2973,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
             'dept_id' => substr($vars['deptId'], 1),
             'team_id' => substr($vars['assignId'], 1),
             'topic_id' => $topicId,
+            'isrecordable' => $Recordable,
             'ip_address' => $ipaddress,
             'source' => $source,
         ));

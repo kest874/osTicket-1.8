@@ -15,6 +15,7 @@ $team  = $ticket->getTeam();  //Assigned team.
 $sla   = $ticket->getSLA();
 $lock  = $ticket->getLock();  //Ticket lock obj
 $topic = $ticket->getHelpTopicId();
+$recordable = $ticket->isRecordable();
 if (!$lock && $cfg->getTicketLockMode() == Lock::MODE_ON_VIEW)
     $lock = $ticket->acquireLock($thisstaff->getId());
 $mylock = ($lock && $lock->getStaffId() == $thisstaff->getId()) ? $lock : null;
@@ -409,7 +410,31 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                         </div>
                     </div>
             </div>
-        
+            <?php if ($topic == 11){?>
+           <div class="col-sm-3">
+                <div class="form-group">
+                      <div>
+                        <div class=" <?php if ($errors['isrecordable'] || !$topic){ echo 'has-danger';}?>">
+                        
+                        <label for="isRecordable" class="custom-control custom-checkbox m-b-0">
+                        <input  class="custom-control-input" id="isRecordable"
+                                    type="checkbox" name="isRecordable" <?php
+                                    if ($recordable==1) echo 'checked="checked"'; ?> />Recordable
+                                
+                                <span class="custom-control-indicator"></span>
+                        <span class="custom-control-description"></span>
+                                
+                                </label>
+                        
+                        
+                            <?php if ($errors['isrecordable']){ ?>
+                            <div class="form-control-feedback-danger"><?php echo __('');?></div>
+                            <?php }?>
+                                  </div>    
+                        </div>
+                    </div>
+            </div>
+            <?php } ?>
             
             
                      <?php 

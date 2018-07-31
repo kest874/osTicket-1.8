@@ -132,6 +132,10 @@ if ($_POST)
                           
                           $('#submit').show();
                           $('#reset').show();
+                          topic = this.value;
+                          if (topic == 11){
+                              $('#chkRecordable').show();
+                          }                                   
                           ">
                     <?php
                     if ($topics=Topic::getHelpTopics(false, false, true)) {
@@ -154,9 +158,31 @@ if ($_POST)
                 </select>
                 <?php if ($errors['topicId']){?>&nbsp;<font class="error"><b>*</b>&nbsp;<?php echo $errors['topicId']; ?></font><?php } ?>
             
-        </div>
-
         
+        <div class="col-sm-3 hidden" id="chkRecordable">
+                <div class="form-group">
+                      <div>
+                        <div class=" <?php if ($errors['isrecordable'] || !$topic){ echo 'has-danger';}?>">
+                        
+                        <label for="isRecordable" class="custom-control custom-checkbox m-b-0">
+                        <input  class="custom-control-input" id="isRecordable"
+                                    type="checkbox" name="isRecordable" <?php
+                                    if ($recordable==1) echo 'checked="checked"'; ?> />Recordable
+                                
+                                <span class="custom-control-indicator"></span>
+                        <span class="custom-control-description"></span>
+                                
+                                </label>
+                        
+                        
+                            <?php if ($errors['isrecordable']){ ?>
+                            <div class="form-control-feedback-danger"><?php echo __('');?></div>
+                            <?php }?>
+                                  </div>    
+                        </div>
+                    </div>
+            </div>
+        </div>
     </div>
     <div class='col-sm-3'>
     
