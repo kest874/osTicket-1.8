@@ -129,7 +129,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                       
                             <a class="dialog-first" data-action="department" href="#staff/change-department">
                                 <i class="icon-truck icon-fixed-width"></i>
-                                <?php echo __( 'Change Team'); ?>
+                                <?php echo __( 'Change Location'); ?>
                             </a>
                       
                              
@@ -185,7 +185,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
             <th width="5%"><a <?php echo $name_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=name"><?php echo __('Name');?></a></th>
             <th width="5%"><a <?php echo $username_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=username"><?php echo __('Username');?></a></th>
             <th width="8%"><a  <?php echo $status_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=status"><?php echo __('Status');?></a></th>
-            <th width="14%"><a  <?php echo $dept_sort; ?>href="staff.php?<?php echo $qstr; ?>&sort=dept"><?php echo __('Primary Team');?></a></th>
+            <th width="14%"><a  <?php echo $dept_sort; ?>href="staff.php?<?php echo $qstr; ?>&sort=dept"><?php echo __('Primary Location');?></a></th>
             <th width="14%"><a <?php echo $created_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=created"><?php echo __('Created');?></a></th>
             <th width="16%"><a <?php echo $login_sort; ?> href="staff.php?<?php echo $qstr; ?>&sort=login"><?php echo __('Last Login');?></a></th>
         </tr>

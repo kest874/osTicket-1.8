@@ -114,9 +114,9 @@ $qstr.='&amp;order='.($order=='DESC' ? 'ASC' : 'DESC');
     <button type="submit" class="input-group-addon" ><i class="fa fa-search"></i> </button>
  
   <select name="did" id="did" class="form-control" style="height: 34px;">
-             <option value="0">&mdash; <?php echo __('All Teams');?> &mdash;</option>
+             <option value="0">&mdash; <?php echo __('All Locations');?> &mdash;</option>
              
-             <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) if (strlen($name) > 5 ){  $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
+             <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) if (strlen($name) > 0 ){  $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
                     <option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
              
   </select>
@@ -147,7 +147,7 @@ $qstr.='&amp;order='.($order=='DESC' ? 'ASC' : 'DESC');
     <thead>
         <tr>
             <th width="20%"><a <?php echo $name_sort; ?> href="directory.php?<?php echo $qstr; ?>&sort=name"><?php echo __('Name');?></a></th>
-            <th width="15%"><a  <?php echo $dept_sort; ?>href="directory.php?<?php echo $qstr; ?>&sort=dept"><?php echo __('AI Team');?></a></th>
+            <th width="15%"><a  <?php echo $dept_sort; ?>href="directory.php?<?php echo $qstr; ?>&sort=dept"><?php echo __('Location');?></a></th>
             <th width="25%"><a  <?php echo $email_sort; ?>href="directory.php?<?php echo $qstr; ?>&sort=email"><?php echo __('Email Address');?></a></th>
         </tr>
     </thead>
