@@ -798,7 +798,17 @@ a:focus {
   line-height: 30px;
   text-align: center;
   width: 30px; }
+  
+.filtercancel{
 
+    position: absolute;
+    left: 16px;
+    margin-top: 10px;
+    font-size: 9px !important;
+    text-align: right;
+    }
+    
+ 
 /* ===========
    Bootstrap-custom
  =============*/
