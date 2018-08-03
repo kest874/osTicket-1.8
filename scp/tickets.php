@@ -398,6 +398,7 @@ if($_POST && !$errors):
                     if(($ticket=Ticket::open($vars, $errors))) {
                         $msg=__('Incident created successfully');
                         $_REQUEST['a']=null;
+                        $_SESSION["alrt"]=0;
                         if (!$ticket->checkStaffPerm($thisstaff) || $ticket->isClosed())
                             $ticket=null;
                         Draft::deleteForNamespace('ticket.staff%', $thisstaff->getId());

@@ -1,44 +1,33 @@
 <?php
 /*********************************************************************
     class.i18n.php
-
     Internationalization and localization helpers for osTicket
-
     Peter Rotich <peter@osticket.com>
     Jared Hancock <jared@osticket.com>
     Copyright (c)  2006-2013 osTicket
     http://www.osticket.com
-
     Released under the GNU General Public License WITHOUT ANY WARRANTY.
     See LICENSE.TXT for details.
-
     vim: expandtab sw=4 ts=4 sts=4:
 **********************************************************************/
 require_once INCLUDE_DIR.'class.error.php';
 require_once INCLUDE_DIR.'class.yaml.php';
-
 class Internationalization {
-
     // Languages in order of decreasing priority. Always use en_US as a
     // fallback
     var $langs = array('en_US');
-
     function __construct($language=false) {
         global $cfg;
-
         if ($cfg && ($lang = $cfg->getPrimaryLanguage()))
             array_unshift($this->langs, $language);
-
         // Detect language filesystem path, case insensitively
         if ($language && ($info = self::getLanguageInfo($language))) {
             array_unshift($this->langs, $info['code']);
         }
     }
-
     function getTemplate($path) {
         return new DataTemplate($path, $this->langs);
     }
-
     /**
      * Loads data from the I18N_DIR for the target language into the
      * database. This is intended to be done at the time of installation;
@@ -70,7 +59,6 @@ class Internationalization {
             'queue_sort.yaml' =>    'QueueSort::__create',
             'queue.yaml' =>         'CustomQueue::__create',
         );
-
         $errors = array();
         foreach ($models as $yaml=>$m) {
             if ($objects = $this->getTemplate($yaml)->getData()) {
@@ -83,7 +71,6 @@ class Internationalization {
                 }
             }
         }
-
         // Priorities
         $priorities = $this->getTemplate('priority.yaml')->getData();
         foreach ($priorities as $name=>$info) {
@@ -95,7 +82,6 @@ class Internationalization {
                 .', priority_urgency='.db_input($info['priority_urgency']);
             db_query($sql);
         }
-
         // Configuration
         require_once INCLUDE_DIR.'class.config.php';
         if (($tpl = $this->getTemplate('config.yaml'))
@@ -106,18 +92,14 @@ class Internationalization {
                     $_config->set($key, $value);
             }
         }
-
         // Load core config
         $_config = new OsticketConfig();
-
         // Determine reasonable default max_file_size
         $max_size = Format::filesize2bytes(strtoupper(ini_get('upload_max_filesize')));
         $val = ((int) $max_size/2);
         $po2 = 1;
         while( $po2 < $val ) $po2 <<= 1;
-
         $_config->set('max_file_size', $po2);
-
         // Pages and content
         foreach (array('landing','thank-you','offline',
                 'registration-staff', 'pwreset-staff', 'banner-staff',
@@ -138,7 +120,6 @@ class Internationalization {
         }
         // Default Language
         $_config->set('system_language', $this->langs[0]);
-
         // Canned response examples
         if (($tpl = $this->getTemplate('templates/premade.yaml'))
                 && ($canned = $tpl->getData())) {
@@ -151,7 +132,6 @@ class Internationalization {
                 }
             }
         }
-
         // Email templates
         // TODO: Lookup tpl_id
         if ($objects = $this->getTemplate('email_template_group.yaml')->getData()) {
@@ -174,10 +154,8 @@ class Internationalization {
             }
         }
     }
-
     static function getLanguageDescription($lang) {
         global $thisstaff, $thisclient;
-
         $langs = self::availableLanguages();
         $lang = strtolower($lang);
         if (isset($langs[$lang])) {
@@ -207,22 +185,17 @@ class Internationalization {
         else
             return $lang;
     }
-
     static function getLanguageInfo($lang) {
         $langs = self::availableLanguages();
         return @$langs[strtolower($lang)] ?: array();
     }
-
     static function availableLanguages($base=I18N_DIR) {
         static $cache = false;
         if ($cache) return $cache;
-
         $langs = (include I18N_DIR . 'langs.php');
-
         // Consider all subdirectories and .phar files in the base dir
         $dirs = glob(I18N_DIR . '*', GLOB_ONLYDIR | GLOB_NOSORT);
         $phars = glob(I18N_DIR . '*.phar', GLOB_NOSORT) ?: array();
-
         $installed = array();
         foreach (array_merge($dirs, $phars) as $f) {
             $base = basename($f, '.phar');
@@ -242,33 +215,26 @@ class Internationalization {
             }
         }
         ksort($installed);
-
         return $cache = $installed;
     }
-
     static function isLanguageInstalled($code) {
         $langs = self::availableLanguages();
         return isset($langs[strtolower($code)]);
     }
-
     static function isLanguageEnabled($code) {
         $langs = self::getConfiguredSystemLanguages();
         return isset($langs[$code]);
     }
-
     static function getConfiguredSystemLanguages() {
         global $cfg;
         static $langs;
-
         if (!$cfg)
             return self::availableLanguages();
-
         if (!isset($langs)) {
             $langs = array();
             $pri = $cfg->getPrimaryLanguage();
             if ($info = self::getLanguageInfo($pri))
                 $langs = array($pri => $info);
-
             // Honor sorting preference of ::availableLanguages()
             foreach ($cfg->getSecondaryLanguages() as $l) {
                 if ($info = self::getLanguageInfo($l))
@@ -277,22 +243,17 @@ class Internationalization {
         }
         return $langs;
     }
-
     // TODO: Move this to the REQUEST class or some middleware when that
     // exists.
     // Algorithm borrowed from Drupal 7 (locale.inc)
     static function getDefaultLanguage() {
         global $cfg;
         static $lang;
-
         if (isset($lang))
             return $lang;
-
         if (empty($_SERVER["HTTP_ACCEPT_LANGUAGE"]))
             return $cfg ? $cfg->getPrimaryLanguage() : 'en_US';
-
         $languages = self::getConfiguredSystemLanguages();
-
         // The Accept-Language header contains information about the
         // language preferences configured in the user's browser / operating
         // system. RFC 2616 (section 14.4) defines the Accept-Language
@@ -315,7 +276,6 @@ class Internationalization {
             $browser_langcodes[$langcode] = (int) ($qvalue * 1000);
           }
         }
-
         // We should take pristine values from the HTTP headers, but
         // Internet Explorer from version 7 sends only specific language
         // tags (eg. fr-CA) without the corresponding generic tag (fr)
@@ -333,7 +293,6 @@ class Internationalization {
             $browser_langcodes[$generic_tag] = $qvalue;
           }
         }
-
         // Find the enabled language with the greatest qvalue, following the rules
         // of RFC 2616 (section 14.4). If several languages have the same qvalue,
         // prefer the one with the greatest weight.
@@ -343,11 +302,9 @@ class Internationalization {
           // Language tags are case insensitive (RFC2616, sec 3.10).
           // We use _ as the location separator
           $langcode = str_replace('_','-',strtolower($langcode));
-
           // If nothing matches below, the default qvalue is the one of the wildcard
           // language, if set, or is 0 (which will never match).
           $qvalue = isset($browser_langcodes['*']) ? $browser_langcodes['*'] : 0;
-
           // Find the longest possible prefix of the browser-supplied language
           // ('the language-range') that matches this site language ('the language tag').
           $prefix = $langcode;
@@ -357,41 +314,32 @@ class Internationalization {
               break;
             }
           } while ($prefix = substr($prefix, 0, strrpos($prefix, '-')));
-
           // Find the best match.
           if ($qvalue > $max_qvalue) {
             $best_match_langcode = $language['code'];
             $max_qvalue = $qvalue;
           }
         }
-
         return $lang = self::isLanguageInstalled($best_match_langcode)
             ? $best_match_langcode
-            : $cfg->getPrimaryLanguage();
+            : ($cfg ? $cfg->getPrimaryLanguage() : 'en_US');
     }
-
     static function getCurrentLanguage($user=false) {
         global $thisstaff, $thisclient;
-
         $user = $user ?: $thisstaff ?: $thisclient;
         if ($user && method_exists($user, 'getLanguage'))
             if (($lang = $user->getLanguage()) && self::isLanguageEnabled($lang))
                 return $lang;
-
         // Support the flag buttons for guests
         if ((!$user || $user != $thisstaff) && $_SESSION['::lang'])
             return $_SESSION['::lang'];
-
         return self::getDefaultLanguage();
     }
-
     static function getCurrentLanguageInfo($user=false) {
         return static::getLanguageInfo(static::getCurrentLanguage($user));
     }
-
     static function getCurrentLocale($user=false) {
         global $thisstaff, $cfg;
-
         if ($user) {
             return self::getCurrentLanguage($user);
         }
@@ -401,23 +349,71 @@ class Internationalization {
             return $thisstaff->getLocale()
                 ?: self::getCurrentLanguage($thisstaff);
         }
-
         if (!($locale = $cfg->getDefaultLocale()))
             $locale = self::getCurrentLanguage();
-
         return $locale;
     }
-
+    static function getCSVDelimiter($locale='') {
+        if (!$locale && extension_loaded('intl'))  // Prefer browser settings
+            $locale = Locale::acceptFromHttp($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        // Detect delimeter from the current locale settings. For locales
+        // which use comma (,) as the decimal separator, the semicolon (;)
+        // should be used as the field separator
+        $delimiter = ',';
+        if (class_exists('NumberFormatter')) {
+            $nf = NumberFormatter::create($locale ?: self::getCurrentLocale(),
+                NumberFormatter::DECIMAL);
+            $s = $nf->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL);
+            if ($s == ',')
+                $delimiter = ';';
+        } else {
+            $info = localeconv();
+            if ($info && $info['decimal_point'] == ',')
+                $delimiter = ';';
+        }
+        return $delimiter;
+    }
+    //  getIntDateFormatter($options)
+    //
+    // Setting up the IntlDateFormatter is pretty expensive, so cache it since
+    // there aren't many variations of the arguments passed to the constructor
+    static function getIntDateFormatter($options) {
+        static $cache = false;
+        global $cfg;
+        // Set some defaults
+        $options['locale'] = $options['locale'] ?: self::getCurrentLocale();
+        // Generate signature key for options given
+        $k = md5(implode(':', array_filter(
+                    array_intersect_key($options,
+                        array_flip(array(
+                                'locale',
+                                'daytype',
+                                'timetype',
+                                'timezone',
+                                'pattern')
+                            )))));
+        // We if we have it cached
+        if (isset($cache[$k]) && $cache[$k])
+            return $cache[$k];
+        // Create formatter && cache
+        $cache[$k] = $formatter = new IntlDateFormatter(
+                $options['locale'],
+                $options['daytype'] ?: null,
+                $options['timetype'] ?: null,
+                $options['timezone'] ?: null,
+                $options['calendar'] ?: IntlDateFormatter::GREGORIAN,
+                $options['pattern'] ?: null
+                );
+        return $formatter;
+    }
     static function rfc1766($what) {
         if (is_array($what))
             return array_map(array(get_called_class(), 'rfc1766'), $what);
-
         $lr = explode('_', $what);
         if (isset($lr[1]))
             $lr[1] = strtoupper($lr[1]);
         return implode('-', $lr);
     }
-
     static function getTtfFonts() {
         if (!class_exists('Phar'))
             return;
@@ -440,15 +436,12 @@ class Internationalization {
         Signal::send('config.ttfonts', null, $rv);
         return $rv;
     }
-
     static function setCurrentLanguage($lang) {
         if (!self::isLanguageInstalled($lang))
             return false;
-
         $_SESSION['::lang'] = $lang ?: null;
         return true;
     }
-
     static function allLocales() {
         $locales = array();
         if (class_exists('ResourceBundle')) {
@@ -467,10 +460,8 @@ class Internationalization {
         }
         return $locales;
     }
-
     static function sortKeyedList($list, $case=false) {
         global $cfg;
-
         // XXX: Use current language
         if ($cfg && function_exists('collator_create')) {
             $coll = Collator::create($cfg->getPrimaryLanguage());
@@ -490,25 +481,19 @@ class Internationalization {
         }
         return $list;
     }
-
     static function bootstrap() {
-
         require_once INCLUDE_DIR . 'class.translation.php';
-
         $domain = 'messages';
         TextDomain::setDefaultDomain($domain);
         TextDomain::lookup()->setPath(I18N_DIR);
-
         // Set the default locale to UTF-8. It will be changed by
         // ::setLocaleForUser() later for web requests. See #2910
         TextDomain::setLocale(LC_ALL, 'en_US.UTF-8');
-
         // User-specific translations
         function _N($msgid, $plural, $n) {
             return TextDomain::lookup()->getTranslation()
                 ->ngettext($msgid, $plural, is_numeric($n) ? $n : 1);
         }
-
         // System-specific translations
         function _S($msgid) {
             global $cfg;
@@ -517,7 +502,6 @@ class Internationalization {
         function _NS($msgid, $plural, $count) {
             global $cfg;
         }
-
         // Phrases with separate contexts
         function _P($context, $msgid) {
             return TextDomain::lookup()->getTranslation()
@@ -527,7 +511,6 @@ class Internationalization {
             return TextDomain::lookup()->getTranslation()
                 ->npgettext($context, $singular, $plural, is_numeric($n) ? $n : 1);
         }
-
         // Language-specific translations
         function _L($msgid, $locale) {
             return TextDomain::lookup()->getTranslation($locale)
@@ -539,14 +522,11 @@ class Internationalization {
         }
     }
 }
-
 class DataTemplate {
     // Base folder for default data and templates
     var $base = I18N_DIR;
-
     var $filepath;
     var $data;
-
     /**
      * Searches for the files matching the template in the order of the
      * received languages. Once matched, the language is captured so that
@@ -569,7 +549,6 @@ class DataTemplate {
             }
         }
     }
-
     function getData() {
         if (!isset($this->data) && $this->filepath)
             $this->data = YamlDataParser::load($this->filepath);
@@ -577,7 +556,6 @@ class DataTemplate {
             //       language in the list of requested languages
         return $this->data;
     }
-
     function getRawData() {
         if (!isset($this->data) && $this->filepath)
             return file_get_contents($this->filepath);
@@ -585,10 +563,8 @@ class DataTemplate {
             //       language in the list of requested languages
         return false;
     }
-
     function getLang() {
         return $this->lang;
     }
 }
-
 ?>

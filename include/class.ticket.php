@@ -290,6 +290,12 @@ implements RestrictedAccess, Threadable, Searchable {
     function getNumber() {
         return $this->number;
     }
+    function getRecordable() {
+        
+        $recordable = $this->isrecordable;
+        if ($recordable == 1) {$recordable = 'Yes';} else {$recordable = 'No';}
+        return $recordable;
+    }
     function getOwnerId() {
         return $this->user_id;
     }
@@ -1604,6 +1610,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
                 'class' => 'Staff', 'desc' => __('Assigned/closing agent'),
             ),
             'subject' => 'Subject',
+            'isrecordable' => 'Recordable',
             'team' => array(
                 'class' => 'Team', 'desc' => __('Assigned/closing team'),
             ),

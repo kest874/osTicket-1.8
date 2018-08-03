@@ -132,6 +132,7 @@ class SearchInterface {
                     'number'=>      $model->getNumber(),
                     'status'=>      $model->getStatus(),
                     'topic_id'=>    $model->getTopicId(),
+                    'isrecordable'=> $model->getRecordable(),
                     'priority_id'=> $model->getPriorityId(),
                     // Stats (comments, attachments)
                     // Access constraints

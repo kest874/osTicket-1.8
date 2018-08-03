@@ -1,4 +1,6 @@
 <?php
+
+$_SESSION["alrt"]=1;
 if (!defined('OSTSCPINC') || !$thisstaff
         || !$thisstaff->hasPerm(Ticket::PERM_CREATE, false))
         die('Access Denied');
@@ -49,8 +51,6 @@ if ($_POST)
  <input type="hidden" name="do" value="create">
  <input type="hidden" name="a" value="open">
 
-    
-       
         <div class="form-group">
         <label><?php echo __('Submitter'); ?>:</label>
            
