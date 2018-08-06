@@ -151,7 +151,7 @@ $(function () {
             type: 'spline'
         },
         title: {
-            text: 'Incidents YTD by location',
+            text: 'Incidents by location',
             style: {
             color: '#797979',
             fontSize: '14px',

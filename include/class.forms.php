@@ -1861,7 +1861,7 @@ class ChoiceField extends FormField {
 }
 
 class DatetimeField extends FormField {
-static $widget = 'DatetimePickerWidget';
+    static $widget = 'DatetimePickerWidget';
     var $min = null;
     var $max = null;
     static function intervals($count=2, $i='') {
@@ -2286,7 +2286,6 @@ static $widget = 'DatetimePickerWidget';
         }
     }
 }
-
 
 class TimeField extends FormField {
     static $widget = 'TimePickerWidget';
@@ -4610,7 +4609,7 @@ class CheckboxWidget extends Widget {
 
 class DatetimePickerWidget extends Widget {
     function render($options=array()) {
-       global $cfg;
+        global $cfg;
         $config = $this->field->getConfiguration();
         $timezone = $this->field->getTimezone();
         if (!isset($this->value) && ($default=$this->field->get('default')))
@@ -4633,7 +4632,7 @@ class DatetimePickerWidget extends Widget {
             $datetime->setTimezone($timezone);
         }
         ?>
-            <div class="form-group">
+         <div class="form-group">
                 <div class="input-group input-group-sm date" id="<?php echo $this->id; ?>" data-target-input="nearest">
                     <input type="text" name="<?php echo $this->name; ?>" value="<?php echo $this->value; ?>" class="form-control form-control-sm datetimepicker-input" data-target="#<?php echo $this->id; ?>"/>
                     <div class="input-group-addon" data-target="#<?php echo $this->id; ?>" data-toggle="datetimepicker">
@@ -4684,19 +4683,26 @@ class DatetimePickerWidget extends Widget {
         
             </script>
         <?php
-        if ($config['time'])
+        if ($config['time']) {
+            list($hr, $min) = explode(':', $datetime ?
+                    $datetime->format('H:i') : '');
             // TODO: Add time picker -- requires time picker or selection with
             //       Misc::timeDropdown
             echo '&nbsp;' . Misc::timeDropdown($hr, $min, $this->name . ':time');
+            echo sprintf('&nbsp;<span class="faded">(<a href="#"
+                        data-placement="top" data-toggle="tooltip"
+                        title="%s">%s</a>)</span>',
+                    $datetime->getTimezone()->getName(),
+                    $datetime->format('T'));
+        }
     }
-
     /**
      * Function: getValue
      * Combines the datepicker date value and the time dropdown selected
-     * time value into a single date and time string value.
+     * time value into a single date and time string value in DateTime::W3C
      */
     function getValue() {
-       global $cfg;
+        global $cfg;
         if ($value = parent::getValue()) {
             // Effective timezone for the selection
             $timezone = $this->field->getTimezone();
@@ -4710,6 +4716,7 @@ class DatetimePickerWidget extends Widget {
         return $value;
     }
 }
+
 
 
 class TimePickerWidget extends Widget {
