@@ -906,7 +906,7 @@ html.js.cssanimations.fa-events-icons-ready > body > div#pjax-container > div.co
 }
 
 div#requiredfield .redactor-editor, .redactor-box, .redactor-box textarea {
-    background-color: #ffffcc;
+    background-color: #ffffcc !important;
 }
 .requiredfield {
 	background-color: #ffffcc !important;	

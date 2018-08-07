@@ -4558,6 +4558,45 @@ class TabbedBoxChoicesWidget extends BoxChoicesWidget {
     }
 }
 
+/**
+* TimezoneWidget extends ChoicesWidget to add auto-detect and select2 search
+* options
+*
+**/
+class TimezoneWidget extends ChoicesWidget {
+    function render($options=array()) {
+        parent::render($options);
+        $config = $this->field->getConfiguration();
+        if (@$config['autodetect']) {
+        ?>
+        <button type="button" class="action-button" onclick="javascript:
+            $('head').append($('<script>').attr('src', '<?php
+            echo ROOT_PATH; ?>js/jstz.min.js'));
+            var recheck = setInterval(function() {
+                if (window.jstz !== undefined) {
+                    clearInterval(recheck);
+                    var zone = jstz.determine();
+                    $('#<?php echo $this->id; ?>').val(zone.name()).trigger('change');
+                }
+            }, 100);
+            return false;"
+            style="vertical-align:middle">
+            <i class="icon-map-marker"></i> <?php echo __('Auto Detect'); ?>
+        </button>
+        <?php
+        } ?>
+        <script type="text/javascript">
+            $(function() {
+                $('#<?php echo $this->id; ?>').select2({
+                    allowClear: true,
+                    width: '300px'
+                });
+            });
+        </script>
+      <?php
+    }
+}
+
 class CheckboxWidget extends Widget {
     function __construct($field) {
         parent::__construct($field);
