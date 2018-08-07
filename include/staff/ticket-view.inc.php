@@ -40,6 +40,15 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
 
 ?>
 
+<script>
+$.busyLoadFull("show", {
+  image: "images/loader.gif",
+  //maxSize: "50px",
+  minSize: "75px"
+});
+
+ 
+</script>
 
 <div class="subnav">
 
@@ -228,6 +237,8 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
       <?php echo $alerttext ;?>
 </div>
  <?php } ?>
+ 
+ <div id="overl">
  <form action="tickets.php?id=<?php echo $ticket->getId(); ?>&a=edit" method="post" id="save"  enctype="multipart/form-data" > 
 <div class="card-box">
 <?php 
@@ -446,7 +457,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
         
     </fieldset>
   </form>
-
+</div>
 <div class="card-box m-t-10">
 <?php
 $tcount = $ticket->getThreadEntries($types)->count();
@@ -871,13 +882,17 @@ $(function() {
                    showTodayButton: true
                    
                });
+                
+               $.busyLoadFull("hide", {
+
+                });
                <?php //if ($msg){echo "$.Notification.notify('warning','top right', 'Warning', '".$msg."');";} ?>
                <?php if ($errors['err']){echo "$.Notification.notify('warning','top right', 'Warning', '".$errors['err']."');";} ?>
                <?php if ($outstanding !== false){echo "$.Notification.notify('warning','top right', 'Warning', '".$warning."');";} ?>     
                <?php if ($warn)   {echo "$.Notification.notify('warning','top right', 'Overdue', '".$warn."');";} ?>
                <?php // if ($bannermsg){echo "$.Notification.notify('success','top right', 'Success', '".$bannermsg."');";} ?>
                
-              
+             
            
             
             

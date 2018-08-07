@@ -59,6 +59,7 @@ if ($lang) {
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/helptopic.css"/>
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/jquery.fancybox.min.js"></script>
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/loadingoverlay.min.js"></script>
     <link type="text/css" rel="stylesheet" href="./css/translatable.css"/>
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/accordian.css" media="all">
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/typeahead.css" media="screen">
@@ -70,8 +71,6 @@ if ($lang) {
     ?>
 </head>
 <body class="fixed-left">
-
-
  
     <div id="pjax-container" class="<?php if ($_POST) echo 'no-pjax'; ?>">
 <?php } else {
