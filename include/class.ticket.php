@@ -219,6 +219,9 @@ implements RestrictedAccess, Threadable, Searchable {
     function isRecordable() {
         return $this->ht['isrecordable'];
     }
+        function isdart() {
+        return $this->ht['isdart'];
+    }
     function isOverdue() {
         return $this->ht['isoverdue'];
     }
@@ -1685,6 +1688,9 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
             'isrecordable' => new BooleanField(array(
                 'label' => __('Recordable'),
             )),
+            'isdart' => new BooleanField(array(
+                'label' => __('DART'),
+            )),
         );
         $tform = TicketForm::getInstance();
         foreach ($tform->getFields() as $F) {
@@ -2456,7 +2462,8 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         if ($vars['duedate'] == '1970-01-01 00:00:00') $vars['duedate'] = null;
         
         
-        if ($vars['isRecordable']) {$Recordable = 1;} else {$Recordable = 0;};        
+        if ($vars['isRecordable']) {$Recordable = 1;} else {$Recordable = 0;};   
+        if ($vars['isdart']) {$DART = 1;} else {$DART = 0;};         
       
         $fields = array();
         $fields['topicId']  = array('type'=>'int',      'required'=>1, 'error'=>__('Help topic selection is required'));
@@ -2489,6 +2496,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         
         $this->topic_id = $vars['topicId'];
         $this->isrecordable = $Recordable;
+        $this->isdart = $DART;
         $this->source = $vars['source'];
         $this->duedate = $vars['duedate'];
         if ($vars['user_id'])
@@ -2981,6 +2989,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
             'team_id' => substr($vars['assignId'], 1),
             'topic_id' => $topicId,
             'isrecordable' => $Recordable,
+            'isdart' => $DART,
             'ip_address' => $ipaddress,
             'source' => $source,
         ));

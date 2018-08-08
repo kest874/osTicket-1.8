@@ -43,9 +43,9 @@ if ($_POST)
 <div class="row">
 <div class="col"> 
 <form action="tickets.php?a=open" method="post" id="save"  enctype="multipart/form-data" >
-<fieldset> 
 
-<div class="row ticketform">
+<div class="row">
+
             <div class='col-sm-3'>
  <?php csrf_token(); ?>
  <input type="hidden" name="do" value="create">
@@ -74,6 +74,31 @@ if ($_POST)
         
         
    </div>
+        <div class='col-sm-3 hidden'>
+    
+            <div class="form-group hidden">
+                <label>
+                    <?php echo __('Incident Source');?>:
+                </label>
+                
+                    <select name="source" class="form-control form-control-sm requiredfield">
+                        <?php
+                        $source = $info['source'] ?: 'Phone';
+                        $sources = Ticket::getSources();
+                        unset($sources['Web'], $sources['API']);
+                        foreach ($sources as $k => $v)
+                            echo sprintf('<option value="%s" %s>%s</option>',
+                                    $k,
+                                    ($source == $k ) ? 'selected="selected"' : '',
+                                    $v);
+                        ?>
+                    </select>
+                    <?php if ($errors['source']) { ?>
+                    <span><font class="error"><?php echo $errors['source']; ?></font></span>
+                    <?php } ?>
+                
+            </div>
+        </div>
    
    <div class="col-sm-3">
    
@@ -102,20 +127,18 @@ if ($_POST)
                     
                    ?>
                 </select>
-                <?php if ($errors['deptId']){?><font class='error'>&nbsp;<?php echo $errors['deptId']; ?></font> <?php } ?>
+                
                 <em class="field-hint m-b-0">The location of this incident</em>
         </div>
         <?php } ?>
         </div>
     <div class="col-sm-3">
-                     
-
-<div class="form-group">
+         <div class="form-group">
             <label>
                 <?php echo __('Type of Incident'); ?>:
             </label>
             
-                    <select class="form-control form-control-sm requiredfield" name="topicId" onchange="javascript:
+                    <select class="form-control form-control-sm requiredfield" name="topicId" id="topicId" onchange="javascript:
                         
                         var data = $(':input[name]', '#dynamic-form').serialize();
                         $.ajax(
@@ -130,12 +153,16 @@ if ($_POST)
                           });
                           
                           
-                          $('#submit').show();
-                          $('#reset').show();
+                          $('#submitrow').show();
+                          
                           topic = this.value;
                           if (topic == 11){
                               $('#chkRecordable').show();
-                          }                                   
+                              $('#chkDART').show();
+                          } else {
+                              $('#chkRecordable').hide();
+                              $('#chkDART').hide();
+                          }                                  
                           ">
                     <?php
                     if ($topics=Topic::getHelpTopics(false, false, true)) {
@@ -143,7 +170,7 @@ if ($_POST)
                             $selected = 'selected="selected"';
                         else { ?>
                         <option value="" selected >&mdash; <?php echo __('Select Incident Type'); ?> &mdash;</option>
-<?php                   }
+                    <?php    }
                         foreach($topics as $id =>$name) {
                             echo sprintf('<option value="%d" %s %s>%s</option>',
                                 $id, ($info['topicId']==$id)?'selected="selected"':'',
@@ -156,18 +183,20 @@ if ($_POST)
                     }
                     ?>
                 </select>
-                <?php if ($errors['topicId']){?>&nbsp;<font class="error"><b>*</b>&nbsp;<?php echo $errors['topicId']; ?></font><?php } ?>
-            
-        
-        <div class="col-sm-3 hidden" id="chkRecordable">
+                            
+        </div>
+    </div>
+            <div class="col-sm-3 ">
                 <div class="form-group">
+                &nbsp;
+                </div>
+                <div class="form-group hidden" id="chkRecordable">
                       <div>
                         <div class=" <?php if ($errors['isrecordable'] || !$topic){ echo 'has-danger';}?>">
                         
                         <label for="isRecordable" class="custom-control custom-checkbox m-b-0">
                         <input  class="custom-control-input" id="isRecordable"
-                                    type="checkbox" name="isRecordable" <?php
-                                    if ($recordable==1) echo 'checked="checked"'; ?> />Recordable
+                                    type="checkbox" name="isRecordable" />Recordable
                                 
                                 <span class="custom-control-indicator"></span>
                         <span class="custom-control-description"></span>
@@ -181,77 +210,54 @@ if ($_POST)
                                   </div>    
                         </div>
                     </div>
+           
+                <div class="form-group hidden" id="chkDART">
+                      <div>
+                        <div class=" <?php if ($errors['isdart'] || !$topic){ echo 'has-danger';}?>">
+                        
+                        <label for="isdart" class="custom-control custom-checkbox m-b-0" style="display:none;" id="isdartlbl">
+                        <input  class="custom-control-input" id="isdart"
+                                    type="checkbox" name="isdart"  />Days Away Restricted or Transferred
+                                
+                                <span class="custom-control-indicator"></span>
+                        <span class="custom-control-description"></span>
+                                
+                                </label>
+                        
+                        
+                            <?php if ($errors['isdart']){ ?>
+                            <div class="form-control-feedback-danger"><?php echo __('');?></div>
+                            <?php }?>
+                                  </div>    
+                        </div>
+                    </div>
             </div>
-        </div>
-    </div>
-    <div class='col-sm-3'>
+       
+
     
 
-        <div class="form-group hidden">
-            <label>
-                <?php echo __('Incident Source');?>:
-            </label>
-            
-                <select name="source" class="form-control form-control-sm requiredfield">
-                    <?php
-                    $source = $info['source'] ?: 'Phone';
-                    $sources = Ticket::getSources();
-                    unset($sources['Web'], $sources['API']);
-                    foreach ($sources as $k => $v)
-                        echo sprintf('<option value="%s" %s>%s</option>',
-                                $k,
-                                ($source == $k ) ? 'selected="selected"' : '',
-                                $v);
-                    ?>
-                </select>
-                <?php if ($errors['source']) { ?>
-                <span><font class="error"><?php echo $errors['source']; ?></font></span>
-                <?php } ?>
-            
-        </div>
-        
-        
-       
   
-      
-            
+<script>    
  
-       </div>
-       <div class='col-sm-3'>
+  $("#isRecordable").on("click", function(){
+     if($('#isRecordable')[0].checked){
+         $("#isdartlbl").css('display','');
+         $("#dynamic-form").css('margin-top','-25px');
+     } else {
+         $("#isdartlbl").css('display','none');
+         $('#isdart').prop('checked', false);
+         $("#dynamic-form").css('margin-top','0px');
+         
+     }
        
-         <div class="form-group"  style="display:none;">
-            <label>
-                <?php echo __('SLA Plan');?>:
-            </label>
-            
-                <select  class="form-control form-control-sm " name="slaId">
-                    <option value="0" selected="selected" >&mdash; <?php echo __('System Default');?> &mdash;</option>
-                    <?php
-                    if($slas=SLA::getSLAs()) {
-                        foreach($slas as $id =>$name) {
-                            echo sprintf('<option value="%d" %s>%s</option>',
-                                    $id, ($info['slaId']==$id)?'selected="selected"':'',$name);
-                        }
-                    }
-                    ?>
-                </select>
-                &nbsp;<font class="error">&nbsp;<?php echo $errors['slaId']; ?></font>
-            
-         </div>
+});
 
-                         
-          
-          
-        
-
-    </div>
-    </div>
-  
-     
-    <div class="row boldlabels">
+</script>
     
-<div id="ticketopen"> 
-<div id="dynamic-form">
+ 
+
+ 
+<div id="dynamic-form" style="width: 100%">
       
         <?php
             foreach ($forms as $form) {
@@ -261,10 +267,11 @@ if ($_POST)
         ?>
 </div>
        
- </div>       
- </fieldset>      
+ </div>   
 
-<div>
+     
+
+<div style="margin-top: 15px;" class="hidden" id="submitrow">
     <input class="btn btn-primary btn-sm" type="submit" name="submit" class="save pending" value="<?php echo _P('action-button', 'Submit');?>">
     <input class="btn btn-warning btn-sm" type="reset"  name="reset"  value="<?php echo __('Reset');?>">
     <input class="btn btn-warning btn-danger btn-sm" type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick="javascript:
@@ -277,12 +284,20 @@ if ($_POST)
     ">
 </div>
 </form>
-</div>
+
 </div> 
 </div> 
 <script type="text/javascript">
+
 $(document).ready(function(){
+    var topic = $('#topicId').find(":selected").val();
     
+    if (topic == 11){
+            $('#chkRecordable').show();
+            $('#chkDART').show();
+     } 
+ 
+    //$("#dynamic-form").css('margin-top','-17px');
     $('#datepicker1').datetimepicker({
                    useCurrent: false,
                    format: 'MM/DD/YYYY',

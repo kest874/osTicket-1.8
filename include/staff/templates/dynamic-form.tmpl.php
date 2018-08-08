@@ -1,6 +1,11 @@
 <?php
 // If the form was removed using the trashcan option, and there was some
 // other validation error, don't render the deleted form the second time
+if (!$options){
+//echo '<div class="row boldlabels">'."\n"; 
+    
+ }
+
 if (isset($options['entry']) && $options['mode'] == 'edit'
     && $_POST
     && ($_POST['forms'] && !in_array($options['entry']->getId(), $_POST['forms']))
@@ -122,11 +127,8 @@ if ($form->getTitle()) { ?>
                 ?>" <?php if ($options['width'])
                     echo "width=\"{$options['width']}\""; ?>>
                 <label <?php if (get_class($field) == 'BooleanField' || get_class($field) == 'FileUploadField'){echo 'style="display: none;"';}?>><?php echo Format::htmlchars($field->getLocal('label')); ?>:</label>
-                <?php if ($a && !$a->getValue() && $field->isRequiredForClose()) { ?>
-                    <i class="icon-warning-sign help-tip warning"
-                        data-title="<?php echo __('Required to close ticket'); ?>"
-                        data-content="<?php echo __('Data is required in this field in order to close the related ticket'); ?>"
-                    /></i>
+                <?php if (strlen($field->getAnswer()) ==0 && $field->isRequiredForClose() && $options) { ?>
+                    <span class="form-control-feedback-danger"><i class="fa fa-warning"></i> Required to close Incident</span>
                 <?php } ?>
             <div <?php if ($field->errors()){echo ' class="has-danger"';}?>style="position:relative" <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'id="requiredfield"';
                 ?>><?php
@@ -161,6 +163,7 @@ if ($form->getTitle()) { ?>
                 <div class="form-control-feedback-danger "><?php echo Format::htmlchars($e); ?></div>
             <?php } ?>
             </div></div>
+            <?php if (Format::htmlchars($field->getLocal('label')) == 'Incident Summary' && !$options) //echo '</div>asdfasdfasdf</div>';?>
         
     <?php 
         }

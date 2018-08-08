@@ -2483,6 +2483,10 @@ Modal
 /* ===========
    Form Elements
  =============*/
+
+.form-group {
+   margin-bottom: 0rem; 
+}
 label {
   font-weight: 500; }
 
@@ -2500,9 +2504,14 @@ label {
     border-color: #a2a2a2;
     box-shadow: none; }
 .form-control-feedback-danger {
-    margin-top: .25rem;
-    font-size: .875rem;
-    color: #dc3545;  
+    font-weight: 600;
+    padding: 3px 5px;
+    font-size: 12px;
+    margin-top: 1px;
+    color: #fff;
+    background-color: #ef5350;
+    border-radius: .25rem;
+    text-align: center;
 }
 .has-danger-important {
     border-color: #d9534f !important;

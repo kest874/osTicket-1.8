@@ -17,6 +17,8 @@ $sla   = $ticket->getSLA();
 $lock  = $ticket->getLock();  //Ticket lock obj
 $topic = $ticket->getHelpTopicId();
 $recordable = $ticket->isRecordable();
+$dart = $ticket->isdart();
+
 if (!$lock && $cfg->getTicketLockMode() == Lock::MODE_ON_VIEW)
     $lock = $ticket->acquireLock($thisstaff->getId());
 $mylock = ($lock && $lock->getStaffId() == $thisstaff->getId()) ? $lock : null;
@@ -225,9 +227,18 @@ $.busyLoadFull("show", {
 <div class="clearfix"></div>
           
 </div>
- <?php if (!$topic) { ?>
-<div class="alert alert-danger">
-      <strong>Category!</strong> Please set the category..
+
+<?php
+  $outstanding = false;
+  if ($role->hasPerm(Ticket::PERM_CLOSE)
+          && is_string($warning=$ticket->isCloseable())) {
+      $outstanding =  true;
+     // echo sprintf('<div class="row task-warning-banner">%s</div>', $warning);
+  } 
+  
+  if ($outstanding !== false) { ?>
+<div class="alert alert-warning">
+      <i class="fa fa-warning"></i> <?php echo $warning;?>
 </div>
  <?php } ?>
 
@@ -250,13 +261,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
             $bannermsg = (string) $M; }?>
   
              
-<?php
-  $outstanding = false;
-  if ($role->hasPerm(Ticket::PERM_CLOSE)
-          && is_string($warning=$ticket->isCloseable())) {
-      $outstanding =  true;
-     // echo sprintf('<div class="row task-warning-banner">%s</div>', $warning);
-  } ?>
+
   
  
   
@@ -429,7 +434,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                         <div class=" <?php if ($errors['isrecordable'] || !$topic){ echo 'has-danger';}?>">
                         
                         <label for="isRecordable" class="custom-control custom-checkbox m-b-0">
-                        <input  class="custom-control-input" id="isRecordable"
+                        <input  class="custom-control-input isRecordable" id="isRecordable"
                                     type="checkbox" name="isRecordable" <?php
                                     if ($recordable==1) echo 'checked="checked"'; ?> />Recordable
                                 
@@ -440,6 +445,31 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                         
                         
                             <?php if ($errors['isrecordable']){ ?>
+                            <div class="form-control-feedback-danger"><?php echo __('');?></div>
+                            <?php }?>
+                                  </div>    
+                        </div>
+                    </div>
+           
+            <?php } ?>
+            <?php if ($topic == 11){?>
+           
+                <div class="form-group">
+                      <div>
+                        <div class=" <?php if ($errors['isdart'] || !$topic){ echo 'has-danger';}?>">
+                        
+                        <label for="isdart" <?php if ($recordable==0) echo 'style="display:none;"'; ?>   class="custom-control custom-checkbox m-b-0" id="isdartlbl">
+                        <input class="custom-control-input" id="isdart"
+                                    type="checkbox" name="isdart" <?php
+                                    if ($dart==1) echo 'checked="checked"'; ?> />Days Away Restricted or Transferred
+                                
+                                <span class="custom-control-indicator"></span>
+                        <span class="custom-control-description"></span>
+                                
+                                </label>
+                        
+                        
+                            <?php if ($errors['isdart']){ ?>
                             <div class="form-control-feedback-danger"><?php echo __('');?></div>
                             <?php }?>
                                   </div>    
@@ -888,7 +918,7 @@ $(function() {
                 });
                <?php //if ($msg){echo "$.Notification.notify('warning','top right', 'Warning', '".$msg."');";} ?>
                <?php if ($errors['err']){echo "$.Notification.notify('warning','top right', 'Warning', '".$errors['err']."');";} ?>
-               <?php if ($outstanding !== false){echo "$.Notification.notify('warning','top right', 'Warning', '".$warning."');";} ?>     
+               <?php //if ($outstanding !== false){echo "$.Notification.notify('warning','top right', 'Warning', '".$warning."');";} ?>     
                <?php if ($warn)   {echo "$.Notification.notify('warning','top right', 'Overdue', '".$warn."');";} ?>
                <?php // if ($bannermsg){echo "$.Notification.notify('success','top right', 'Success', '".$bannermsg."');";} ?>
                
@@ -998,4 +1028,17 @@ $('#note').keyup(function(e){
 $(".dropdown-menu a").click(function() {
     $(this).closest(".dropdown-menu").prev().dropdown("toggle");
 });
+
+
+$("#isRecordable").on("click", function(){
+     if($('#isRecordable')[0].checked){
+         $("#isdartlbl").css('display','');
+     } else {
+         $("#isdartlbl").css('display','none');
+         $('#isdart').prop('checked', false);
+         
+     }
+       
+});
+
 </script>
