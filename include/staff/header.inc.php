@@ -257,10 +257,15 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                 <!-- Start content -->
                 <div class="content">
                     <div class="container">
-                
+                <script>
+$.busyLoadFull("show",  { 
+text: "LOADING ...",
+textColor: "#dd2c00",
+color: "#dd2c00",
+background: "rgba(0, 0, 0, 0.2)"
+});
+ </script>
                  
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/moment.js"></script>
-<script src="<?php echo ROOT_PATH; ?>scp/js/footable.js"></script>
-
-                    
+<script src="<?php echo ROOT_PATH; ?>scp/js/footable.js"></script>                
                

@@ -1,3 +1,5 @@
+
+   
 <?php
 // Calling convention (assumed global scope):
 // $tickets - <QuerySet> with all columns and annotations necessary to
@@ -792,6 +794,7 @@ if (!$sselected) {$sselected = 'Status';}
             echo $pageNav->getPageLinks();
         ?>
     </ul>
+
     </nav>
     </div>
     <div class="float-left">
