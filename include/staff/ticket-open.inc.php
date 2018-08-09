@@ -139,7 +139,12 @@ if ($_POST)
             </label>
             
                     <select class="form-control form-control-sm requiredfield" name="topicId" id="topicId" onchange="javascript:
-                        
+                        $.busyLoadFull('show',  { 
+                            text: 'LOADING ...',
+                            textColor: '#dd2c00',
+                            color: '#dd2c00',
+                            background: 'rgba(0, 0, 0, 0.2)'
+                            });
                         var data = $(':input[name]', '#dynamic-form').serialize();
                         $.ajax(
                           'ajax.php/form/help-topic/' + this.value,
@@ -148,7 +153,8 @@ if ($_POST)
                             dataType: 'json',
                             success: function(json) {
                               $('#dynamic-form').empty().append(json.html);
-                              $(document.head).append(json.media);
+                              $(document.head).append(json.media); 
+                              $.busyLoadFull('hide', {}); 
                             }
                           });
                           
@@ -162,7 +168,8 @@ if ($_POST)
                           } else {
                               $('#chkRecordable').hide();
                               $('#chkDART').hide();
-                          }                                  
+                          }
+                         
                           ">
                     <?php
                     if ($topics=Topic::getHelpTopics(false, false, true)) {

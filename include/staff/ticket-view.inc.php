@@ -43,10 +43,11 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
 ?>
 
 <script>
-$.busyLoadFull("show", {
-  image: "images/loader.gif",
-  //maxSize: "50px",
-  minSize: "75px"
+$.busyLoadFull("show",  { 
+text: "LOADING ...",
+textColor: "#dd2c00",
+color: "#dd2c00",
+background: "rgba(0, 0, 0, 0.2)"
 });
 
  
