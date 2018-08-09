@@ -238,18 +238,35 @@ if ($_POST)
 
   
 <script>    
- 
-  $("#isRecordable").on("click", function(){
-     if($('#isRecordable')[0].checked){
-         $("#isdartlbl").css('display','');
-         $("#dynamic-form").css('margin-top','-25px');
-     } else {
-         $("#isdartlbl").css('display','none');
-         $('#isdart').prop('checked', false);
-         $("#dynamic-form").css('margin-top','0px');
-         
-     }
-       
+var screensize= $(window).width();
+$("#isRecordable").on("click", function(){
+    
+    if($('#isRecordable')[0].checked){
+        $("#isdartlbl").css('display','');
+        if (screensize < 1400){
+            $("#dynamic-form").css('margin-top','-25px');
+            
+        }
+        if (screensize > 1400){
+            $("#dynamic-form").css('margin-top','-1px');
+        }
+    } else {
+        $("#isdartlbl").css('display','none');
+        $('#isdart').prop('checked', false);
+        if (screensize < 1400){
+            $("#dynamic-form").css('margin-top','0px');
+        }
+        if (screensize > 1400){
+            $("#dynamic-form").css('margin-top','0px');
+        }
+    }
+});
+
+$(window).resize(function() {
+ var screensize= $(window).width();
+  if (screensize > 1400) {
+      $("#dynamic-form").css('margin-top','0px');
+  }
 });
 
 </script>
