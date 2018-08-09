@@ -155,11 +155,12 @@ if ($_POST)
                               $('#dynamic-form').empty().append(json.html);
                               $(document.head).append(json.media); 
                               $.busyLoadFull('hide', {}); 
+                              $('#submitrow').show();
                             }
                           });
                           
                           
-                          $('#submitrow').show();
+                          
                           
                           topic = this.value;
                           if (topic == 11){
