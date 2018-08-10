@@ -96,7 +96,7 @@ if ($count) { ?>
                 data-preview="#tasks/<?php echo $id; ?>/preview"
                 ><?php echo $task->getNumber(); ?></a></td>
             <td align="center" nowrap><?php echo
-            Format::datetime($task->created); ?></td>
+            Format::date($task->taskdate); ?></td>
             <td><?php echo $status; ?></td>
             <td>
                 <?php

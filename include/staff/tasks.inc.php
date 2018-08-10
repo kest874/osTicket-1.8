@@ -275,13 +275,12 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
     <div class="float-left subnavtitle">
                           
      <a href="<?php echo $refresh_url; ?>"
-                title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i></a> Tasks / <?php echo
+                title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i></a><?php echo
                 $results_type.$showing; ?>                          
     
     </div>
     <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
-    <a class="btn btn-icon waves-effect waves-light btn-success newTicket new-task" href="#tasks/add" title="Open a New Countermeasure" id="new-task" data-dialog-config="{&quot;size&quot;:&quot;large&quot;}"><i class="fa fa-plus-square" data-placement="bottom"
-        data-toggle="tooltip" title="<?php echo __('New Countermeasure'); ?>"></i></a>
+   
            <?php
            if ($count)
                 echo Task::getAgentActions($thisstaff, array('status' => $status));
@@ -418,7 +417,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
 	
 				<?php } ?>
 				<td align="left" nowrap><?php echo
-                Format::datetime($T[$date_col ?: 'created']); ?></td>
+                Format::date($T[$date_col ?: 'created']); ?></td>
                 <td><a <?php if ($flag) { ?> class="Icon <?php echo $flag; ?>Ticket" title="<?php echo ucfirst($flag); ?> Ticket" <?php } ?>
                     href="tasks.php?id=<?php echo $T['id']; ?>"><?php
                     echo $title; ?></a>

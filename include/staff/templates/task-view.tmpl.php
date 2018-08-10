@@ -110,7 +110,7 @@ if ($task->isOverdue())
                         echo sprintf('href="#tickets/%s/tasks/%d/view" ',
                             $ticket->getId(), $task->getId()
                             );
-                    ?>><?php echo sprintf(__('Task #%s'), $task->getNumber()); ?></a>
+                    ?>><?php echo sprintf(__('Countermeasure #%s'), $task->getNumber()); ?></a>
                 </strong> - 
                 <?php
         $title = TaskForm::getInstance()->getField('title');
@@ -130,7 +130,7 @@ if ($task->isOverdue())
                 <a  id="reload-task"
                     href="tasks.php?id=<?php echo $task->getId(); ?>"><i
                     class="icon-refresh"></i>&nbsp;<?php
-                    echo sprintf(__('Task #%s'), $task->getNumber()); ?></a> -
+                    echo sprintf(__('Countermeasure #%s'), $task->getNumber()); ?></a> -
                     <?php
         $title = TaskForm::getInstance()->getField('title');
         echo $title->display($task->getTitle());
@@ -306,7 +306,7 @@ if ($task->isOverdue())
                 ?>
                  <a class="btn btn-light" href="tasks.php" ><i class="fa fa-list-alt" data-placement="bottom"
                         data-toggle="tooltip"
-                        title="<?php echo __('Tasks'); ?>"></i></a>
+                        title="<?php echo __('Countermeasures'); ?>"></i></a>
                 
                 </div>
                 <div class="clearfix"></div>
@@ -326,21 +326,23 @@ if (!$ticket) { ?>
      <div><label><?php echo __('Status');?>:</label>
                        <?php echo $task->getStatus(); ?></div>
     
-    <div><label><?php echo __('Created');?>:</label>
-                        <td><?php echo Format::datetime($task->getCreateDate()); ?></div>
+    <div><label><?php echo __('Entered');?>:</label>
+                        <td><?php echo Format::date($task->getCreateDate()); ?></div>
+    <div><label><?php echo __('Date');?>:</label>
+                        <td><?php echo Format::date($task->getTaskDate()); ?></div>
     
     <?php if($task->isOpen()){ ?>
                     
                          <div><label><?php echo __('Due Date');?>:</label>
                         <?php echo $task->duedate ?
-                        Format::datetime($task->duedate) : '<span
+                        Format::date($task->duedate) : '<span
                         class="faded">&mdash; '.__('None').' &mdash;</span>'; ?></div>
                     
                     <?php
                     }else { ?>
                    
                          <div><label><?php echo __('Completed');?>:</label>
-                        <?php echo Format::datetime($task->getCloseDate()); ?></div>
+                        <?php echo Format::date($task->getCloseDate()); ?></div>
                     
                     <?php
                     }
@@ -349,7 +351,7 @@ if (!$ticket) { ?>
     </div>
     <div class="col-md-3">
     
-    <div><label><?php echo __('Owned By');?>:</label>
+    <div><label><?php echo __('Location');?>:</label>
                         <?php //echo Format::htmlchars($task->dept->getName()); ?></div>
     
     <?php
@@ -497,7 +499,7 @@ else
                     <div class="error"><?php echo $errors['response']; ?></div>
                     <input type="hidden" name="draft_id" value=""/>
                     <textarea name="response" id="task-response" cols="50"
-                        data-signature-field="signature" data-dept-id="<?php echo $dept->getId(); ?>"
+                        data-signature-field="signature" data-dept-id="<?php //echo //$dept->getId(); ?>"
                         data-signature="<?php
                             echo Format::htmlchars(Format::viewableImages($signature)); ?>"
                         placeholder="<?php echo __( 'Start writing your update here.'); ?>"

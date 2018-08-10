@@ -169,6 +169,10 @@ class TaskModel extends VerySimpleModel {
     function getDueDate() {
         return $this->duedate;
     }
+    
+    function getTaskDate() {
+        return $this->taskdate;
+    }
 
     function getCloseDate() {
         return $this->isClosed() ? $this->closed : '';
@@ -271,8 +275,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
         // Check access based on department or assignment
         if (!$staff->canAccessDept($this->getDeptId())
                 && $this->isOpen()
-                && $staff->getId() != $this->getStaffId()
-                && !$staff->isTeamMember($this->getTeamId()))
+                && $staff->getId() != $this->getStaffId())
             return false;
 
         // At this point staff has access unless a specific permission is
@@ -1076,9 +1079,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
                 'class' => 'Staff', 'desc' => __('Assigned/closing agent'),
             ),
             'subject' => 'Subject',
-            'team' => array(
-                'class' => 'Team', 'desc' => __('Assigned/closing team'),
-            ),
+            
             'thread' => array(
                 'class' => 'TaskThread', 'desc' => __('Task Thread'),
             ),
@@ -1311,6 +1312,9 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             $task->dept_id = $Ticket->dept_id;
         if ($vars['internal_formdata']['duedate'])
 	    $task->duedate = date('Y-m-d G:i', Misc::dbtime($vars['internal_formdata']['duedate']));
+    
+        if ($vars['internal_formdata']['taskdate'])
+	    $task->taskdate = date('Y-m-d G:i', Misc::dbtime($vars['internal_formdata']['taskdate']));
 
         if (!$task->save(true))
             return false;
@@ -1532,13 +1536,22 @@ extends AbstractForm {
                     'required' => false,
                     'layout' => new GridFluidCell(6),
                     )),
+                 'taskdate'  =>  new DatetimeField(array(
+                    'id' => 3,
+                    'label' => __('Countermeasure Date'),
+                    'required' => false,
+                    'configuration' => array(
+                        'time' => false,
+                        'gmt' => false,
+                        'future' => false,
+                        ),
+                    )),    
                 'duedate'  =>  new DatetimeField(array(
                     'id' => 3,
                     'label' => __('Due Date'),
                     'required' => false,
                     'configuration' => array(
-                        'min' => Misc::gmtime(),
-                        'time' => true,
+                        'time' => false,
                         'gmt' => false,
                         'future' => true,
                         ),
@@ -1548,7 +1561,7 @@ extends AbstractForm {
 
         $mode = @$this->options['mode'];
         if ($mode && $mode == 'edit') {
-            //unset($fields['dept_id']);
+            unset($fields['dept_id']);
             unset($fields['assignee']);
         }
 

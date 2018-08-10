@@ -2,7 +2,7 @@
 global $cfg; 
 
 if (!$info['title'])
-    $info['title'] = sprintf(__('%s Task #%s'),
+    $info['title'] = sprintf(__('%s Countermeasure #%s'),
             __('Edit'), $task->getNumber()
             );
 
@@ -31,12 +31,14 @@ if ($info['error']) {
     if ($forms) {
         foreach ($forms as $form)
             echo $form->getForm(false, array('mode' => 'edit'))->asTable(
-                    __('Task Information'),
+                    __(''),
                     array(
                         'draft-namespace' => $namespace,
                         )
                     );
     }
+    $iform = $iform ?: TaskForm::getInternalForm();
+        echo $iform->asTable(("")); 
     ?>
     </div>
     <div><strong><?php echo __('Internal Note');?></strong>:
