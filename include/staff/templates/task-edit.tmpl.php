@@ -37,8 +37,8 @@ if ($info['error']) {
                         )
                     );
     }
-    $iform = $iform ?: TaskForm::getInternalForm();
-        echo $iform->asTable(("")); 
+    //$iform = $iform ?: TaskForm::getInternalForm();
+       // echo $iform->asTable(("")); 
     ?>
     </div>
     <div><strong><?php echo __('Internal Note');?></strong>:
