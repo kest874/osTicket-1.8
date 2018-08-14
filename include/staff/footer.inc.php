@@ -149,3 +149,6 @@ if ($thisstaff
 </body>
 </html>
 <?php } # endif X_PJAX ?>
+<script>
+$.busyLoadFull("hide", {});
+</script>
