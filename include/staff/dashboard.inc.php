@@ -20,20 +20,29 @@
 </div> 
 
 <div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-6">
         <div class="portlet" id="IncidentsbyLocation" ><!-- /primary heading -->
             
         </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-6">
         <div class="portlet" id="RecordablesbyLocation" ><!-- /primary heading -->
             
         </div>
     </div>
 </div>
-
+<div class="row">
+    <div class="col-lg-6">
+        <div class="portlet" id="DartbyLocation"><!-- /primary heading -->
+            
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="portlet" id="" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-lg-6">
         <div class="portlet" id="IncidentLocationbyType" ><!-- /primary heading -->
@@ -155,7 +164,7 @@ $locsdata = db_query($sql);
 $(function () {
     Highcharts.chart('IncidentsbyLocation', {
         chart: {
-            type: 'spline'
+            type: 'column'
         },
         title: {
             text: 'Incidents by location',
@@ -174,21 +183,51 @@ $(function () {
        ?>]
         },
         yAxis: {
+            min: 0,
             title: {
-                text: 'Number of Incidents'
-            }
-        },
-        plotOptions: {
-        spline: {
-            marker: {
-                radius: 4,
-                lineColor: '#666666',
-                lineWidth: 1
+                    text: 'Number of Incidents'
+                },
+            stackLabels: {
+            enabled: true,
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
             }
         }
         },
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            x: 0,
+            y: 0,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false
+        },
+        tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+            dataLabels: {
+                enabled: true,
+                formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+                }
+            }
+        },
         
-               series: [
+        series: [
         
          <?php
         foreach ($locs as $loc) { ?>
@@ -279,7 +318,7 @@ $locsdata = db_query($sql);
 $(function () {
     Highcharts.chart('RecordablesbyLocation', {
         chart: {
-            type: 'spline'
+            type: 'column'
         },
         title: {
             text: 'Recordables by location',
@@ -301,16 +340,46 @@ $(function () {
             title: {
                 text: 'Number of Recordables'
             }
-        },
-        plotOptions: {
-        spline: {
-            marker: {
-                radius: 4,
-                lineColor: '#666666',
-                lineWidth: 1
+        ,
+            stackLabels: {
+            enabled: true,
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
             }
         }
         },
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            x: 0,
+            y: 0,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false
+        },
+        tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+            dataLabels: {
+                enabled: true,
+                formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+            }
+        }
+    },
         
                series: [
         
@@ -329,6 +398,158 @@ $(function () {
     });
 });   
 
+<?php
+$sql="select distinct concat(MONTHNAME(STR_TO_DATE(CALENDARWEEK, '%m')),' ',CALENDARYEAR) as cat from
+(select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
+
+select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+
+from
+
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
+
+group by cat, location order by CALENDARYEAR, CALENDARWEEK";
+
+$periods = db_query($sql);
+
+$sql="select distinct location from
+(select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
+
+select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+
+from
+
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
+
+group by location order by location, CALENDARYEAR, CALENDARWEEK";
+
+$locs = db_query($sql);
+
+$sql="select sum(COUNT) as COUNT, concat(MONTHNAME(STR_TO_DATE(CALENDARWEEK, '%m')),' ',CALENDARYEAR) as cat, location from
+(select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
+
+select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+
+from
+
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a
+
+union all 
+select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
+(select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
+
+select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+
+from
+
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
+
+group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
+
+(select distinct location from
+(select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
+
+select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+
+from
+
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
+
+group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1
+
+
+
+)b
+
+group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
+
+
+$locsdata = db_query($sql);
+
+?>
+
+$(function () {
+    Highcharts.chart('DartbyLocation', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Days Away Restricted or Transferred by location',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+        },
+        xAxis: {
+            categories: [<?php
+      foreach ($periods as $period) {
+                 
+                 echo "'".preg_replace('/\s+/', ' ', $period["cat"])."',";
+       }   
+       ?>]
+        },
+        yAxis: {
+            title: {
+                text: ''
+            }
+        ,
+            stackLabels: {
+            enabled: true,
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+        },
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            x: 0,
+            y: 0,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false
+        },
+        tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+            dataLabels: {
+                enabled: true,
+                formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+            }
+        }
+    },
+        
+               series: [
+        
+         <?php
+        foreach ($locs as $loc) { ?>
+        
+        {
+            name: '<?php echo $loc["location"]?>',
+            data: [<?php foreach ($locsdata as $locdata) {
+                if ($locdata["location"] == $loc["location"]) echo $locdata["COUNT"].',';
+            }?>]
+        }, 
+        
+        <?php } ?>
+        ]
+    });
+});
 
 <?php
     $sql="select distinct topic from (SELECT count(ticket_id) as incidents, d.name as location, ht.topic   
