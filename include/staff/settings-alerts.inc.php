@@ -19,6 +19,18 @@
                 <?php echo __('Admin Email'); ?> <em>(<?php echo $cfg->getAdminEmail(); ?>)</em>
             </td>
         </tr>
+         <tr>
+            <td>
+                <input type="checkbox" name="ticket_alert_group" <?php echo $config['ticket_alert_group']?'checked':''; ?>>
+                <?php echo __('Group Alert Email'); ?> 
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" name="ticket_alert_groupemail" value="<?php echo $config['ticket_alert_groupemail']; ?>"> <?php echo __('Group Alert Email Address'); ?>
+                
+            </td>
+        </tr>
         <tr>
             <td>
                 <input type="checkbox" name="ticket_alert_dept_manager" <?php echo $config['ticket_alert_dept_manager']?'checked':''; ?>>

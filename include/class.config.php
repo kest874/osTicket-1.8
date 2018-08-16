@@ -870,7 +870,12 @@ class OsticketConfig extends Config {
     function alertDeptTeamLeaderONNewTicket() {
         return ($this->get('ticket_alert_dept_teamleader'));
     }
-
+    function alertGroupEmailONNewTicket() {
+        return ($this->get('ticket_alert_group'));
+    }
+    function alertGroupEmail() {
+        return ($this->get('ticket_alert_groupemail'));
+    }
     function alertDeptMembersONNewTicket() {
         return ($this->get('ticket_alert_dept_members'));
     }
@@ -1592,6 +1597,8 @@ class OsticketConfig extends Config {
 
        if($vars['ticket_alert_active']
                 && (!isset($vars['ticket_alert_admin'])
+                    && !isset($vars['ticket_alert_group'])
+                    && !isset($vars['tticket_alert_groupemail'])
                     && !isset($vars['ticket_alert_dept_manager'])
                     && !isset($vars['ticket_alert_dept_teamleader'])
                     && !isset($vars['ticket_alert_dept_members'])
@@ -1643,6 +1650,8 @@ class OsticketConfig extends Config {
         return $this->updateAll(array(
             'ticket_alert_active'=>$vars['ticket_alert_active'],
             'ticket_alert_admin'=>isset($vars['ticket_alert_admin'])?1:0,
+            'ticket_alert_groupemail'=>isset($vars['ticket_alert_groupemail'])? $vars['ticket_alert_groupemail']:'null',
+            'ticket_alert_group'=>isset($vars['ticket_alert_group'])?1:0,
             'ticket_alert_dept_manager'=>isset($vars['ticket_alert_dept_manager'])?1:0,
             'ticket_alert_dept_teamleader'=>isset($vars['ticket_alert_dept_teamleader'])?1:0,
             'ticket_alert_dept_members'=>isset($vars['ticket_alert_dept_members'])?1:0,

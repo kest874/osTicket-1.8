@@ -1100,6 +1100,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
             if ($cfg->alertDeptTeamLeaderONNewTicket() && $teamleader) {
                 $recipients[] = $teamleader;
             }
+            
             // Account manager
             if ($cfg->alertAcctManagerONNewMessage()
                 && ($org = $this->getOwner()->getOrganization())
@@ -1121,13 +1122,18 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
                 $email->sendAlert($staff, $alert['subj'], $alert['body'], null, $options);
                 $sentlist[] = $staff->getEmail();
             }
+            
+            if ($cfg->alertGroupEmailONNewTicket() && $cfg->alertGroupEmail()) {
+                $options += array('utype'=>'A');
+                $alert = $this->replaceVars($msg, array('recipient' => 'Admin'));
+                $email->sendAlert($cfg->alertGroupEmail(), $alert['subj'],
+                        $alert['body'], null, $options);               
+            }
+            
             // Alert admin ONLY if not already a staff??
             if ($cfg->alertAdminONNewTicket()
                     && !in_array($cfg->getAdminEmail(), $sentlist)) {
-                $options += array('utype'=>'A');
-                $alert = $this->replaceVars($msg, array('recipient' => 'Admin'));
-                $email->sendAlert($cfg->getAdminEmail(), $alert['subj'],
-                        $alert['body'], null, $options);
+                
             }
         }
         return true;
