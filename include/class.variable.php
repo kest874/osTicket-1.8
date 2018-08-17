@@ -131,7 +131,12 @@ class VariableReplacer {
         $parts = explode('.', $var, 2);
         try {
             if ($parts && ($obj=$this->getObj($parts[0])))
-                return $this->getVar($obj, $parts[1]);
+                if (!$this->getVar($obj, $parts[1])){
+                  return 'Not Entered';   
+                } else {
+                  return $this->getVar($obj, $parts[1]);   
+                }
+              
         }
         catch (OOBContent $content) {
             $type = $content->getType();
