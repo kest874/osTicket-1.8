@@ -25,6 +25,7 @@ if ($_POST)
 //if(!$user) {
 //  $user = User::lookupByemail($thisstaff->getEmail());
  //}
+ 
 ?>
 <div class="subnav">
 
@@ -293,8 +294,7 @@ $(window).resize(function() {
 </div>
        
  </div>   
-
-     
+   
 
 <div style="margin-top: 15px;" class="hidden" id="submitrow">
     <input class="btn btn-primary btn-sm" type="submit" name="submit" class="save pending" value="<?php echo _P('action-button', 'Submit');?>">
@@ -308,6 +308,16 @@ $(window).resize(function() {
         window.location.href='tickets.php';
     ">
 </div>
+<?php
+ if ($errors){?>
+
+<script>
+$('#submitrow').show();
+</script>
+    
+<?php    
+}
+?> 
 </form>
 
 </div> 
