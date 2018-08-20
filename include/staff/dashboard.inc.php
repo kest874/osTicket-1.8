@@ -4,7 +4,7 @@
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/export-data.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/pareto.js"></script>
 
-
+<?php TicketForm::ensureDynamicDataView(); ?>
 
 <div class="subnav">
 
