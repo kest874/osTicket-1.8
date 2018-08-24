@@ -1,4 +1,4 @@
-    <div>
+<div>
         <div class="pull-right">
            <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
                     
@@ -63,7 +63,7 @@ $emitLevel = function($queues, $level=0) use ($all_queues, &$emitLevel) {
         <td colspan="<?php echo max(1, $level); ?>"></td>
 <?php } ?>
         <td>
-          <input type="checkbox" class="custom-control-input mass " value="<?php echo $q->id; ?>" />
+          <input type="checkbox" class="mass checkbox" value="<?php echo $q->id; ?>" />
           <input type="hidden" name="qsort[<?php echo $q->id; ?>]"
             value="<?php echo $q->sort; ?>"/>
         </td>
