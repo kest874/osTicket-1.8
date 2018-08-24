@@ -89,11 +89,17 @@
 </div>
 <div class="row">
     <div class="col-lg-12">
-        <div class="portlet" id="lastnamepareto" ><!-- /primary heading -->
+        <div class="portlet" id="associateincidents" ><!-- /primary heading -->
             
         </div>
     </div>
-        
+</div>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="portlet" id="associaterecordables" ><!-- /primary heading -->
+            
+        </div>
+    </div>
 </div>
 
 <script>
@@ -1570,7 +1576,64 @@ Highcharts.chart('locationbybodypart', {
         
         <?php } ?>]
  });
-});     
+});    
+<?php
+
+$sql="select sum(COUNT) as COUNT, lastname from 
+(
+select count(value) as COUNT, value as lastname from 
+(
+SELECT  concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
+ left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value
+ FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
+ join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id where t.isrecordable = 1
+ )a
+    group by lastname 
+) data
+    where COUNT > 1
+	group by lastname order by  count desc, lastname ";
+
+$tresults = db_query($sql); 
+
+?>
+$(function() {        
+ Highcharts.chart('associaterecordables', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Recodables by Associate > 1',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+    },
+    xAxis: {
+        categories: [<?php foreach ($tresults as $tresult) {echo "\"".$tresult['lastname']."\",";}?>]
+    },
+    yAxis: {
+        title: {
+            text: 'Number of Recordables'
+            }
+        },
+        minPadding: 0,
+        maxPadding: 0,
+        max: 100,
+        min: 0,
+        opposite: true,
+        labels: {
+            format: "{value}%"
+        }
+    ,
+    credits: false,
+    series: [{        name: 'Incidents',
+        type: 'column',
+        data: [<?php foreach ($tresults as $tresult) {echo $tresult['COUNT'].',';} ?>]
+    }]
+});
+});      
+ 
 <?php
 
 $sql="select sum(COUNT) as COUNT, lastname from 
@@ -1590,12 +1653,12 @@ $tresults = db_query($sql);
 
 ?>
 $(function() {        
- Highcharts.chart('lastnamepareto', {
+ Highcharts.chart('associateincidents', {
     chart: {
         type: 'column'
     },
     title: {
-        text: 'Incidents by Individual > 1',
+        text: 'Incidents by Associate > 1',
             style: {
             color: '#797979',
             fontSize: '14px',
