@@ -3,6 +3,7 @@
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/exporting.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/export-data.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/pareto.js"></script>
+<script src="<?php echo ROOT_PATH; ?>scp/js/modules/no-data-to-display.js"></script>
 
 <?php TicketForm::ensureDynamicDataView(); ?>
 
