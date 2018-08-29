@@ -1659,7 +1659,7 @@ $(function() {
         type: 'column'
     },
     title: {
-        text: 'Incidents by Associate > 1',
+        text: 'Incidents/Observations by Associate > 1',
             style: {
             color: '#797979',
             fontSize: '14px',
