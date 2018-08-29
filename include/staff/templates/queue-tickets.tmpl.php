@@ -711,6 +711,22 @@ if (!$sselected) {$sselected = 'Status';}
       </thead>
       <tbody>
     <?php
+    
+    $sitecolor = array(
+                "BRY"=>"#ff5252",
+                "CAN"=>"rgb(241, 92, 128)",
+                "IND"=>"#e040fb",
+                "MEX"=>"#7c4dff",
+                "NTC"=>"rgb(43, 144, 143)",
+                "OH"=>"rgb(67, 67, 72)",
+                "PAU"=>"#40c4ff",
+                "RTA"=>"#18ffff",
+                "RVC"=>"rgb(247, 163, 92)",
+                "TNN1"=>"#69f0ae",
+                "TNN2"=>"rgb(124, 181, 236)",
+                "TNS"=>"#eeff41",
+                "YTD"=>"#c30000");
+
     foreach ($tickets as $T) {
         echo '<tr>';
         if ($canManageTickets) { ?>
@@ -720,9 +736,9 @@ if (!$sselected) {$sselected = 'Status';}
         }
         
         foreach ($columns as $C) {
-            
+                 
         list($contents, $styles) = $C->render($T);
-        
+    
          if (strchr($styles, 'badge')!= false){
                
                 switch ($contents){
@@ -738,9 +754,19 @@ if (!$sselected) {$sselected = 'Status';}
                     break;
                     
                 default:
-               
-               $badgecolor =  strtolower('bg-'.strtok(substr($styles, strpos($styles, "badge:") + 6), ';'));
-               $badgecolor = preg_replace('/\s+/', '', $badgecolor);
+                {
+                    
+                    $badgoverride = null;
+                    
+                    if ($C->heading == 'Location'){
+                       
+                        $badgoverride = 'style="background-color: '.$sitecolor[$contents].' !important;"';
+        
+                    } else {
+                       $badgecolor =  strtolower('bg-'.strtok(substr($styles, strpos($styles, "badge:") + 6), ';'));
+                       $badgecolor = preg_replace('/\s+/', '', $badgecolor);
+                   }
+                }
                }
                               
                $badge='badge label-table '.$badgecolor;
@@ -750,10 +776,10 @@ if (!$sselected) {$sselected = 'Status';}
          }
            
             if ($style = $styles ? 'style="'.$styles.'"' : '') {
-                echo "<td $style><div $style><span class =\"$badge\">$contents</span></div></td>";
+                echo "<td $style><div $style><span class =\"$badge\" $badgoverride>$contents</span></div></td>";
             }
             else {
-                echo "<td><span class=\"$badge\">$contents</span></td>";
+                echo "<td><span class=\"$badge\" >$contents</span></td>";
             }
         $badge=null;
         $badgecolor=null;

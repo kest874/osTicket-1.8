@@ -107,10 +107,25 @@
 
 <?php
 
+$sitecolor = array(
+"BRY"=>"#ff5252",
+"CAN"=>"rgb(241, 92, 128)",
+"IND"=>"#e040fb",
+"MEX"=>"#7c4dff",
+"NTC"=>"rgb(43, 144, 143)",
+"OH"=>"rgb(67, 67, 72)",
+"PAU"=>"#40c4ff",
+"RTA"=>"#18ffff",
+"RVC"=>"rgb(247, 163, 92)",
+"TNN1"=>"#69f0ae",
+"TNN2"=>"rgb(124, 181, 236)",
+"TNS"=>"#eeff41",
+"YTD"=>"#c30000");
+
 $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -123,7 +138,7 @@ $periods = db_query($sql);
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -136,7 +151,7 @@ $locs = db_query($sql);
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -146,7 +161,7 @@ union all
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -157,7 +172,7 @@ group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -173,7 +188,7 @@ $locsdata = db_query($sql);
 $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location,CALENDARWEEK from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -183,7 +198,7 @@ union all
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -194,7 +209,7 @@ group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -294,11 +309,16 @@ $(function () {
         series: [
         
          <?php
-        foreach ($locs as $loc) { ?>
+        foreach ($locs as $loc) { 
+        
+        $key = $loc["location"];
+        $color = $sitecolor[$key];
+        ?>
         
         {
             name: '<?php echo $loc["location"]?>',
             yAxis: 1,
+            color: '<?php echo $color; ?>',
             data: [<?php foreach ($locsdata as $locdata) {
                 if ($locdata["location"] == $loc["location"]) echo $locdata["COUNT"].',';
             }?>]
@@ -330,7 +350,7 @@ $(function () {
 $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -343,7 +363,7 @@ $periods = db_query($sql);
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -356,7 +376,7 @@ $locs = db_query($sql);
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -366,7 +386,7 @@ union all
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -377,7 +397,7 @@ group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -393,7 +413,7 @@ $locsdata = db_query($sql);
 $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location,CALENDARWEEK from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -403,7 +423,7 @@ union all
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -414,7 +434,7 @@ group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -514,11 +534,17 @@ $(function () {
                series: [
         
          <?php
-        foreach ($locs as $loc) { ?>
+        foreach ($locs as $loc) {  
+        
+        $key = $loc["location"];
+        $color = $sitecolor[$key];
+        
+        ?>
         
         {
             name: '<?php echo $loc["location"]?>',
             yAxis: 1,
+            color: '<?php echo $color; ?>',
             data: [<?php foreach ($locsdata as $locdata) {
                 if ($locdata["location"] == $loc["location"]) echo $locdata["COUNT"].',';
             }?>]
@@ -549,7 +575,7 @@ $(function () {
 $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -562,7 +588,7 @@ $periods = db_query($sql);
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -575,7 +601,7 @@ $locs = db_query($sql);
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -585,7 +611,7 @@ union all
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -596,7 +622,7 @@ group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -612,7 +638,7 @@ $locsdata = db_query($sql);
 $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location,CALENDARWEEK from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -622,7 +648,7 @@ union all
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -633,7 +659,7 @@ group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 
-select d.name as location ,month(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARWEEK,YEAR(FROM_DAYS(TO_DAYS(tc.dateofincident) - MOD(TO_DAYS(tc.dateofincident) - 2, 7))) AS CALENDARYEAR
+select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 
 from
 
@@ -732,11 +758,17 @@ $(function () {
                series: [
         
          <?php
-        foreach ($locs as $loc) { ?>
+        foreach ($locs as $loc) { 
+        
+        $key = $loc["location"];
+        $color = $sitecolor[$key];
+        
+        ?>
         
         {
             name: '<?php echo $loc["location"]?>',
             yAxis: 1,
+            color: '<?php echo $color; ?>',
             data: [<?php foreach ($locsdata as $locdata) {
                 if ($locdata["location"] == $loc["location"]) echo $locdata["COUNT"].',';
             }?>]
@@ -865,10 +897,16 @@ Highcharts.chart('IncidentLocationbyType', {
         }
     },
     series: [<?php
-        foreach ($locs as $loc) { ?>
+        foreach ($locs as $loc) { 
+        
+        $key = $loc["location"];
+        $color = $sitecolor[$key];
+        
+        ?>
         
         {
             name: '<?php echo $loc["location"]?>',
+            color: '<?php echo $color; ?>',
             data: [<?php foreach ($topicsdata as $topicdata) {
 
                 if ($topicdata["location"] == $loc["location"]) echo $topicdata["COUNT"].',';
@@ -1134,10 +1172,16 @@ Highcharts.chart('injurytypebylocation', {
         }
     },
     series: [<?php
-        foreach ($locs as $loc) { ?>
+        foreach ($locs as $loc) { 
+        
+        $key = $loc["location"];
+        $color = $sitecolor[$key];
+        
+        ?>
         
         {
             name: '<?php echo $loc["location"]?>',
+            color: '<?php echo $color; ?>',
             data: [<?php foreach ($locsdata as $locdata) {
 
                 if ($loc["location"] == $locdata["location"]) echo $locdata["COUNT"].',';
@@ -1422,10 +1466,16 @@ Highcharts.chart('bodypartbylocation', {
         }
     },
     series: [<?php
-        foreach ($locs as $loc) { ?>
+        foreach ($locs as $loc) { 
+        
+        $key = $loc["location"];
+        $color = $sitecolor[$key];
+       
+        ?>
         
         {
-            name: '<?php echo $loc["location"]?>',
+            name: '<?php echo $loc["location"]?>', 
+            color: '<?php echo $color; ?>',
             data: [<?php foreach ($locsdata as $locdata) {
 
                 if ($loc["location"] == $locdata["location"]) echo $locdata["COUNT"].',';
