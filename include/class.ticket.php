@@ -2755,6 +2755,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
 
         if ($vars['uid'])
             $user = Staff::lookup($vars['uid']);
+        
         $id=0;
         $fields=array();
         switch (strtolower($origin)) {
@@ -2894,6 +2895,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         }
         
         if ($vars['isRecordable']) {$Recordable = 1;} else {$Recordable = 0;}; 
+        if ($vars['isdart']) {$DART = 1;} else {$DART = 0;};   
         // Any errors above are fatal.
         if ($errors)
             return 0;
@@ -2995,6 +2997,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
             'team_id' => substr($vars['assignId'], 1),
             'topic_id' => $topicId,
             'isrecordable' => $Recordable,
+            'isdart' => $DART,
             'isdart' => $DART,
             'ip_address' => $ipaddress,
             'source' => $source,
