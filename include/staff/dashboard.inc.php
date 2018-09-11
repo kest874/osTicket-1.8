@@ -3,6 +3,7 @@
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/exporting.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/export-data.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/pareto.js"></script>
+<script src="<?php echo ROOT_PATH; ?>scp/js/modules/drilldown.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/no-data-to-display.js"></script>
 
 <?php TicketForm::ensureDynamicDataView(); ?>
@@ -1687,24 +1688,71 @@ $(function() {
  
 <?php
 
-$sql="select sum(COUNT) as COUNT, lastname from 
-(
-select count(value) as COUNT, value as lastname from 
-(
-SELECT  concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
+$sql="select distinct topic from (select count(topic) as COUNT, topic, value as lastname from (
+SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
  left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value
  FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
- )a
-    group by lastname 
-) data
-    where COUNT > 1
-	group by lastname order by  count desc, lastname ";
+ join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id)a
+ group by topic, lastname )a";   
+
+$topics = db_query($sql);     
+
+$sql="
+select sum(COUNT) as COUNT , lastname, location,
+
+case
+
+when location = 'BRY' then '#ff5252'
+when location = 'CAN' then 'rgb(241 92 128)'
+when location = 'IND' then '#e040fb'
+when location = 'MEX' then '#7c4dff'
+when location = 'NTC' then 'rgb(43 144 143)'
+when location = 'OH' then 'rgb(67 67 72)'
+when location = 'PAU' then '#40c4ff'
+when location = 'RTA' then '#18ffff'
+when location = 'RVC' then 'rgb(247 163 92)'
+when location = 'TNN1' then '#69f0ae'
+when location = 'TNN2' then 'rgb(124 181 236)'
+when location = 'TNS' then '#eeff41'
+when location = 'YTD' then '#c30000'
+end as color
+
+from (
+		select  count(topic) as COUNT, topic, value as lastname, location from (
+
+			SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
+			 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as LOCATION
+			 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
+			 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id
+		 
+			)a
+		 group by topic, lastname, location
+		)cdata
+where COUNT >1 group by lastname, location order by count desc
+";
+ 
+$associates = db_query($sql);
+
+$sql="select sum(count) as COUNT, topic, lastname, location from (
+
+select  count(topic) as COUNT, topic, value as lastname, location from (
+
+	SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
+	 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as LOCATION
+	 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
+	 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id
+ 
+	)a
+ group by topic, lastname, location
+ 
+ )a  
+  group by topic, lastname, location ";    
 
 $tresults = db_query($sql); 
 
 ?>
-$(function() {        
- Highcharts.chart('associateincidents', {
+
+Highcharts.chart('associateincidents', {
     chart: {
         type: 'column'
     },
@@ -1716,29 +1764,90 @@ $(function() {
             fontWeight: '600',
             }
     },
+    credits: false,
+    tooltip: {
+        formatter: function () {
+            
+            if (this.point.location !== undefined ){
+                return  this.point.name + ': <b>' + this.point.y + '<br>Location: <b>' + this.point.location + '</b>';
+            }
+        }
+    },
     xAxis: {
-        categories: [<?php foreach ($tresults as $tresult) {echo "\"".$tresult['lastname']."\",";}?>]
+        type: 'category'
     },
     yAxis: {
-        title: {
-            text: 'Number of Incidents'
-            }
-        },
-        minPadding: 0,
-        maxPadding: 0,
-        max: 100,
+        allowDecimals: false,
         min: 0,
-        opposite: true,
-        labels: {
-            format: "{value}%"
+        title: {
+            text: 'Total Incidents'
+        },
+        stackLabels: {
+            enabled: true,
+            formatter: function(){
+        var val = this.total;
+        if (val > 0) {
+            return val;
         }
-    ,
-    credits: false,
-    series: [{        name: 'Incidents',
-        type: 'column',
-        data: [<?php foreach ($tresults as $tresult) {echo $tresult['COUNT'].',';} ?>]
-    }]
+        return '';
+    },
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+    },
+    legend: {
+        enabled: false
+    },
+
+    plotOptions: {
+        series: {
+            borderWidth: 0,
+            dataLabels: {
+                enabled: true
+            }
+        }
+    },
+
+    series: [{
+        name: 'Incidents',
+        color: 'red',
+        data: [<?php foreach ($associates as $associate) { ?>
+        
+        {
+            color: '<?php echo $associate["color"]?>',
+            name: '<?php echo $associate["lastname"]?>',
+            location: '<?php echo $associate["location"]?>',
+            y: <?php echo $associate["COUNT"]?>,
+            drilldown: '<?php echo $associate["lastname"]?>'
+        }, 
+         <?php } ?>
+            ]
+    }],
+    drilldown: {
+        series: [<?php foreach ($associates as $associate) { ?>
+        
+
+            
+        {  
+            id: '<?php echo $associate["lastname"]?>',
+           
+            data: [
+            
+            <?php foreach ($tresults as $tresult) { 
+            
+                if ($tresult['lastname'] == $associate["lastname"] && $tresult['location'] == $associate["location"]) {?>
+                ['<?php echo $tresult["topic"]; ?>', <?php echo $tresult["COUNT"]; ?>],
+                 
+                <?php }} ?>
+                 ]
+        },  
+        <?php } ?>
+        ]
+    }
 });
-});      
+
 </script>
+
 
