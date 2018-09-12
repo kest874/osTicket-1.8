@@ -3,7 +3,6 @@
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/exporting.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/export-data.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/pareto.js"></script>
-<script src="<?php echo ROOT_PATH; ?>scp/js/modules/drilldown.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/no-data-to-display.js"></script>
 
 <?php TicketForm::ensureDynamicDataView(); ?>
@@ -105,9 +104,7 @@
 </div>
 
 <script>
-
 <?php
-
 $sitecolor = array(
 "BRY"=>"#ff5252",
 "CAN"=>"rgb(241, 92, 128)",
@@ -122,109 +119,62 @@ $sitecolor = array(
 "TNN2"=>"rgb(124, 181, 236)",
 "TNS"=>"#eeff41",
 "YTD"=>"#c30000");
-
 $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by cat, location order by CALENDARYEAR, CALENDARWEEK";
-
 $periods = db_query($sql);
-
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by location order by location, CALENDARYEAR, CALENDARWEEK";
-
 $locs = db_query($sql);
-
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a
-
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
-
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
-
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
-
-
 $locsdata = db_query($sql);
-
 $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location,CALENDARWEEK from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a
-
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
-
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
-
 group by cat, location order by CALENDARWEEK,CALENDARYEAR )tot
-
 group by cat order by CALENDARWEEK";
-
 $monthtotals = db_query($sql);
 ?>
-
 $(function () {
     Highcharts.chart('IncidentsbyLocation', {
         chart: {
@@ -281,8 +231,7 @@ $(function () {
             x: 0,
             y: 0,
             backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-            borderColor: '#CCC',
-            borderWidth: 1,
+           
             shadow: false
         },
         tooltip: {
@@ -345,112 +294,63 @@ $(function () {
         ]
     });
 });      
-
-
 <?php
 $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by cat, location order by CALENDARYEAR, CALENDARWEEK";
-
 $periods = db_query($sql);
-
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by location order by location, CALENDARYEAR, CALENDARWEEK";
-
 $locs = db_query($sql);
-
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1 order by CALENDARYEAR, CALENDARWEEK)a
-
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
-
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
-
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
-
-
 $locsdata = db_query($sql);
-
 $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location,CALENDARWEEK from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1 order by CALENDARYEAR, CALENDARWEEK)a
-
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
-
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
-
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK )tot
-
 group by cat order by CALENDARWEEK";
-
 $monthtotals = db_query($sql);
-
 ?>
-
 $(function () {
     Highcharts.chart('RecordablesbyLocation', {
         chart: {
@@ -506,8 +406,7 @@ $(function () {
             x: 0,
             y: 0,
             backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-            borderColor: '#CCC',
-            borderWidth: 1,
+           
             shadow: false
         },
         tooltip: {
@@ -571,110 +470,63 @@ $(function () {
         ]
     });
 });   
-
 <?php
 $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by cat, location order by CALENDARYEAR, CALENDARWEEK";
-
 $periods = db_query($sql);
-
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by location order by location, CALENDARYEAR, CALENDARWEEK";
-
 $locs = db_query($sql);
-
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a
-
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
-
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
-
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
-
-
 $locsdata = db_query($sql);
-
 $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location,CALENDARWEEK from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a
-
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
-
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
-
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
-
 from
-
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 order by CALENDARYEAR, CALENDARWEEK)a)b
-
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
-
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK)tot
-
 group by cat order by CALENDARWEEK";
-
 $monthtotals = db_query($sql);
 ?>
-
 $(function () {
     Highcharts.chart('DartbyLocation', {
         chart: {
@@ -730,8 +582,7 @@ $(function () {
             x: 0,
             y: 0,
             backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-            borderColor: '#CCC',
-            borderWidth: 1,
+           
             shadow: false
         },
         tooltip: {
@@ -741,7 +592,7 @@ $(function () {
         plotOptions: {
             column: {
                 stacking: 'normal',
-            dataLabels: {
+                dataLabels: {
                 enabled: true,
                 formatter: function(){
                     console.log(this);
@@ -808,7 +659,6 @@ $(function () {
         
     $locs = db_query($sql);
     
-
     $sql="select sum(count) as COUNT, location, topic from (SELECT count(ticket_id) as COUNT, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
     group by d.name, ht.topic 
@@ -827,9 +677,7 @@ $(function () {
         
     $topicsdata = db_query($sql);
     
-
 ?>
-
 $(function () {
 Highcharts.chart('IncidentLocationbyType', {
     chart: {
@@ -872,8 +720,7 @@ Highcharts.chart('IncidentLocationbyType', {
         x: 0,
         y: 0,
         backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-        borderColor: '#CCC',
-        borderWidth: 1,
+        
         shadow: false
     },
     tooltip: {
@@ -909,7 +756,6 @@ Highcharts.chart('IncidentLocationbyType', {
             name: '<?php echo $loc["location"]?>',
             color: '<?php echo $color; ?>',
             data: [<?php foreach ($topicsdata as $topicdata) {
-
                 if ($topicdata["location"] == $loc["location"]) echo $topicdata["COUNT"].',';
             }?>]
         }, 
@@ -917,9 +763,6 @@ Highcharts.chart('IncidentLocationbyType', {
         <?php } ?>]
  });
 }); 
-
-
-
 <?php
     $sql="select distinct topic from (SELECT count(ticket_id) as incidents, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
@@ -933,7 +776,6 @@ Highcharts.chart('IncidentLocationbyType', {
         
     $locs = db_query($sql);
     
-
     $sql="select sum(count) as COUNT, location, topic from (SELECT count(ticket_id) as COUNT, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
     group by d.name, ht.topic 
@@ -952,9 +794,7 @@ Highcharts.chart('IncidentLocationbyType', {
         
     $topicsdata = db_query($sql);
     
-
 ?>
-
 $(function () {
 Highcharts.chart('IncidentTypebyLocation', {
     chart: {
@@ -1004,8 +844,7 @@ Highcharts.chart('IncidentTypebyLocation', {
         x: 0,
         y: 0,
         backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-        borderColor: '#CCC',
-        borderWidth: 1,
+        
         shadow: false
     },
     tooltip: {
@@ -1036,7 +875,6 @@ Highcharts.chart('IncidentTypebyLocation', {
         {
             name: '<?php echo $topic["topic"]?>',
             data: [<?php foreach ($topicsdata as $topicdata) {
-
                 if ($topicdata["topic"] == $topic["topic"]) echo $topicdata["COUNT"].',';
             }?>]
         }, 
@@ -1044,59 +882,38 @@ Highcharts.chart('IncidentTypebyLocation', {
         <?php } ?>]
  });
 });      
-
 <?php 
-
 $sql="select distinct name as location from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a";
-
 $locs = db_query($sql);
-
 $sql="select distinct value as injurytype  from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a order by injurytype";
-
 $injurytypes = db_query($sql);
-
-
 $sql="select sum(COUNT) as COUNT, injurytype, location from 
 	(select count(value) as COUNT, value as injurytype, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
-
 	group by location, value 
-
 	union
-
 	select 0 as COUNT, injurytype, location  from 
 	(select distinct name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )l)loc join
-
-
 	(select distinct value as injurytype  from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
     
 	group by injurytype, location order by location, injurytype
 ";
-
 $locsdata = db_query($sql);
-
  ?>
-
-
 $(function () {
 Highcharts.chart('injurytypebylocation', {
     chart: {
@@ -1146,8 +963,7 @@ Highcharts.chart('injurytypebylocation', {
         x: 0,
         y: 0,
         backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-        borderColor: '#CCC',
-        borderWidth: 1,
+        
         shadow: false
     },
     tooltip: {
@@ -1184,7 +1000,6 @@ Highcharts.chart('injurytypebylocation', {
             name: '<?php echo $loc["location"]?>',
             color: '<?php echo $color; ?>',
             data: [<?php foreach ($locsdata as $locdata) {
-
                 if ($loc["location"] == $locdata["location"]) echo $locdata["COUNT"].',';
             }?>]
         }, 
@@ -1192,60 +1007,38 @@ Highcharts.chart('injurytypebylocation', {
         <?php } ?>]
  });
 });      
-
-
 <?php 
-
 $sql="select distinct name as location from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a order by location";
-
 $locs = db_query($sql);
-
 $sql="select distinct value as injurytype  from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a order by injurytype";
-
 $injurytypes = db_query($sql);
-
-
 $sql="select sum(COUNT) as COUNT, injurytype, location from 
 	(select count(value) as COUNT, value as injurytype, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
-
 	group by location, value 
-
 	union
-
 	select 0 as COUNT, injurytype, location  from 
 	(select distinct name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )l)loc join
-
-
 	(select distinct value as injurytype  from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
     
 	group by injurytype, location order by location, injurytype
 ";
-
 $locsdata = db_query($sql);
-
  ?>
-
-
 $(function () {
 Highcharts.chart('locationbyinjurytype', {
     chart: {
@@ -1295,8 +1088,7 @@ Highcharts.chart('locationbyinjurytype', {
         x: 0,
         y: 0,
         backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-        borderColor: '#CCC',
-        borderWidth: 1,
+        
         shadow: false
     },
     tooltip: {
@@ -1327,7 +1119,6 @@ Highcharts.chart('locationbyinjurytype', {
         {
             name: '<?php echo $injurytype["injurytype"]?>',
             data: [<?php foreach ($locsdata as $locdata) {
-
                 if ($injurytype["injurytype"] == $locdata["injurytype"]) echo $locdata["COUNT"].',';
             }?>]
         }, 
@@ -1335,62 +1126,38 @@ Highcharts.chart('locationbyinjurytype', {
         <?php } ?>]
  });
 }); 
-
-
-
-
 <?php 
-
 $sql="select distinct name as location from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a";
-
 $locs = db_query($sql);
-
 $sql="select distinct value as bodypart  from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a order by bodypart";
-
 $bodyparts = db_query($sql);
-
-
 $sql="select sum(COUNT) as COUNT, bodypart, location from 
 	(select count(value) as COUNT, value as bodypart, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
-
 	group by location, value 
-
 	union
-
 	select 0 as COUNT, bodypart, location  from 
 	(select distinct name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )l)loc join
-
-
 	(select distinct value as bodypart  from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
     
 	group by bodypart, location order by location, bodypart
 ";
-
 $locsdata = db_query($sql);
-
  ?>
-
-
 $(function () {
 Highcharts.chart('bodypartbylocation', {
     chart: {
@@ -1440,8 +1207,7 @@ Highcharts.chart('bodypartbylocation', {
         x: 0,
         y: 0,
         backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-        borderColor: '#CCC',
-        borderWidth: 1,
+        
         shadow: false
     },
     tooltip: {
@@ -1478,7 +1244,6 @@ Highcharts.chart('bodypartbylocation', {
             name: '<?php echo $loc["location"]?>', 
             color: '<?php echo $color; ?>',
             data: [<?php foreach ($locsdata as $locdata) {
-
                 if ($loc["location"] == $locdata["location"]) echo $locdata["COUNT"].',';
             }?>]
         }, 
@@ -1486,60 +1251,38 @@ Highcharts.chart('bodypartbylocation', {
         <?php } ?>]
  });
 });      
-
-
 <?php 
-
 $sql="select distinct name as location from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a order by location";
-
 $locs = db_query($sql);
-
 $sql="select distinct value as bodypart  from (
 SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a order by bodypart";
-
 $bodyparts = db_query($sql);
-
-
 $sql="select sum(COUNT) as COUNT, bodypart, location from 
 	(select count(value) as COUNT, value as bodypart, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
-
 	group by location, value 
-
 	union
-
 	select 0 as COUNT, bodypart, location  from 
 	(select distinct name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )l)loc join
-
-
 	(select distinct value as bodypart  from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-
 	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )b )bod on  1=1) data
     
 	group by bodypart, location order by location, bodypart
 ";
-
 $locsdata = db_query($sql);
-
  ?>
-
-
 $(function () {
 Highcharts.chart('locationbybodypart', {
     chart: {
@@ -1589,8 +1332,7 @@ Highcharts.chart('locationbybodypart', {
         x: 0,
         y: 0,
         backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
-        borderColor: '#CCC',
-        borderWidth: 1,
+        
         shadow: false
     },
     tooltip: {
@@ -1621,7 +1363,6 @@ Highcharts.chart('locationbybodypart', {
         {
             name: '<?php echo $bodypart["bodypart"]?>',
             data: [<?php foreach ($locsdata as $locdata) {
-
                 if ($bodypart["bodypart"] == $locdata["bodypart"]) echo $locdata["COUNT"].',';
             }?>]
         }, 
@@ -1630,7 +1371,6 @@ Highcharts.chart('locationbybodypart', {
  });
 });    
 <?php
-
 $sql="select sum(COUNT) as COUNT, lastname from 
 (
 select count(value) as COUNT, value as lastname from 
@@ -1644,9 +1384,7 @@ SELECT  concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),len
 ) data
     where COUNT > 1
 	group by lastname order by  count desc, lastname ";
-
 $tresults = db_query($sql); 
-
 ?>
 $(function() {        
  Highcharts.chart('associaterecordables', {
@@ -1688,18 +1426,49 @@ $(function() {
  
 <?php
 
-$sql="select distinct topic from (select count(topic) as COUNT, topic, value as lastname from (
-SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
- left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value
- FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
- join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id)a
- group by topic, lastname )a";   
+$sql="select sum(COUNT) as COUNT, topic, lastname, location from(select  count(topic) as COUNT, 
+case
 
-$topics = db_query($sql);     
+when topic = 'Injury/Illness' then 'injuryillness'
+when topic = 'Near-miss' then 'nearmiss'
+when topic = 'Property Damage' then 'propertydamage'
+when topic = 'Spill' then 'spill'
 
-$sql="
-select sum(COUNT) as COUNT , lastname, location,
+end as topic
 
+, value as lastname, location from (
+
+		SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
+		 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as location
+		 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
+		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id
+	 
+		)a group by topic, lastname, location
+        
+union all
+
+select 0 as COUNT,topic, value as lastname, location from (SELECT distinct concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
+		 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as location
+		 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
+		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id) a
+         
+join (         
+         
+SELECT distinct case
+
+when topic = 'Injury/Illness' then 'injuryillness'
+when topic = 'Near-miss' then 'nearmiss'
+when topic = 'Property Damage' then 'propertydamage'
+when topic = 'Spill' then 'spill'
+
+end as topic
+		 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
+		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id) b on 1=1    )data
+         group by topic, lastname, location";
+
+$topics = db_query($sql); 
+
+$sql="select *,
 case
 
 when location = 'BRY' then '#ff5252'
@@ -1716,43 +1485,26 @@ when location = 'TNN2' then 'rgb(124 181 236)'
 when location = 'TNS' then '#eeff41'
 when location = 'YTD' then '#c30000'
 end as color
+ from  (
+	select sum(count) as COUNT, lastname, location from (
 
-from (
-		select  count(topic) as COUNT, topic, value as lastname, location from (
+	select  count(topic) as COUNT, topic, value as lastname, location from (
 
-			SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
-			 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as LOCATION
-			 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
-			 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id
-		 
-			)a
-		 group by topic, lastname, location
-		)cdata
-where COUNT >1 group by lastname, location order by count desc
-";
- 
-$associates = db_query($sql);
-
-$sql="select sum(count) as COUNT, topic, lastname, location from (
-
-select  count(topic) as COUNT, topic, value as lastname, location from (
-
-	SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
-	 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as LOCATION
-	 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
-	 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id
- 
-	)a
- group by topic, lastname, location
- 
- )a  
-  group by topic, lastname, location ";    
-
+		SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
+		 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as LOCATION
+		 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
+		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id
+	 
+		)a
+	 group by topic, lastname, location
+	 
+	 )a  
+	  group by lastname, location 
+)c where count >1  order by location,count desc";
 $tresults = db_query($sql); 
-
 ?>
-
-Highcharts.chart('associateincidents', {
+$(function() {        
+ Highcharts.chart('associateincidents', {
     chart: {
         type: 'column'
     },
@@ -1764,90 +1516,93 @@ Highcharts.chart('associateincidents', {
             fontWeight: '600',
             }
     },
-    credits: false,
     tooltip: {
         formatter: function () {
             
             if (this.point.location !== undefined ){
-                return  this.point.name + ': <b>' + this.point.y + '<br>Location: <b>' + this.point.location + '</b>';
+                return  '<b>'+this.point.name +'<br>'+ ' Total: <b>' + this.point.y + '<br>Location: <b>' + this.point.location + '<br>Injury/Illness: <b>' + this.point.injuryillness+ '<br>Near-Miss: <b>' + this.point.nearmiss+ '<br>Propery Damage: <b>' + this.point.propertydamage+ '<br>Spill: <b>' + this.point.spill;
             }
         }
+    },
+    // legend: {
+    // useHTML: true,
+    // labelFormatter: function () {
+        // return '<span title="' + this.color + '">' + this.color + '</span>';
+    // }
+    // },
+    plotOptions: {
+    area: {
+            events: {
+            legendItemClick: function () {
+                return false; 
+            }
+        }
+    },
+    allowPointSelect: false,
     },
     xAxis: {
-        type: 'category'
+        categories: [<?php foreach ($tresults as $tresult) {echo "\"".$tresult['lastname']."\",";}?>]
     },
     yAxis: {
-        allowDecimals: false,
-        min: 0,
         title: {
-            text: 'Total Incidents'
+            text: 'Number of Incidents'
+            }
         },
-        stackLabels: {
-            enabled: true,
-            formatter: function(){
-        var val = this.total;
-        if (val > 0) {
-            return val;
+        minPadding: 0,
+        maxPadding: 0,
+        max: 100,
+        min: 0,
+        opposite: true,
+        labels: {
+            format: "{value}%"
         }
-        return '';
-    },
-            style: {
-                fontWeight: 'bold',
-                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
-            }
-        }
-    },
-    legend: {
-        enabled: false
-    },
-
-    plotOptions: {
-        series: {
-            borderWidth: 0,
-            dataLabels: {
-                enabled: true
-            }
-        }
-    },
-
-    series: [{
+    ,
+    credits: false,
+    series: [{        
+        showInLegend: false,
         name: 'Incidents',
-        color: 'red',
-        data: [<?php foreach ($associates as $associate) { ?>
+        type: 'column',
+        data: [
+        <?php foreach ($tresults as $tresult) {?>
         
-        {
-            color: '<?php echo $associate["color"]?>',
-            name: '<?php echo $associate["lastname"]?>',
-            location: '<?php echo $associate["location"]?>',
-            y: <?php echo $associate["COUNT"]?>,
-            drilldown: '<?php echo $associate["lastname"]?>'
-        }, 
-         <?php } ?>
-            ]
-    }],
-    drilldown: {
-        series: [<?php foreach ($associates as $associate) { ?>
+        {y: <?php echo $tresult['COUNT']; ?>,
+        name: '<?php echo $tresult["lastname"]?>',
+        color: '<?php echo $tresult["color"]?>',
+        location: '<?php echo $tresult["location"];?>',
+        <?php foreach ($topics as $topic) {
+         if ($tresult['lastname'] == $topic["lastname"] && $tresult['location'] == $topic["location"]) {   
+              echo $topic['topic'].": '".$topic['COUNT']."',";
+         }
+        } ?>   
         
-
-            
-        {  
-            id: '<?php echo $associate["lastname"]?>',
-           
-            data: [
-            
-            <?php foreach ($tresults as $tresult) { 
-            
-                if ($tresult['lastname'] == $associate["lastname"] && $tresult['location'] == $associate["location"]) {?>
-                ['<?php echo $tresult["topic"]; ?>', <?php echo $tresult["COUNT"]; ?>],
-                 
-                <?php }} ?>
-                 ]
-        },  
-        <?php } ?>
-        ]
-    }
+        },
+        
+            <?php } ?>]
+    },{type: 'area',
+       name: 'BRY',
+       color: '#ff5252'},{type: 'area',
+       name: 'CAN',
+       color: 'rgb(241, 92, 128)'},{type: 'area',
+       name: 'IND',
+       color: '#e040fb'},{type: 'area',
+       name: 'MEX',
+       color: '#7c4dff'},{type: 'area',
+       name: 'NTC',
+       color: 'rgb(43, 144, 143)'},{type: 'area',
+       name: 'OH',
+       color: 'rgb(67, 67, 72)'},{type: 'area',
+       name: 'PAU',
+       color: '#40c4ff'},{type: 'area',
+       name: 'RTA',
+       color: '#18ffff'},{type: 'area',
+       name: 'RVC',
+       color: 'rgb(247, 163, 92)'},{type: 'area',
+       name: 'TNN1',
+       color: '#69f0ae'},{type: 'area',
+       name: 'TNN2',
+       color: 'rgb(124, 181, 236)'},{type: 'area',
+       name: 'TNS',
+       color: '#eeff41'}]
 });
-
+});      
 </script>
-
-
