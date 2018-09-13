@@ -1827,7 +1827,7 @@ $(function() {
             }
         },
         tooltip: {
-            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            headerFormat: '<span style="font-size:10px"><b>{point.key}</b></span><br><table>',
             // pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
                 // '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
             footerFormat: '</table>',
@@ -2049,7 +2049,7 @@ $(function() {
             }
         },
         tooltip: {
-            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            headerFormat: '<span style="font-size:10px"><b>{point.key}</b></span><br><table>',
             // pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
                 // '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
             footerFormat: '</table>',
