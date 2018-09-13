@@ -1384,19 +1384,39 @@ Highcharts.chart('locationbybodypart', {
  });
 });    
 <?php
-$sql="select sum(COUNT) as COUNT, lastname from 
-(
-select count(value) as COUNT, value as lastname from 
-(
-SELECT  concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
- left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value
- FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
- join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id where t.isrecordable = 1
- )a
-    group by lastname 
-) data
-    where COUNT > 1
-	group by lastname order by  count desc, lastname ";
+$sql="select *,
+case
+
+when location = 'BRY' then '#ff5252'
+when location = 'CAN' then 'rgb(241 92 128)'
+when location = 'IND' then '#e040fb'
+when location = 'MEX' then '#7c4dff'
+when location = 'NTC' then 'rgb(43 144 143)'
+when location = 'OH' then 'rgb(67 67 72)'
+when location = 'PAU' then '#40c4ff'
+when location = 'RTA' then '#18ffff'
+when location = 'RVC' then 'rgb(247 163 92)'
+when location = 'TNN1' then '#69f0ae'
+when location = 'TNN2' then 'rgb(124 181 236)'
+when location = 'TNS' then '#eeff41'
+when location = 'YTD' then '#c30000'
+end as color
+ from  (
+	select sum(count) as COUNT, lastname, location from (
+
+	select  count(topic) as COUNT, topic, value as lastname, location from (
+
+		SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
+		 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as LOCATION
+		 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
+		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id where t.isrecordable = 1
+	 
+		)a
+	 group by topic, lastname, location
+	 
+	 )a  
+	  group by lastname, location 
+)c where count >1  order by location,count desc";
 $tresults = db_query($sql); 
 ?>
 $(function() {        
@@ -1405,12 +1425,30 @@ $(function() {
         type: 'column'
     },
     title: {
-        text: 'Recodables by Associate > 1',
+        text: 'Recordables by Associate > 1',
             style: {
             color: '#797979',
             fontSize: '14px',
             fontWeight: '600',
             }
+    },
+    tooltip: {
+            formatter: function () {
+                
+                if (this.point.location !== undefined ){
+                    return  '<b>'+this.point.name +'<br>'+ ' Total: <b>' + this.point.y + '<br>Location: <b>' + this.point.location;
+                }
+            }
+    },
+    plotOptions: {
+        area: {
+                events: {
+                legendItemClick: function () {
+                    return false; 
+                }
+            }
+        },
+        allowPointSelect: false,
     },
     xAxis: {
         categories: [<?php foreach ($tresults as $tresult) {echo "\"".$tresult['lastname']."\",";}?>]
@@ -1430,10 +1468,42 @@ $(function() {
         }
     ,
     credits: false,
-    series: [{        name: 'Incidents',
+    series: [{        name: 'Recordables',
         type: 'column',
-        data: [<?php foreach ($tresults as $tresult) {echo $tresult['COUNT'].',';} ?>]
-    }]
+        data: [<?php foreach ($tresults as $tresult) {?>
+            
+            {y: <?php echo $tresult['COUNT']; ?>,
+            name: '<?php echo $tresult["lastname"]?>',
+            color: '<?php echo $tresult["color"]?>',
+            location: '<?php echo $tresult["location"];?>',
+            },
+            
+                <?php } ?>]
+    },{type: 'area',
+           name: 'BRY',
+           color: '#ff5252'},{type: 'area',
+           name: 'CAN',
+           color: 'rgb(241, 92, 128)'},{type: 'area',
+           name: 'IND',
+           color: '#e040fb'},{type: 'area',
+           name: 'MEX',
+           color: '#7c4dff'},{type: 'area',
+           name: 'NTC',
+           color: 'rgb(43, 144, 143)'},{type: 'area',
+           name: 'OH',
+           color: 'rgb(67, 67, 72)'},{type: 'area',
+           name: 'PAU',
+           color: '#40c4ff'},{type: 'area',
+           name: 'RTA',
+           color: '#18ffff'},{type: 'area',
+           name: 'RVC',
+           color: 'rgb(247, 163, 92)'},{type: 'area',
+           name: 'TNN1',
+           color: '#69f0ae'},{type: 'area',
+           name: 'TNN2',
+           color: 'rgb(124, 181, 236)'},{type: 'area',
+           name: 'TNS',
+           color: '#eeff41'}]
 });
 });      
  
