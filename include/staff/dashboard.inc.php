@@ -19,7 +19,20 @@
       </div>   
    <div class="clearfix"></div> 
 </div> 
-
+<div class="row">
+    <div class="col-lg-12">
+        <div class="portlet" id="IncidentRate" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="portlet" id="DartRate" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-lg-6">
         <div class="portlet" id="IncidentsbyLocation" ><!-- /primary heading -->
@@ -1504,105 +1517,536 @@ end as color
 $tresults = db_query($sql); 
 ?>
 $(function() {        
- Highcharts.chart('associateincidents', {
-    chart: {
-        type: 'column'
-    },
-    title: {
-        text: 'Incidents/Observations by Associate > 1',
-            style: {
-            color: '#797979',
-            fontSize: '14px',
-            fontWeight: '600',
-            }
-    },
-    tooltip: {
-        formatter: function () {
-            
-            if (this.point.location !== undefined ){
-                return  '<b>'+this.point.name +'<br>'+ ' Total: <b>' + this.point.y + '<br>Location: <b>' + this.point.location + '<br>Injury/Illness: <b>' + this.point.injuryillness+ '<br>Near-Miss: <b>' + this.point.nearmiss+ '<br>Propery Damage: <b>' + this.point.propertydamage+ '<br>Spill: <b>' + this.point.spill;
-            }
-        }
-    },
-    // legend: {
-    // useHTML: true,
-    // labelFormatter: function () {
-        // return '<span title="' + this.color + '">' + this.color + '</span>';
-    // }
-    // },
-    plotOptions: {
-    area: {
-            events: {
-            legendItemClick: function () {
-                return false; 
-            }
-        }
-    },
-    allowPointSelect: false,
-    },
-    xAxis: {
-        categories: [<?php foreach ($tresults as $tresult) {echo "\"".$tresult['lastname']."\",";}?>]
-    },
-    yAxis: {
+     Highcharts.chart('associateincidents', {
+        chart: {
+            type: 'column'
+        },
         title: {
-            text: 'Number of Incidents'
+            text: 'Incidents/Observations by Associate > 1',
+                style: {
+                color: '#797979',
+                fontSize: '14px',
+                fontWeight: '600',
+                }
+        },
+        tooltip: {
+            formatter: function () {
+                
+                if (this.point.location !== undefined ){
+                    return  '<b>'+this.point.name +'<br>'+ ' Total: <b>' + this.point.y + '<br>Location: <b>' + this.point.location + '<br>Injury/Illness: <b>' + this.point.injuryillness+ '<br>Near-Miss: <b>' + this.point.nearmiss+ '<br>Propery Damage: <b>' + this.point.propertydamage+ '<br>Spill: <b>' + this.point.spill;
+                }
             }
         },
-        minPadding: 0,
-        maxPadding: 0,
-        max: 100,
-        min: 0,
-        opposite: true,
-        labels: {
-            format: "{value}%"
-        }
-    ,
-    credits: false,
-    series: [{        
-        showInLegend: false,
-        name: 'Incidents',
-        type: 'column',
-        data: [
-        <?php foreach ($tresults as $tresult) {?>
-        
-        {y: <?php echo $tresult['COUNT']; ?>,
-        name: '<?php echo $tresult["lastname"]?>',
-        color: '<?php echo $tresult["color"]?>',
-        location: '<?php echo $tresult["location"];?>',
-        <?php foreach ($topics as $topic) {
-         if ($tresult['lastname'] == $topic["lastname"] && $tresult['location'] == $topic["location"]) {   
-              echo $topic['topic'].": '".$topic['COUNT']."',";
-         }
-        } ?>   
-        
+        // legend: {
+        // useHTML: true,
+        // labelFormatter: function () {
+            // return '<span title="' + this.color + '">' + this.color + '</span>';
+        // }
+        // },
+        plotOptions: {
+        area: {
+                events: {
+                legendItemClick: function () {
+                    return false; 
+                }
+            }
         },
-        
-            <?php } ?>]
-    },{type: 'area',
-       name: 'BRY',
-       color: '#ff5252'},{type: 'area',
-       name: 'CAN',
-       color: 'rgb(241, 92, 128)'},{type: 'area',
-       name: 'IND',
-       color: '#e040fb'},{type: 'area',
-       name: 'MEX',
-       color: '#7c4dff'},{type: 'area',
-       name: 'NTC',
-       color: 'rgb(43, 144, 143)'},{type: 'area',
-       name: 'OH',
-       color: 'rgb(67, 67, 72)'},{type: 'area',
-       name: 'PAU',
-       color: '#40c4ff'},{type: 'area',
-       name: 'RTA',
-       color: '#18ffff'},{type: 'area',
-       name: 'RVC',
-       color: 'rgb(247, 163, 92)'},{type: 'area',
-       name: 'TNN1',
-       color: '#69f0ae'},{type: 'area',
-       name: 'TNN2',
-       color: 'rgb(124, 181, 236)'},{type: 'area',
-       name: 'TNS',
-       color: '#eeff41'}]
-});
-});      
+        allowPointSelect: false,
+        },
+        xAxis: {
+            categories: [<?php foreach ($tresults as $tresult) {echo "\"".$tresult['lastname']."\",";}?>]
+        },
+        yAxis: {
+            title: {
+                text: 'Number of Incidents'
+                }
+            },
+            minPadding: 0,
+            maxPadding: 0,
+            max: 100,
+            min: 0,
+            opposite: true,
+            labels: {
+                format: "{value}%"
+            }
+        ,
+        credits: false,
+        series: [{        
+            showInLegend: false,
+            name: 'Incidents',
+            type: 'column',
+            data: [
+            <?php foreach ($tresults as $tresult) {?>
+            
+            {y: <?php echo $tresult['COUNT']; ?>,
+            name: '<?php echo $tresult["lastname"]?>',
+            color: '<?php echo $tresult["color"]?>',
+            location: '<?php echo $tresult["location"];?>',
+            <?php foreach ($topics as $topic) {
+             if ($tresult['lastname'] == $topic["lastname"] && $tresult['location'] == $topic["location"]) {   
+                  echo $topic['topic'].": '".$topic['COUNT']."',";
+             }
+            } ?>   
+            
+            },
+            
+                <?php } ?>]
+        },{type: 'area',
+           name: 'BRY',
+           color: '#ff5252'},{type: 'area',
+           name: 'CAN',
+           color: 'rgb(241, 92, 128)'},{type: 'area',
+           name: 'IND',
+           color: '#e040fb'},{type: 'area',
+           name: 'MEX',
+           color: '#7c4dff'},{type: 'area',
+           name: 'NTC',
+           color: 'rgb(43, 144, 143)'},{type: 'area',
+           name: 'OH',
+           color: 'rgb(67, 67, 72)'},{type: 'area',
+           name: 'PAU',
+           color: '#40c4ff'},{type: 'area',
+           name: 'RTA',
+           color: '#18ffff'},{type: 'area',
+           name: 'RVC',
+           color: 'rgb(247, 163, 92)'},{type: 'area',
+           name: 'TNN1',
+           color: '#69f0ae'},{type: 'area',
+           name: 'TNN2',
+           color: 'rgb(124, 181, 236)'},{type: 'area',
+           name: 'TNS',
+           color: '#eeff41'}]
+    });
+});     
+<?php
+
+$sql="select distinct d.name as location
+from 
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
+
+where isrecordable = 1 or isdart = 1 order by d.name";
+
+$locs = db_query($sql);
+
+$sql="select sum(data.recordables) as recordables, h.hours, data.location, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR from (
+
+	select sum(isrecordable)as recordables,0 as hours, d.name as location,
+	DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') AS MONTHNAME,
+	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR 
+	from 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
+
+	where isrecordable = 1
+
+	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
+
+	union
+
+	select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  YEAR(CURDATE()) as CALENDARYEAR from (select distinct d.name as location
+	from 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
+
+	where isrecordable = 1 order by d.name)a
+
+	join 
+
+	(SELECT 1 AS MONTH, 'Jan' as MONTHNAME
+	   UNION SELECT 2 AS MONTH, 'Feb' as MONTHNAME
+	   UNION SELECT 3 AS MONTH, 'Mar' as MONTHNAME
+	   UNION SELECT 4 AS MONTH, 'Apr' as MONTHNAME
+	   UNION SELECT 5 AS MONTH, 'May' as MONTHNAME
+	   UNION SELECT 6 AS MONTH, 'Jun' as MONTHNAME
+	   UNION SELECT 7 AS MONTH, 'Jul' as MONTHNAME
+	   UNION SELECT 8 AS MONTH, 'Aug' as MONTHNAME
+	   UNION SELECT 9 AS MONTH, 'Sep' as MONTHNAME
+	   UNION SELECT 10 AS MONTH, 'Oct' as MONTHNAME
+	   UNION SELECT 11 AS MONTH, 'Nov' as MONTHNAME
+	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
+	
+	) data
+join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and YEAR(CURDATE())=h.year
+group by data.location, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.location,data.MONTHNUM,data.CALENDARYEAR
+
+";
+
+$locsdata = db_query($sql); 
+
+$sql="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR from (
+
+	select sum(isrecordable)as recordables,0 as hours, d.name as location,
+	DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') AS MONTHNAME,
+	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR 
+	from 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
+
+	where isrecordable = 1
+
+	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
+
+	union
+
+	select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  YEAR(CURDATE()) as CALENDARYEAR from (select distinct d.name as location
+	from 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
+
+	where isrecordable = 1 order by d.name)a
+
+	join 
+
+	(SELECT 1 AS MONTH, 'Jan' as MONTHNAME
+	   UNION SELECT 2 AS MONTH, 'Feb' as MONTHNAME
+	   UNION SELECT 3 AS MONTH, 'Mar' as MONTHNAME
+	   UNION SELECT 4 AS MONTH, 'Apr' as MONTHNAME
+	   UNION SELECT 5 AS MONTH, 'May' as MONTHNAME
+	   UNION SELECT 6 AS MONTH, 'Jun' as MONTHNAME
+	   UNION SELECT 7 AS MONTH, 'Jul' as MONTHNAME
+	   UNION SELECT 8 AS MONTH, 'Aug' as MONTHNAME
+	   UNION SELECT 9 AS MONTH, 'Sep' as MONTHNAME
+	   UNION SELECT 10 AS MONTH, 'Oct' as MONTHNAME
+	   UNION SELECT 11 AS MONTH, 'Nov' as MONTHNAME
+	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
+	
+	) data
+join (SELECT sum(hours) as hours, month, year FROM ost_hours where YEAR(CURDATE())=year group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
+group by data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.MONTHNUM,data.CALENDARYEAR
+
+";
+
+$totals = db_query($sql);
+?>
+$(function() {
+    Highcharts.chart('IncidentRate', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Incident Rates'
+        },
+         // subtitle: {
+             // text: 'Recordables'
+         // },
+        xAxis: {
+            categories: [
+                'Jan',
+                'Feb',
+                'Mar',
+                'Apr',
+                'May',
+                'Jun',
+                'Jul',
+                'Aug',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dec'
+            ],
+            crosshair: true
+        },
+        credits: false,
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Incident Rate'
+            }
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            // pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                // '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        series: [
+        <?php foreach ($locs as $loc){ 
+            $key = $loc["location"];
+            $color = $sitecolor[$key];
+        ?>
+        {
+            name: '<?php echo $loc['location']; ?>',
+            color: '<?php echo $color; ?>',
+            data: [<?php foreach ($locsdata as $locdata){
+
+                    if ($loc['location'] == $locdata['location'] ) {
+                        
+                        $r = $locdata['recordables'] + $r;
+                        $h = $locdata['hours'] +$h;
+                       if ($h !=0){ 
+                       echo ROUND($r*200000/$h,2).',';
+                       }else{
+                        echo '0,';   
+                       } 
+                    }
+         } ?>]
+
+        },
+         <?php  $h = null;
+                $r = null;
+            } ?>
+        {
+            name: 'Total',
+            type: 'line',
+            color: "#c30000",
+            data: [<?php foreach ($totals as $total){
+            
+                        $r = $total['recordables'] + $r;
+                        $h = $total['hours'] +$h;
+                       if ($h !=0){ 
+                       echo ROUND($r*200000/$h,2).',';
+                       }else{
+                        echo '0,';   
+                       } 
+            }?>
+            ]
+            
+        },
+        {
+            name: 'IR Goal',
+            type: 'line',
+            data: [3.38,3.38,3.38,3.38,3.38,3.38,3.38,3.38,3.38,3.38,3.38,3.38],
+        },
+        {
+            name: 'PMA Rate',
+            type: 'line',
+            data: [5.20,5.20,5.20,5.20,5.20,5.20,5.20,5.20,5.20,5.20,5.20,5.20],
+        },
+        {
+            name: 'IR (2016: 336370)',
+            type: 'line',
+            data: [6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30],
+        },
+        {
+            name: 'IR (2016: 336360)',
+            type: 'line',
+            data: [4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20],
+        },
+        ]
+    });
+}); 
+
+
+<?php
+
+$sql="select distinct d.name as location
+from 
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
+
+where isrecordable = 1 or isdart = 1 order by d.name";
+
+$locs = db_query($sql);
+
+$sql="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR from (
+
+	select sum(isdart)as dart,0 as hours, d.name as location,
+	DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') AS MONTHNAME,
+	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR 
+	from 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
+
+	where isdart = 1
+
+	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
+
+	union
+
+	select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  YEAR(CURDATE()) as CALENDARYEAR from (select distinct d.name as location
+	from 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
+
+	where isdart = 1 order by d.name)a
+
+	join 
+
+	(SELECT 1 AS MONTH, 'Jan' as MONTHNAME
+	   UNION SELECT 2 AS MONTH, 'Feb' as MONTHNAME
+	   UNION SELECT 3 AS MONTH, 'Mar' as MONTHNAME
+	   UNION SELECT 4 AS MONTH, 'Apr' as MONTHNAME
+	   UNION SELECT 5 AS MONTH, 'May' as MONTHNAME
+	   UNION SELECT 6 AS MONTH, 'Jun' as MONTHNAME
+	   UNION SELECT 7 AS MONTH, 'Jul' as MONTHNAME
+	   UNION SELECT 8 AS MONTH, 'Aug' as MONTHNAME
+	   UNION SELECT 9 AS MONTH, 'Sep' as MONTHNAME
+	   UNION SELECT 10 AS MONTH, 'Oct' as MONTHNAME
+	   UNION SELECT 11 AS MONTH, 'Nov' as MONTHNAME
+	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
+	
+	) data
+join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and YEAR(CURDATE())=h.year
+group by data.location, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.location,data.MONTHNUM,data.CALENDARYEAR
+
+";
+
+$locsdata = db_query($sql); 
+
+$sql="select sum(data.dart) as dart, h.hours, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR from (
+
+	select sum(isdart)as dart,0 as hours, d.name as location,
+	DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') AS MONTHNAME,
+	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR 
+	from 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
+
+	where isdart = 1
+
+	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
+
+	union
+
+	select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  YEAR(CURDATE()) as CALENDARYEAR from (select distinct d.name as location
+	from 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
+
+	where isdart = 1 order by d.name)a
+
+	join 
+
+	(SELECT 1 AS MONTH, 'Jan' as MONTHNAME
+	   UNION SELECT 2 AS MONTH, 'Feb' as MONTHNAME
+	   UNION SELECT 3 AS MONTH, 'Mar' as MONTHNAME
+	   UNION SELECT 4 AS MONTH, 'Apr' as MONTHNAME
+	   UNION SELECT 5 AS MONTH, 'May' as MONTHNAME
+	   UNION SELECT 6 AS MONTH, 'Jun' as MONTHNAME
+	   UNION SELECT 7 AS MONTH, 'Jul' as MONTHNAME
+	   UNION SELECT 8 AS MONTH, 'Aug' as MONTHNAME
+	   UNION SELECT 9 AS MONTH, 'Sep' as MONTHNAME
+	   UNION SELECT 10 AS MONTH, 'Oct' as MONTHNAME
+	   UNION SELECT 11 AS MONTH, 'Nov' as MONTHNAME
+	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
+	
+	) data
+join (SELECT sum(hours) as hours, month, year FROM ost_hours where YEAR(CURDATE())=year group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
+group by data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.MONTHNUM,data.CALENDARYEAR
+
+";
+
+$totals = db_query($sql);
+
+
+?>
+$(function() {
+    Highcharts.chart('DartRate', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'DART Rates'
+        },
+         // subtitle: {
+             // text: 'Recordables DART'
+         // },
+        xAxis: {
+            categories: [
+                'Jan',
+                'Feb',
+                'Mar',
+                'Apr',
+                'May',
+                'Jun',
+                'Jul',
+                'Aug',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dec'
+            ],
+            crosshair: true
+        },
+        credits: false,
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'DART Rate'
+            }
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            // pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                // '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        series: [
+        <?php foreach ($locs as $loc){ 
+            $key = $loc["location"];
+            $color = $sitecolor[$key];
+        ?>
+        {
+            name: '<?php echo $loc['location']; ?>',
+            color: '<?php echo $color; ?>',
+            data: [<?php foreach ($locsdata as $locdata){
+
+                    if ($loc['location'] == $locdata['location'] ) {
+                        
+                        $r = $locdata['dart'] + $r;
+                        $h = $locdata['hours'] +$h;
+                       if ($h !=0){ 
+                       echo ROUND($r*200000/$h,2).',';
+                       }else{
+                        echo '0,';   
+                       } 
+                    }
+         } ?>]
+
+        },
+         <?php  $h = null;
+                $r = null;
+            } ?>
+         {
+            name: 'Total',
+            type: 'line',
+            color: "#c30000",
+            data: [<?php foreach ($totals as $total){
+            
+                        $r = $total['dart'] + $r;
+                        $h = $total['hours'] +$h;
+                       if ($h !=0){ 
+                       echo ROUND($r*200000/$h,2).',';
+                       }else{
+                        echo '0,';   
+                       } 
+            }?>
+            ]
+            
+        },
+        {
+            name: 'DR (2016: 336370)',
+            type: 'line',
+            data: [2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90],
+        },
+        {
+            name: 'DR (2016: 336360)',
+            type: 'line',
+            data: [2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80],
+        },        
+        ]
+    });
+}); 
 </script>
+
