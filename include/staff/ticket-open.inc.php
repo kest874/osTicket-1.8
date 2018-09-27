@@ -297,7 +297,18 @@ $(window).resize(function() {
    
 
 <div style="margin-top: 15px;" class="hidden" id="submitrow">
-    <input class="btn btn-primary btn-sm" type="submit" name="submit" class="save pending" value="<?php echo _P('action-button', 'Submit');?>">
+    <input class="btn btn-primary btn-sm" type="submit" name="submit" class="save pending" value="<?php echo _P('action-button', 'Submit');?>"
+    onclick="javascript:
+        $('#submitrow').hide();
+        $.busyLoadFull('show',  { 
+text: 'CREATING NEW INCIDENT ...',
+textColor: '#dd2c00',
+color: '#dd2c00',
+background: 'rgba(0, 0, 0, 0.2)'
+});
+        
+    "
+    >
     <input class="btn btn-warning btn-sm" type="reset"  name="reset"  value="<?php echo __('Reset');?>">
     <input class="btn btn-warning btn-danger btn-sm" type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick="javascript:
         $('.richtext').each(function() {
