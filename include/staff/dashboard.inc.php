@@ -1451,7 +1451,7 @@ $(function() {
         allowPointSelect: false,
     },
     xAxis: {
-        categories: [<?php foreach ($tresults as $tresult) {echo "\"".$tresult['lastname']."\",";}?>]
+        categories: [<?php foreach ($tresults as $tresult) {echo "\"".str_replace("'","\'",$tresult['lastname'])."\",";}?>]
     },
     yAxis: {
         title: {
@@ -1473,7 +1473,7 @@ $(function() {
         data: [<?php foreach ($tresults as $tresult) {?>
             
             {y: <?php echo $tresult['COUNT']; ?>,
-            name: '<?php echo $tresult["lastname"]?>',
+            name: '<?php echo str_replace("'","\'",$tresult["lastname"])?>',
             color: '<?php echo $tresult["color"]?>',
             location: '<?php echo $tresult["location"];?>',
             },
@@ -1624,7 +1624,7 @@ $(function() {
         allowPointSelect: false,
         },
         xAxis: {
-            categories: [<?php foreach ($tresults as $tresult) {echo "\"".$tresult['lastname']."\",";}?>]
+            categories: [<?php foreach ($tresults as $tresult) {echo "\"".str_replace("'","\'",$tresult['lastname'])."\",";}?>]
         },
         yAxis: {
             title: {
@@ -1649,7 +1649,7 @@ $(function() {
             <?php foreach ($tresults as $tresult) {?>
             
             {y: <?php echo $tresult['COUNT']; ?>,
-            name: '<?php echo $tresult["lastname"]?>',
+            name: '<?php echo str_replace("'","\'",$tresult["lastname"])?>',
             color: '<?php echo $tresult["color"]?>',
             location: '<?php echo $tresult["location"];?>',
             <?php foreach ($topics as $topic) {
