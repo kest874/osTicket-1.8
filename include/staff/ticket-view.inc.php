@@ -1,5 +1,5 @@
 <?php
-$_SESSION["alrt"]=0;
+$_SESSION["alrt"]=1;
 //Note that ticket obj is initiated in tickets.php.
 if(!defined('OSTSCPINC') || !$thisstaff || !is_object($ticket) || !$ticket->getId()) die('Invalid path');
 //Make sure the staff is allowed to access the page.
@@ -553,7 +553,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                
                         <div class="faded" style="padding-left:0.15em"><?php
                         echo __('Note title - summary of the note (optional)'); ?></div>
-                        <input type="text" name="title" id="title" size="60" value="<?php echo $info['title']; ?>" >
+                        <input type="text"  class="form-control form-control-sm ;" name="title" id="title" size="60" value="<?php echo $info['title']; ?>">
                         <br/>
                         <?php
             if($errors['title']) {?>
@@ -579,7 +579,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                     <textarea name="note" id="internal_note" cols="80"
                         placeholder="<?php echo __('Note details'); ?>"
                         rows="9" wrap="soft"
-                        class="<?php if ($cfg->isRichTextEnabled()) echo 'richtext';
+                        class="form-control <?php if ($cfg->isRichTextEnabled()) echo 'richtext';
                             ?> draft draft-delete" <?php
     list($draft, $attrs) = Draft::getDraftAndDataAttrs('ticket.note', $ticket->getId(), $info['note']);
     echo $attrs; ?>><?php echo $_POST ? $info['note'] : $draft;
@@ -594,7 +594,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                     <label><?php echo __('Incident Status');?>:</label>
                 
                     <div class="faded"></div>
-                    <select name="note_status_id">
+                    <select name="note_status_id" class="form-control form-control-sm" >
                         <?php
                         $statusId = $info['note_status_id'] ?: $ticket->getStatusId();
                         $states = array('open');
@@ -614,7 +614,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                         }
                         ?>
                     </select>
-                    &nbsp;<span class='error'>*&nbsp;<?php echo $errors['note_status_id']; ?></span>
+                    &nbsp;<span class='error'>&nbsp;<?php echo $errors['note_status_id']; ?></span>
                </div>
         <div>
            <input class="btn btn-primary btn-sm" type="submit" value="<?php echo __('Add Note');?>">
@@ -633,7 +633,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
  </div>
 <div style="display:none;" class="dialog" id="print-options">
     <h3><?php echo __('Ticket Print Options');?></h3>
-    <a class="close" href=""><i class="icon-remove-circle"></i></a>
+    <a class="close" href=""><i class="fa fa-ban-circle"></i></a>
     <hr/>
     <form action="tickets.php?id=<?php echo $ticket->getId(); ?>
 	&queue=<?php 
@@ -678,7 +678,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
     <div class="clear"></div>
 <div style="display:none;" class="dialog" id="confirm-action">
     <h3><?php echo __('Please Confirm');?></h3>
-    <a class="close" href=""><i class="icon-remove-circle"></i></a>
+    <a class="close" href=""><i class="fa fa-ban-circle"></i></a>
     <hr/>
     <p class="confirm-action" style="display:none;" id="claim-confirm">
         <?php echo sprintf(__('Are you sure you want to <b>claim</b> (self assign) %s?'), __('this ticket'));?>
@@ -734,7 +734,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
     </div>
 </div>
 <script type="text/javascript">
-    var keytrigger = false;     
+    var savetrigger = false;     
             
  $("#datepicker1").on("dp.change", function (e) {
   
@@ -753,10 +753,10 @@ $tcount = $ticket->getThreadEntries($types)->count();
                 $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
                 $("#updatearea").css("display", "none");
                 $("#detailschanged").css("display", "inherit");
-                if (!keytrigger) {
+                if (!savetrigger) {
                 $.notify({
-                    text: 'Changes made please click the save <i class="icon-save"></i> or cancel <i //class="icon-remove"></i> button on the ribbon.',
-                    image: '<i class="icon-save"></i>'
+                    text: 'Changes made please click the save <i class="fa fa-floppy-o"></i> or cancel <i //class="fa fa-ban"></i> button on the ribbon.',
+                    image: '<i class="fa fa-floppy-o"></i>'
                 }, {
                     style: 'metro',
                     className: 'error',
@@ -765,7 +765,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                 });
                         }
                         
-                keytrigger = true;
+                savetrigger = true;
              }
         };
  });       
@@ -943,8 +943,8 @@ $(function() {
             
             $("#help-topic-error").css("display", "none"); 
             $.notify({
-            text: 'Changes made please click the save <i class="icon-save"></i> or cancel <i //class="icon-remove"></i> button on the ribbon.',
-            image: '<i class="icon-save"></i>'
+            text: 'Changes made please click the save <i class="fa fa-floppy-o"></i> or cancel <i //class="fa fa-ban"></i> button on the ribbon.',
+            image: '<i class="fa fa-floppy-o"></i>'
         }, {
             style: 'metro',
             className: 'error',
@@ -964,11 +964,11 @@ $('#save').find('input, select, text').change(function(){
     $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
     $("#updatearea").css("display", "none");
     $("#detailschanged").css("display", "inherit");
-    if (!keytrigger) {
+    if (!savetrigger) {
    
     $.notify({
-            text: 'Changes made please click the save <i class="icon-save"></i> or cancel <i //class="icon-remove"></i> button on the ribbon.',
-            image: '<i class="icon-save"></i>'
+            text: 'Changes made please click the save <i class="fa fa-floppy-o"></i> or cancel <i //class="fa fa-ban"></i> button on the ribbon.',
+            image: '<i class="fa fa-floppy-o"></i>'
         }, {
             style: 'metro',
             className: 'error',
@@ -976,7 +976,8 @@ $('#save').find('input, select, text').change(function(){
             clickToHide: true
         });
     }
-    keytrigger = true;
+    savetrigger = true;
+	<?php $_SESSION["alrt"] == 2; ?>
 });
 $("#save").keyup(function(e){
     var charCode = e.which || e.keyCode; 
@@ -990,11 +991,11 @@ $("#save").keyup(function(e){
         $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
         $("#updatearea").css("display", "none");
         $("#detailschanged").css("display", "inherit");
-    if (!keytrigger) {
+    if (!savetrigger) {
    
     $.notify({
-            text: 'Changes made please click the save <i class="icon-save"></i> or cancel <i //class="icon-remove"></i> button on the ribbon.',
-            image: '<i class="icon-save"></i>'
+            text: 'Changes made please click the save <i class="fa fa-floppy-o"></i> or cancel <i //class="fa fa-ban"></i> button on the ribbon.',
+            image: '<i class="fa fa-floppy-o"></i>'
         }, {
             style: 'metro',
             className: 'error',
@@ -1002,7 +1003,8 @@ $("#save").keyup(function(e){
             clickToHide: true
         });
     }
-    keytrigger = true;
+    savetrigger = true;
+	<?php $_SESSION["alrt"] == 2; ?>
    }
 });
 $('#reply').find('input, select').change(function(){

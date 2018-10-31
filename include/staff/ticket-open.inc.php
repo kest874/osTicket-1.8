@@ -1,6 +1,6 @@
 <?php
 
-$_SESSION["alrt"]=1;
+$_SESSION["alrt"]=0;
 if (!defined('OSTSCPINC') || !$thisstaff
         || !$thisstaff->hasPerm(Ticket::PERM_CREATE, false))
         die('Access Denied');
@@ -160,9 +160,6 @@ if ($_POST)
                             }
                           });
                           
-                          
-                          
-                          
                           topic = this.value;
                           if (topic == 11){
                               $('#chkRecordable').show();
@@ -277,6 +274,8 @@ $(window).resize(function() {
       $("#dynamic-form").css('margin-top','0px');
   }
 });
+
+
 
 </script>
     

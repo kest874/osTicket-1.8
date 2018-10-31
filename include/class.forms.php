@@ -4009,7 +4009,11 @@ class TextareaWidget extends Widget {
         if (isset($config['html']) && $config['html']) {
             $class = array('richtext', 'no-bar');
             $class[] = @$config['size'] ?: 'small';
-            $class = sprintf('class="input-group %s"', implode(' ', $class));
+		
+	   			
+		if ($this->field->isRequiredForStaff() || $this->field->isRequiredForClose()) $class[] = 'requiredfield';
+		
+            $class = sprintf('class="form-control %s"', implode(' ', $class));
             $this->value = Format::viewableImages($this->value);
         }
         
@@ -4030,12 +4034,44 @@ class TextareaWidget extends Widget {
         <textarea  <?php echo $rows." ".$cols." ".$maxlength." ".$disabled. "" .$class
                 .' '.Format::array_implode('=', ' ', $attrs)
                 .' placeholder="'.$config['placeholder'].'"'; ?>
-            id="<?php echo $this->id; ?>"
-            name="<?php echo $this->name; ?>"><?php
+				id="<?php echo $this->id; ?>"
+				name="<?php echo $this->name; ?>"><?php
                 echo Format::htmlchars($this->value);
            
             ?></textarea>
-            
+			
+			            <script type="text/javascript">
+                
+        <?php if ($this->field->getId() == 55||$this->field->getId() == 56) {?>        
+                $(function() {
+                var savetrigger = false;
+                        
+                $("#<?php echo $this->id; ?>").keyup(function (e) {
+                              
+                    var charCode = e.which || e.keyCode; 
+                         if (!(charCode === 9)){
+
+                            if (!savetrigger) {
+                            $("#<?php echo $this->id; ?>").notify({
+                                text: '<strong style="color:red;">Please ensure this field does not contain personal information (associate name, employee ID etc.</strong>',
+                                image: '<i class="fa fa-exclamation-circle" style="color:red;"></i>'
+                            }, {
+                                style: 'metro',
+								className: 'warning',
+								autoHide: false,
+								clickToHide: true,
+								position:'top'
+                            });
+                                    }
+                                    
+                            savetrigger = true;
+                         }
+                    });
+             });       
+             <?php } ?>
+        
+            </script>
+			
         <?php } ?>
         </span>
         <?php
@@ -4686,7 +4722,7 @@ class DatetimePickerWidget extends Widget {
                     format: 'L',
                     });
                 });
-        <?php if ($_SESSION["alrt"] !== 1) {?>        
+        <?php if ($_SESSION["alrt"] == 1) {?>        
                 $(function() {
                 var savetrigger = false;
                         
@@ -4704,8 +4740,8 @@ class DatetimePickerWidget extends Widget {
                             $("#detailschanged").css("display", "inherit");
                             if (!savetrigger) {
                             $.notify({
-                                text: 'Changes made please click the save <i class="fa fa-save"></i> or cancel <i //class="fa fa-remove"></i> button on the ribbon.',
-                                image: '<i class="icon-save"></i>'
+                                text: 'Changes made please click the save <i class="fa fa-save"></i> or cancel <i //class="fa fa-ban"></i> button on the ribbon.',
+                                image: '<i class="fa fa-floppy-o"></i>'
                             }, {
                                 style: 'metro',
                                 className: 'error',
@@ -4718,7 +4754,9 @@ class DatetimePickerWidget extends Widget {
                          }
                     });
              });       
-             <?php } ?>
+             <?php 
+			 $_SESSION["alrt"] == 2;
+			 } ?>
         
             </script>
         <?php
@@ -4923,7 +4961,7 @@ class ThreadEntryWidget extends Widget {
         <?php if ($options['modal'] !== 'ticketedit'){ ?>
         <textarea style="width:100%;" name="<?php echo $this->field->get('name'); ?>"
             placeholder="<?php echo Format::htmlchars($this->field->get('placeholder')); ?>"
-            class="<?php if ($config['html']) echo 'richtext';
+            class="form-control <?php if ($config['html']) echo 'richtext';
                 ?> draft draft-delete" <?php echo $attrs; ?>
             cols="21" rows="8" style="width:80%;"><?php echo
             Format::htmlchars($this->value) ?: $draft; ?></textarea>
