@@ -4053,7 +4053,7 @@ class TextareaWidget extends Widget {
 
                             if (!savetrigger) {
                             $("#<?php echo $this->id; ?>").notify({
-                                text: '<strong style="color:red;">Please ensure this field does not contain personal information (associate name, employee ID etc.</strong>',
+                                text: '<strong style="color:red;">Please ensure this field does not contain personal information (associate name, employee ID etc.)</strong>',
                                 image: '<i class="fa fa-exclamation-circle" style="color:red;"></i>'
                             }, {
                                 style: 'metro',
