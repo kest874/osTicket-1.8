@@ -22,6 +22,7 @@ $sort_options = array(
     'created' =>            __('Most Recently Created'),
     'due' =>                __('Due Soon'),
     'number' =>             __('Countermeasure Number'),
+	'parent' =>             __('Incident Number'),
     'closed' =>             __('Most Recently Closed'),
     'hot' =>                __('Longest Thread'),
 	'ticketnumber' =>       __('Ticker Number'),
@@ -58,73 +59,59 @@ $queue_columns = array(
             'width' => '16%',
             'heading' => __('Associate'),
             ),
+		'flag' => array(
+            'width' => '16%',
+            'heading' => __('Status'),
+            'sort_col'  => 'flags',
+            ),
         );
 
+$queue_sort_options = array('closed', 'updated', 'created', 'number','ticketnumber', 'parent');
+
+$l = $_GET['tl'];
+$s = $_GET['ts'];
+
+if (isset($l)||isset($s)) $_SESSION['tfilter']=1;
+
+$tfilters=$_SESSION['tfilter'];
+//if ($_GET['a'] == 'search' || $_GET['queue'] == 'adhoc') $filters=0;
+
+if (is_numeric($l)) $_SESSION['tloc'] = $l;
+if (is_numeric($s))$_SESSION['tsta'] = $s;
+
+$loc = $_SESSION['tloc'];
+$sta = $_SESSION['tsta'];
+
+$_SESSION['tloc'] = $loc;
+$_SESSION['tsta'] = $sta;
+$_SESSION['tfilter'] = $tfilters;
 
 
-// Queue we're viewing
-$queue_key = sprintf('::Q:%s', ObjectModel::OBJECT_TYPE_TASK);
-$queue_name = $_SESSION[$queue_key] ?: '';
 
-switch ($queue_name) {
-case 'closed':
-    $status='closed';
-    $results_type=__('Closed Countermeasures');
-    $showassigned=true; //closed by.
-    $queue_sort_options = array('closed', 'updated', 'created', 'number','ticketnumber', 'hot');
+// // Apply filters
+// $filters = array();
+// if ($status) {
+    // $SQ = new Q(array('flags' =>1));
+    // if (!strcasecmp($status, 'closed'))
+        // $SQ->negate();
 
-    break;
-case 'overdue':
-    $status='open';
-    $results_type=__('Overdue Countermeasures');
-    $tasks->filter(array('isoverdue'=>1));
-    $queue_sort_options = array('updated', 'created', 'number','ticketnumber', 'hot');
-    break;
-case 'assigned':
-    $status='open';
-    $staffId=$thisstaff->getId();
-    $results_type=__('My Countermeasures');
-    $tasks->filter(array('staff_id'=>$thisstaff->getId()));
-    $queue_sort_options = array('updated', 'created', 'hot', 'number','ticketnumber');
-    break;
-default:
-case 'search':
-    $queue_sort_options = array('closed', 'updated', 'created', 'number','ticketnumber', 'hot');
-    // Consider basic search
-    if ($_REQUEST['query']) {
-        $results_type=__('Search Results');
-        $tasks = $tasks->filter(Q::any(array(
-            'number__startswith' => $_REQUEST['query'],
-            'cdata__title__contains' => $_REQUEST['query'],
-        )));
-        unset($_SESSION[$queue_key]);
-        break;
-    } elseif (isset($_SESSION['advsearch:tasks'])) {
-        // XXX: De-duplicate and simplify this code
-        $form = $search->getFormFromSession('advsearch:tasks');
-        $form->loadState($_SESSION['advsearch:tasks']);
-        $tasks = $search->mangleQuerySet($tasks, $form);
-        $results_type=__('Advanced Search')
-            . '<a class="action-button" href="?clear_filter"><i class="icon-ban-circle"></i> <em>' . __('clear') . '</em></a>';
-        break;
-    }
-    // Fall-through and show open tickets
-case 'open':
-    $status='open';
-    $results_type=__('Open Countermeasures');
-    $queue_sort_options = array('created', 'updated', 'due', 'number','ticketnumber', 'hot');
-    break;
+    // $filters[] = $SQ;
+// }
+
+if ($loc !=='0'){
+$tasks->filter(array('dept_id'=>$loc));	
+}
+ 
+
+
+if ($sta !=='0'){
+	if ($sta == 1) $tstatus = 1; 
+	if ($sta == 2) $tstatus = 0; 
+$tasks->filter(array('flags'=>$tstatus));
 }
 
-// Apply filters
-$filters = array();
-if ($status) {
-    $SQ = new Q(array('flags' =>1));
-    if (!strcasecmp($status, 'closed'))
-        $SQ->negate();
-
-    $filters[] = $SQ;
-}
+if ($sta == 1) $showing = 'Open';
+if ($sta == 2) $showing = 'Closed';
 
 if ($filters)
     $tasks->filter($filters);
@@ -171,7 +158,15 @@ case 'number':
     $queue_columns['number']['sort_dir'] = $sort_dir;
     $tasks->extra(array(
         'order_by'=>array(
-            array(SqlExpression::times(new SqlField('number'), 1), $orm_dir)
+            array(SqlExpression::times(new SqlField('id'), 1), $orm_dir)
+        )
+    ));
+    break;
+case 'parent':
+    $queue_columns['parent']['sort_dir'] = $sort_dir;
+    $tasks->extra(array(
+        'order_by'=>array(
+            array(SqlExpression::times(new SqlField('object_id'), 1), $orm_dir)
         )
     ));
     break;
@@ -276,7 +271,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                           
      <a href="<?php echo $refresh_url; ?>"
                 title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i></a><?php echo
-                $results_type.$showing; ?>                          
+                $showing; ?> Countermeasures                         
     
     </div>
     <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
@@ -292,6 +287,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
 <div class="card-box">
 <div class="row">
     <div class="col">
+
         <div class="float-right">
             <form  class="form-inline" action="users.php" method="get" style="padding-bottom: 10px; margin-top: -5px;">
                 <?php csrf_token(); ?>
@@ -307,6 +303,111 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                 </div>
             </form>
         </div>
+		<div class="btn-group btn-group-sm float-right m-b-10 <?php //if ($filters == 0){ echo 'hidden';}?>" role="group" aria-label="Button group with nested dropdown">
+		
+		<?php
+      $lselected = Dept::getNamebyId($loc);
+     
+      if (!$lselected ) {$lselected = 'Location';}
+?>
+
+
+ <div class="btn-group btn-group-sm" role="group">
+        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" 
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
+         title="<?php echo __('Filter Incident Location'); ?>"><i class="fa fa-filter"></i> <?php echo $lselected;?>
+        </button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
+              
+              <a href="tasks.php?tl=0&s=<?php echo $_GET['s'];?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
+              
+              <?php
+    
+                if ($loc =='0'){
+                $Location = Dept::objects()
+                ->order_by('name');
+                    
+                } else {
+                $Location = Dept::objects()
+                ->order_by('name') 
+                ->filter(array('id' => $loc));
+                }   
+                     
+                     foreach ($Location as $cLocation) { 
+					 
+					 $TaskCount = Task::objects()
+						->filter(array('dept_id' => $cLocation->getId())) //Awaiting Quote
+						
+						->aggregate(array('count' => SqlAggregate::COUNT('id')));
+						 
+						 foreach ($TaskCount as $TaskCountc) { 
+							$TaskCount = $TaskCountc["count"];
+      				 
+                     if ($TaskCount > 0) {?>
+                
+                   <a href="tasks.php?tl=<?php echo $cLocation->id ?>&ts=<?php echo $_GET['s']?>>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cLocation->name?>
+                     <span class="badge badge-pill badge-default  pull-right"><?php echo $TaskCount ?></span> </a>
+						 <?php }}}     
+        ?>
+            </div>
+    </div>
+<?php 
+	if (!$showing) {$sselected = 'Status';} else {
+		$sselected = ($sta == 1) ? 'Open' : 'Closed';
+	}
+	if ($loc =='0'){
+		$OpenTask = Task::objects()
+			->filter(array('flags' => '1')) //Awaiting Quote
+			->aggregate(array('count' => SqlAggregate::COUNT('id')));
+	} else {
+		$OpenTask = Task::objects()
+			->filter(array('flags' => '1'))
+			->filter(array('dept_id' => $loc))	
+			->aggregate(array('count' => SqlAggregate::COUNT('id')));
+    }
+         foreach ($OpenTask as $cOpenTask) { 
+            $OpenTasks = $cOpenTask["count"];
+        }
+	if ($loc =='0'){	
+		$CloseTask = Task::objects()
+			->filter(array('flags' => '0'))
+			->aggregate(array('count' => SqlAggregate::COUNT('id')));
+	} else {
+		$CloseTask = Task::objects()
+        ->filter(array('flags' => '0'))
+		->filter(array('dept_id' => $loc))
+        ->aggregate(array('count' => SqlAggregate::COUNT('id')));
+		
+	}   
+         foreach ($CloseTask as $cCloseTask) { 
+            $ClosedTasks = $cCloseTask["count"];
+        }
+
+?>
+<div class="btn-group btn-group-sm" role="group">
+        
+        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" 
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
+         title="<?php echo __('Filter Status'); ?>"><i class="fa fa-filter"></i> <?php echo $sselected; ?>
+        </button>
+            <div class="dropdown-menu dropdown-menu-xlg dropdown-menu-right" aria-labelledby="btnGroupDrop1">
+              
+            <a class="dropdown-item no-pjax" href="tasks.php?tl=<?php echo $_GET['l']?>&ts=0"><i class="fa fa-filter"></i> All</a>
+            <a class="dropdown-item no-pjax"
+                href="tasks.php?tl=<?php echo $_GET['tl']?>&ts=1"><i class="fa fa-filter"></i> Open <span class="queue-status-count badge badge-pill badge-default pull-right"
+              ><span class="faded-more"> <?php echo $OpenTasks; ?></span></a>
+			<a class="dropdown-item no-pjax"
+                href="tasks.php?tl=<?php echo $_GET['tl']?>&ts=2"><i class="fa fa-filter"></i> Closed <span class="queue-status-count badge badge-pill badge-default pull-right"
+              ><span class="faded-more"> <?php echo $ClosedTasks; ?></span></a>
+            </div>
+  </div> 
+<div class="btn-group btn-group-sm" role="group">
+<button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light" 
+        
+         title="<?php echo __('Clear Filters'); ?>" onclick="location.href = '/scp/tasks.php?tl=0&ts=0';"><span><i class="fa fa-filter"></i><i class="fa fa-ban filtercancel"></i></span> 
+        </button
+</div>    
+		</div>
     </div>
 </div>
 <div class='col-sm-12 navspacer'> 
@@ -362,6 +463,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
         $ids=($errors && $_POST['tids'] && is_array($_POST['tids']))?$_POST['tids']:null;
         foreach ($tasks as $T) {
             $T['isopen'] = ($T['flags'] & TaskModel::ISOPEN != 0); //XXX:
+			$status = ($T['flags'] ==0) ? '<span class="badge label-table bg-success">Closed</span>' : '<span class="badge label-table bg-flatred">Open</span>';
             $total += 1;
             $tag=$T['staff_id']?'assigned':'openticket';
             $flag=null;
@@ -433,6 +535,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                 </td>
                 <td nowrap>&nbsp;<?php echo Format::truncate($dept, 40); ?></td>
                 <td align="left" nowrap>&nbsp;<?php echo $assignee; ?></td>
+				<td align="left" nowrap>&nbsp;<?php echo $status; ?></td>
             </tr>
             <?php
             } //end of foreach

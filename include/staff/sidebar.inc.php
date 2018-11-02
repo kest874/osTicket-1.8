@@ -11,11 +11,11 @@ if(!defined('ADMINPAGE')) { ?>
             <li><a href="/scp/directory.php" title="" id="nav1">Associate Directory</a></li>
         </ul>
     </li>
-    <li class=" has_sub "><a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-list"></i>  <span class="menu-arrow"></span> Countermeasures </a> <ul class="list-unstyled">
-    
-    <li><a href="/scp/tasks.php?status=open" title="" id="nav0">Open <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $OpenTasks; ?></span></a></li>
-    <li><a href="/scp/tasks.php?status=closed" title="" id="nav1">Closed <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $ClosedTasks; ?></span></a></li></ul>
-    </li>
+       <li  class="has_sub">
+    <a class="waves-effect waves-primary" href="/scp/tasks.php?tl=0&ts=0" ><i class=" ti-list"></i> </span> Countermeasures <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $OpenTasks; ?></span></a> 
+       
+    </li> 
+
     <!-- Queues -->
     <?php
     $all_queues = CustomQueue::queues()->getIterator();
