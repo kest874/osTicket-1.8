@@ -42,7 +42,7 @@ class TasksAjaxAPI extends AjaxController {
             ->filter(Q::any(array(
                 'number__startswith' => $_REQUEST['q'],
             )))
-            ->filter($visibility)
+            //->filter($visibility)
             ->values('number')
             ->annotate(array('countermeasures' => SqlAggregate::COUNT('id')))
             ->order_by('-created')
