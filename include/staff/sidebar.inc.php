@@ -12,7 +12,7 @@ if(!defined('ADMINPAGE')) { ?>
         </ul>
     </li>
        <li  class="has_sub">
-    <a class="waves-effect waves-primary" href="/scp/tasks.php?tl=0&ts=0" ><i class=" ti-list"></i> </span> Countermeasures <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $OpenTasks; ?></span></a> 
+    <a class="waves-effect waves-primary" href="/scp/tasks.php?tl=0&ts=0"><i class=" ti-list"></i> </span> Countermeasures <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $OpenTasks; ?></span></a> 
        
     </li> 
 
