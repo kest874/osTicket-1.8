@@ -8,6 +8,7 @@ $DeptMembers = Staff::objects()
  
         foreach ($DeptMembers as $row)
                 $DeptMembers  = $row;
+
 //Department Information
 $Dept= Dept::objects()
         ->filter(array('id' => $thisstaff->dept_id));
@@ -16,6 +17,7 @@ $Dept= Dept::objects()
     
 $Manager = $Dept->manager;
 $Teamleader = $Dept->teamleader;
+
 //Submitted Suggestions
 $SubmittedSuggestions = Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -24,8 +26,16 @@ $SubmittedSuggestions = Ticket::objects()
  
         foreach ($SubmittedSuggestions as $row)
                 $SubmittedSuggestions  = $row;
-                
-//Submitted Suggestions
+//AllSubmitted Suggestions
+$AllSubmittedSuggestions = Ticket::objects()
+        ->filter(array('status_id' => '1'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($AllSubmittedSuggestions as $row)
+                $AllSubmittedSuggestions  = $row;               
+ $AllSubmittedSuggestions = $AllSubmittedSuggestions["count"];
+ 
+//Assigned Suggestions
 $AssignedSubmittedSuggestions = Ticket::objects()
         ->filter(array('team_id' => $thisstaff->dept_id))
         ->filter(array('status_id' => '1'))
@@ -42,7 +52,15 @@ $ActiveSuggestions = Ticket::objects()
  
         foreach ($ActiveSuggestions as $row)
                 $ActiveSuggestions  = $row;
-                
+//All Active Suggestions
+$AllActiveSuggestions = Ticket::objects()
+        
+        ->filter(array('status_id' => '8'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($AllActiveSuggestions as $row)
+                $AllActiveSuggestions  = $row;               
+$AllActiveSuggestions = $AllActiveSuggestions["count"];              
 //Active Suggestions
 $AssignedActiveSuggestions = Ticket::objects()
         ->filter(array('team_id' => $thisstaff->dept_id))
@@ -60,6 +78,14 @@ $ParkedSuggestions = Ticket::objects()
  
         foreach ($ParkedSuggestions as $row)
                 $ParkedSuggestions  = $row;
+//All Parking Lot Suggestions
+$AllParkedSuggestions = Ticket::objects()
+        ->filter(array('status_id' => '7'))
+        ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
+ 
+        foreach ($AllParkedSuggestions as $row)
+                $AllParkedSuggestions  = $row;
+$AllParkedSuggestions =  $AllParkedSuggestions["count"];
                 
 //Parking Lot Suggestions
 $AssignedParkedSuggestions = Ticket::objects()
@@ -69,6 +95,7 @@ $AssignedParkedSuggestions = Ticket::objects()
  
         foreach ($AssignedParkedSuggestions as $row)
                 $AssignedParkedSuggestions  = $row;
+
 //Open Owned Suggestions
 $OwnedSuggestions = Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -89,7 +116,7 @@ $AssignedSuggestions = Ticket::objects()
         foreach ($AssignedSuggestions as $row)
                 $AssignedSuggestions  = $row;
                 
-//Implmented
+//Implemented
 $ImplmentedSuggestions = Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
         ->filter(array('status_id' => '3'))
@@ -97,7 +124,8 @@ $ImplmentedSuggestions = Ticket::objects()
  
         foreach ($ImplmentedSuggestions as $row)
                 $ImplmentedSuggestions  = $row;
-//Not Implmented
+
+//Not Implemented
 $NotImplmentedSuggestions = Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
         ->filter(array('status_id' => '6'))
@@ -105,6 +133,7 @@ $NotImplmentedSuggestions = Ticket::objects()
  
         foreach ($NotImplmentedSuggestions as $row)
                 $NotImplmentedSuggestions  = $row;
+
 //Previous Month Submitted
 $PMonthSubmitted= Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -115,6 +144,7 @@ $PMonthSubmitted= Ticket::objects()
                  
         foreach ($PMonthSubmitted as $row)
                 $PMonthSubmitted = $row;
+
                 //Current Month Submitted
 $CMonthSubmitted= Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -125,6 +155,7 @@ $CMonthSubmitted= Ticket::objects()
             
         foreach ($CMonthSubmitted as $row)
                 $CMonthSubmitted = $row;
+
 //YTD Submitted
 $YearToDateSubmitted = Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -134,6 +165,7 @@ $YearToDateSubmitted = Ticket::objects()
                
         foreach ($YearToDateSubmitted as $row)
                 $YearToDateSubmitted = $row;
+
 //Previous Month Implemented
 $PMonthImplemented= Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -145,6 +177,7 @@ $PMonthImplemented= Ticket::objects()
            
         foreach ($PMonthImplemented as $row)
                 $PMonthImplemented = $row;
+
 //Current Month Implemented
 $CMonthImplemented= Ticket::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -167,6 +200,37 @@ $YearToDateImplemented = Ticket::objects()
                
         foreach ($YearToDateImplemented as $row)
                 $YearToDateImplemented = $row;
+
+//All YTD Implemented
+$AllYearToDateImplemented = Ticket::objects()
+        ->filter(array('status_id' => '3'))
+        ->filter(array('closed__year' => date("Y")))
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+               
+        foreach ($AllYearToDateImplemented as $row)
+                $AllYearToDateImplemented = $row;
+$AllYearToDateImplemented = $AllYearToDateImplemented["count"];    
+
+//All YTD Not Implemented
+$AllYearToDateNotImplemented = Ticket::objects()
+        ->filter(array('status_id' => '3'))
+        ->filter(array('closed__year' => date("Y")))
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+               
+        foreach ($AllYearToDateNotImplemented as $row)
+                $AllYearToDateNotImplemented = $row;
+//$AllYearToDateNotImplemented = $AllYearToDateNotImplemented["count"];      
+            
+//YTD Implemented
+$YearToDateNotImplemented = Ticket::objects()
+        ->filter(array('dept_id' => $thisstaff->dept_id))
+        ->filter(array('status_id' => '6'))
+        ->filter(array('closed__year' => date("Y")))
+        ->values_flat('dept_id')
+        ->aggregate(array('count' => SqlAggregate::COUNT('number')));
+               
+        foreach ($YearToDateNotImplemented as $row)
+                $YearToDateNotImplemented = $row;
 //Open Tasks Count
 $tasks = Task::objects()
         ->filter(array('dept_id' => $thisstaff->dept_id))
@@ -176,7 +240,10 @@ $tasks = Task::objects()
                    
         foreach ($tasks as $row)
                 $OpenTasks = $row;
-                
+
+ $OpenTasks = ($OpenTasks["count"]) ? $OpenTasks["count"] : 0;               
+
+
 $MemberCount = $DeptMembers["count"];
 $OwnedSuggestions = $OwnedSuggestions["count"];
 $AssignedSuggestions = $AssignedSuggestions["count"];
@@ -188,39 +255,36 @@ $ParkedSuggestions = $ParkedSuggestions["count"];
 $AssignedParkedSuggestions = $AssignedParkedSuggestions["count"];
 $ImplmentedSuggestions = $ImplmentedSuggestions["count"];
 $NotImplmentedSuggestions = $NotImplmentedSuggestions["count"];
+
 $PMSubmitted = (int)$PMonthSubmitted["count"];
-$PMTargetSuggestions =  round(($MemberCount * 17) /12 * (int) date('m', strtotime(date('Y-m')." -1 month")));
-$PMSugAheadBehind = $PMSubmitted - $PMTargetSuggestions;
-$PMSugAheadBehindColor = ($PMSugAheadBehind > -1 ? 'lightgreen':'#ff9999');
-$PMSugGoal = number_format($PMSubmitted / $PMTargetSuggestions * 100,2).'%';
+
             
 $PMImplemented = (int)$PMonthImplemented["count"];
-$PMTargetImplemented = $MemberCount * 12/12 * (int) date('m', strtotime(date('Y-m')." -1 month"));
-$PMImpAheadBehind = $PMImplemented - $PMTargetImplemented;
-$PMImpAheadBehindColor = ($PMImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
-$PMImpGoal = number_format($PMImplemented / $PMTargetImplemented * 100,2).'%';
-            
+           
 $CMSubmitted = (int)$CMonthSubmitted["count"];
-$CMTargetSuggestions =  round(($MemberCount * 17) /12 * (int) date('m', strtotime(date('Y-m'))));
-$CMSugAheadBehind = $CMSubmitted - $CMTargetSuggestions;
-$CMSugAheadBehindColor = ($CMSugAheadBehind > -1 ? 'lightgreen':'#ff9999');
-$CMSugGoal = number_format($CMSubmitted / $CMTargetSuggestions * 100,2).'%';
-            
+           
 $CMImplemented = (int)$CMonthImplemented["count"];
-$CMTargetImplemented = $MemberCount * 12/12 * (int) date('m', strtotime(date('Y-m')));
-$CMImpAheadBehind = $CMImplemented - $CMTargetImplemented;
-$CMImpAheadBehindColor = ($CMImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
-$CMImpGoal = number_format($CMImplemented / $CMTargetImplemented * 100,2).'%';
-$YTDSubmitted = (int)$YearToDateSubmitted["count"];
-$YTDTargetSuggestions =  round(($MemberCount * 17));
-$YTDSugAheadBehind = $YTDSubmitted - $YTDTargetSuggestions;
-$YTDSugAheadBehindColor = ($YTDSugAheadBehind > -1 ? 'lightgreen':'#ff9999');
-$YTDSugGoal = number_format($YTDSubmitted / $YTDTargetSuggestions * 100,2).'%';
-$YTDImplemented = (int)$YearToDateImplemented["count"];
-$YTDTargetImplemented = $MemberCount * 12;
-$YTDImpAheadBehind = $YTDImplemented - $YTDTargetImplemented;
-$YTDImpAheadBehindColor = ($YTDImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
-$YTDImpGoal = number_format($YTDImplemented / $YTDTargetImplemented * 100,2).'%';
-$OpenTasks = ($OpenTasks["count"]) ? $OpenTasks["count"] : 0
 
+$YTDNotImplemented = (int)$YearToDateNotImplemented["count"];
+
+
+$SugYearTarget = ($MemberCount * $ost->getConfig()->getSugPerYr());
+$SugTargetPerMonth = $SugYearTarget;
+$SugPreviousMonthTarget = round(($MemberCount * $SugTargetPerMonth)* (int) date('m', strtotime(date('Y-m')." -1 month")));
+$SugCurrentMonthTarget = round(($MemberCount * $SugTargetPerMonth)* (int) date('m', strtotime(date('Y-m'))));
+$YTDSubmitted = (int)$YearToDateSubmitted["count"];
+$YTDSugAheadBehind = $YTDSubmitted - $SugYearTarget;
+$YTDSugAheadBehindColor = ($YTDSugAheadBehind > -1 ? 'lightgreen':'#ff9999');
+if ($SugYearTarget>$SugYearTarget * 100)
+$YTDSugGoal = number_format($YTDSubmitted / $SugYearTarget * 100,2).'%';
+
+$ImpYearTarget = ($MemberCount * $ost->getConfig()->getImpPerYr());
+$ImpTargetPerMonth = $ImpYearTarget/12;
+$ImpPreviousMonthTarget = round(($MemberCount * $ImpTargetPerMonth)* (int) date('m', strtotime(date('Y-m')." -1 month")));
+$ImpCurrentMonthTarget = round(($MemberCount * $ImpTargetPerMonth)* (int) date('m', strtotime(date('Y-m'))));
+$YTDImplemented = (int)$YearToDateImplemented["count"];
+$YTDImpAheadBehind = $YTDImplemented - $ImpYearTarget;
+$YTDImpAheadBehindColor = ($YTDImpAheadBehind > -1 ? 'lightgreen':'#ff9999');
+if ($ImpYearTarget * 100>0)
+	$YTDImpGoal = number_format($YTDImplemented / $ImpYearTarget * 100,2).'%';
 ?>

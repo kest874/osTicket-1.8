@@ -492,7 +492,7 @@ if (!$sselected) {$sselected = 'Status';}
            $foo = 'data-breakpoints="xs sm"';
             break;         
         case "Last Updated":
-           $foo = 'data-breakpoints="xs sm"';
+           $foo = 'data-breakpoints="xs sm lg"';
             break;
         case "Owned By":
            $foo = 'data-breakpoints="xs sm"';
@@ -507,10 +507,10 @@ if (!$sselected) {$sselected = 'Status';}
             $foo = 'data-breakpoints="xs"';
             break;
         case "TCS Status":
-           $foo = 'data-breakpoints="xs sm"';
+           $foo = 'data-breakpoints="xs sm lg"';
             break;  
         case "TCS $":
-           $foo = 'data-breakpoints="xs sm"';
+           $foo = 'data-breakpoints="xs sm lg"';
             break; 
         case "Category":
             $foo = 'data-breakpoints="xs"';
@@ -673,7 +673,13 @@ if (!$sselected) {$sselected = 'Status';}
 <script>
 
 jQuery(function($){
-	$('#ticketqueue').footable();
+	$('#ticketqueue').footable({"breakpoints": {
+		"xs": 480,
+		"sm": 768,
+		"md": 992,
+		"lg": 1280,
+		"xlg": 1400
+	}});
 });
         
         

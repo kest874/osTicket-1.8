@@ -1,7 +1,13 @@
  <?php
 if(!defined('ADMINPAGE')) { ?>
                                 
-    <li ><a class="waves-effect waves-primary" href="/scp/dashboard.php" ><i class=" ti-dashboard"></i> Dashboard </a> </li>
+    <li  class="has_sub">
+    <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class=" ti-dashboard"></i> <span class="menu-arrow"></span> Dashboard </a> 
+        <ul class="list-unstyled">
+            <li><a href="/scp/dashboard.php?a=0" title="" id="nav1">My Team</a></li>
+            <li><a href="/scp/dashboard.php?a=1" title="" id="nav1">All Teams</a></li>
+        </ul>
+    </li>
     <li class=" has_sub ">
         <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-user"></i>  <span class="menu-arrow"></span> Associates </a> 
         <ul class="list-unstyled">
@@ -58,8 +64,7 @@ if(!defined('ADMINPAGE')) { ?>
         
         <?php if (!$level){echo '<i class="'.$icon.'"></i>';}if (count($children)) {echo '<span class="menu-arrow"></span>';}?>
         <?php
-              echo Format::htmlchars($q->getName());?> <?php if (!count($children)) {?><span class="queue-count badge <?php echo $badgecolor;?> badge-pill pull-right"
-              data-queue-id="<?php echo $q->getId(); ?>"><span class="faded-more">-</span><?php } ?>
+              echo Format::htmlchars($q->getName());?> 
             </span></a>
             
     <?php
@@ -95,13 +100,7 @@ if(!defined('ADMINPAGE')) { ?>
     <!-- Queues -->
 
 
-    <li class=" has_sub "><a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-book"></i>  <span class="menu-arrow"></span> Knowledgebase </a> 
-        <ul class="list-unstyled">
-            <li><a href="/scp/kb.php" title="" id="nav0">FAQs</a></li>
-            <li><a href="/scp/categories.php" title="" id="nav1">Categories</a></li>
-            <li><a href="/scp/canned.php" title="" id="nav2">Canned Responses</a></li>
-        </ul>
-    </li>
+
     <li class="  ">
     <a class="waves-effect waves-primary" href="/scp/reports.php" ><i class="ti-stats-up"></i>   Reports </a> 
     </li>
@@ -117,10 +116,11 @@ if(!defined('ADMINPAGE')) { ?>
             <li><a href="/scp/logs.php" title="" id="nav0">System Logs</a></li>
             <li><a href="/scp/system.php" title="" id="nav1">Information</a></li>
        </ul>
-    </li>
+</li><?php } ?>
     <li class=" has_sub ">
         <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-settings"></i><span class="menu-arrow"></span> Settings </a> 
         <ul class="list-unstyled">
+            <?php  if ($thisstaff->GetId() == 42){ ?>
             <li><a href="/scp/settings.php?t=pages" title="" id="nav0">Company</a></li>
             <li><a href="/scp/settings.php?t=system" title="" id="nav1">System</a></li>
             <li><a href="/scp/settings.php?t=tickets" title="" id="nav2">Tickets</a></li>
@@ -128,8 +128,11 @@ if(!defined('ADMINPAGE')) { ?>
             <li><a href="/scp/settings.php?t=agents" title="" id="nav4">Agents</a></li>
             <li><a href="/scp/settings.php?t=users" title="" id="nav5">Associates</a></li>
             <li><a href="/scp/settings.php?t=kb" title="" id="nav6">Knowledgebase</a></li>
+            <?php } ?>
+            <li><a href="/scp/settings.php?t=targets" title="" id="nav6">Targets</a></li>
         </ul>
     </li>
+    <?php  if ($thisstaff->GetId() == 42){ ?>
     <li class=" has_sub ">
         <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-pencil-alt"></i><span class="menu-arrow"></span> Manage </a> 
         <ul class="list-unstyled"><li><a href="/scp/helptopics.php" title="" id="nav0">Help Topics</a></li>
@@ -154,6 +157,7 @@ if(!defined('ADMINPAGE')) { ?>
             <li><a href="/scp/staff.php" title="" id="nav0">Associates</a></li>
             <li><a href="/scp/roles.php" title="" id="nav2">Roles</a></li>
             <li><a href="/scp/departments.php" title="" id="nav3">Teams</a></li>
+            
         </ul>
     </li>
 

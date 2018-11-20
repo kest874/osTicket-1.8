@@ -1055,7 +1055,13 @@ class OsticketConfig extends Config {
     function alertONLoginError() {
         return ($this->get('send_login_errors'));
     }
-
+    
+    function getSugPerYr() {
+        return $this->get('sug_per_yr');
+    }
+    function getImpPerYr() {
+        return $this->get('imp_per_yr');
+    }
 
 
     /* Attachments */
@@ -1125,6 +1131,11 @@ class OsticketConfig extends Config {
                 return $this->updateKBSettings($vars, $errors);
                 break;
             default:
+            case 'targets':
+                return $this->updateTargetsSettings($vars, $errors);
+                break;
+            default:
+            
                 $errors['err']=sprintf('%s - %s', __('Unknown setting option'), __('Get technical help!'));
         }
 
@@ -1463,6 +1474,7 @@ class OsticketConfig extends Config {
     function isAuthRequiredForFiles() {
         return $this->get('files_req_auth');
     }
+    
 
     function updatePagesSettings($vars, &$errors) {
         global $ost;
@@ -1561,7 +1573,20 @@ class OsticketConfig extends Config {
             'enable_premade'=>isset($vars['enable_premade'])?1:0,
         ));
     }
+    function updateTargetsSettings($vars, &$errors) {
 
+        // if ($vars['sug_per_yr'] && !$this->isClientRegistrationEnabled())
+            // $errors['sug_per_yr'] =
+                // __('The knowledge base cannot be restricted unless client registration is enabled');
+
+        // if ($errors) return false;
+
+        return $this->updateAll(array(
+            'sug_per_yr'=>$vars['sug_per_yr'],
+            'imp_per_yr'=>$vars['imp_per_yr'],
+            
+        ));
+    }
 
     function updateAlertsSettings($vars, &$errors) {
 

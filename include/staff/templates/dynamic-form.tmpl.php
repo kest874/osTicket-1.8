@@ -19,8 +19,8 @@ if (isset($options['entry']) && $options['mode'] == 'edit') { ?>
 <?php } ?>
 <?php 
 if ($options['modal'] !== 'ticketedit'){
-if ($form->getTitle()) { ?>
-  
+if ($form->getTitle()) {
+?>
         <em>
 <?php if ($options['mode'] == 'edit') { ?> 
         <div class="pull-right">

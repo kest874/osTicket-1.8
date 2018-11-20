@@ -128,7 +128,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                 <!-- Button mobile view to collapse sidebar menu -->
                 <nav class="navbar-custom">
                     
-                    <ul class="list-inline float-left mb-0 mr-0">
+                    <ul class="hide-phone list-inline float-left mb-0 mr-0">
                         <li class="list-inline-item notification-list hide-phone  mr-0">
                             <span class="nav-link">Associate Involvement Suggestion System</span>
                         </li>
@@ -216,7 +216,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                     </ul>
                     <script type="text/javascript">
                         function googleTranslateElementInit() {
-                        new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'en,es', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false, multilanguagePage: true}, 'google_translate_element'); }
+                        new google.translate.TranslateElement({ includedLanguages: 'en,es', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false}, 'google_translate_element'); }
                         </script>
                         <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script><!-- Flag click handler -->
                         <script type="text/javascript">

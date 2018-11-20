@@ -253,7 +253,7 @@ body.fixed-left .side-menu.left {
   -o-transition: -o-transform .15s;
   transition: transform .15s;
   position: absolute;
-  right: 20px;
+  right: 10px;
   display: inline-block;
   font-family: "Material Design Icons";
   text-rendering: auto;
@@ -2443,9 +2443,10 @@ label {
   font-weight: 500; }
 
 .form-control {
-  border: 1px solid #cfcfcf;
-  box-shadow: none;
-  color: rgba(0, 0, 0, 0.6); }
+	background-color: #f1f1f1;
+    border: 1px solid #cfcfcf;
+    box-shadow: none;
+    color: rgba(0, 0, 0, 0.6); }
   .form-control:focus {
     background: #ffffff;
     border-color: #a2a2a2;

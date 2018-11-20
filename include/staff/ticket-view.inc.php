@@ -2,7 +2,8 @@
 //Note that ticket obj is initiated in tickets.php.
 if(!defined('OSTSCPINC') || !$thisstaff || !is_object($ticket) || !$ticket->getId()) die('Invalid path');
 //Make sure the staff is allowed to access the page.
-if(!@$thisstaff->isStaff() || !$ticket->checkStaffPerm($thisstaff)) die('Access Denied');
+//if(!@$thisstaff->isStaff() || !$ticket->checkStaffPerm($thisstaff)) die('Access Denied');
+if(!@$thisstaff->isStaff()) die('Access Denied');
 //Re-use the post info on error...savekeyboards.org (Why keyboard? -> some people care about objects than users!!)
 $info=($_POST && $errors)?Format::input($_POST):array();
 					
@@ -14,16 +15,27 @@ $user  = $ticket->getOwner(); //Ticket User (EndUser)
 $team  = $ticket->getTeam();  //Assigned team.
 $sla   = $ticket->getSLA();
 $lock  = $ticket->getLock();  //Ticket lock obj
-$topic = $ticket->getHelpTopicId();
 if (!$lock && $cfg->getTicketLockMode() == Lock::MODE_ON_VIEW)
     $lock = $ticket->acquireLock($thisstaff->getId());
 $mylock = ($lock && $lock->getStaffId() == $thisstaff->getId()) ? $lock : null;
 $id    = $ticket->getId();    //Ticket ID.
+$topic = $ticket->getHelpTopicId();
 //Useful warnings and errors the user might want to know!
+if ($ticket->isClosed() && !$ticket->isReopenable())
+    $warn = sprintf(
+            __('Current ticket status (%s) does not allow the end user to reply.'),
+            $ticket->getStatus());
+elseif ($ticket->isAssigned()
+        && (($staff && $staff->getId()!=$thisstaff->getId())
+            || ($team && !$team->isMember($thisstaff))
+        ))
+    $warn.= sprintf('&nbsp;&nbsp;<span class="Icon assignedTicket">%s</span>',
+            sprintf(__('Suggesiton is assigned to %s'),
+                implode('/', $ticket->getAssignees())
+                ));
 if (!$errors['err']) {
     if ($lock && $lock->getStaffId()!=$thisstaff->getId())
-        $errors['err'] = sprintf(__('%s is currently locked by %s'),
-                __('This ticket'),
+        $errors['err'] = sprintf(__('This ticket is currently locked by %s'),
                 $lock->getStaffName());
     elseif (($emailBanned=Banlist::isBanned($ticket->getEmail())))
         $errors['err'] = __('Email is in banlist! Must be removed before any reply/response');
@@ -31,7 +43,7 @@ if (!$errors['err']) {
         $errors['err'] = __('EndUser email address is not valid! Consider updating it before responding');
 }
 $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
-
+//permissions checkStaffPerm
 $staffpermission = $ticket->checkStaffPerm($thisstaff);
 $assigned = ($team->id == $thisstaff->dept_id ? 1:0);
 $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
@@ -70,14 +82,15 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                 </div>
         </div>
                    
-        <?php
+        <?php if ($haspermission){
             if ($topic){
                 // Status change options
                     echo TicketStatus::status_options();
-            }
+		}}
         ?>
 
-        <?php
+       <?php
+            if ($haspermission){
             // Assign
             if ($ticket->isOpen() && $role->hasPerm(Ticket::PERM_ASSIGN)) {?>
 
@@ -110,20 +123,24 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
             <a class="btn btn-light waves-effect" id="cancelbutton" href="" onclick="window.location.href="tickets.php?id=<?php echo $ticket->getId(); ?>" 
             data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Cancel');?>" ><i class="fa fa-times"></i></a>		
                     
-            <?php If  ($topic) { ?>
-                
-                <?php if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
+            <?php 
+			}
+			
+			If  ($topic) { 
+          
+            if ($haspermission){
+              if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
                     
                     <a class="btn btn-light waves-effect" href="#reply" class="post-response" id="post-reply" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Post Update'); ?>">
                     <i class="fa fa-reply"></i></a>
                          
-                <?php }  ?> 
+			  <?php }}  ?> 
                 
                     <a class="btn btn-light waves-effect" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Post Internal Note'); ?>">
                     <i class="fa fa-pencil-square-o"></i></a>
                 
             <?php	}
-                
+                 if ($haspermission){
                  if ($thisstaff->hasPerm(Email::PERM_BANLIST)
                         || $role->hasPerm(Ticket::PERM_EDIT)
                         || ($dept && $dept->isManager($thisstaff))) { ?>        
@@ -205,7 +222,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
         </div>
       </div>
       <?php
-                }
+				 }}
                 ?>
         <a class="btn btn-light btn-sm waves-effect" href="#" data-stop="top" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Scroll Top'); ?>">
                     <i class="icon-chevron-up"></i></a>	
@@ -222,12 +239,18 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
       <strong>Category!</strong> Please set the category..
 </div>
  <?php } ?>
-<?php if($ticket->isOverdue()) { ?>
+<?php if($ticket->isOverdue() && $haspermission) { ?>
 <div class="alert alert-warning">
       <strong>Overdue!</strong> Suggestion is maked overdue..
 </div>
  <?php } 
  
+ If  (!$haspermission) { ?>
+<div class="alert alert-danger">
+  This another Team's suggestion (view only).
+</div>
+             <?php
+            }
  
  // if ($ticket->isClosed() && !$ticket->isReopenable())
     // $alerttext = sprintf(
@@ -381,7 +404,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
             <label class="form-control-label"><?php echo __('Due Date');?>:</label>
             
             <div class="input-group date  <?php if ($errors['duedate']){ echo 'has-danger';}?> " id="datepicker1" >
-                    <input type='text' id="duedate" name="duedate" class="form-control form-control-sm <?php if ($errors['duedate']){ echo 'form-control-danger';}?>" value="<?php echo $duedate; ?>" />
+                    <input <?php if (!$haspermission){ echo " disabled ";} ?>  type='text' id="duedate" name="duedate" class="form-control form-control-sm <?php if ($errors['duedate']){ echo 'form-control-danger';}?>" value="<?php echo $duedate; ?>" />
                     <span class="input-group-addon <?php if ($errors['duedate']){ echo 'has-danger-important';}?>" style="display: inline">
                         <span class="fa fa-calendar"></span>
                     </span>
@@ -404,7 +427,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                   <div>
             <div class=" <?php if ($errors['topicId'] || !$topic){ echo 'has-danger';}?>">
             <label><?php echo __('Category');?>:</label>
-            	<input id="cc" name="topicId" class="easyui-combotree " style="width:95%;  border-radius: 2px !important;"></input>
+            	<input <?php if (!$haspermission){ echo " disabled ";} ?>  id="cc" name="topicId" class="easyui-combotree " style="width:95%;  border-radius: 2px !important;"></input>
 				<?php if ($errors['topicId'] || !$topic){ ?>
                 <div class="form-control-feedback-danger"><?php echo __('Help topic selection is required');?></div>
                 <?php }?>
@@ -414,7 +437,13 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
             
                      <?php 
 			foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
-				$form->render(true, false, array('mode'=>'edit','modal'=>'ticketedit','width'=>140,'entry'=>$form));
+			
+				  if ($haspermission){
+								$form->render(true, false, array('mode'=>'edit','modal'=>'ticketedit','width'=>140,'entry'=>$form));
+                                } else {
+								$form->render(true, false, array('mode'=>'edit','modal'=>'ticketedit','width'=>140,'disabled'=>1,'entry'=>$form));
+                                 
+                                }
 		} ?>
              
         
