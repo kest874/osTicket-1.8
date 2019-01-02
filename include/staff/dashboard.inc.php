@@ -5,25 +5,45 @@
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/pareto.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/no-data-to-display.js"></script>
 
-<?php TicketForm::ensureDynamicDataView(); ?>
+<?php TicketForm::ensureDynamicDataView(); 
+$year = $_GET['y'];
+
+if (isset($year)) {}else{$year= date("Y");}
+
+$sql = "SELECT distinct year FROM ost_hours";
+$syears = db_query($sql);
+
+
+
+?>
 
 <div class="subnav">
 
     <div class="float-left subnavtitle">
                           
-    <?php echo __('IT Dashboard');?>                        
+    <?php echo __('IT Dashboard');   ?>                        
     
     </div>
     <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
-   &nbsp;
+		
+		<?php foreach ($syears as $syear) { 
+		
+		if ($year == $syear['year']){$class = 'btn-success';} else {$class = 'btn-secondary';}
+		?>
+				<a class="btn btn-icon waves-effect waves-light <?php echo $class;?>" id="btn<?php echo $syear['year'];?>" data-placement="bottom" data-toggle="tooltip" title="" href="/scp/dashboard.php?y=<?php echo $syear['year'];?>" data-original-title="Year"><?php echo $syear['year'];?></i></a>
+		
+		<?php }?>
       </div>   
    <div class="clearfix"></div> 
 </div> 
 <div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-12">		
+	
+	    
         <div class="portlet" id="IncidentRate" ><!-- /primary heading -->
             
         </div>
+
     </div>
 </div>
 <div class="row">
@@ -1715,7 +1735,7 @@ $sql="select sum(data.recordables) as recordables, h.hours, data.location, data.
 
 	union
 
-	select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  YEAR(CURDATE()) as CALENDARYEAR from (select distinct d.name as location
+	select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  '".$year."' as CALENDARYEAR from (select distinct d.name as location
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
@@ -1738,7 +1758,7 @@ $sql="select sum(data.recordables) as recordables, h.hours, data.location, data.
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
 	
 	) data
-join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and YEAR(CURDATE())=h.year
+join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and '".$year."'=h.year
 group by data.location, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.location,data.MONTHNUM,data.CALENDARYEAR
 
 ";
@@ -1761,7 +1781,7 @@ $sql="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data.
 
 	union
 
-	select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  YEAR(CURDATE()) as CALENDARYEAR from (select distinct d.name as location
+	select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  '".$year."' as CALENDARYEAR from (select distinct d.name as location
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
@@ -1784,7 +1804,7 @@ $sql="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data.
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
 	
 	) data
-join (SELECT sum(hours) as hours, month, year FROM ost_hours where YEAR(CURDATE())=year group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
+join (SELECT sum(hours) as hours, month, year FROM ost_hours where '".$year."'=year group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
 group by data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.MONTHNUM,data.CALENDARYEAR
 
 ";
@@ -1935,7 +1955,7 @@ $sql="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,data
 
 	union
 
-	select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  YEAR(CURDATE()) as CALENDARYEAR from (select distinct d.name as location
+	select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  ".$year." as CALENDARYEAR from (select distinct d.name as location
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
@@ -1958,7 +1978,7 @@ $sql="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,data
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
 	
 	) data
-join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and YEAR(CURDATE())=h.year
+join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and ".$year."=h.year
 group by data.location, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.location,data.MONTHNUM,data.CALENDARYEAR
 
 ";
@@ -1981,7 +2001,7 @@ $sql="select sum(data.dart) as dart, h.hours, data.MONTHNAME,data.MONTHNUM,data.
 
 	union
 
-	select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  YEAR(CURDATE()) as CALENDARYEAR from (select distinct d.name as location
+	select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  ".$year." as CALENDARYEAR from (select distinct d.name as location
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
@@ -2004,7 +2024,7 @@ $sql="select sum(data.dart) as dart, h.hours, data.MONTHNAME,data.MONTHNUM,data.
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
 	
 	) data
-join (SELECT sum(hours) as hours, month, year FROM ost_hours where YEAR(CURDATE())=year group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
+join (SELECT sum(hours) as hours, month, year FROM ost_hours where ".$year."=year group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
 group by data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.MONTHNUM,data.CALENDARYEAR
 
 ";
