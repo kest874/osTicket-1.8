@@ -12,8 +12,11 @@ if (isset($year)) {}else{$year= date("Y");}
 
 $sql = "SELECT distinct year FROM ost_hours";
 $syears = db_query($sql);
-
-
+$cyear=0;
+foreach ($syears as $syear) {
+	
+	if ($syear['year']==date("Y")) $cyear=1;
+}
 
 ?>
 
@@ -33,6 +36,14 @@ $syears = db_query($sql);
 				<a class="btn btn-icon waves-effect waves-light <?php echo $class;?>" id="btn<?php echo $syear['year'];?>" data-placement="bottom" data-toggle="tooltip" title="" href="/scp/dashboard.php?y=<?php echo $syear['year'];?>" data-original-title="Year"><?php echo $syear['year'];?></i></a>
 		
 		<?php }?>
+		
+		
+		<?php if ($cyear ==0){ 
+			if ($year == date("Y")){$class = 'btn-success';} else {$class = 'btn-secondary';}?>
+		<a class="btn btn-icon waves-effect waves-light <?php echo $class;?>" id="btn<?php echo date("Y");?>" data-placement="bottom" data-toggle="tooltip" title="" href="/scp/dashboard.php?y=<?php echo date("Y");?>" data-original-title="Year"><?php echo date("Y");?></i></a>
+		
+		<?php } ?>
+		
       </div>   
    <div class="clearfix"></div> 
 </div> 
@@ -1817,7 +1828,7 @@ $(function() {
             type: 'column'
         },
         title: {
-            text: 'Incident Rates'
+            text: 'Incident Rates (<?php echo $year;?>)'
         },
          // subtitle: {
              // text: 'Recordables'
@@ -2039,7 +2050,7 @@ $(function() {
             type: 'column'
         },
         title: {
-            text: 'DART Rates'
+            text: 'DART Rates (<?php echo $year;?>)'
         },
          // subtitle: {
              // text: 'Recordables DART'
