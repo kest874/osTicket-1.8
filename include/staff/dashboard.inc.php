@@ -728,7 +728,7 @@ Highcharts.chart('IncidentLocationbyType', {
         type: 'column'
     },
     title: {
-        text: 'Incident Location by Type',
+        text: 'Incident Location by Type (<?php echo $year;?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -846,7 +846,7 @@ Highcharts.chart('IncidentTypebyLocation', {
         type: 'column'
     },
     title: {
-        text: 'Incident Type by Location',
+        text: 'Incident Type by Location (<?php echo $year;?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -965,7 +965,7 @@ Highcharts.chart('injurytypebylocation', {
         type: 'column'
     },
     title: {
-        text: 'Injury Type by Location',
+        text: 'Injury Type by Location (<?php echo $year;?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -1091,7 +1091,7 @@ Highcharts.chart('locationbyinjurytype', {
         type: 'column'
     },
     title: {
-        text: 'Location by Injury Type',
+        text: 'Location by Injury Type (<?php echo $year;?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -1210,7 +1210,7 @@ Highcharts.chart('bodypartbylocation', {
         type: 'column'
     },
     title: {
-        text: 'Primary Body Part by Location',
+        text: 'Primary Body Part by Location (<?php echo $year;?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -1335,7 +1335,7 @@ Highcharts.chart('locationbybodypart', {
         type: 'column'
     },
     title: {
-        text: 'Location by Primary Body Part',
+        text: 'Location by Primary Body Part (<?php echo $year;?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
