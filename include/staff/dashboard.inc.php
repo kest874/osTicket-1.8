@@ -703,9 +703,9 @@ $(function () {
         
     $locs = db_query($sql);
     
-    $sql="select sum(count) as COUNT, location, topic from (SELECT count(ticket_id) as COUNT, d.name as location, ht.topic   
+    $sql="select sum(count) as COUNT, location, topic from (SELECT count(t.ticket_id) as COUNT, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
-    group by d.name, ht.topic 
+    join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' group by d.name, ht.topic 
      
      union all 
      
@@ -820,8 +820,9 @@ Highcharts.chart('IncidentLocationbyType', {
         
     $locs = db_query($sql);
     
-    $sql="select sum(count) as COUNT, location, topic from (SELECT count(ticket_id) as COUNT, d.name as location, ht.topic   
+    $sql="select sum(count) as COUNT, location, topic from (SELECT count(t.ticket_id) as COUNT, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' 
     group by d.name, ht.topic 
      
      union all 
@@ -941,7 +942,7 @@ $sql="select sum(COUNT) as COUNT, injurytype, location from
 	(select count(value) as COUNT, value as injurytype, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."') and fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
 	select 0 as COUNT, injurytype, location  from 
@@ -1066,7 +1067,8 @@ $sql="select sum(COUNT) as COUNT, injurytype, location from
 	(select count(value) as COUNT, value as injurytype, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	where fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."') and 
+	fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
 	select 0 as COUNT, injurytype, location  from 
@@ -1185,7 +1187,7 @@ $sql="select sum(COUNT) as COUNT, bodypart, location from
 	(select count(value) as COUNT, value as bodypart, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."') and  fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
 	select 0 as COUNT, bodypart, location  from 
@@ -1310,7 +1312,7 @@ $sql="select sum(COUNT) as COUNT, bodypart, location from
 	(select count(value) as COUNT, value as bodypart, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	where fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."') and fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
 	select 0 as COUNT, bodypart, location  from 
