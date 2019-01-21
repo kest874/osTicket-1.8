@@ -1540,7 +1540,7 @@ $(function() {
  
 <?php
 
-$sql="select sum(COUNT) as COUNT, topic, lastname, location from(select  count(topic) as COUNT, 
+$sql="select * from (select sum(COUNT) as COUNT, topic, lastname, location from(select  count(topic) as COUNT, 
 case
 
 when topic = 'Injury/Illness' then 'injuryillness'
@@ -1578,7 +1578,7 @@ when topic = 'Spill' then 'spill'
 end as topic
 		 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
 		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id) b on 1=1    )data
-         group by topic, lastname, location";
+         group by topic, lastname, location )data where topic <> 'nearmiss'";
 
 $topics = db_query($sql); 
 
@@ -1609,7 +1609,7 @@ end as color
 		 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
 		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id
 	 
-		)a
+		where ht.topic_id <>2)a
 	 group by topic, lastname, location
 	 
 	 )a  
@@ -1623,7 +1623,7 @@ $(function() {
             type: 'column'
         },
         title: {
-            text: 'Incidents/Observations by Associate > 1',
+            text: 'Incidents by Associate > 1',
                 style: {
                 color: '#797979',
                 fontSize: '14px',
@@ -1634,7 +1634,7 @@ $(function() {
             formatter: function () {
                 
                 if (this.point.location !== undefined ){
-                    return  '<b>'+this.point.name +'<br>'+ ' Total: <b>' + this.point.y + '<br>Location: <b>' + this.point.location + '<br>Injury/Illness: <b>' + this.point.injuryillness+ '<br>Near-Miss: <b>' + this.point.nearmiss+ '<br>Propery Damage: <b>' + this.point.propertydamage+ '<br>Spill: <b>' + this.point.spill;
+                    return  '<b>'+this.point.name +'<br>'+ ' Total: <b>' + this.point.y + '<br>Location: <b>' + this.point.location + '<br>Injury/Illness: <b>' + this.point.injuryillness+  '<br>Propery Damage: <b>' + this.point.propertydamage+ '<br>Spill: <b>' + this.point.spill;
                 }
             }
         },
