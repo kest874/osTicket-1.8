@@ -1616,7 +1616,7 @@ end as color
 	 
 	 )a  
 	  group by lastname, location 
-)c where count >1  order by location,count desc";
+)c where count >1  order by count desc limit 10";
 $tresults = db_query($sql); 
 ?>
 $(function() {        
