@@ -273,10 +273,10 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             return false;
 
         // Check access based on department or assignment
-        if (!$staff->canAccessDept($this->getDeptId())
-                && $this->isOpen()
-                && $staff->getId() != $this->getStaffId())
-            return false;
+        // if (!$staff->canAccessDept($this->getDeptId())
+                // && $this->isOpen()
+                // && $staff->getId() != $this->getStaffId())
+            // return false;
 
         // At this point staff has access unless a specific permission is
         // requested

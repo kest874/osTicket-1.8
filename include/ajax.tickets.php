@@ -1097,11 +1097,13 @@ class TicketsAjaxAPI extends AjaxController {
     function task($tid, $id) {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid))
-                || !$ticket->checkStaffPerm($thisstaff))
+               // || !$ticket->checkStaffPerm($thisstaff))
+		   )
             Http::response(404, 'Unknown incident');
         // Lookup task and check access
         if (!($task=Task::lookup($id))
-                || !$task->checkStaffPerm($thisstaff))
+                //|| !$task->checkStaffPerm($thisstaff))
+			)
             Http::response(404, 'Unknown countermeasure');
         $info = $errors = array();
         $note_attachments_form = new SimpleForm(array(

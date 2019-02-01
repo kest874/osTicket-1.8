@@ -28,14 +28,14 @@ class TasksAjaxAPI extends AjaxController {
         $limit = isset($_REQUEST['limit']) ? (int) $_REQUEST['limit']:25;
         $countermeasures = array();
 
-        $visibility = Q::any(array(
-            'staff_id' => $thisstaff->getId(),
-            'team_id__in' => $thisstaff->teams->values_flat('team_id'),
-        ));
+       // $visibility = Q::any(array(
+       //     'staff_id' => $thisstaff->getId(),
+       //     'team_id__in' => $thisstaff->teams->values_flat('team_id'),
+       // ));
 
-        if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts())) {
-            $visibility->add(array('dept_id__in' => $depts));
-        }
+        // if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts())) {
+            // $visibility->add(array('dept_id__in' => $depts));
+        // }
 
 
         $hits = TaskModel::objects()
