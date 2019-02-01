@@ -59,7 +59,7 @@ class Export {
         // Reset the $sql query
         $tickets = $sql->models()
             ->select_related('dept', 'staff',
-                'team', 'staff', 'cdata', 'topic', 'status', 'cdata__:priority')
+                'team', 'staff', 'cdata', 'topic', 'status')
             ->options(QuerySet::OPT_NOCACHE)
             ->annotate(array(
                 'collab_count' => TicketThread::objects()
@@ -87,7 +87,7 @@ class Export {
                 'cdata.subject' =>  __('Subject'),
                 'staff.name' =>      __('From'),
                 //'user.default_email.address' => __('From Email'),
-                'cdata.:priority.priority_desc' => __('Priority'),
+                //'cdata.:priority.priority_desc' => __('Priority'),
                 'dept::getLocalName' => __('Department'),
                 'topic::getName' => __('Help Topic'),
                 'source' =>         __('Source'),
@@ -99,7 +99,7 @@ class Export {
                 'staff::getName' => __('Agent Assigned'),
                 'team::getName' =>  __('Team Assigned'),
                 'thread_count' =>   __('Thread Count'),
-                'attachment_count' => __('Attachment Count'),
+                //'attachment_count' => __('Attachment Count'),
             ) + $cdata,
             $how,
             array('modify' => function(&$record, $keys) use ($fields) {
