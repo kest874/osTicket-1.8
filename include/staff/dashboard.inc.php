@@ -1742,7 +1742,7 @@ $sql="select sum(data.recordables) as recordables, h.hours, data.location, data.
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 
-	where isrecordable = 1
+	where isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$year."'
 
 	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
 
@@ -1788,7 +1788,7 @@ $sql="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data.
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 
-	where isrecordable = 1
+	where isrecordable = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$year."'
 
 	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
 
@@ -1929,12 +1929,24 @@ $(function() {
         {
             name: 'IR (2016: 336370)',
             type: 'line',
-            data: [6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30],
+			<?php if ($year == '2018')
+				echo "data: [6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30],";
+				?>
+            <?php if ($year == '2019')
+				echo "data: [5.30,5.30,5.30,5.30,5.30,5.30,5.30,5.30,5.30,5.30,5.30,5.30],";
+				?>
+			
         },
         {
             name: 'IR (2016: 336360)',
             type: 'line',
-            data: [4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20],
+           <?php if ($year == '2018')
+				echo "data: [4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20],";
+			?>
+			<?php if ($year == '2019')
+				echo "data: [3.80,3.80,3.80,3.80,3.80,3.80,3.80,3.80,3.80,3.80,3.80,3.80],";
+			?>
+			
         },
         ]
     });
@@ -1962,7 +1974,7 @@ $sql="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,data
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 
-	where isdart = 1
+	where isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$year."'
 
 	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
 
@@ -2008,7 +2020,7 @@ $sql="select sum(data.dart) as dart, h.hours, data.MONTHNAME,data.MONTHNUM,data.
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 
-	where isdart = 1
+	where isdart = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$year."'
 
 	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
 
@@ -2141,12 +2153,22 @@ $(function() {
         {
             name: 'DR (2016: 336370)',
             type: 'line',
-            data: [2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90],
+            <?php if ($year == '2018')
+				echo "data: [2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90],";
+			?>
+			<?php if ($year == '2019')
+				echo "data: [2.50,2.50,2.50,2.50,2.50,2.50,2.50,2.50,2.50,2.50,2.50,2.50],";
+			?>
         },
         {
             name: 'DR (2016: 336360)',
             type: 'line',
-            data: [2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80],
+            <?php if ($year == '2018')
+				echo "data: [2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80],";
+			?>
+			<?php if ($year == '2019')
+				echo "data: [2.70,2.70,2.70,2.70,2.70,2.70,2.70,2.70,2.70,2.70,2.70,2.70],";
+			?>
         },        
         ]
     });
