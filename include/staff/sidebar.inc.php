@@ -1,8 +1,13 @@
  <?php
-if(!defined('ADMINPAGE')) { ?>
+if(!defined('ADMINPAGE')) { 
+
+	$begindate = date('d-m-Y', strtotime('first day of january this year'));
+	$enddate = date("m-d-Y");
+	
+	?>
                                 
     <li  class="has_sub">
-    <a class="waves-effect waves-primary" href="dashboard.php" ><i class=" ti-dashboard"></i> </span> Dashboard </a> 
+    <a class="waves-effect waves-primary" href="dashboard.php?begindate=<?php echo $begindate?>&enddate=<?php echo $enddate?>" ><i class=" ti-dashboard"></i> </span> Dashboard </a> 
        
     </li>
     <li class=" has_sub ">

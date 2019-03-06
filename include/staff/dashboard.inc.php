@@ -6,17 +6,6 @@
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/no-data-to-display.js"></script>
 
 <?php TicketForm::ensureDynamicDataView(); 
-$year = $_GET['y'];
-
-if (isset($year)) {}else{$year= date("Y");}
-
-$sql = "SELECT distinct year FROM ost_hours";
-$syears = db_query($sql);
-$cyear=0;
-foreach ($syears as $syear) {
-	
-	if ($syear['year']==date("Y")) $cyear=1;
-}
 
 ?>
 
@@ -24,27 +13,52 @@ foreach ($syears as $syear) {
 
     <div class="float-left subnavtitle">
                           
-    <?php echo __('IT Dashboard');   ?>                        
+    <?php echo __('IT Dashboard');  
+
+	$begindate = $_GET['begindate'];
+	$enddate = $_GET['enddate'];
+	
+	
+	$sqlbegindate =  substr($begindate, 6, 4)."-". substr($begindate, 0, 2)."-".substr($begindate, 3, 2);
+	$sqlenddate = substr($enddate, 6, 4)."-". substr($enddate, 0, 2)."-".substr($enddate, 3, 2);
+	
+	$sqlbeginmonth = substr($begindate, 0, 2);
+	$sqlendmonth = substr($enddate, 0, 2);
+	
+	$sqlbeginyear = substr($begindate, 6, 4);
+	$sqlendyear = substr($enddate, 6, 4);
+	?>                        
     
     </div>
     <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
 		
-		<?php foreach ($syears as $syear) { 
-		
-		if ($year == $syear['year']){$class = 'btn-success';} else {$class = 'btn-secondary';}
-		?>
-				<a class="btn btn-icon waves-effect waves-light <?php echo $class;?>" id="btn<?php echo $syear['year'];?>" data-placement="bottom" data-toggle="tooltip" title="" href="/scp/dashboard.php?y=<?php echo $syear['year'];?>" data-original-title="Year"><?php echo $syear['year'];?></i></a>
-		
-		<?php }?>
-		
-		
-		<?php if ($cyear ==0){ 
-			if ($year == date("Y")){$class = 'btn-success';} else {$class = 'btn-secondary';}?>
-		<a class="btn btn-icon waves-effect waves-light <?php echo $class;?>" id="btn<?php echo date("Y");?>" data-placement="bottom" data-toggle="tooltip" title="" href="/scp/dashboard.php?y=<?php echo date("Y");?>" data-original-title="Year"><?php echo date("Y");?></i></a>
-		
-		<?php } ?>
-		
-      </div>   
+			
+
+	  <form class="form-inline">
+    <div class="form-group">
+        <label class="" for="begindate">Begining: </label>
+        <div class="col-xs-9 input-group input-group-sm date" id="begindate" data-target-input="nearest">
+                    <input type="text" name="begindate" value="<?php echo $begindate?>" class="form-control form-control-sm datetimepicker-input" data-target="begindate"/>
+                    <div class="input-group-addon" data-target="#begindate" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                    </div>
+                </div>
+    </div>
+    <div class="form-group">
+        <label class="" for="enddate">Ending: &nbsp;</label>
+        <div class="input-group input-group-sm date" id="enddate" data-target-input="nearest">
+                    <input type="text" name="enddate" value="<?php echo $enddate?>" class="form-control form-control-sm datetimepicker-input" data-target="enddate"/>
+                    <div class="input-group-addon" data-target="#enddate" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                    </div>
+					</div>
+               
+    </div>
+  
+    &nbsp <button type="submit" class="btn btn-primary btn-sm">Refresh</button>
+</form>
+	  </div>
+	  
    <div class="clearfix"></div> 
 </div> 
 <div class="row">
@@ -63,6 +77,28 @@ foreach ($syears as $syear) {
             
         </div>
     </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="portlet" id="incidenttrend" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="portlet" id="avgdays" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="portlet" id="openincidentspie" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+    
 </div>
 <div class="row">
     <div class="col-lg-6">
@@ -148,7 +184,22 @@ foreach ($syears as $syear) {
 </div>
 
 <script>
+
+ $(document).ready(function () {
+                    $('#begindate').datetimepicker({
+                      minView: 2,
+					format: 'MM-DD-YYYY'
+                    });
+                });
+				
+ $(document).ready(function () {
+                    $('#enddate').datetimepicker({
+                      minView: 2,
+					format: 'MM-DD-YYYY'
+                    });
+                });
 <?php
+
 $sitecolor = array(
 "BRY"=>"#ff5252",
 "CAN"=>"rgb(241, 92, 128)",
@@ -163,37 +214,280 @@ $sitecolor = array(
 "TNN2"=>"rgb(124, 181, 236)",
 "TNS"=>"#eeff41",
 "YTD"=>"#c30000");
+
+
+$sql="SELECT count(t.ticket_id) as COUNT, d.name as Location FROM ost_ticket t join ost_department d on t.dept_id = d.id
+where t.status_id != 3
+group by d.name";
+ 
+  $SElocsdata = db_query($sql); 
+ 
+ ?>
+ 
+ 
+$(function() {
+var getColor = {
+'BRY':'#ff5252',
+'CAN':'rgb(241, 92, 128)',
+'IND':'#e040fb',
+'MEX':'#7c4dff',
+'NTC':'rgb(43, 144, 143)',
+'OH':'rgb(67, 67, 72)',
+'PAU':'#40c4ff',
+'RTA':'#18ffff',
+'RVC':'rgb(247, 163, 92)',
+'TNN1':'#69f0ae',
+'TNN2':'rgb(124, 181, 236)',
+'TNS':'#eeff41',
+'YTD':'#c30000'};
+    Highcharts.chart('openincidentspie', {
+        chart: {
+            type: 'pie',
+            options3d: {
+                enabled: true,
+                alpha: 45,
+                beta: 0
+            }
+        },
+        title: {
+            text: 'Open Incidents by Location',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+        },
+        credits: false,
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> <b> ({point.y})</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                depth: 35,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}'
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Incidents',
+            data: [
+			     <?php
+        foreach ($SElocsdata as $SEloc) { ?>
+			{name:'<?php echo $SEloc["Location"]?>', y:<?php echo $SEloc["COUNT"] ?>,color: getColor['<?php echo $SEloc["Location"]?>']},
+        <?php } ?>
+           ]
+        }]
+    });
+});		
+
+<?php
+        $sql="select CALENDARWEEK as WEEK, 
+                max(case when Status = 'OPEN' then VALUE else 0 end)as OPEN, 
+                max(case when Status = 'CLOSED' then VALUE else 0 end) as CLOSED
+                
+                from ( 
+
+                Select * from(                        
+                                SELECT   COUNT(dateofincident) AS VALUE, 'OPEN' AS Status, FROM_DAYS(TO_DAYS(dateofincident) - MOD(TO_DAYS(dateofincident) 
+                                                         - 2, 7)) AS CALENDARWEEK
+                                FROM         ost_ticket join ost_ticket__cdata on ost_ticket.ticket_id = ost_ticket__cdata.ticket_id
+                                WHERE     dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."'
+                                                               GROUP BY FROM_DAYS(TO_DAYS(dateofincident) - MOD(TO_DAYS(dateofincident) - 2, 7)) 
+                                
+                                Union all
+                                
+                                SELECT   COUNT(closed) AS VALUE, 'CLOSED' AS Status, FROM_DAYS(TO_DAYS(closed) - MOD(TO_DAYS(closed) 
+                                                         - 2, 7)) AS CALENDARWEEK
+                                FROM         ost_ticket
+                                WHERE     closed >= '".$sqlbegindate."' and closed <= '".$sqlenddate."'
+                                GROUP BY FROM_DAYS(TO_DAYS(closed) - MOD(TO_DAYS(closed) - 2, 7))) data
+                                
+                    )dt
+                group by CALENDARWEEK;";
+        $results = db_query($sql); 
+        
+    ?> 
+    
+    
+$(function() {        
+     Highcharts.chart('incidenttrend', {
+        chart: {
+            type: 'areaspline'
+        },
+        title: {
+            text: 'Incidents (OPENED|CLOSED) (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
+            style: {
+                color: '#797979',
+                fontSize: '14px',
+                fontWeight: '600',
+                }
+        },
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            x: 0,
+            y: 0,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false
+        },
+
+        xAxis: {
+            categories: [ <?php foreach ($results as $result) {echo "'".$result['WEEK']."',";}?>
+                
+            ],
+            
+        },
+        yAxis: {
+            title: {
+                text: 'Number of Incidents'
+            },
+            
+                    },
+        tooltip: {
+            shared: true,
+            valueSuffix: ' Incidents'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            areaspline: {
+                fillOpacity: 0.5
+            }
+        },
+        series: [
+        {
+            type: 'column',
+            name: 'CLOSED',
+            data: [<?php foreach ($results as $result) { echo $result['CLOSED'].',';}?>]
+        }, {
+            type: 'spline',
+            name: 'OPENED',
+            data: [<?php foreach ($results as $result) { echo $result['OPEN'].',';}?>],
+            color: '#e3c436'
+            
+        }]
+
+    });
+
+}); 
+
+<?php
+        $sql="select avg(daysopen) as DaysOpen, WEEK from 
+(
+SELECT   dateofincident as open,
+		IFNULL(closed,now()) as close,  
+        datediff(date(IFNULL(closed,now())),date(dateofincident)) as daysopen, 
+		FROM_DAYS(TO_DAYS(IFNULL(closed,now())) - MOD(TO_DAYS(IFNULL(closed,now())) 
+                                                         - 2, 7)) AS WEEK
+FROM         ost_ticket join ost_ticket__cdata on ost_ticket.ticket_id = ost_ticket__cdata.ticket_id
+WHERE     ost_ticket.status_id = 3 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')
+)data
+group by WEEK;";
+        $results = db_query($sql); 
+        
+    ?> 
+    
+    
+$(function() {        
+     Highcharts.chart('avgdays', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Incidents Average Days Open (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
+            style: {
+                color: '#797979',
+                fontSize: '14px',
+                fontWeight: '600',
+                }
+        },
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            x: 0,
+            y: 0,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false
+        },
+
+        xAxis: {
+            categories: [ <?php foreach ($results as $result) {echo "'".$result['WEEK']."',";}?>
+                
+            ],
+            
+        },
+        yAxis: {
+            title: {
+                text: 'Average Number of  Days Open'
+            },
+                  },
+        tooltip: {
+            shared: true,
+            valueSuffix: ' Incidents'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            areaspline: {
+                fillOpacity: 0.5
+            }
+        },
+        series: [
+        {
+            type: 'column',
+            name: 'Days',
+            data: [<?php foreach ($results as $result) { echo $result['DaysOpen'].',';}?>]
+        }]
+
+    });
+
+}); 
+    
+
+<?php
+
 $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by cat, location order by CALENDARYEAR, CALENDARWEEK";
 $periods = db_query($sql);
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK";
 $locs = db_query($sql);
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
 $locsdata = db_query($sql);
@@ -201,19 +495,19 @@ $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as CO
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by CALENDARWEEK,CALENDARYEAR )tot
 group by cat order by CALENDARWEEK";
@@ -225,7 +519,7 @@ $(function () {
             type: 'column'
         },
         title: {
-            text: 'Incidents by location (<?php echo $year;?>)',
+            text: 'Incidents by location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
             style: {
             color: '#797979',
             fontSize: '14px',
@@ -343,33 +637,33 @@ $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by cat, location order by CALENDARYEAR, CALENDARWEEK";
 $periods = db_query($sql);
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."'  order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK";
 $locs = db_query($sql);
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."'  order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."'  order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."'  order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
 $locsdata = db_query($sql);
@@ -377,19 +671,19 @@ $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as CO
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."'  order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."'  order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."'  order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK )tot
 group by cat order by CALENDARWEEK";
@@ -401,7 +695,7 @@ $(function () {
             type: 'column'
         },
         title: {
-            text: 'Recordables by location (<?php echo $year;?>)',
+            text: 'Recordables by location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
             style: {
             color: '#797979',
             fontSize: '14px',
@@ -519,33 +813,33 @@ $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by cat, location order by CALENDARYEAR, CALENDARWEEK";
 $periods = db_query($sql);
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK";
 $locs = db_query($sql);
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
 $locsdata = db_query($sql);
@@ -553,19 +847,19 @@ $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as CO
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK)tot
 group by cat order by CALENDARWEEK";
@@ -577,7 +871,7 @@ $(function () {
             type: 'column'
         },
         title: {
-            text: 'Days Away Restricted or Transfered by location (<?php echo $year;?>)',
+            text: 'Days Away Restricted or Transfered by location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
             style: {
             color: '#797979',
             fontSize: '14px',
@@ -705,7 +999,7 @@ $(function () {
     
     $sql="select sum(count) as COUNT, location, topic from (SELECT count(t.ticket_id) as COUNT, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
-    join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' group by d.name, ht.topic 
+    join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') group by d.name, ht.topic 
      
      union all 
      
@@ -728,7 +1022,7 @@ Highcharts.chart('IncidentLocationbyType', {
         type: 'column'
     },
     title: {
-        text: 'Incident Location by Type (<?php echo $year;?>)',
+        text: 'Incident Location by Type (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -822,7 +1116,7 @@ Highcharts.chart('IncidentLocationbyType', {
     
     $sql="select sum(count) as COUNT, location, topic from (SELECT count(t.ticket_id) as COUNT, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
-	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."' 
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') 
     group by d.name, ht.topic 
      
      union all 
@@ -846,7 +1140,7 @@ Highcharts.chart('IncidentTypebyLocation', {
         type: 'column'
     },
     title: {
-        text: 'Incident Type by Location (<?php echo $year;?>)',
+        text: 'Incident Type by Location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -942,7 +1236,7 @@ $sql="select sum(COUNT) as COUNT, injurytype, location from
 	(select count(value) as COUNT, value as injurytype, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."') and fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')) and fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
 	select 0 as COUNT, injurytype, location  from 
@@ -965,7 +1259,7 @@ Highcharts.chart('injurytypebylocation', {
         type: 'column'
     },
     title: {
-        text: 'Injury Type by Location (<?php echo $year;?>)',
+        text: 'Injury Type by Location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -1067,7 +1361,7 @@ $sql="select sum(COUNT) as COUNT, injurytype, location from
 	(select count(value) as COUNT, value as injurytype, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."') and 
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')) and 
 	fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
@@ -1091,7 +1385,7 @@ Highcharts.chart('locationbyinjurytype', {
         type: 'column'
     },
     title: {
-        text: 'Location by Injury Type (<?php echo $year;?>)',
+        text: 'Location by Injury Type (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -1187,7 +1481,7 @@ $sql="select sum(COUNT) as COUNT, bodypart, location from
 	(select count(value) as COUNT, value as bodypart, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."') and  fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')) and  fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
 	select 0 as COUNT, bodypart, location  from 
@@ -1210,7 +1504,7 @@ Highcharts.chart('bodypartbylocation', {
         type: 'column'
     },
     title: {
-        text: 'Primary Body Part by Location (<?php echo $year;?>)',
+        text: 'Primary Body Part by Location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -1312,7 +1606,7 @@ $sql="select sum(COUNT) as COUNT, bodypart, location from
 	(select count(value) as COUNT, value as bodypart, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = '".$year."') and fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')) and fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
 	select 0 as COUNT, bodypart, location  from 
@@ -1335,7 +1629,7 @@ Highcharts.chart('locationbybodypart', {
         type: 'column'
     },
     title: {
-        text: 'Location by Primary Body Part (<?php echo $year;?>)',
+        text: 'Location by Primary Body Part (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
         style: {
             color: '#797979',
             fontSize: '14px',
@@ -1442,7 +1736,7 @@ end as color
 		SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
 		 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as LOCATION
 		 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
-		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id where t.isrecordable = 1
+		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where t.isrecordable = 1  and (STR_TO_DATE(tc.dateofincident, '%Y-%m-%d') >= '".$sqlbegindate."' and STR_TO_DATE(tc.dateofincident, '%Y-%m-%d') <= '".$sqlenddate."')
 	 
 		)a
 	 group by topic, lastname, location
@@ -1458,7 +1752,7 @@ $(function() {
         type: 'column'
     },
     title: {
-        text: 'Recordables by Associate > 1',
+        text: 'Top 10 Recordables by Associate > 1  (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
             style: {
             color: '#797979',
             fontSize: '14px',
@@ -1609,9 +1903,9 @@ end as color
 		SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
 		 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as LOCATION
 		 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
-		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id
+		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id
 	 
-		where ht.topic_id <>2)a
+		where ht.topic_id <>2 and (STR_TO_DATE(tc.dateofincident, '%Y-%m-%d') >= '".$sqlbegindate."' and STR_TO_DATE(tc.dateofincident, '%Y-%m-%d') <= '".$sqlenddate."'))a
 	 group by topic, lastname, location
 	 
 	 )a  
@@ -1625,7 +1919,7 @@ $(function() {
             type: 'column'
         },
         title: {
-            text: 'Incidents by Associate > 1',
+            text: 'Top 10 Incidents by Associate > 1  (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
                 style: {
                 color: '#797979',
                 fontSize: '14px',
@@ -1721,19 +2015,16 @@ $(function() {
            color: '#eeff41'}]
     });
 });     
-<?php
 
+////////////////////////////////////////////////////////////////////  INCIDENTS  //////////////////////////////////////////////////////////////////// 
+<?php
 $sql="select distinct d.name as location
 from 
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
-
 where isrecordable = 1 or isdart = 1 order by d.name";
-
 $locs = db_query($sql);
-
 $sql="select sum(data.recordables) as recordables, h.hours, data.location, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR from (
-
 	select sum(isrecordable)as recordables,0 as hours, d.name as location,
 	DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') AS MONTHNAME,
 	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
@@ -1741,22 +2032,15 @@ $sql="select sum(data.recordables) as recordables, h.hours, data.location, data.
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
-
-	where isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$year."'
-
+	where isrecordable = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$sqlendyear."'
 	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
-
 	union
-
-	select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  '".$year."' as CALENDARYEAR from (select distinct d.name as location
+	select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  '".$sqlendyear."' as CALENDARYEAR from (select distinct d.name as location
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
-
 	where isrecordable = 1 order by d.name)a
-
 	join 
-
 	(SELECT 1 AS MONTH, 'Jan' as MONTHNAME
 	   UNION SELECT 2 AS MONTH, 'Feb' as MONTHNAME
 	   UNION SELECT 3 AS MONTH, 'Mar' as MONTHNAME
@@ -1771,15 +2055,11 @@ $sql="select sum(data.recordables) as recordables, h.hours, data.location, data.
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
 	
 	) data
-join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and '".$year."'=h.year
+join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and '".$sqlendyear."'=h.year
 group by data.location, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.location,data.MONTHNUM,data.CALENDARYEAR
-
 ";
-
 $locsdata = db_query($sql); 
-
 $sql="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR from (
-
 	select sum(isrecordable)as recordables,0 as hours, d.name as location,
 	DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') AS MONTHNAME,
 	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
@@ -1787,22 +2067,15 @@ $sql="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data.
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
-
-	where isrecordable = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$year."'
-
+	where isrecordable = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$sqlendyear."'
 	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
-
 	union
-
-	select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  '".$year."' as CALENDARYEAR from (select distinct d.name as location
+	select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  '".$sqlendyear."' as CALENDARYEAR from (select distinct d.name as location
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
-
 	where isrecordable = 1 order by d.name)a
-
 	join 
-
 	(SELECT 1 AS MONTH, 'Jan' as MONTHNAME
 	   UNION SELECT 2 AS MONTH, 'Feb' as MONTHNAME
 	   UNION SELECT 3 AS MONTH, 'Mar' as MONTHNAME
@@ -1817,11 +2090,9 @@ $sql="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data.
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
 	
 	) data
-join (SELECT sum(hours) as hours, month, year FROM ost_hours where '".$year."'=year group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
+join (SELECT sum(hours) as hours, month, year FROM ost_hours where '".$sqlendyear."'=year group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
 group by data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.MONTHNUM,data.CALENDARYEAR
-
 ";
-
 $totals = db_query($sql);
 ?>
 $(function() {
@@ -1830,7 +2101,7 @@ $(function() {
             type: 'column'
         },
         title: {
-            text: 'Incident Rates (<?php echo $year;?>)'
+            text: 'Incident Rates (<?php echo $sqlendyear;?>)'
         },
          // subtitle: {
              // text: 'Recordables'
@@ -1882,7 +2153,6 @@ $(function() {
             name: '<?php echo $loc['location']; ?>',
             color: '<?php echo $color; ?>',
             data: [<?php foreach ($locsdata as $locdata){
-
                     if ($loc['location'] == $locdata['location'] ) {
                         
                         $r = $locdata['recordables'] + $r;
@@ -1894,7 +2164,6 @@ $(function() {
                        } 
                     }
          } ?>]
-
         },
          <?php  $h = null;
                 $r = null;
@@ -1919,10 +2188,10 @@ $(function() {
         {
             name: 'IR Goal',
             type: 'line',
-            <?php if ($year == '2018')
+            <?php if ($sqlendyear == '2018')
 				echo "data: [3.38,3.38,3.38,3.38,3.38,3.38,3.38,3.38,3.38,3.38,3.38,3.38],";
 			?>
-			 <?php if ($year == '2019')
+			 <?php if ($sqlendyear == '2019')
 				echo "data: [3.59,3.59,3.59,3.59,3.59,3.59,3.59,3.59,3.59,3.59,3.59,3.59],";
 			?>
         },
@@ -1934,10 +2203,10 @@ $(function() {
         {
             name: 'IR (2016: 336370)',
             type: 'line',
-			<?php if ($year == '2018')
+			<?php if ($sqlendyear == '2018')
 				echo "data: [6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30,6.30],";
 				?>
-            <?php if ($year == '2019')
+            <?php if ($sqlendyear == '2019')
 				echo "data: [5.30,5.30,5.30,5.30,5.30,5.30,5.30,5.30,5.30,5.30,5.30,5.30],";
 				?>
 			
@@ -1945,10 +2214,10 @@ $(function() {
         {
             name: 'IR (2016: 336360)',
             type: 'line',
-           <?php if ($year == '2018')
+           <?php if ($sqlendyear == '2018')
 				echo "data: [4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20,4.20],";
 			?>
-			<?php if ($year == '2019')
+			<?php if ($sqlendyear == '2019')
 				echo "data: [3.80,3.80,3.80,3.80,3.80,3.80,3.80,3.80,3.80,3.80,3.80,3.80],";
 			?>
 			
@@ -1958,19 +2227,17 @@ $(function() {
 }); 
 
 
-<?php
+////////////////////////////////////////////////////////////////////  DART  //////////////////////////////////////////////////////////////////// 
 
+
+<?php
 $sql="select distinct d.name as location
 from 
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
-
 where isrecordable = 1 or isdart = 1 order by d.name";
-
 $locs = db_query($sql);
-
 $sql="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR from (
-
 	select sum(isdart)as dart,0 as hours, d.name as location,
 	DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') AS MONTHNAME,
 	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
@@ -1978,22 +2245,15 @@ $sql="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,data
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
-
-	where isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$year."'
-
+	where isdart = 1 and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$sqlendyear."'
 	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
-
 	union
-
-	select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  ".$year." as CALENDARYEAR from (select distinct d.name as location
+	select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  ".$sqlendyear." as CALENDARYEAR from (select distinct d.name as location
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
-
 	where isdart = 1 order by d.name)a
-
 	join 
-
 	(SELECT 1 AS MONTH, 'Jan' as MONTHNAME
 	   UNION SELECT 2 AS MONTH, 'Feb' as MONTHNAME
 	   UNION SELECT 3 AS MONTH, 'Mar' as MONTHNAME
@@ -2008,15 +2268,11 @@ $sql="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,data
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
 	
 	) data
-join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and ".$year."=h.year
+join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and ".$sqlendyear."=h.year
 group by data.location, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.location,data.MONTHNUM,data.CALENDARYEAR
-
 ";
-
 $locsdata = db_query($sql); 
-
 $sql="select sum(data.dart) as dart, h.hours, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR from (
-
 	select sum(isdart)as dart,0 as hours, d.name as location,
 	DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') AS MONTHNAME,
 	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
@@ -2024,22 +2280,15 @@ $sql="select sum(data.dart) as dart, h.hours, data.MONTHNAME,data.MONTHNUM,data.
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
-
-	where isdart = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$year."'
-
+	where isdart = 1  and YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) ='".$sqlendyear."'
 	group by d.name, month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')),YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
-
 	union
-
-	select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  ".$year." as CALENDARYEAR from (select distinct d.name as location
+	select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM,  ".$sqlendyear." as CALENDARYEAR from (select distinct d.name as location
 	from 
 	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
-
 	where isdart = 1 order by d.name)a
-
 	join 
-
 	(SELECT 1 AS MONTH, 'Jan' as MONTHNAME
 	   UNION SELECT 2 AS MONTH, 'Feb' as MONTHNAME
 	   UNION SELECT 3 AS MONTH, 'Mar' as MONTHNAME
@@ -2054,14 +2303,10 @@ $sql="select sum(data.dart) as dart, h.hours, data.MONTHNAME,data.MONTHNUM,data.
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
 	
 	) data
-join (SELECT sum(hours) as hours, month, year FROM ost_hours where ".$year."=year group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
+join (SELECT sum(hours) as hours, month, year FROM ost_hours where ".$sqlendyear."=year group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
 group by data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR order by data.MONTHNUM,data.CALENDARYEAR
-
 ";
-
 $totals = db_query($sql);
-
-
 ?>
 $(function() {
     Highcharts.chart('DartRate', {
@@ -2069,7 +2314,7 @@ $(function() {
             type: 'column'
         },
         title: {
-            text: 'DART Rates (<?php echo $year;?>)'
+            text: 'DART Rates (<?php echo $sqlendyear;?>)'
         },
          // subtitle: {
              // text: 'Recordables DART'
@@ -2121,7 +2366,6 @@ $(function() {
             name: '<?php echo $loc['location']; ?>',
             color: '<?php echo $color; ?>',
             data: [<?php foreach ($locsdata as $locdata){
-
                     if ($loc['location'] == $locdata['location'] ) {
                         
                         $r = $locdata['dart'] + $r;
@@ -2133,7 +2377,6 @@ $(function() {
                        } 
                     }
          } ?>]
-
         },
          <?php  $h = null;
                 $r = null;
@@ -2155,7 +2398,7 @@ $(function() {
             ]
             
         },
-		<?php if ($year == '2019'){?>
+		<?php if ($sqlendyear == '2019'){?>
 		{
             name: 'DART Goal',
             type: 'line',
@@ -2165,25 +2408,25 @@ $(function() {
 	{
             name: 'DR (2016: 336370)',
             type: 'line',
-            <?php if ($year == '2018')
+            <?php if ($sqlendyear == '2018')
 				echo "data: [2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90,2.90],";
 			?>
-			<?php if ($year == '2019')
+			<?php if ($sqlendyear == '2019')
 				echo "data: [2.50,2.50,2.50,2.50,2.50,2.50,2.50,2.50,2.50,2.50,2.50,2.50],";
 			?>
         },
         {
             name: 'DR (2016: 336360)',
             type: 'line',
-            <?php if ($year == '2018')
+            <?php if ($sqlendyear == '2018')
 				echo "data: [2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80,2.80],";
 			?>
-			<?php if ($year == '2019')
+			<?php if ($sqlendyear == '2019')
 				echo "data: [2.70,2.70,2.70,2.70,2.70,2.70,2.70,2.70,2.70,2.70,2.70,2.70],";
 			?>
         },        
         ]
     });
 }); 
-</script>
 
+</script>
