@@ -215,7 +215,11 @@ $sitecolor = array(
 "TNS"=>"#eeff41",
 "YTD"=>"#c30000");
 
-
+$sql="SELECT count(t.ticket_id) as COUNT FROM ost_ticket t 
+where t.status_id != 3";
+ 
+  $SETotal = db_query($sql); 
+  
 $sql="SELECT count(t.ticket_id) as COUNT, d.name as Location FROM ost_ticket t join ost_department d on t.dept_id = d.id
 where t.status_id != 3
 group by d.name";
@@ -250,7 +254,9 @@ var getColor = {
             }
         },
         title: {
-            text: 'Open Incidents by Location',
+            text: 'Open Incidents by Location (<?php
+        foreach ($SETotal as $SETotal) { 
+			echo $SETotal["COUNT"];  } ?>)',
             style: {
             color: '#797979',
             fontSize: '14px',
