@@ -2,7 +2,7 @@
 if(!defined('ADMINPAGE')) { 
 
 	$begindate = date('d-m-Y', strtotime('first day of january this year'));
-	$enddate = date("m-d-Y");
+	$enddate = date("d-m-Y");
 	
 	?>
                                 

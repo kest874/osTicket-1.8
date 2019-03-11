@@ -2018,6 +2018,10 @@ $(function() {
 
 ////////////////////////////////////////////////////////////////////  INCIDENTS  //////////////////////////////////////////////////////////////////// 
 <?php
+
+$sqlbeginperiod = $sqlbeginyear.ltrim($sqlbeginmonth, '0');
+$sqlendperiod = $sqlendyear.ltrim($sqlendmonth, '0');
+
 $sql="select distinct d.name as location
 from 
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
@@ -2075,8 +2079,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
     
 	) data
 join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
-where (data.MONTHNUM >= ".$sqlbeginmonth." and data.CALENDARYEAR >='".$sqlbeginyear."') and 
-	(data.MONTHNUM <= ".$sqlendmonth." and data.CALENDARYEAR <='".$sqlendyear."') 
+where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.")
 order by data.CALENDARYEAR, data.MONTHNUM
 
 ";
@@ -2132,8 +2135,7 @@ $sql1="select sum(data.recordables) as recordables, h.hours, data.location, data
     
 	) data
 join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
-where (data.MONTHNUM >= ".$sqlbeginmonth." and data.CALENDARYEAR >='".$sqlbeginyear."') and 
-	(data.MONTHNUM <= ".$sqlendmonth." and data.CALENDARYEAR <='".$sqlendyear."') 
+where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.") 
 group by data.CALENDARYEAR,data.MONTHNUM,data.location
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
@@ -2186,8 +2188,7 @@ select distinct h.year as year
 	
 	) data
 join (SELECT sum(hours) as hours, month, year FROM ost_hours group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
-where (data.MONTHNUM >= ".$sqlbeginmonth." and data.CALENDARYEAR >='".$sqlbeginyear."') and 
-	(data.MONTHNUM <= ".$sqlendmonth." and data.CALENDARYEAR <='".$sqlendyear."') 
+where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.")
 group by data.CALENDARYEAR,data.MONTHNUM
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
@@ -2199,7 +2200,7 @@ $(function() {
             type: 'column'
         },
         title: {
-            text: 'Incident Rates (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)'
+            text: 'Incident Rates (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate)?>)'
         },
          // subtitle: {
              // text: 'Recordables'
@@ -2431,8 +2432,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
     
 	) data
 join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
-where (data.MONTHNUM >= ".$sqlbeginmonth." and data.CALENDARYEAR >='".$sqlbeginyear."') and 
-	(data.MONTHNUM <= ".$sqlendmonth." and data.CALENDARYEAR <='".$sqlendyear."') 
+where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.")
 order by data.CALENDARYEAR, data.MONTHNUM
 
 ";
@@ -2488,8 +2488,7 @@ $sql1="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,dat
     
 	) data
 join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
-where (data.MONTHNUM >= ".$sqlbeginmonth." and data.CALENDARYEAR >='".$sqlbeginyear."') and 
-	(data.MONTHNUM <= ".$sqlendmonth." and data.CALENDARYEAR <='".$sqlendyear."') 
+where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.")
 group by data.location,data.CALENDARYEAR,data.MONTHNUM
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
@@ -2542,8 +2541,7 @@ select distinct h.year as year
 	
 	) data
 join (SELECT sum(hours) as hours, month, year FROM ost_hours group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
-where (data.MONTHNUM >= ".$sqlbeginmonth." and data.CALENDARYEAR >='".$sqlbeginyear."') and 
-	(data.MONTHNUM <= ".$sqlendmonth." and data.CALENDARYEAR <='".$sqlendyear."') 
+where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.")
 group by data.CALENDARYEAR,data.MONTHNUM
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
