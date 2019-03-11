@@ -2019,8 +2019,8 @@ $(function() {
 ////////////////////////////////////////////////////////////////////  INCIDENTS  //////////////////////////////////////////////////////////////////// 
 <?php
 
-$sqlbeginperiod = $sqlbeginyear.ltrim($sqlbeginmonth, '0');
-$sqlendperiod = $sqlendyear.ltrim($sqlendmonth, '0');
+$sqlbeginperiod =  $sqlbeginyear.'/'.$sqlbeginmonth.'/01';
+$sqlendperiod = $sqlendyear.'/'.$sqlendmonth.'/01';
 
 $sql="select distinct d.name as location
 from 
@@ -2079,7 +2079,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
     
 	) data
 join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
-where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.")
+where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."' 
 order by data.CALENDARYEAR, data.MONTHNUM
 
 ";
@@ -2135,7 +2135,7 @@ $sql1="select sum(data.recordables) as recordables, h.hours, data.location, data
     
 	) data
 join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
-where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.") 
+where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."'  
 group by data.CALENDARYEAR,data.MONTHNUM,data.location
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
@@ -2188,7 +2188,7 @@ select distinct h.year as year
 	
 	) data
 join (SELECT sum(hours) as hours, month, year FROM ost_hours group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
-where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.")
+where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."' 
 group by data.CALENDARYEAR,data.MONTHNUM
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
@@ -2432,7 +2432,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
     
 	) data
 join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
-where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.")
+where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."' 
 order by data.CALENDARYEAR, data.MONTHNUM
 
 ";
@@ -2488,7 +2488,7 @@ $sql1="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,dat
     
 	) data
 join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
-where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.")
+where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."' 
 group by data.location,data.CALENDARYEAR,data.MONTHNUM
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
@@ -2541,7 +2541,7 @@ select distinct h.year as year
 	
 	) data
 join (SELECT sum(hours) as hours, month, year FROM ost_hours group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
-where (concat(data.CALENDARYEAR,data.MONTHNUM) >= ".$sqlbeginperiod." and concat(data.CALENDARYEAR,data.MONTHNUM) <= ".$sqlendperiod.")
+where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."' 
 group by data.CALENDARYEAR,data.MONTHNUM
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
