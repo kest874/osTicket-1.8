@@ -296,6 +296,7 @@ $(window).resize(function() {
    
 
 <div style="margin-top: 15px;" class="hidden" id="submitrow">
+	<button type=submit onclick="return false;" style="display:none;"></button>
     <input class="btn btn-primary btn-sm" type="submit" name="submit" class="save pending" value="<?php echo _P('action-button', 'Submit');?>"
     onclick="javascript:
         $('#submitrow').hide();
@@ -350,13 +351,7 @@ $(document).ready(function(){
                    showTodayButton: true
                    
                });
-    
-	$(window).keydown(function(event){
-		if(event.keyCode == 13) {
-			event.preventDefault();
-		return false;
-		}
-	});
+     
        
 });
 </script>
