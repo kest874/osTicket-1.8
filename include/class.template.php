@@ -134,6 +134,14 @@ class EmailTemplateGroup {
                 'task', 'recipient', 'message',
             ),
         ),
+        'task.alert.close' => array(
+            'group'=>'c.task',
+            'name'=>/* @trans */ 'Closed Task Alert',
+            'desc'=>/* @trans */ 'Alert sent to agents, if enabled, on closed task.',
+            'context' => array(
+                'task', 'recipient', 'message',
+            ),
+        ),
         'task.activity.notice' => array(
             'group'=>'c.task',
             'name'=>/* @trans */ 'New Activity Notice',
@@ -174,6 +182,7 @@ class EmailTemplateGroup {
                 'task', 'recipient', 'comments',
             ),
         ),
+         
     );
     function __construct($id){
         $this->id=0;
@@ -302,6 +311,9 @@ class EmailTemplateGroup {
     /* Tasks templates */
     function getNewTaskAlertMsgTemplate() {
         return $this->getMsgTemplate('task.alert');
+    }
+     function getTaskAlertCloseMsgTemplate() {
+        return $this->getMsgTemplate('task.alert.close');
     }
     function  getTaskActivityAlertMsgTemplate() {
         return $this->getMsgTemplate('task.activity.alert');

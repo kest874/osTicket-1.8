@@ -546,7 +546,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
     }
 
     function setStatus($status, $comments='', &$errors=array()) {
-        global $thisstaff;
+        global $thisstaff,$cfg;
 
         $ecb = null;
         switch($status) {
@@ -578,6 +578,16 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             $ecb = function($t) {
                 $t->logEvent('closed');
             };
+         
+					$this->AlertClose(array(
+                        'note' => $comments,
+                        'title' => sprintf(
+                            __('Status changed to %s'),
+                            $this->getStatus())
+                        ),
+                    $errors,
+                    $thisstaff);
+		
             break;
         default:
             return false;
@@ -589,6 +599,8 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
         // Log events via callback
         if ($ecb) $ecb($this);
 
+
+		
         if ($comments) {
             $errors = array();
             $this->postNote(array(
@@ -601,9 +613,43 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
                     $thisstaff);
         }
 
-        return true;
+        return true; 
     }
 
+	
+	function  AlertClose($entry, $vars = array()) {
+        global $cfg;
+
+        if (!($dept=$this->getDept())
+            || !($tpl=$dept->getTemplate())
+            || !($msg=$tpl->getTaskAlertCloseMsgTemplate())
+            || !($email=$dept->getEmail())
+        ) {
+            return;
+        }
+
+        $vars = array_merge($vars, array(
+            'message' => (string) $entry,
+            'poster' => $poster ?: _S('A collaborator'),
+            )
+        );
+
+        $msg = $this->replaceVars($msg->asArray(), $vars);
+
+        //$attachments = $cfg->emailAttachments()?$entry->getAttachments():array();
+        $options = array('thread' => $entry);
+
+        //foreach ($recipients as $recipient) {
+            // Skip folks who have already been included on this part of
+            // the conversation
+           // if (isset($skip[$recipient->getUserId()]))
+            //    continue;
+            $notice = $this->replaceVars($msg, array('recipient' => $recipient));
+            $email->sendAlert($cfg->alertGroupEmail(), $notice['subj'], $notice['body'], null,
+                $options);
+        //}
+    }
+	
     function to_json() {
 
         $info = array(
@@ -980,6 +1026,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             );
         }
 
+			
         return $response;
     }
 
@@ -1018,6 +1065,32 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
 
     function getVar($tag) {
         global $cfg;
+		
+		$sqlt="SELECT t.number, td.title as subject, te.body as countermeasure FROM ost_task t 
+					join  ost_task__cdata td on t.id = td.task_id  
+					join ost_thread th on th.object_id = t.id and th.object_type = 'A'
+					join ost_thread_entry te on te.thread_id = th.id
+					where t.id = ".$this->id." limit 1";
+					
+		$tresults = db_query($sqlt);		
+		
+		$sqlt= "SELECT t.number, d.name as location, right(tc.shiftoccuredon,3) as shiftoccuredon, ht.topic,
+				    case when t.isrecordable = 1 then 'Yes' else 'No' End as isrecordable,tc.locationofincident,
+					DATE_FORMAT(tc.dateofincident, '%m-%d-%Y') as dateofincident,tc.subject, tc.whatwereyoudoing, tc.whathappened,fevc.value as chemicalname, fevca.value as chemicalamount,
+					fevr.value as rootcause,tc.supervisor
+					FROM ost_ticket t 
+					join ost_department d on t.dept_id = d.id 
+					join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id
+					join ost_help_topic ht on t.topic_id = ht.topic_id
+					join ost_form_entry fer on t.ticket_id = fer.object_id and fer.form_id= 11 
+					join ost_form_entry_values fevr on fevr.field_id = 272 and fevr.entry_id = fer.id
+					left join ost_form_entry fec on t.ticket_id = fec.object_id and fec.form_id= 9
+					left join ost_form_entry_values fevc on fevc.field_id = 218 and fevc.entry_id = fec.id
+					left join ost_form_entry feca on t.ticket_id = feca.object_id and feca.form_id= 9
+					left join ost_form_entry_values fevca on fevca.field_id = 219 and fevca.entry_id = feca.id
+					where t.ticket_id =".$this->object_id;
+					
+		 $results = db_query($sqlt); 
 
         if ($tag && is_callable(array($this, 'get'.ucfirst($tag))))
             return call_user_func(array($this, 'get'.ucfirst($tag)));
@@ -1031,6 +1104,55 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
                 return sprintf('%s/scp/tickets.php?id=%d#tasks',
                     $cfg->getBaseUrl(), $ticket->getId());
             }
+		
+		case 'subject':
+		foreach ($tresults as $tresult) { return $tresult['subject'];}
+		
+		case 'countermeasure':
+		foreach ($tresults as $tresult) { return $tresult['countermeasure'];}
+		
+		case 'ticket_number':
+		foreach ($results as $result) { return $result['number'];}
+		
+		case 'ticket_location':
+		foreach ($results as $result) { return $result['location'];}
+		
+		case 'ticket_dateofincident':
+		foreach ($results as $result) { return $result['dateofincident'];}
+		
+		case 'ticket_shiftoccuredon':
+		foreach ($results as $result) { return $result['shiftoccuredon'];}
+		
+		case 'ticket_topic':
+		foreach ($results as $result) { return $result['subject'];}
+		
+		case 'ticket_isrecordable':
+		foreach ($results as $result) { return $result['isrecordable'];}
+		
+		case 'ticket_locationofincident':
+		foreach ($results as $result) { return $result['locationofincident'];}
+		
+		case 'ticket_subject':
+		foreach ($results as $result) { return $result['subject'];}
+		
+		case 'ticket_whatwereyoudoing':
+		foreach ($results as $result) { return $result['whatwereyoudoing'];}
+		
+		case 'ticket_whathappened':
+		foreach ($results as $result) { return $result['whathappened'];}
+		
+		case 'ticket_chemicalname':
+		foreach ($results as $result) { return $result['chemicalname'];}
+		
+		case 'ticket_chemicalamount':
+		foreach ($results as $result) { return $result['chemicalamount'];}
+		
+		case 'ticket_rootcause':
+		foreach ($results as $result) { return $result['rootcause'];}
+		
+		case 'ticket_supervisor':	
+		foreach ($results as $result) { return $result['supervisor'];}
+		
         case 'staff_link':
             return sprintf('%s/scp/tasks.php?id=%d', $cfg->getBaseUrl(), $this->getId());
         case 'create_date':
@@ -1078,19 +1200,37 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             'staff' => array(
                 'class' => 'Staff', 'desc' => __('Assigned/closing agent'),
             ),
-            'subject' => 'Subject',
+            'subject' => __('Subject'),
+			'countermeasure' => __('Countermeasure'),
             
             'thread' => array(
                 'class' => 'TaskThread', 'desc' => __('Task Thread'),
             ),
             'staff_link' => __('Link to view the task'),
             'ticket_link' => __('Link to view the task inside the ticket'),
-            'last_update' => array(
+			
+			'ticket_number' => __('Ticket Number'), 
+			'ticket_location' => __('Ticket Facility'), 
+			'ticket_dateofincident' => __('Ticket Date of Incident'), 
+			'ticket_shiftoccuredon' => __('Ticket Shift Occoured On'), 
+			'ticket_topic' => __('Ticket topic'),
+			'ticket_isrecordable' => __('Ticket Recodable'), 
+			'ticket_locationofincident' => __('Ticket Location of Incident'), 
+			'ticket_subject' => __('Ticket Subject'), 
+			'ticket_whatwereyoudoing' => __('Ticket What Were You Doing'), 
+			'ticket_whathappened' => __('Ticket What Happened'), 
+			'ticket_chemicalname' => __('Ticket Chemincal Name'), 
+			'ticket_chemicalamount' => __('Ticket Chemincal Amount Spilled'),
+			'ticket_rootcause' => __('Ticket Root Cause'), 
+			'ticket_supervisor' => __('Ticket Supervisor'),            
+			
+			'last_update' => array(
                 'class' => 'FormattedDate', 'desc' => __('Time of last update'),
             ),
         );
 
         $extra = VariableReplacer::compileFormScope(TaskForm::getInstance());
+
         return $base + $extra;
     }
 
@@ -1169,7 +1309,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
         }
 
     }
-
+	
     /*
      * Notify collaborators on response or new message
      *

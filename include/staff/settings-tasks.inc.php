@@ -141,6 +141,45 @@ if(!($maxfileuploads=ini_get('max_file_uploads')))
                     <?php echo __('Department Members'); ?>
                 </td>
             </tr>
+            
+            
+            <tr><th><em><b><?php echo __('Close Task Alert'); ?></b>:
+                <i class="help-tip icon-question-sign" href="#task_alert_close"></i>
+                </em></th></tr>
+            <tr>
+                <td><em><b><?php echo __('Status'); ?>:</b></em> &nbsp;
+                    <input type="radio" name="task_alert_close_active"  value="1"
+                    <?php echo $config['task_alert_close_active'] ? 'checked="checked"' : ''; ?>
+                    /> <?php echo __('Enable'); ?>
+                    <input type="radio" name="task_alert_close_active"  value="0"
+                    <?php echo !$config['task_alert_close_active'] ? 'checked="checked"' : ''; ?> />
+                    <?php echo __('Disable'); ?>
+                    &nbsp;&nbsp;<font class="error">&nbsp;<?php echo $errors['task_alert_close_active']; ?></font></em>
+                 </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="checkbox" name="task_alert_close_admin" <?php
+                        echo $config['task_alert_close_admin'] ? 'checked="checked"' : ''; ?>>
+                    <?php echo __('Admin Email'); ?> <em>(<?php echo $cfg->getAdminEmail(); ?>)</em>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="checkbox" name="task_alert_close_dept_manager"
+                    <?php echo $config['task_alert_close_dept_manager'] ? 'checked="checked"' : ''; ?>>
+                    <?php echo __('Department Manager'); ?>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="checkbox" name="task_alert_close_dept_members"
+                    <?php echo $config['task_alert_close_dept_members'] ? 'checked="checked"' : ''; ?>>
+                    <?php echo __('Department Members'); ?>
+                </td>
+            </tr>
+            
+            
             <tr><th><em><b><?php echo __('New Activity Alert'); ?></b>:
                 <i class="help-tip icon-question-sign" href="#activity_alert"></i>
                 </em></th></tr>

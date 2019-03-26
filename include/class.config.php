@@ -982,7 +982,27 @@ class OsticketConfig extends Config {
     function alertDeptMembersONNewTask() {
         return ($this->get('task_alert_dept_members'));
     }
+    
+    function alertONCloseTask() {
+        return ($this->get('task_alert_close_active'));
+    }
 
+    function alertAdminONCloseTask() {
+        return ($this->get('task_alert_close_admin'));
+    }
+
+    function alertDeptManagerONCloseTask() {
+        return ($this->get('task_alert_close_dept_manager'));
+    }
+    
+    function alertDeptTeamLeaderONCloseTask() {
+        return ($this->get('task_alert_close_dept_teamleader'));
+    }
+
+    function alertDeptMembersONCloseTask() {
+        return ($this->get('task_alert_close_dept_members'));
+    }
+    
     function alertONTaskActivity() {
         return ($this->get('task_activity_alert_active'));
     }
@@ -1346,6 +1366,16 @@ class OsticketConfig extends Config {
                     && !isset($vars['task_alert_acct_manager']))) {
             $errors['task_alert_active'] = __('Select recipient(s)');
         }
+        
+        if ($vars['task_alert_close_active']
+                && (!isset($vars['task_alert_close_admin'])
+                    && !isset($vars['task_alert_close_dept_manager'])
+                    && !isset($vars['task_alert_close_dept_teamleader'])
+                    && !isset($vars['task_alert_close_dept_members'])
+                    && !isset($vars['task_alert_close_acct_manager']))) {
+            $errors['task_alert_close_active'] = __('Select recipient(s)');
+        }
+
 
         if ($vars['task_activity_alert_active']
                 && (!isset($vars['task_activity_alert_laststaff'])
@@ -1391,6 +1421,11 @@ class OsticketConfig extends Config {
             'task_alert_dept_manager'=>isset($vars['task_alert_dept_manager']) ? 1 : 0,
             'task_alert_dept_teamleader'=>isset($vars['task_alert_dept_teamleader']) ? 1 : 0,
             'task_alert_dept_members'=>isset($vars['task_alert_dept_members']) ? 1 : 0,
+            'task_alert_close_active'=>$vars['task_alert_close_active'],
+            'task_alert_close_admin'=>isset($vars['task_alert_close_admin']) ? 1 : 0,
+            'task_alert_close_dept_manager'=>isset($vars['task_alert_close_dept_manager']) ? 1 : 0,
+            'task_alert_close_dept_teamleader'=>isset($vars['task_alert_close_dept_teamleader']) ? 1 : 0,
+            'task_alert_close_dept_members'=>isset($vars['task_alert_close_dept_members']) ? 1 : 0,
             'task_activity_alert_active'=>$vars['task_activity_alert_active'],
             'task_activity_alert_laststaff'=>isset($vars['task_activity_alert_laststaff']) ? 1 : 0,
             'task_activity_alert_assigned'=>isset($vars['task_activity_alert_assigned']) ? 1 : 0,
