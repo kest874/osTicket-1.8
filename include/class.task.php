@@ -1066,11 +1066,11 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
     function getVar($tag) {
         global $cfg;
 		
-		$sqlt="SELECT t.number, td.title as subject, te.body as countermeasure FROM ost_task t 
+		$sqlt="SELECT t.number, td.title as subject, te.body FROM ost_task t 
 					join  ost_task__cdata td on t.id = td.task_id  
 					join ost_thread th on th.object_id = t.id and th.object_type = 'A'
 					join ost_thread_entry te on te.thread_id = th.id
-					where t.id = ".$this->id." limit 1";
+					where t.id = ".$this->id;
 					
 		$tresults = db_query($sqlt);		
 		
@@ -1109,8 +1109,11 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
 		foreach ($tresults as $tresult) { return $tresult['subject'];}
 		
 		case 'countermeasure':
-		foreach ($tresults as $tresult) { return $tresult['countermeasure'];}
-		
+		foreach ($tresults as $tresult) {
+			$cms .= $tresult['body'].'<br><br>';
+		}
+			return substr($cms, 0, -8);
+			
 		case 'ticket_number':
 		foreach ($results as $result) { return $result['number'];}
 		
