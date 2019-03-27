@@ -1149,7 +1149,7 @@ extends QueueColumnAnnotation {
        
         if ($taskcount) {
             return sprintf(
-                '<i class="Icon tasklist" data-toggle="tooltip" title="(%s) Open Tasks"></i>',
+                '<i class="fa fa-check-square-o" style="color: #AAA;" data-toggle="tooltip" title="(%s) Open Countermeasure(s)"></i> &nbsp;',
                 $taskcount
             );
     }}
