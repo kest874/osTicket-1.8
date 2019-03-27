@@ -98,6 +98,11 @@
             
         </div>
     </div>
+	    <div class="col-lg-6">
+        <div class="portlet" id="opencountermeasurepie" ><!-- /primary heading -->
+            
+        </div>
+    </div>
     
 </div>
 <div class="row">
@@ -255,6 +260,84 @@ var getColor = {
         },
         title: {
             text: 'Open Incidents by Location (<?php
+        foreach ($SETotal as $SETotal) { 
+			echo $SETotal["COUNT"];  } ?>)',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+        },
+        credits: false,
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> <b> ({point.y})</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                depth: 35,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}'
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Incidents',
+            data: [
+			     <?php
+        foreach ($SElocsdata as $SEloc) { ?>
+			{name:'<?php echo $SEloc["Location"]?>', y:<?php echo $SEloc["COUNT"] ?>,color: getColor['<?php echo $SEloc["Location"]?>']},
+        <?php } ?>
+           ]
+        }]
+    });
+});		
+
+<?php
+$sql="SELECT count(tk.id) as COUNT FROM ost_task tk
+where tk.flags = 1";
+ 
+  $SETotal = db_query($sql); 
+  
+$sql="SELECT count(tk.id) as COUNT, d.name as Location FROM ost_task tk 
+join ost_ticket t on t.ticket_id = tk.object_id
+join ost_department d on d.id = t.dept_id
+where tk.flags = 1
+group by d.name";
+ 
+  $SElocsdata = db_query($sql); 
+
+?>
+
+$(function() {
+var getColor = {
+'BRY':'#ff5252',
+'CAN':'rgb(241, 92, 128)',
+'IND':'#e040fb',
+'MEX':'#7c4dff',
+'NTC':'rgb(43, 144, 143)',
+'OH':'rgb(67, 67, 72)',
+'PAU':'#40c4ff',
+'RTA':'#18ffff',
+'RVC':'rgb(247, 163, 92)',
+'TNN1':'#69f0ae',
+'TNN2':'rgb(124, 181, 236)',
+'TNS':'#eeff41',
+'YTD':'#c30000'};
+    Highcharts.chart('opencountermeasurepie', {
+        chart: {
+            type: 'pie',
+            options3d: {
+                enabled: true,
+                alpha: 45,
+                beta: 0
+            }
+        },
+        title: {
+            text: 'Open Countermeasures by Location (<?php
         foreach ($SETotal as $SETotal) { 
 			echo $SETotal["COUNT"];  } ?>)',
             style: {
