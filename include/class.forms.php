@@ -4011,7 +4011,7 @@ class TextareaWidget extends Widget {
             $class[] = @$config['size'] ?: 'small';
 		
 	   			
-		if ($this->field->isRequiredForStaff() || $this->field->isRequiredForClose()) $class[] = 'requiredfield';
+		//if ($this->field->isRequiredForStaff() || $this->field->isRequiredForClose()) $class[] = 'requiredfield';
 		
             $class = sprintf('class="form-control %s"', implode(' ', $class));
             $this->value = Format::viewableImages($this->value);
