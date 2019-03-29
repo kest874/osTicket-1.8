@@ -62,6 +62,19 @@
    <div class="clearfix"></div> 
 </div> 
 <div class="row">
+    <div class="col-lg-6">
+        <div class="portlet" id="openincidentspie" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+	    <div class="col-lg-6">
+        <div class="portlet" id="opencountermeasurepie" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+    
+</div>
+<div class="row">
     <div class="col-lg-12">		
 	
 	    
@@ -93,13 +106,20 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-lg-6">
-        <div class="portlet" id="openincidentspie" ><!-- /primary heading -->
+    <div class="col-lg-12">
+        <div class="portlet" id="cmtrend" ><!-- /primary heading -->
             
         </div>
     </div>
-    
 </div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="portlet" id="cmavgdays" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-lg-6">
         <div class="portlet" id="IncidentsbyLocation" ><!-- /primary heading -->
@@ -292,6 +312,84 @@ var getColor = {
 });		
 
 <?php
+$sql="SELECT count(tk.id) as COUNT FROM ost_task tk
+where tk.flags = 1";
+ 
+  $SETotal = db_query($sql); 
+  
+$sql="SELECT count(tk.id) as COUNT, d.name as Location FROM ost_task tk 
+join ost_ticket t on t.ticket_id = tk.object_id
+join ost_department d on d.id = t.dept_id
+where tk.flags = 1
+group by d.name";
+ 
+  $SElocsdata = db_query($sql); 
+
+?>
+
+$(function() {
+var getColor = {
+'BRY':'#ff5252',
+'CAN':'rgb(241, 92, 128)',
+'IND':'#e040fb',
+'MEX':'#7c4dff',
+'NTC':'rgb(43, 144, 143)',
+'OH':'rgb(67, 67, 72)',
+'PAU':'#40c4ff',
+'RTA':'#18ffff',
+'RVC':'rgb(247, 163, 92)',
+'TNN1':'#69f0ae',
+'TNN2':'rgb(124, 181, 236)',
+'TNS':'#eeff41',
+'YTD':'#c30000'};
+    Highcharts.chart('opencountermeasurepie', {
+        chart: {
+            type: 'pie',
+            options3d: {
+                enabled: true,
+                alpha: 45,
+                beta: 0
+            }
+        },
+        title: {
+            text: 'Open Countermeasures by Location (<?php
+        foreach ($SETotal as $SETotal) { 
+			echo $SETotal["COUNT"];  } ?>)',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+        },
+        credits: false,
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> <b> ({point.y})</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                depth: 35,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}'
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Countermeasures',
+            data: [
+			     <?php
+        foreach ($SElocsdata as $SEloc) { ?>
+			{name:'<?php echo $SEloc["Location"]?>', y:<?php echo $SEloc["COUNT"] ?>,color: getColor['<?php echo $SEloc["Location"]?>']},
+        <?php } ?>
+           ]
+        }]
+    });
+});		
+
+<?php
         $sql="select CALENDARWEEK as WEEK, 
                 max(case when Status = 'OPEN' then VALUE else 0 end)as OPEN, 
                 max(case when Status = 'CLOSED' then VALUE else 0 end) as CLOSED
@@ -302,7 +400,7 @@ var getColor = {
                                 SELECT   COUNT(dateofincident) AS VALUE, 'OPEN' AS Status, FROM_DAYS(TO_DAYS(dateofincident) - MOD(TO_DAYS(dateofincident) 
                                                          - 2, 7)) AS CALENDARWEEK
                                 FROM         ost_ticket join ost_ticket__cdata on ost_ticket.ticket_id = ost_ticket__cdata.ticket_id
-                                WHERE     dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."'
+                                WHERE     date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."'
                                                                GROUP BY FROM_DAYS(TO_DAYS(dateofincident) - MOD(TO_DAYS(dateofincident) - 2, 7)) 
                                 
                                 Union all
@@ -310,7 +408,7 @@ var getColor = {
                                 SELECT   COUNT(closed) AS VALUE, 'CLOSED' AS Status, FROM_DAYS(TO_DAYS(closed) - MOD(TO_DAYS(closed) 
                                                          - 2, 7)) AS CALENDARWEEK
                                 FROM         ost_ticket
-                                WHERE     closed >= '".$sqlbegindate."' and closed <= '".$sqlenddate."'
+                                WHERE     date(closed) >= '".$sqlbegindate."' and date(closed) <= '".$sqlenddate."'
                                 GROUP BY FROM_DAYS(TO_DAYS(closed) - MOD(TO_DAYS(closed) - 2, 7))) data
                                 
                     )dt
@@ -385,6 +483,96 @@ $(function() {
 
 }); 
 
+
+
+<?php
+        $sql="select CALENDARWEEK as WEEK, 
+                max(case when Status = 'OPEN' then VALUE else 0 end)as OPEN, 
+                max(case when Status = 'CLOSED' then VALUE else 0 end) as CLOSED
+				from (                 
+								SELECT COUNT(tk.id) AS VALUE, 'OPEN' AS Status,FROM_DAYS(TO_DAYS(tk.created) - MOD(TO_DAYS(tk.created) - 2, 7)) AS CALENDARWEEK 
+				FROM ost_task tk  
+				
+				join ost_ticket t on  t.ticket_id = tk.object_id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id
+												WHERE     tc.dateofincident >= '".$sqlbegindate."' and tc.dateofincident <= '".$sqlenddate."'
+																			GROUP BY FROM_DAYS(TO_DAYS(tk.created) - MOD(TO_DAYS(tk.created) - 2, 7)) 
+				union all
+				SELECT COUNT(tk.id) AS VALUE, 'CLOSED' AS Status,FROM_DAYS(TO_DAYS(tk.closed) - MOD(TO_DAYS(tk.closed) - 2, 7)) AS CALENDARWEEK 
+				FROM ost_task tk
+				WHERE date(tk.closed) >= '".$sqlbegindate."' and date(tk.closed) <= '".$sqlenddate."'
+				GROUP BY FROM_DAYS(TO_DAYS(tk.closed) - MOD(TO_DAYS(tk.closed) - 2, 7)) 
+				)dt group by CALENDARWEEK;";
+        $results = db_query($sql); 
+        
+    ?> 
+    
+    
+$(function() {        
+     Highcharts.chart('cmtrend', {
+        chart: {
+            type: 'areaspline'
+        },
+        title: {
+            text: 'Countermeasures (OPENED|CLOSED) (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
+            style: {
+                color: '#797979',
+                fontSize: '14px',
+                fontWeight: '600',
+                }
+        },
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            x: 0,
+            y: 0,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false
+        },
+
+        xAxis: {
+            categories: [ <?php foreach ($results as $result) {echo "'".$result['WEEK']."',";}?>
+                
+            ],
+            
+        },
+        yAxis: {
+            title: {
+                text: 'Number of Countermeasures'
+            },
+            
+                    },
+        tooltip: {
+            shared: true,
+            valueSuffix: ' Countermeasures'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            areaspline: {
+                fillOpacity: 0.5
+            }
+        },
+        series: [
+        {
+            type: 'column',
+            name: 'CLOSED',
+            data: [<?php foreach ($results as $result) { echo $result['CLOSED'].',';}?>]
+        }, {
+            type: 'spline',
+            name: 'OPENED',
+            data: [<?php foreach ($results as $result) { echo $result['OPEN'].',';}?>],
+            color: '#e3c436'
+            
+        }]
+
+    });
+
+}); 
+
+
 <?php
         $sql="select avg(daysopen) as DaysOpen, WEEK from 
 (
@@ -394,7 +582,7 @@ SELECT   dateofincident as open,
 		FROM_DAYS(TO_DAYS(IFNULL(closed,now())) - MOD(TO_DAYS(IFNULL(closed,now())) 
                                                          - 2, 7)) AS WEEK
 FROM         ost_ticket join ost_ticket__cdata on ost_ticket.ticket_id = ost_ticket__cdata.ticket_id
-WHERE     ost_ticket.status_id = 3 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')
+WHERE     ost_ticket.status_id = 3 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')
 )data
 group by WEEK;";
         $results = db_query($sql); 
@@ -439,7 +627,7 @@ $(function() {
                   },
         tooltip: {
             shared: true,
-            valueSuffix: ' Incidents'
+            valueSuffix: ' Days'
         },
         credits: {
             enabled: false
@@ -460,40 +648,113 @@ $(function() {
 
 }); 
     
+<?php
+        $sql="select avg(daysopen) as DaysOpen, WEEK from 
+(
+SELECT   created as open,
+		IFNULL(closed,now()) as close,  
+        datediff(date(IFNULL(closed,now())),date(created)) as daysopen, 
+		FROM_DAYS(TO_DAYS(IFNULL(closed,now())) - MOD(TO_DAYS(IFNULL(closed,now())) 
+                                                         - 2, 7)) AS WEEK
+FROM        ost_task
+WHERE     flags = 0 and (closed >= '".$sqlbegindate."' and closed <= '".$sqlenddate."')
+)data
+group by WEEK;";
+        $results = db_query($sql); 
+        
+    ?> 
+    
+    
+$(function() {        
+     Highcharts.chart('cmavgdays', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Countermeasure Average Days Open (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
+            style: {
+                color: '#797979',
+                fontSize: '14px',
+                fontWeight: '600',
+                }
+        },
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            x: 0,
+            y: 0,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+            borderColor: '#CCC',
+            borderWidth: 1,
+            shadow: false
+        },
 
+        xAxis: {
+            categories: [ <?php foreach ($results as $result) {echo "'".$result['WEEK']."',";}?>
+                
+            ],
+            
+        },
+        yAxis: {
+            title: {
+                text: 'Average Number of  Days Open'
+            },
+                  },
+        tooltip: {
+            shared: true,
+            valueSuffix: ' Days'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            areaspline: {
+                fillOpacity: 0.5
+            }
+        },
+        series: [
+        {
+            type: 'column',
+            name: 'Days',
+            data: [<?php foreach ($results as $result) { echo $result['DaysOpen'].',';}?>]
+        }]
+
+    });
+
+}); 
 <?php
 
 $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by cat, location order by CALENDARYEAR, CALENDARWEEK";
 $periods = db_query($sql);
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK";
 $locs = db_query($sql);
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
 $locsdata = db_query($sql);
@@ -501,19 +762,19 @@ $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as CO
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by CALENDARWEEK,CALENDARYEAR )tot
 group by cat order by CALENDARWEEK";
@@ -643,33 +904,33 @@ $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by cat, location order by CALENDARYEAR, CALENDARWEEK";
 $periods = db_query($sql);
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK";
 $locs = db_query($sql);
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
 $locsdata = db_query($sql);
@@ -677,19 +938,19 @@ $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as CO
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isrecordable = 1  and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isrecordable = 1  and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')  order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK )tot
 group by cat order by CALENDARWEEK";
@@ -819,33 +1080,33 @@ $sql="select distinct concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by cat, location order by CALENDARYEAR, CALENDARWEEK";
 $periods = db_query($sql);
 $sql="select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK";
 $locs = db_query($sql);
 $sql="select sum(COUNT) as COUNT, concat(DATE_FORMAT(STR_TO_DATE(CALENDARWEEK, '%m'), '%b'),' ',CALENDARYEAR) as cat, location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK";
 $locsdata = db_query($sql);
@@ -853,19 +1114,19 @@ $sql = "select sum(count) as COUNT,CALENDARWEEK,cat from(select sum(COUNT) as CO
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a
 union all 
 select 0 as COUNT,CALENDARWEEK,CALENDARYEAR, location from (select distinct CALENDARWEEK,CALENDARYEAR from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and t.isdart = 1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by CALENDARWEEK,CALENDARYEAR, location order by CALENDARYEAR, CALENDARWEEK)a join 
 (select distinct location from
 (select 1 as COUNT, CALENDARWEEK, CALENDARYEAR, location from (
 select d.name as location ,month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARWEEK,YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR
 from
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1  and t.isdart = 1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') order by CALENDARYEAR, CALENDARWEEK)a)b
 group by location order by location, CALENDARYEAR, CALENDARWEEK) b on 1= 1)b
 group by cat, location order by location, CALENDARYEAR, CALENDARWEEK)tot
 group by cat order by CALENDARWEEK";
@@ -1005,7 +1266,7 @@ $(function () {
     
     $sql="select sum(count) as COUNT, location, topic from (SELECT count(t.ticket_id) as COUNT, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
-    join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') group by d.name, ht.topic 
+    join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') group by d.name, ht.topic 
      
      union all 
      
@@ -1122,7 +1383,7 @@ Highcharts.chart('IncidentLocationbyType', {
     
     $sql="select sum(count) as COUNT, location, topic from (SELECT count(t.ticket_id) as COUNT, d.name as location, ht.topic   
     FROM ost_ticket t join ost_department d on t.dept_id = d.id join ost_help_topic ht on ht.topic_id = t.topic_id
-	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."') 
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."') 
     group by d.name, ht.topic 
      
      union all 
@@ -1242,7 +1503,7 @@ $sql="select sum(COUNT) as COUNT, injurytype, location from
 	(select count(value) as COUNT, value as injurytype, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')) and fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')) and fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
 	select 0 as COUNT, injurytype, location  from 
@@ -1367,7 +1628,7 @@ $sql="select sum(COUNT) as COUNT, injurytype, location from
 	(select count(value) as COUNT, value as injurytype, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')) and 
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')) and 
 	fev.field_id = 149 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
@@ -1487,7 +1748,7 @@ $sql="select sum(COUNT) as COUNT, bodypart, location from
 	(select count(value) as COUNT, value as bodypart, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')) and  fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')) and  fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
 	select 0 as COUNT, bodypart, location  from 
@@ -1612,7 +1873,7 @@ $sql="select sum(COUNT) as COUNT, bodypart, location from
 	(select count(value) as COUNT, value as bodypart, name as location from (
 	SELECT left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as value, d.name
 	FROM ost_form_entry_values fev  join ost_form_entry fe on fe.id = fev.entry_id join ost_ticket t on fe.object_id = t.ticket_id join ost_department d on t.dept_id = d.id
-	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (dateofincident >= '".$sqlbegindate."' and dateofincident <= '".$sqlenddate."')) and fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
+	join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id where (length(tc.dateofincident)>1 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')) and fev.field_id = 148 and fev.value is not null and length(fev.value) > 7 )a
 	group by location, value 
 	union
 	select 0 as COUNT, bodypart, location  from 
