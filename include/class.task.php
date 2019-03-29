@@ -1066,6 +1066,8 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
     function getVar($tag) {
         global $cfg;
 		
+		TicketForm::ensureDynamicDataView();
+		
 		$sqlt="SELECT t.number, td.title as subject, te.body FROM ost_task t 
 					join  ost_task__cdata td on t.id = td.task_id  
 					join ost_thread th on th.object_id = t.id and th.object_type = 'A'
