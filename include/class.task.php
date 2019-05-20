@@ -64,7 +64,7 @@ class TaskModel extends VerySimpleModel {
                 ),
                 'null' => true,
             ),
-        ),
+		),
     );
 
     const PERM_CREATE   = 'task.create';

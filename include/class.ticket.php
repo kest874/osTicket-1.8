@@ -597,6 +597,36 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
     }
     function getLastMsgDate() {
         return $this->getLastMessageDate();
+    }    
+    function getDaysOpen() {
+        
+	$sql="SELECT dateofincident FROM ost_ticket__cdata where ticket_id =".$this->ticket_id;
+ 
+	$dateofincident= db_query($sql); 
+	 
+	foreach ($dateofincident as $dateofincident) {
+			$opendate = $dateofincident["dateofincident"];
+	}
+	
+    $opened = new DateTime($opendate);
+    $closed = new DateTime($this->closed);
+    $current = new DateTime(date("D M d, Y G:i", time()));
+    
+   if ($this->status_id == 3 ){
+        $whichdate = $closed;
+    } else {
+        $whichdate = $current;
+    }
+
+    $interval = $opened->diff($whichdate);
+        
+    $days = $interval->format('%r%a'); 
+    
+    if ($days ==0) $days = '-';
+    
+     return  $days;
+        
+       
     }
     function getLastResponseDate() {
         return $this->thread->lastresponse;
@@ -1645,6 +1675,9 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         $base = array(
             'number' => new TextboxField(array(
                 'label' => __('Ticket Number')
+            )),
+            'daysopen' => new DaysOpenField(array(
+                'label' => __('Days Open')
             )),
             'created' => new DatetimeField(array(
                 'label' => __('Create Date'),
