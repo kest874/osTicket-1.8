@@ -599,7 +599,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         return $this->getLastMessageDate();
     }    
     function getDaysOpen() {
-        
+    TicketForm::ensureDynamicDataView();
 	$sql="SELECT dateofincident FROM ost_ticket__cdata where ticket_id =".$this->ticket_id;
  
 	$dateofincident= db_query($sql); 
