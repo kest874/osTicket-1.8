@@ -3064,7 +3064,7 @@ class DepartmentField extends ChoiceField {
         $choices = array();
         if (($depts = Dept::getDepartments()))
             foreach ($depts as $id => $name)
-                if (strlen($name) > 5)
+                //if (strlen($name) > 5)
                 $choices[$id] = $name;
 
         return $choices;
@@ -5561,10 +5561,10 @@ class TransferForm extends Form {
         $fields = array(
             'dept' => new DepartmentField(array(
                     'id'=>1,
-                    'label' => __('Team'),
+                    'label' => __('Division'),
                     'flags' => hexdec(0X450F3),
                     'required' => true,
-                    'validator-error' => __('Team selection is required'),
+                    'validator-error' => __('Division selection is required'),
                     )
                 ),
             'comments' => new TextareaField(array(
@@ -5575,7 +5575,7 @@ class TransferForm extends Form {
                     'configuration' => array(
                         'html' => true,
                         'size' => 'small',
-                        'placeholder' => __('Optional reason for the transfer'),
+                        'placeholder' => __('Optional reason for the change'),
                         ),
                     )
                 ),

@@ -145,8 +145,8 @@ background: "rgba(0, 0, 0, 0.2)"
                 <?php
                      if ($role->hasPerm(Ticket::PERM_EDIT)) { ?>
                         <a class="dropdown-item ticket-action" href="#tickets/<?php
-                        echo $ticket->getId(); ?>/change-user"><i class="fa fa-user"></i> <?php
-                        echo __('Change Owner'); ?></a>
+                        echo $ticket->getId(); ?>/transfer"><i class="fa fa-map-marker"></i> <?php
+                        echo __('Change Division'); ?></a>
                     <?php
                      }
                      if($ticket->isOpen() && ($dept && $dept->isManager($thisstaff))) {
