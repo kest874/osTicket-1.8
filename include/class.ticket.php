@@ -1786,8 +1786,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
     function transfer(TransferForm $form, &$errors, $alert=true) {
         global $thisstaff, $cfg;
         // Check if staff can do the transfer
-        if (!$this->checkStaffPerm($thisstaff, Ticket::PERM_TRANSFER))
-            return false;
+       
         $cdept = $this->getDept(); // Current department
         $dept = $form->getDept(); // Target department
         if (!$dept || !($dept instanceof Dept))
@@ -1799,13 +1798,13 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
             $this->dept_id = $dept->getId();
             // Make sure the new department allows assignment to the
             // currently assigned agent (if any)
-            if ($this->isAssigned()
-                && ($staff=$this->getStaff())
-                && $dept->assignMembersOnly()
-                && !$dept->isMember($staff)
-            ) {
-                $this->staff_id = 0;
-            }
+            // if ($this->isAssigned()
+                // && ($staff=$this->getStaff())
+                // && $dept->assignMembersOnly()
+                // && !$dept->isMember($staff)
+            // ) {
+                // $this->staff_id = 0;
+            // }
         }
         if ($errors || !$this->save(true))
             return false;

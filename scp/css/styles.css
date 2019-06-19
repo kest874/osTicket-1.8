@@ -2665,6 +2665,7 @@ div#requiredfield.has-danger > input {
 
 .select2-container--default .select2-selection--single .select2-selection__rendered {
     background-color: #f1f1f1 !important;
+	border-radius: .2rem;
 }
 #requiredfield .select2-selection__rendered{
     background-color: #ffffcc !important;
