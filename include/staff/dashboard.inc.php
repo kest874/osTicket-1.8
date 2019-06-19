@@ -221,6 +221,7 @@
 <?php
 
 $sitecolor = array(
+"AST"=>"#52e462",
 "BRY"=>"#ff5252",
 "CAN"=>"rgb(241, 92, 128)",
 "IND"=>"#e040fb",
@@ -251,6 +252,7 @@ group by d.name";
  
 $(function() {
 var getColor = {
+'AST':'	#52e462',
 'BRY':'#ff5252',
 'CAN':'rgb(241, 92, 128)',
 'IND':'#e040fb',
@@ -329,6 +331,7 @@ group by d.name";
 
 $(function() {
 var getColor = {
+'AST':'	#52e462',
 'BRY':'#ff5252',
 'CAN':'rgb(241, 92, 128)',
 'IND':'#e040fb',
