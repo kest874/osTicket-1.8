@@ -303,14 +303,14 @@ class TicketsAjaxAPI extends AjaxController {
         function transfer($tid) {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid)))
-            Http::response(404, __('No such ticket'));
+            Http::response(404, __('No such incident'));
         if (!$ticket->checkStaffPerm($thisstaff, Ticket::PERM_TRANSFER))
             Http::response(403, __('Permission denied'));
         $errors = array();
         $info = array(
-                ':title' => sprintf(__('Ticket #%s: %s'),
+                ':title' => sprintf(__('Incident #%s: %s'),
                     $ticket->getNumber(),
-                    __('Transfer Ownership')),
+                    __('Change Division')),
                 ':action' => sprintf('#tickets/%d/transfer',
                     $ticket->getId())
                 );
@@ -320,7 +320,7 @@ class TicketsAjaxAPI extends AjaxController {
                 $_SESSION['::sysmsgs']['msg'] = sprintf(
                         __('%s successfully'),
                         sprintf(
-                            __('%s transferred to %s department'),
+                            __('%s changed to %s'),
                             __('Ticket'),
                             $ticket->getDept()
                             )
@@ -328,7 +328,7 @@ class TicketsAjaxAPI extends AjaxController {
                 Http::response(201, $ticket->getId());
             }
             $form->addErrors($errors);
-            $info['error'] = $errors['err'] ?: __('Unable to transfer ticket');
+            $info['error'] = $errors['err'] ?: __('Unable to change incident');
         }
         $info['dept_id'] = $info['dept_id'] ?: $ticket->getDeptId();
         include STAFFINC_DIR . 'templates/transfer.tmpl.php';

@@ -69,8 +69,8 @@ if ($agent->hasPerm(Ticket::PERM_ASSIGN, false)) {?>
 if ($agent->hasPerm(Ticket::PERM_TRANSFER, false)) {?>
 
  <a class="btn btn-light tickets-action" id="tickets-transfer" data-placement="bottom"
-    data-toggle="tooltip" title="<?php echo __('Transfer'); ?>"
-    href="#tickets/mass/transfer"><i class="fa fa-share-square"></i></a>
+    data-toggle="tooltip" title="<?php echo __('Change Division'); ?>"
+    href="#tickets/mass/transfer"><i class="fa fa-map-marker"></i></a>
 
 <?php
 }
