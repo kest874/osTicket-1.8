@@ -713,13 +713,14 @@ if (!$sselected) {$sselected = 'Status';}
     <?php
     
     $sitecolor = array(
+				"AST"=>"#52e462",
                 "BRY"=>"#ff5252",
                 "CAN"=>"rgb(241, 92, 128)",
                 "IND"=>"#e040fb",
                 "MEX"=>"#7c4dff",
                 "NTC"=>"rgb(43, 144, 143)",
                 "OH"=>"rgb(67, 67, 72)",
-                "PAU"=>"#40c4ff",
+                "PAU"=>"#cddc39",
                 "RTA"=>"#18ffff",
                 "RVC"=>"rgb(247, 163, 92)",
                 "TNN1"=>"#69f0ae",

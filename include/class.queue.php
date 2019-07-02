@@ -1473,7 +1473,7 @@ extends ChoiceField {
          'Flat Green', 'Flat Green Alt', ' Flat Green Alt 2', 'Flat Green Alt 3',
          'Flat Yellow', 'Flat Yellow Alt', 'Flat Orange', 'Flat Orange Alt',
          ' Flat Orange Alt 1', 'Flat Grey', 'Flat Brown',
-         'Graph Green', 'Graph Yellow', 'Graph Red',
+         'Graph Green', 'Graph Yellow', 'Graph Red','Pale Green','Bright Green'
             ),
         'background-color' => 'ColorChoiceField',
         'color' => 'ColorChoiceField',
