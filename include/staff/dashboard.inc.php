@@ -228,7 +228,7 @@ $sitecolor = array(
 "MEX"=>"#7c4dff",
 "NTC"=>"rgb(43, 144, 143)",
 "OH"=>"rgb(67, 67, 72)",
-"PAU"=>"#40c4ff",
+"PAU"=>"#cddc39",
 "RTA"=>"#18ffff",
 "RVC"=>"rgb(247, 163, 92)",
 "TNN1"=>"#69f0ae",
@@ -259,7 +259,7 @@ var getColor = {
 'MEX':'#7c4dff',
 'NTC':'rgb(43, 144, 143)',
 'OH':'rgb(67, 67, 72)',
-'PAU':'#40c4ff',
+'PAU':'#cddc39',
 'RTA':'#18ffff',
 'RVC':'rgb(247, 163, 92)',
 'TNN1':'#69f0ae',
@@ -338,7 +338,7 @@ var getColor = {
 'MEX':'#7c4dff',
 'NTC':'rgb(43, 144, 143)',
 'OH':'rgb(67, 67, 72)',
-'PAU':'#40c4ff',
+'PAU':'#cddc39',
 'RTA':'#18ffff',
 'RVC':'rgb(247, 163, 92)',
 'TNN1':'#69f0ae',
@@ -1990,7 +1990,7 @@ when location = 'IND' then '#e040fb'
 when location = 'MEX' then '#7c4dff'
 when location = 'NTC' then 'rgb(43 144 143)'
 when location = 'OH' then 'rgb(67 67 72)'
-when location = 'PAU' then '#40c4ff'
+when location = 'PAU' then '#cddc39'
 when location = 'RTA' then '#18ffff'
 when location = 'RVC' then 'rgb(247 163 92)'
 when location = 'TNN1' then '#69f0ae'
@@ -2090,7 +2090,7 @@ $(function() {
            name: 'OH',
            color: 'rgb(67, 67, 72)'},{type: 'area',
            name: 'PAU',
-           color: '#40c4ff'},{type: 'area',
+           color: '#cddc39'},{type: 'area',
            name: 'RTA',
            color: '#18ffff'},{type: 'area',
            name: 'RVC',
@@ -2157,7 +2157,7 @@ when location = 'IND' then '#e040fb'
 when location = 'MEX' then '#7c4dff'
 when location = 'NTC' then 'rgb(43 144 143)'
 when location = 'OH' then 'rgb(67 67 72)'
-when location = 'PAU' then '#40c4ff'
+when location = 'PAU' then '#cddc39'
 when location = 'RTA' then '#18ffff'
 when location = 'RVC' then 'rgb(247 163 92)'
 when location = 'TNN1' then '#69f0ae'
@@ -2272,7 +2272,7 @@ $(function() {
            name: 'OH',
            color: 'rgb(67, 67, 72)'},{type: 'area',
            name: 'PAU',
-           color: '#40c4ff'},{type: 'area',
+           color: '#cddc39'},{type: 'area',
            name: 'RTA',
            color: '#18ffff'},{type: 'area',
            name: 'RVC',

@@ -926,7 +926,11 @@ code, pre {
   background-color: #f3e7aa !important; } 
 .bg-graphred {
   background-color: #f0a7a5 !important; }
-
+.bg-palegreen {
+  background-color: ##cddc39 !important; }
+.bg-brightgreen {
+  background-color:#52e462 !important; }
+  
 /* Text Colors */
 .text-graphgreen {
      color: #cbebcc !important;
