@@ -1,6 +1,7 @@
 <?php
 if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
-
+$DeptId = Dept::getParentId($thisstaff->dept_id);?>
+<?php $TeamId = $thisstaff->dept_id;
 ?>
 
 <div class="subnav">
