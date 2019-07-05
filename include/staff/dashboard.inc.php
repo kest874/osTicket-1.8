@@ -185,10 +185,14 @@
             
         </div>
     </div>
-    
-    
 </div>
 <div class="row">
+    <div class="col-lg-12">
+        <div class="portlet" id="associatetrend" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+</div><div class="row">
     <div class="col-lg-12">
         <div class="portlet" id="associateincidents" ><!-- /primary heading -->
             
@@ -2971,4 +2975,196 @@ $(function() {
     });
 }); 
 
+
+<?php
+
+    $sql="select distinct location from (select location,count(days) as count, days
+				from
+				(
+				select location,
+				case 
+				when days <= 90 then 'Under 3 Months'
+				when days between 90 and 120 then '3 to 6 Months'
+				when days between 120 and 365 then '6 Months to 1 Year'
+				when days between 365 and 1095 then '1 Year to 3 Years'
+				when days between 1095 and 1825 then '3 Years to 5 Years'
+				when days >= 1826 then '5 Years Plus'
+				end
+				as days
+
+				from
+				(
+					SELECT d.name as location,date(tcd.dateofincident) as incidentdate, date(tcd.hiredate)as hiredate, datediff(date(tcd.dateofincident), date(tcd.hiredate)) as days
+					FROM osticket_saftest.ost_ticket__cdata tcd 
+					join ost_ticket t on tcd.ticket_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					where tcd.hiredate is not null
+				)
+				a
+				)b
+
+				group by days, location
+
+				Union all
+
+				select d.name as locaiton, count, days from 
+				(
+				select 0 as count, 'Under 3 Months' as days
+				union
+				select 0 as count, '3 to 6 Months' as days
+				union
+				select 0 as count, '6 Months to 1 Year' as days
+				union
+				select 0 as count, '1 Year to 3 Years' as days
+				union
+				select 0 as count, '3 Years to 5 Years' as days
+				union
+				select 0 as count, '5 Years Plus' as days
+				)c
+				join ost_department d on 1=1)d";
+        
+    $locs = db_query($sql);
+	
+    $sql="select location, sum(count) as count, days,
+				case 
+				when days = 'Under 3 Months' then 1
+				when days = '3 to 6 Months' then 2
+				when days = '6 Months to 1 Year' then 3
+				when days = '1 Year to 3 Years' then 4
+				when days = '3 Years to 5 Years' then 5
+				when days = '5 Years Plus' then 6
+				end
+				as sort
+from
+(
+select location,count(days) as count, days
+				from
+				(
+				select location,
+				case 
+				when days <= 90 then 'Under 3 Months'
+				when days between 90 and 120 then '3 to 6 Months'
+				when days between 120 and 365 then '6 Months to 1 Year'
+				when days between 365 and 1095 then '1 Year to 3 Years'
+				when days between 1095 and 1825 then '3 Years to 5 Years'
+				when days >= 1826 then '5 Years Plus'
+				end
+				as days
+
+				from
+				(
+					SELECT d.name as location,date(tcd.dateofincident) as incidentdate, date(tcd.hiredate)as hiredate, datediff(date(tcd.dateofincident), date(tcd.hiredate)) as days
+					FROM osticket_saftest.ost_ticket__cdata tcd 
+					join ost_ticket t on tcd.ticket_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					where tcd.hiredate is not null and date(tcd.dateofincident) >= '".$sqlbeginperiod."' and date(tcd.dateofincident) <= '".$sqlendperiod."'
+				)
+				a
+				)b
+
+				group by days, location
+
+				Union all
+
+				select d.name as locaiton, count, days from 
+				(
+				select 0 as count, 'Under 3 Months' as days
+				union
+				select 0 as count, '3 to 6 Months' as days
+				union
+				select 0 as count, '6 Months to 1 Year' as days
+				union
+				select 0 as count, '1 Year to 3 Years' as days
+				union
+				select 0 as count, '3 Years to 5 Years' as days
+				union
+				select 0 as count, '5 Years Plus' as days
+				)c
+				join ost_department d on 1=1
+                )e
+		group by location, days
+        order by location, sort";
+        
+    $locsdata = db_query($sql);
+    
+    
+?>
+$(function () {
+Highcharts.chart('associatetrend', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: 'Associate Incidents (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
+        style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+    },
+    credits: false,
+    xAxis: {
+        categories: ['Under 3 Months','3 to 6 Months','6 Months to 1 Year','1 Year to 3 Years','3 Years to 5 Years','5 Years Plus']
+    },
+    yAxis: {
+        min: 0,
+        title: {
+            text: 'Total Incidents'
+        },
+        stackLabels: {
+            enabled: true,
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+    },
+    legend: {
+        align: 'center',
+        verticalAlign: 'bottom',
+        x: 0,
+        y: 0,
+        backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+        
+        shadow: false
+    },
+    tooltip: {
+        headerFormat: '<b>{point.x}</b><br/>',
+        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+    },
+    plotOptions: {
+        column: {
+                dataLabels: {
+                enabled: true,
+                formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+            }
+        }
+    },
+    series: [<?php
+        foreach ($locs as $loc) { 
+        
+        $key = $loc["location"];
+        $color = $sitecolor[$key];
+        
+        ?>
+        
+        {
+            name: '<?php echo $loc["location"]?>',
+            color: '<?php echo $color; ?>',
+            data: [<?php foreach ($locsdata as $locdata) {
+                if ($locdata["location"] == $loc["location"]) echo $locdata["count"].',';
+            }?>]
+        }, 
+        
+        <?php } ?>]
+ });
+}); 
 </script>
