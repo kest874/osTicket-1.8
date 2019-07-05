@@ -155,7 +155,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                 <?php
                      if ($role->hasPerm(Ticket::PERM_EDIT)) { ?>
                         <a class="dropdown-item ticket-action" href="#tickets/<?php
-                        echo $ticket->getId(); ?>/change-user"><i class="icon-user"></i> <?php
+                        echo $ticket->getId(); ?>/transfer"><i class="fa fa-users"></i> <?php
                         echo __('Change Owner'); ?></a>
                     <?php
                      }
