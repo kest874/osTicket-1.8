@@ -20,6 +20,7 @@
   font-size: 12px;
   opacity: 0;
   filter: alpha(opacity=0);
+  margin-top: -75px;
 }
 .tooltip.in {
   opacity: 0.9;

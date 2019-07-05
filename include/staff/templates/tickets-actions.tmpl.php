@@ -1,7 +1,7 @@
 <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
 
    <a class="btn btn-icon waves-effect waves-light btn-success" id="tickets-helptopic" data-placement="bottom"
-    data-toggle="tooltip" title="<?php echo __('New Ticket'); ?>"
+    data-toggle="tooltip" title="<?php echo __('New Suggestion'); ?>"
    href="<?php echo ROOT_PATH ?>scp/tickets.php?a=open"><i class="fa fa-plus-square"></i></a>
 
 <?php

@@ -227,7 +227,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
         <a class="btn btn-light btn-sm waves-effect" href="#" data-stop="top" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Scroll Top'); ?>">
                     <i class="icon-chevron-up"></i></a>	
                     
-        <a class="btn btn-light btn-sm waves-effect" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Tickets'); ?>"
+        <a class="btn btn-light btn-sm waves-effect" data-placement="bottom"  data-toggle="tooltip" title="<?php echo __('Suggestions'); ?>"
                     href="tickets.php<?php ?>"><i class="icon-list-alt"></i></a>			
                 
     </div>
