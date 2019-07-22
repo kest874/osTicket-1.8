@@ -17,7 +17,7 @@ $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
     if ($count) {
         echo '<strong>'.$showing.'</strong>';
     } else {
-        echo sprintf(__('%s does not have any Countermeasures'), $ticket? 'This incident' :
+        echo sprintf(__('%s does not have any Tasks'), $ticket? 'This suggestion' :
                 'System');
     }
    ?>
@@ -25,7 +25,7 @@ $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
 <div class="pull-right">
    
         <a
-        class="btn btn-sm btn-success  ticket-task-action" title="Add New Countermeasure" 
+        class="btn btn-sm btn-success  ticket-task-action" title="Add New Task" 
         data-url="tickets.php?id=<?php echo $ticket->getId(); ?>#tasks"
         data-dialog-config='{"size":"large"}'
         href="#tickets/<?php
