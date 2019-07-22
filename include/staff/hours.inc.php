@@ -175,20 +175,15 @@ toastr.options = {
 		align:"center",
 		validate: {
 		    validator: function(value, item) {
-				
-			var matchedPosition = String(value).search(/[a-z]/i);
-			//alert(String(value).test(/^[a-zA-Z]*/));
-			if(matchedPosition != -1)
-    {
-            return false;
-    } else {
-			return true;
-			}
+				if (isNaN(value) || value <=0){
+					return false;
+				} else {
+					return true;
+				}
 			},
             message: function(value, item) {
 			toastr["error"]("Hours must be a number and greater than 0.")
             },
-            
         }
       },
       {
