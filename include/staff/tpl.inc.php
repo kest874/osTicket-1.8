@@ -1,6 +1,5 @@
 <?php
 $info=Format::htmlchars(($errors && $_POST)?$_POST:$_REQUEST);
-
 if (is_a($template, EmailTemplateGroup)) {
     // New template implementation
     $id = 0;
@@ -32,7 +31,6 @@ if (is_a($template, EmailTemplateGroup)) {
     $info=array_merge(array('subject'=>$template->getSubject(), 'body'=>$template->getBodyWithImages()),$info);
 }
 $tpl=$msgtemplates[$selected];
-
 ?>
 <form method="get" action="templates.php?">
 <h2>
@@ -108,10 +106,10 @@ if ($template instanceof EmailTemplate) {
     <div class="warning-banner"><?php echo sprintf(
         __('Some variables may not be a valid for this context. Please check for spelling errors and correct usage for %s.'), __('this template')); ?>
     <br/>
-    <code><?php //echo implode(', ', $invalid); ?></code>
-</div> -->
-<?php //}
-//} ?>
+    <code><?php echo implode(', ', $invalid); ?></code>
+</div>
+<?php }
+} ?>
 
 <div style="padding-bottom:3px;" class="faded"><strong><?php echo __('Email Subject and Body'); ?>:</strong></div>
 <div id="toolbar"></div>

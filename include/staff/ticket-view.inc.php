@@ -94,29 +94,9 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
             // Assign
             if ($ticket->isOpen() && $role->hasPerm(Ticket::PERM_ASSIGN)) {?>
 
-            <div class="btn-group btn-group-sm" role="group">
-            <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle waves-effect" 
-            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-            title="<?php echo $ticket->isAssigned() ? __('Assign') : __('Reassign'); ?>"><i class="icon-user"></i>
-            </button>
-                <div class="dropdown-menu " aria-labelledby="btnGroupDrop1">
-                    
-                <?php   
-                    // Agent can claim team assigned ticket
-                    if (!$ticket->getStaff()
-                            && (!$dept->assignMembersOnly()
-                                || $dept->isMember($thisstaff))
-                            ) { ?>
-                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/claim"><i class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
-                    <?php
-                    } ?>
-                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/agents"><i class="icon-user"></i> <?php echo __('Agent'); ?></a>
-                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/teams"><i class="icon-group"></i> <?php echo __('Team'); ?></a>
-            
-                </div>
-            </div>
-      <?php } ?>
-                
+				<a class="btn btn-light waves-effect ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/teams"  data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Assign'); ?>"><i class="icon-group"></i></a>
+			<?php } ?>
+        
             <a  class="btn btn-light waves-effect" id="savebutton" onclick="document.getElementById('save').submit();" 
             data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Save'); ?>"><i class="fa fa-floppy-o"></i></a>
          
@@ -530,41 +510,6 @@ $tcount = $ticket->getThreadEntries($types)->count();
                                     >&mdash; <?php echo __('Do Not Email Reply'); ?> &mdash;</option>
                                 </select>
                         </div>
-        
-                      <?php
-                        if(1) { //Make CC optional feature? NO, for now.
-                            ?>
-                        <div class="form-group">
-                            
-                                <label><strong><?php echo __('Collaborators'); ?>:</strong></label>
-                         
-                                <input type='checkbox' value='1' name="emailcollab"
-                                id="t<?php echo $ticket->getThreadId(); ?>-emailcollab"
-                                    <?php echo ((!$info['emailcollab'] && !$errors) || isset($info['emailcollab']))?'checked="checked"':''; ?>
-                                    style="display:<?php echo $ticket->getThread()->getNumCollaborators() ? 'inline-block': 'none'; ?>;"
-                                    >
-                                <?php
-                                $recipients = __('Add Recipients');
-                                if ($ticket->getThread()->getNumCollaborators())
-                                    $recipients = sprintf(__('Recipients (%d of %d)'),
-                                            $ticket->getThread()->getNumActiveCollaborators(),
-                                            $ticket->getThread()->getNumCollaborators());
-                                echo sprintf('<span><a class="collaborators preview"
-                                        href="#thread/%d/collaborators"><span id="t%d-recipients">%s</span></a></span>',
-                                        $ticket->getThreadId(),
-                                        $ticket->getThreadId(),
-                                        $recipients);
-                               ?>
-                        <?php
-                        } ?>
-                        </div>
-                        <?php
-                            if($errors['response']) {?>
-                          <div class="alert alert-danger">
-                            <?php echo $errors['response']; ;?>
-                          </div>
-                            <?php
-                            }?>
                            
                             <div  class="form-group">
                                
