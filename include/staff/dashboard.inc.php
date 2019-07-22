@@ -13,7 +13,7 @@
 
     <div class="float-left subnavtitle">
                           
-    <?php echo __('IT Dashboard');  
+    <?php echo __('Dashboard');  
 
 	$begindate = $_GET['begindate'];
 	$enddate = $_GET['enddate'];
@@ -39,7 +39,7 @@
         <label class="" for="begindate">Begining: </label>
         <div class="col-xs-9 input-group input-group-sm date" id="begindate" data-target-input="nearest">
                     <input type="text" name="begindate" value="<?php echo $begindate?>" class="form-control form-control-sm datetimepicker-input" data-target="begindate"/>
-                    <div class="input-group-addon" data-target="#begindate" data-toggle="datetimepicker">
+                    <div class="input-group-append" data-target="#begindate" data-toggle="datetimepicker">
                         <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
         <label class="" for="enddate">Ending: &nbsp;</label>
         <div class="input-group input-group-sm date" id="enddate" data-target-input="nearest">
                     <input type="text" name="enddate" value="<?php echo $enddate?>" class="form-control form-control-sm datetimepicker-input" data-target="enddate"/>
-                    <div class="input-group-addon" data-target="#enddate" data-toggle="datetimepicker">
+                    <div class="input-group-append" data-target="#enddate" data-toggle="datetimepicker">
                         <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                     </div>
 					</div>
@@ -2125,7 +2125,9 @@ end as topic
 		SELECT ht.topic, concat(left(left(right(a.value,length(a.value) - instr(a.value,':')),length(right(a.value,length(a.value) - instr(a.value,':')))),1),'. ',
 		 left(right(b.value,length(b.value) - instr(b.value,':')),length(right(b.value,length(b.value) - instr(b.value,':'))))) as value, d.name as location
 		 FROM ost_form_entry_values a join ost_form_entry_values b on a.entry_id = b.entry_id and a.field_id = 38 and b.field_id = 329 
-		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id
+		 join ost_form_entry e on a.entry_id = e.id join ost_ticket t on e.object_id = t.ticket_id join ost_help_topic ht on t.topic_id = ht.topic_id join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id
+		 
+		 where (STR_TO_DATE(tc.dateofincident, '%Y-%m-%d') >= '".$sqlbegindate."' and STR_TO_DATE(tc.dateofincident, '%Y-%m-%d') <= '".$sqlenddate."')
 	 
 		)a group by topic, lastname, location
         
@@ -2298,7 +2300,7 @@ $sqlendperiod = $sqlendyear.'/'.$sqlendmonth.'/01';
 
 $sql="select distinct d.name as location
 from 
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 where isrecordable = 1 or isdart = 1 order by d.name";
 $locs = db_query($sql);
@@ -2310,7 +2312,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
 	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR 
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 
 	where isrecordable = 1
@@ -2323,7 +2325,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
     (
     select distinct d.name as location
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isrecordable = 1 order by d.name
     )a
@@ -2332,7 +2334,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
     
     (select distinct h.year as year
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isrecordable = 1 order by d.name)yr on 1=1
 
@@ -2352,7 +2354,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
     
 	) data
-join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
+join ost_hours h on data.location = h.location and data.MONTHNUM = month(str_to_date(h.month,'%b')) and data.CALENDARYEAR =h.year
 where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."' 
 order by data.CALENDARYEAR, data.MONTHNUM
 
@@ -2366,7 +2368,7 @@ $sql1="select sum(data.recordables) as recordables, h.hours, data.location, data
 	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR 
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 
 	where isrecordable = 1 
@@ -2379,7 +2381,7 @@ $sql1="select sum(data.recordables) as recordables, h.hours, data.location, data
     (
     select distinct d.name as location
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isrecordable = 1 order by d.name
     )a
@@ -2388,7 +2390,7 @@ $sql1="select sum(data.recordables) as recordables, h.hours, data.location, data
     
     (select distinct h.year as year
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isrecordable = 1 order by d.name)yr on 1=1
 
@@ -2408,7 +2410,7 @@ $sql1="select sum(data.recordables) as recordables, h.hours, data.location, data
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
     
 	) data
-join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
+join ost_hours h on data.location = h.location and data.MONTHNUM = month(str_to_date(h.month,'%b')) and data.CALENDARYEAR =h.year
 where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."'  
 group by data.CALENDARYEAR,data.MONTHNUM,data.location
 order by data.CALENDARYEAR, data.MONTHNUM
@@ -2421,7 +2423,7 @@ $sql2="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data
 	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR 
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 
 	where isrecordable = 1 
@@ -2432,7 +2434,7 @@ $sql2="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data
 
 select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM, yr.year as CALENDARYEAR from (select distinct d.name as location
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isrecordable = 1 order by d.name)a
 	join 
@@ -2441,7 +2443,7 @@ select 0 as recordables,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONT
     
 select distinct h.year as year
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isrecordable = 1 order by d.name)yr on 1=1
     
@@ -2461,7 +2463,7 @@ select distinct h.year as year
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
 	
 	) data
-join (SELECT sum(hours) as hours, month, year FROM ost_hours group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
+join (SELECT sum(hours) as hours, month, year FROM ost_hours group by month, year)h on month(str_to_date(h.month,'%b')) = data.MONTHNUM and h.year = data.CALENDARYEAR
 where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."' 
 group by data.CALENDARYEAR,data.MONTHNUM
 order by data.CALENDARYEAR, data.MONTHNUM
@@ -2651,7 +2653,7 @@ $(function() {
 <?php
 $sql="select distinct d.name as location
 from 
-ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 where isrecordable = 1 or isdart = 1 order by d.name";
 $locs = db_query($sql);
@@ -2663,7 +2665,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
 	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR 
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 
 	where isdart = 1
@@ -2676,7 +2678,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
     (
     select distinct d.name as location
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isdart = 1 order by d.name
     )a
@@ -2685,7 +2687,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
     
     (select distinct h.year as year
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isdart = 1 order by d.name)yr on 1=1
 
@@ -2705,7 +2707,7 @@ $sql="select distinct concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period fro
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
     
 	) data
-join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
+join ost_hours h on data.location = h.location and data.MONTHNUM = month(str_to_date(h.month,'%b')) and data.CALENDARYEAR =h.year
 where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."' 
 order by data.CALENDARYEAR, data.MONTHNUM
 
@@ -2719,7 +2721,7 @@ $sql1="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,dat
 	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR 
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 
 	where isdart = 1
@@ -2732,7 +2734,7 @@ $sql1="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,dat
     (
     select distinct d.name as location
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isdart = 1 order by d.name
     )a
@@ -2741,7 +2743,7 @@ $sql1="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,dat
     
     (select distinct h.year as year
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isdart = 1 order by d.name)yr on 1=1
 
@@ -2761,7 +2763,7 @@ $sql1="select sum(data.dart) as dart, h.hours, data.location, data.MONTHNAME,dat
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
     
 	) data
-join ost_hours h on data.location = h.location and data.MONTHNUM = h.month and data.CALENDARYEAR =h.year
+join ost_hours h on data.location = h.location and data.MONTHNUM = month(str_to_date(h.month,'%b')) and data.CALENDARYEAR =h.year
 where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."' 
 group by data.location,data.CALENDARYEAR,data.MONTHNUM
 order by data.CALENDARYEAR, data.MONTHNUM
@@ -2774,7 +2776,7 @@ $sql2="select sum(data.dart) as dart, h.hours, data.MONTHNAME,data.MONTHNUM,data
 	month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS MONTHNUM,
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) AS CALENDARYEAR 
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 
 	where isdart = 1 
@@ -2785,7 +2787,7 @@ $sql2="select sum(data.dart) as dart, h.hours, data.MONTHNAME,data.MONTHNUM,data
 
 select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM, yr.year as CALENDARYEAR from (select distinct d.name as location
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isdart = 1 order by d.name)a
 	join 
@@ -2794,7 +2796,7 @@ select 0 as dart,0 as hours, a.location, mon.MONTHNAME, mon.MONTH as MONTHNUM, y
     
 select distinct h.year as year
 	from 
-	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.month and 
+	ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
 	YEAR(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = h.year
 	where isdart = 1 order by d.name)yr on 1=1
     
@@ -2814,7 +2816,7 @@ select distinct h.year as year
 	   UNION SELECT 12 AS MONTH, 'Dec' as MONTHNAME)mon on 1=1
 	
 	) data
-join (SELECT sum(hours) as hours, month, year FROM ost_hours group by month, year)h on h.month = data.MONTHNUM and h.year = data.CALENDARYEAR
+join (SELECT sum(hours) as hours, month, year FROM ost_hours group by month, year)h on month(str_to_date(h.month,'%b')) = data.MONTHNUM and h.year = data.CALENDARYEAR
 where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') >= '".$sqlbeginperiod."' and str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') <= '".$sqlendperiod."' 
 group by data.CALENDARYEAR,data.MONTHNUM
 order by data.CALENDARYEAR, data.MONTHNUM

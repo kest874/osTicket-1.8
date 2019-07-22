@@ -10,14 +10,12 @@ if(!defined('ADMINPAGE')) {
     <a class="waves-effect waves-primary" href="dashboard.php?begindate=<?php echo $begindate?>&enddate=<?php echo $enddate?>" ><i class=" ti-dashboard"></i> </span> Dashboard </a> 
        
     </li>
-    <li class=" has_sub ">
-        <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-user"></i>  <span class="menu-arrow"></span> Associates </a> 
-        <ul class="list-unstyled">
-            <li><a href="/scp/directory.php" title="" id="nav1">Associate Directory</a></li>
-        </ul>
+	
+	<li  class="has_sub">
+		<a class="waves-effect waves-primary" href="/scp/directory.php" ><i class=" ti-user"></i> </span> Associates</a> 
     </li>
-       <li  class="has_sub">
-    <a class="waves-effect waves-primary" href="/scp/tasks.php?tl=0&ts=0"><i class=" ti-list"></i> </span> Countermeasures <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $OpenTasks; ?></span></a> 
+    <li  class="has_sub">
+		<a class="waves-effect waves-primary" href="/scp/tasks.php?tl=0&ts=0"><i class=" ti-list"></i> </span> Countermeasures <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $OpenTasks; ?></span></a> 
        
     </li> 
 
@@ -155,15 +153,20 @@ if(!defined('ADMINPAGE')) {
         </ul>
     </li>
 <?php } ?>
-    <li class=" has_sub "><a class="waves-effect waves-primary" href="javascript:void(0);" ><i class=" ti-user"></i><span class="menu-arrow"></span> Associates </a> 
+   <!-- <li class=" has_sub "><a class="waves-effect waves-primary" href="javascript:void(0);" ><i class=" ti-user"></i><span class="menu-arrow"></span> Associates </a> 
         <ul class="list-unstyled">
             <li><a href="/scp/staff.php" title="" id="nav0">Associates</a></li>
             <li><a href="/scp/roles.php" title="" id="nav2">Roles</a></li>
             <li><a href="/scp/departments.php" title="" id="nav3">Teams</a></li>
             
         </ul>
+    </li>-->
+	<li  class="has_sub">
+    <a class="waves-effect waves-primary" href="/scp/staff.php" ><i class=" ti-user"></i> </span> Associates</a> 
     </li>
-
+    <li  class="has_sub">
+    <a class="waves-effect waves-primary" href="hours.php" ><i class=" ti-time"></i> </span> Hours</a> 
+    </li>
     <!-- End Admin -->
     
 <?php } ?>

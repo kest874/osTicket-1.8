@@ -315,9 +315,11 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                     <input type="text" class="form-control form-control-sm basic-search" data-url="ajax.php/tasks/lookup" name="query"
                      value="<?php echo Format::htmlchars($_REQUEST['query'], true); ?>"
                    autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Countermeasures" >
-                <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
-                    <button type="submit"  class="input-group-addon" ><i class="fa fa-search"></i>
-                    </button>
+             	
+					<div class="input-group-append">
+						<button type="submit" class="input-group-text"><i class="ti-search"></i></button>
+					</div>
+                   
                 </div>
             </form>
         </div>

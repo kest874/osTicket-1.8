@@ -89,7 +89,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                             <span ><a href="<?php echo $refresh_url; ?>"
                                 title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i> 
                                 </a> &nbsp;
-            <?php echo __('Agents');?>
+            <?php echo __('Associates');?>
                                 
                                 </span>
                         
@@ -101,7 +101,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                     
                     <a class="btn btn-icon waves-effect waves-light btn-success"
                        href="staff.php?a=add" data-placement="bottom"
-                    data-toggle="tooltip" title="<?php echo __('Add Agent'); ?>">
+                    data-toggle="tooltip" title="<?php echo __('Add Associate'); ?>">
                         <i class="fa fa-plus-square"></i>
                     </a>
             
@@ -148,24 +148,22 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
 <form  class="form-inline" action="staff.php" method="get"  name="filter"  style="padding-bottom: 10px; margin-top: -5px;">
             <?php csrf_token(); ?>
             
-             <div class="input-group input-group-sm">
-             <input type="hidden" name="a" value="search">
-                <input type="text"  id="usr" name="usr" value="<?php echo Format::htmlchars($_REQUEST['query']); ?>" class="form-control form-control-sm"  placeholder="Search Associates">
-            <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
-                
-                
-            
-       <button type="submit" class="input-group-addon"  ><i class="fa fa-search"></i>
-                </button>
-                
-            <select name="did" id="did" class="form-control form-control-sm" style="height: 34px;">
-             <option value="0">&mdash; <?php echo __( 'All Locations');?> &mdash;</option>
-                    <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) if (strlen($name) > 1 ){  $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
-                    <option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
-             <input type="submit" name="submit" value="&#xf0b0;" class="input-group-addon fa" />
-        
-            </div>
-            &nbsp;<i class="help-tip icon-question-sign" href="#apply_filtering_criteria"></i>
+    <div class="input-group input-group-sm">
+		<input type="hidden" name="a" value="search">
+		<input type="text"  id="usr" name="usr" value="<?php echo Format::htmlchars($_REQUEST['query']); ?>" class="form-control form-control-sm"  placeholder="Search Associates">
+		<div class="input-group-append">
+		<button type="submit" class="input-group-text" ><i class="fa fa-search"></i> </button>
+		 
+		   <select name="did" id="did" class="form-control form-control-sm input-group-text notranslate">
+				 <option value="0">&mdash; <?php echo __('All Locations');?> &mdash;</option>
+				 
+				 <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) if (strlen($name) > 0 ){  $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
+						<option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
+				 
+		   </select>
+		   <button type="submit" name="submit" class="input-group-text"><i class="fa fa-filter"></i> </button>
+		</div>
+	</div>
         </form>
         </div>
     </div>
@@ -211,7 +209,7 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                     echo $agent->onvacation ? ' <small>(<i>'.__('vacation').'</i>)</small>' : ''; ?></td>
 
                 <td><a href="departments.php?id=<?php echo
-                    $agent->getDeptId(); ?>"><?php
+                    $agent->getDeptId(); ?>" class="notranslate"><?php
                     echo Format::htmlchars((string) $agent->dept); ?></a></td>
                 <td><?php echo Format::date($agent->created); ?></td>
                 <td><?php echo Format::relativeTime(Misc::db2gmtime($agent->lastlogin)) ?: '<em class="faded">'.__('never').'</em>'; ?></td>

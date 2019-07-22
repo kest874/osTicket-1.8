@@ -4710,7 +4710,7 @@ class DatetimePickerWidget extends Widget {
          <div class="form-group">
                 <div class="input-group input-group-sm date" id="<?php echo $this->id; ?>" data-target-input="nearest">
                     <input type="text" name="<?php echo $this->name; ?>" value="<?php echo $this->value; ?>" class="form-control form-control-sm datetimepicker-input" data-target="#<?php echo $this->id; ?>"/>
-                    <div class="input-group-addon" data-target="#<?php echo $this->id; ?>" data-toggle="datetimepicker">
+                    <div class="input-group-append" data-target="#<?php echo $this->id; ?>" data-toggle="datetimepicker">
                         <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                     </div>
                 </div>
@@ -4818,7 +4818,7 @@ class TimePickerWidget extends Widget {
             <div class="form-group">
                 <div class="input-group input-group-sm  date" id="<?php echo $this->id; ?>" data-target-input="nearest">
                     <input type="text" name="<?php echo $this->name; ?>" value="<?php echo Format::htmlchars($this->value); ?>" class="form-control form-control-sm datetimepicker-input" data-target="#<?php echo $this->id; ?>"/>
-                    <div class="input-group-addon" data-target="#<?php echo $this->id; ?>" data-toggle="datetimepicker">
+                    <div class="input-group-append" data-target="#<?php echo $this->id; ?>" data-toggle="datetimepicker">
                         <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
                     </div>
                 </div>

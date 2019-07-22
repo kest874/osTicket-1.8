@@ -85,7 +85,7 @@ if ($lang) {
         if (strpos($h, '<script ') !== false)
             echo $h;
     } ?>
-    <title><?php echo ($ost && ($title=$ost->getPageTitle()))?$title:'osTicket :: '.__('Staff Control Panel'); ?></title>
+    <title><?php echo ($ost && ($title=$ost->getPageTitle()))?$title:'osTicket :: '.__('Admin'); ?></title>
     
     <?php
 } # endif X_PJAX 
@@ -117,20 +117,20 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
         <div id="wrapper">
 
             <!-- Top Bar Start -->
-            <div class="topbar">
+            <div class="topbar" >
 
                 <!-- LOGO -->
-                <div class="topbar-left">
+                <div class="topbar-left" <?php  if(defined('ADMINPAGE')) echo "style=' background-color:#f8632e;'"?>>
                      <div class="text-center">
                         <a href="#" class=" open-left waves-light waves-effect logo"><i class="mdi mdi-menu"></i> <span>NASG</span></a>
                     </div>
                  
                 </div>
                 <!-- Button mobile view to collapse sidebar menu -->
-                <nav class="navbar-custom">
+                <nav class="navbar-custom" <?php  if(defined('ADMINPAGE')) echo "style=' background-color: #f8632e;'"?>>
                     <ul class="hide-phone list-inline float-left mb-0 mr-0">
                         <li class="list-inline-item notification-list hide-phone  mr-0">
-                            <span class="nav-link">Safety Incident System</span>
+                            <span class="nav-link"> Safety Incident System <?php  if(defined('ADMINPAGE')) echo " (Administration)"?></span>
                         </li>
                     </ul>
 
@@ -238,7 +238,9 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
             <div class="left side-menu">
                 <div class="sidebar-inner slimscrollleft">
                     <!--- Divider -->
+					
                     <div id="sidebar-menu">
+					
                         <ul>
                         <?php include STAFFINC_DIR . "sidebar.inc.php"; ?>
                         

@@ -453,11 +453,13 @@ $pageNav->setURL('tickets.php', $args);
                      value="<?php echo Format::htmlchars($_REQUEST['query'], true); ?>"
                    autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Tickets" >
                 <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
-                    <button type="submit"  class="input-group-addon" ><i class="fa fa-search"></i>
-                    </button>
-                    <button type="submit"  class="input-group-addon advsearch" href="#" onclick="javascript:
-                                    $.dialog('ajax.php/tickets/search', 201);"><i class=" fa fa-search-plus help-tip" href="#advanced" ></i>
-                    </button>
+                    <div class="input-group-append">
+						<button type="submit"  class="input-group-text" ><i class="fa fa-search"></i>
+						</button>
+						<button type="submit"  class="input-group-text advsearch" href="#" onclick="javascript:
+										$.dialog('ajax.php/tickets/search', 201);"><i class=" fa fa-search-plus help-tip" href="#advanced" ></i>
+						</button>
+					</div>
                 </div>
             </form>
         </div>
@@ -770,7 +772,7 @@ if (!$sselected) {$sselected = 'Status';}
                 }
                }
                               
-               $badge='badge label-table '.$badgecolor;
+               $badge='badge label-table notranslate '.$badgecolor;
                     
                $styles = str_replace('rem','',str_replace(strtok(substr($styles, strpos($styles, "rem:") + 3), ';'),'',str_replace('badge','rem',$styles)));
               

@@ -981,6 +981,10 @@ code, pre {
 .badge-default {
     background-color: #636c72;
 }  
+
+.label-table {
+	color: #fff;
+}
 /* Dropcap */
 .dropcap {
   font-size: 3.1em; }
@@ -2112,7 +2116,7 @@ m-r--5 {
 
 /*===========
 Modal
-=========== */
+=========== 
 .modal .modal-dialog .close {
   top: -15px;
   position: absolute;
@@ -2140,9 +2144,9 @@ Modal
     padding: 20px; }
 
 .modal-full {
-  width: 98%; }
+  width: 98%; }*/
 
-/* Custom-modal */
+/* Custom-modal 
 .modal-demo {
   background-color: #ffffff;
   width: 600px;
@@ -2173,7 +2177,7 @@ Modal
 
 .custombox-modal-flash .close, .custombox-modal-rotatedown .close {
   top: 20px;
-  z-index: 9999; }
+  z-index: 9999; }*/
 
 /* =============
    Progressbars
