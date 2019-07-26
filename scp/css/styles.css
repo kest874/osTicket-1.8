@@ -12,14 +12,16 @@
     position: relative;
     padding-bottom: 0px;
     width: 240px;
-    z-index: 1;
+    z-index: 999;
     background-color: #154a94  ; }
     .topbar .topbar-left-sm {
     width: 180px; }
   .topbar .topbar-left-sm + .navbar-custom {
     margin-left: 180px; }
 
-    
+td.footable-last-visible > span > svg{
+	margin-top: -4px;
+}    
     
 @media screen and (max-width: 900px) {  
     .topbar .topbar-left {
@@ -979,6 +981,10 @@ code, pre {
 .badge-default {
     background-color: #636c72;
 }  
+
+.label-table {
+	color: #fff;
+}
 /* Dropcap */
 .dropcap {
   font-size: 3.1em; }

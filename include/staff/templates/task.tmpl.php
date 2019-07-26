@@ -30,18 +30,17 @@ if ($info['error']) {
                 );
 
         $iform = $iform ?: TaskForm::getInternalForm();
-
         echo $iform->asTable(("")); 
 ?>
     <hr>
     <p class="full-width">
         <span class="buttons pull-left">
-            <input type="reset" value="<?php echo __('Reset'); ?>">
-            <input type="button" name="cancel" class="close"
+            <input class="btn btn-warning btn-sm" type="reset" value="<?php echo __('Reset'); ?>">
+            <input type="button" name="cancel" class="close btn btn-danger btn-sm"
                 value="<?php echo __('Cancel'); ?>">
         </span>
         <span class="buttons pull-right">
-            <input type="submit" value="<?php echo __('Create Task'); ?>">
+            <input  class="btn btn-primary btn-sm" type="submit" value="<?php echo __('Create Task'); ?>">
         </span>
      </p>
 </form>

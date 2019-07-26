@@ -110,17 +110,19 @@ $qstr.='&amp;order='.($order=='DESC' ? 'ASC' : 'DESC');
         <div class="input-group input-group-sm">
   
   <input type="hidden" name="a" value="search">
-                <input type="text" name="q" value="<?php echo Format::htmlchars($_REQUEST['q']); ?>" class="form-control"  placeholder="Search Agents">
-    <button type="submit" class="input-group-addon" ><i class="fa fa-search"></i> </button>
+                <input type="text" name="q" value="<?php echo Format::htmlchars($_REQUEST['q']); ?>" class="form-control"  placeholder="Search Associates">
+    <div class="input-group-append">
+	<button type="submit" class="input-group-text" ><i class="fa fa-search"></i> </button>
  
-  <select name="did" id="did" class="form-control" style="height: 34px;">
+  <select name="did" id="did" class="form-control form-control-sm">
              <option value="0">&mdash; <?php echo __('All Teams');?> &mdash;</option>
              
              <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) if (strlen($name) > 5 ){  $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
                     <option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
              
   </select>
-  <input type="submit" name="submit" value="&#xf0b0;" class="input-group-addon fa" style="padding-top: 7px"/> 
+  <button type="submit" name="submit" class="input-group-text"><i class="fa fa-filter"></i> </button> 
+  </div>
 </div>&nbsp;<i class="help-tip icon-question-sign" href="#apply_filtering_criteria"></i>
 </form>
 

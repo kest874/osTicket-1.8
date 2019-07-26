@@ -31,12 +31,14 @@ if ($info['error']) {
     if ($forms) {
         foreach ($forms as $form)
             echo $form->getForm(false, array('mode' => 'edit'))->asTable(
-                    __('Task Information'),
+                    __(''),
                     array(
                         'draft-namespace' => $namespace,
                         )
                     );
     }
+    //$iform = $iform ?: TaskForm::getInternalForm();
+       // echo $iform->asTable(("")); 
     ?>
     </div>
     <div><strong><?php echo __('Internal Note');?></strong>:
@@ -44,7 +46,7 @@ if ($info['error']) {
     <div>
         <textarea class="richtext no-bar" name="note" cols="21" rows="6"
             style="width:80%;"
-            placeholder="<?php echo __('Reason for editing the task (optional)'); ?>"
+            placeholder="<?php echo __('Reason for editing the Task (optional)'); ?>"
             >
             <?php echo $info['note'];
             ?></textarea>

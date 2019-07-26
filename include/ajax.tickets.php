@@ -1043,13 +1043,13 @@ class TicketsAjaxAPI extends AjaxController {
     function tasks($tid) {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid)))
-            Http::response(404, 'Unknown ticket');
+            Http::response(404, 'Unknown suggestion');
          include STAFFINC_DIR . 'ticket-tasks.inc.php';
     }
     function addTask($tid) {
         global $thisstaff;
         if (!($ticket=Ticket::lookup($tid)))
-            Http::response(404, 'Unknown ticket');
+            Http::response(404, 'Unknown suggestion');
         
         $info=$errors=array();
         if ($_POST) {
@@ -1088,7 +1088,7 @@ class TicketsAjaxAPI extends AjaxController {
         }
         $info['action'] = sprintf('#tickets/%d/add-task', $ticket->getId());
         $info['title'] = sprintf(
-                __( 'Ticket #%1$s: %2$s'),
+                __( 'Suggestion #%1$s: %2$s'),
                 $ticket->getNumber(),
                 __('Add New Task')
                 );

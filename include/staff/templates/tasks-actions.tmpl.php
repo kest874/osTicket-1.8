@@ -12,34 +12,22 @@ $actions = array();
 if ($agent->hasPerm(Task::PERM_ASSIGN, false)) {
     $actions += array(
             'claim' => array(
-                'icon' => 'icon-user',
+                'icon' => 'fa fa-chevron-circle-down',
                 'action' => __('Claim')
             ));
      $actions += array(
             'assign/agents' => array(
-                'icon' => 'icon-user',
+                'icon' => 'fa fa-user',
                 'action' => __('Assign to Associate')
             ));
-    $actions += array(
-            'assign/teams' => array(
-                'icon' => 'icon-group',
-                'action' => __('Assign to Team')
-            ));
-}
+    }
 
-if ($agent->hasPerm(Task::PERM_TRANSFER, false)) {
-    $actions += array(
-            'transfer' => array(
-                'icon' => 'icon-share',
-                'action' => __('Transfer Ownership')
-            ));
-}
 
 if ($agent->hasPerm(Task::PERM_DELETE, false)) {
     $actions += array(
             'delete' => array(
                 'class' => 'danger',
-                'icon' => 'icon-trash',
+                'icon' => 'fa fa-trash',
                 'action' => __('Delete')
             ));
 }
@@ -99,7 +87,7 @@ if ($actions && !isset($options['status'])) {
                 if (!$status || !strcasecmp($status, 'closed')) { ?>
                      <a class="dropdown-item no-pjax tasks-action"
                         href="#tasks/mass/reopen"><i
-                        class="icon-fixed-width icon-undo"></i> <?php
+                        class="fa fa-undo"></i> <?php
                         echo __('Reopen');?> </a>
                 
                 <?php
@@ -109,7 +97,7 @@ if ($actions && !isset($options['status'])) {
               
                     <a class="dropdown-item no-pjax tasks-action"
                         href="#tasks/mass/close"><i
-                        class="icon-fixed-width icon-ok-circle"></i> <?php
+                        class="fa fa-check-circle"></i> <?php
                         echo __('Close');?> </a>
                 
                 <?php
@@ -128,13 +116,11 @@ if ($actions && !isset($options['status'])) {
                     
                     <a class="dropdown-item no-pjax tasks-action"
             href="#tasks/mass/claim"><i
-            class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
+            class="fa fa-chevron-circle-down"></i> <?php echo __('Claim'); ?></a>
          <a class="dropdown-item no-pjax tasks-action"
             href="#tasks/mass/assign/agents"><i
-            class="icon-user"></i> <?php echo __('Associate'); ?></a>
-         <a class="dropdown-item no-pjax tasks-action"
-            href="#tasks/mass/assign/teams"><i
-            class="icon-group"></i> <?php echo __('Team'); ?></a>
+            class="fa fa-user"></i> <?php echo __('Associate'); ?></a>
+        
                     
             </div>
         </div>                   
@@ -142,23 +128,13 @@ if ($actions && !isset($options['status'])) {
     <?php
     }
 
-    // Mass Transfer
-    if ($agent->hasPerm(Task::PERM_TRANSFER, false)) {?>
  
-     <a class="btn btn-light btn-sm  waves-effect  tasks-action" id="tasks-transfer" data-placement="bottom"
-        data-toggle="tooltip" title="<?php echo __('Transfer Ownership'); ?>"
-        href="#tasks/mass/transfer"><i class="icon-share"></i></a>
-    
-    <?php
-    }
-
-
     // Mass Delete
     if ($agent->hasPerm(Task::PERM_DELETE, false)) {?>
     
      <a class="btn btn-icon waves-effect waves-light btn-danger tasks-action" id="tasks-delete" data-placement="bottom"
         data-toggle="tooltip" title="<?php echo __('Delete'); ?>"
-        href="#tasks/mass/delete"><i class="icon-trash"></i></a>
+        href="#tasks/mass/delete"><i class="fa fa-trash"></i></a>
    
 <?php
     }

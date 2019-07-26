@@ -1149,7 +1149,7 @@ extends QueueColumnAnnotation {
        
         if ($taskcount) {
             return sprintf(
-                '<i class="Icon tasklist" data-toggle="tooltip" title="(%s) Open Tasks"></i>',
+                '<i class="fa fa-check-square-o" style="color: #AAA;" data-placement="bottom" data-toggle="tooltip" title="(%s) Open Task(s)"></i> &nbsp;',
                 $taskcount
             );
     }}
@@ -1196,22 +1196,22 @@ extends QueueColumnAnnotation {
         switch ($row["cdata__progress"][0]){
         
         case 0:
-            $pie = '<span data-plugin="peity-pie" data-colors="#ef5350,#ebeff2" data-width="30" data-height="30"><span class="hidden">0</span></span>';
+            $pie = ' <span data-plugin="peity-pie" data-colors="#ef5350,#ebeff2" data-width="30" data-height="30"><span class="hidden">0</span></span>';
             break;
         case 1:
-            $pie = '<span data-plugin="peity-pie" data-colors="#ef5350,#ebeff2" data-width="20" data-height="20"><span class="hidden">0</span></span>';
+            $pie = ' <span data-plugin="peity-pie" data-colors="#ef5350,#ebeff2" data-width="20" data-height="20"><span class="hidden">0</span></span>';
             break;
         case 2:
-            $pie = '<span data-plugin="peity-pie" data-colors="#f76397,#ebeff2" data-width="20" data-height="20"><span class="hidden">1/4</span></span>';
+            $pie = ' <span data-plugin="peity-pie" data-colors="#f76397,#ebeff2" data-width="20" data-height="20"><span class="hidden">1/4</span></span>';
             break;
         case 3: 
-            $pie = '<span data-plugin="peity-pie" data-colors="#f1b53d,#ebeff2" data-width="20" data-height="20"><span class="hidden">1/2</span></span>';
+            $pie = ' <span data-plugin="peity-pie" data-colors="#f1b53d,#ebeff2" data-width="20" data-height="20"><span class="hidden">1/2</span></span>';
             break;
         case 4:
-            $pie = '<span data-plugin="peity-pie" data-colors="#039cfd,#ebeff2" data-width="20" data-height="20"><span class="hidden">3/4</span></span>';
+            $pie = ' <span data-plugin="peity-pie" data-colors="#039cfd,#ebeff2" data-width="20" data-height="20"><span class="hidden">3/4</span></span>';
             break;
         case 5:
-            $pie = '<span data-plugin="peity-pie" data-colors="#52bb56,#ebeff2" data-width="20" data-height="20"><span class="hidden">1</span></span>';
+            $pie = ' <span data-plugin="peity-pie" data-colors="#52bb56,#ebeff2" data-width="20" data-height="20"><span class="hidden">1</span></span>';
             break;
             
             

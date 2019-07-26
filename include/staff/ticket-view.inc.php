@@ -49,7 +49,15 @@ $assigned = ($team->id == $thisstaff->dept_id ? 1:0);
 $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
 
 ?>
-
+<script>
+$.busyLoadFull("show",  { 
+text: "LOADING ...",
+textColor: "#dd2c00",
+color: "#dd2c00",
+background: "rgba(0, 0, 0, 0.2)"
+});
+ 
+</script>
 
 <div class="subnav">
 
@@ -119,7 +127,7 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
                     <a class="btn btn-light waves-effect" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Post Internal Note'); ?>">
                     <i class="fa fa-pencil-square-o"></i></a>
 
-                    <a class="btn btn-light waves-effect" href="#note" id="countermeasures" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Tasks'); ?>">
+                    <a class="btn btn-light waves-effect" href="#note" id="taskbutton" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Tasks'); ?>">
                     <i class="fa fa-check-square-o"></i></a>
                 
             <?php	}
@@ -217,14 +225,27 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
 <div class="clearfix"></div>
           
 </div>
- <?php if (!$topic) { ?>
-<div class="alert alert-danger">
-      <strong>Category!</strong> Please set the category..
+<?php
+  $outstanding = false;
+  if ($role->hasPerm(Ticket::PERM_CLOSE)
+          && is_string($warning=$ticket->isCloseable())) {
+      $outstanding =  true;
+     // echo sprintf('<div class="row task-warning-banner">%s</div>', $warning);
+  } 
+  
+  if ($outstanding !== false && $haspermission) { ?>
+<div class="alert alert-warning">
+      <i class="fa fa-warning"></i> <?php echo $warning;?>
 </div>
  <?php } ?>
-<?php if($ticket->isOverdue() && $haspermission) { ?>
+  <?php if($warn) { ?>
+<div class="alert alert-danger">
+      <?php echo $warn ;?>
+</div>
+ <?php } 
+if($alerttext) { ?>
 <div class="alert alert-warning">
-      <strong>Overdue!</strong> Suggestion is maked overdue..
+      <?php echo $alerttext ;?>
 </div>
  <?php } 
  
@@ -233,28 +254,8 @@ $haspermission = ($staffpermission == true || $assigned == true ? 1:0);
   This another Team's suggestion (view only).
 </div>
              <?php
-            }
- 
- // if ($ticket->isClosed() && !$ticket->isReopenable())
-    // $alerttext = sprintf(
-            // __('<strong>Status!</strong> Current ticket status (%s) does not allow the end user to reply.'),
-            // $ticket->getStatus());
-// elseif ($ticket->isAssigned()
-        // && (($staff && $staff->getId()!=$thisstaff->getId())
-            // || ($team && !$team->hasMember($thisstaff))
-        // ))
-    // $alerttext.= sprintf('<strong>Assigned!</strong> &nbsp;&nbsp;<span class="Icon assignedTicket">%s</span>',
-            // sprintf(__('Ticket is assigned to %s'),
-                // implode('/', $ticket->getAssignees())
-                // ));
-                
-                
-  ?>              
- <?php if($alerttext) { ?>
-<div class="alert alert-warning">
-      <?php echo $alerttext ;?>
-</div>
- <?php } ?>
+            }?>
+
   
 <div class="card-box ">
 <?php 
@@ -857,7 +858,8 @@ $(function() {
     
     $('#post-note').click(function(e){
     	e.preventDefault();
-        $('#ticket_tabs a[href="#note"]').tab('show');
+        $('#ticket_tabs a[href="#ticket_thread"]').tab('show');
+		 $('#ticket_tabs a[href="#note"]').tab('show');
         // Scroll to the response section.
             var $stop = $(document).height();
             var $s = $('div#response_options');
@@ -877,7 +879,20 @@ $(function() {
             $('html, body').animate({scrollTop: $stop}, 'fast');
                         
     })
-    $('#countermeasures').click(function(e){
+
+    $('#taskbutton').click(function(e){
+    	e.preventDefault();
+        $('#ticket_tabs a[href="#tasks"]').tab('show');
+        // Scroll to the response section.
+            var $stop = $(document).height();
+            var $s = $('div#ticket_tabs');
+            if ($s.length)
+                $stop = $s.offset().top-125
+            $('html, body').animate({scrollTop: $stop}, 'fast');
+                        
+    })
+	
+	    $('#tasks').click(function(e){
     	e.preventDefault();
         $('#ticket_tabs a[href="#tasks"]').tab('show');
         // Scroll to the response section.
@@ -971,10 +986,12 @@ $(function() {
                    showTodayButton: true
                    
                });
+               $.busyLoadFull("hide", {
+                });
                <?php //if ($msg){echo "$.Notification.notify('warning','top right', 'Warning', '".$msg."');";} ?>
                <?php if ($errors['err']){echo "$.Notification.notify('warning','top right', 'Warning', '".$errors['err']."');";} ?>
-               <?php if ($outstanding !== false){echo "$.Notification.notify('warning','top right', 'Warning', '".$warning."');";} ?>     
-               <?php if ($warn)   {echo "$.Notification.notify('warning','top right', 'Overdue', '".$warn."');";} ?>
+               <?php //if ($outstanding !== false){echo "$.Notification.notify('warning','top right', 'Warning', '".$warning."');";} ?>     
+               <?php //if ($warn)   {echo "$.Notification.notify('warning','top right', 'Overdue', '".$warn."');";} ?>
                <?php // if ($bannermsg){echo "$.Notification.notify('success','top right', 'Success', '".$bannermsg."');";} ?>
                
               

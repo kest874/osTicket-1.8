@@ -64,7 +64,7 @@ class TaskModel extends VerySimpleModel {
                 ),
                 'null' => true,
             ),
-        ),
+		),
     );
 
     const PERM_CREATE   = 'task.create';
@@ -169,6 +169,10 @@ class TaskModel extends VerySimpleModel {
     function getDueDate() {
         return $this->duedate;
     }
+    
+    function getTaskDate() {
+        return $this->taskdate;
+    }
 
     function getCloseDate() {
         return $this->isClosed() ? $this->closed : '';
@@ -269,11 +273,10 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             return false;
 
         // Check access based on department or assignment
-        if (!$staff->canAccessDept($this->getDeptId())
-                && $this->isOpen()
-                && $staff->getId() != $this->getStaffId()
-                && !$staff->isTeamMember($this->getTeamId()))
-            return false;
+        // if (!$staff->canAccessDept($this->getDeptId())
+                // && $this->isOpen()
+                // && $staff->getId() != $this->getStaffId())
+            // return false;
 
         // At this point staff has access unless a specific permission is
         // requested
@@ -543,7 +546,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
     }
 
     function setStatus($status, $comments='', &$errors=array()) {
-        global $thisstaff;
+        global $thisstaff,$cfg;
 
         $ecb = null;
         switch($status) {
@@ -575,6 +578,16 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             $ecb = function($t) {
                 $t->logEvent('closed');
             };
+         
+					$this->AlertClose(array(
+                        'note' => $comments,
+                        'title' => sprintf(
+                            __('Status changed to %s'),
+                            $this->getStatus())
+                        ),
+                    $errors,
+                    $thisstaff);
+		
             break;
         default:
             return false;
@@ -586,6 +599,8 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
         // Log events via callback
         if ($ecb) $ecb($this);
 
+
+		
         if ($comments) {
             $errors = array();
             $this->postNote(array(
@@ -598,9 +613,43 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
                     $thisstaff);
         }
 
-        return true;
+        return true; 
     }
 
+	
+	function  AlertClose($entry, $vars = array()) {
+        global $cfg;
+
+        if (!($dept=$this->getDept())
+            || !($tpl=$dept->getTemplate())
+            || !($msg=$tpl->getTaskAlertCloseMsgTemplate())
+            || !($email=$dept->getEmail())
+        ) {
+            return;
+        }
+
+        $vars = array_merge($vars, array(
+            'message' => (string) $entry,
+            'poster' => $poster ?: _S('A collaborator'),
+            )
+        );
+
+        $msg = $this->replaceVars($msg->asArray(), $vars);
+
+        //$attachments = $cfg->emailAttachments()?$entry->getAttachments():array();
+        $options = array('thread' => $entry);
+
+        //foreach ($recipients as $recipient) {
+            // Skip folks who have already been included on this part of
+            // the conversation
+           // if (isset($skip[$recipient->getUserId()]))
+            //    continue;
+            $notice = $this->replaceVars($msg, array('recipient' => $recipient));
+            $email->sendAlert($cfg->alertGroupEmail(), $notice['subj'], $notice['body'], null,
+                $options);
+        //}
+    }
+	
     function to_json() {
 
         $info = array(
@@ -977,6 +1026,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             );
         }
 
+			
         return $response;
     }
 
@@ -1015,7 +1065,10 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
 
     function getVar($tag) {
         global $cfg;
-
+		
+		TicketForm::ensureDynamicDataView();
+		TaskForm::ensureDynamicDataView();
+		
         if ($tag && is_callable(array($this, 'get'.ucfirst($tag))))
             return call_user_func(array($this, 'get'.ucfirst($tag)));
 
@@ -1028,6 +1081,16 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
                 return sprintf('%s/scp/tickets.php?id=%d#tasks',
                     $cfg->getBaseUrl(), $ticket->getId());
             }
+		
+		case 'subject':
+		foreach ($tresults as $tresult) { return $tresult['subject'];}
+		
+		case 'Task':
+		foreach ($tresults as $tresult) {
+			$cms .= $tresult['body'].'<br><br>';
+		}
+			return substr($cms, 0, -8);
+			
         case 'staff_link':
             return sprintf('%s/scp/tasks.php?id=%d', $cfg->getBaseUrl(), $this->getId());
         case 'create_date':
@@ -1075,21 +1138,24 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             'staff' => array(
                 'class' => 'Staff', 'desc' => __('Assigned/closing agent'),
             ),
-            'subject' => 'Subject',
-            'team' => array(
-                'class' => 'Team', 'desc' => __('Assigned/closing team'),
-            ),
+            'subject' => __('Subject'),
+			'Task' => __('Task'),
+            
             'thread' => array(
                 'class' => 'TaskThread', 'desc' => __('Task Thread'),
             ),
             'staff_link' => __('Link to view the task'),
             'ticket_link' => __('Link to view the task inside the ticket'),
-            'last_update' => array(
+			
+			'ticket_number' => __('Suggestion Number'), 
+					
+			'last_update' => array(
                 'class' => 'FormattedDate', 'desc' => __('Time of last update'),
             ),
         );
 
         $extra = VariableReplacer::compileFormScope(TaskForm::getInstance());
+
         return $base + $extra;
     }
 
@@ -1168,7 +1234,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
         }
 
     }
-
+	
     /*
      * Notify collaborators on response or new message
      *
@@ -1301,10 +1367,19 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             'updated' => new SqlFunction('NOW'),
         ));
 
-        if ($vars['internal_formdata']['dept_id'])
-            $task->dept_id = $vars['internal_formdata']['dept_id'];
+            
+       $Ticket = Ticket::objects()
+        ->filter(array('ticket_id' => $vars['object_id']));
+                
+       foreach ($Ticket as $row)
+                $Ticket = $row;
+       
+            $task->dept_id = $Ticket->dept_id;
         if ($vars['internal_formdata']['duedate'])
 	    $task->duedate = date('Y-m-d G:i', Misc::dbtime($vars['internal_formdata']['duedate']));
+    
+        if ($vars['internal_formdata']['taskdate'])
+	    $task->taskdate = date('Y-m-d G:i', Misc::dbtime($vars['internal_formdata']['taskdate']));
 
         if (!$task->save(true))
             return false;
@@ -1526,13 +1601,22 @@ extends AbstractForm {
                     'required' => false,
                     'layout' => new GridFluidCell(6),
                     )),
+                 'taskdate'  =>  new DatetimeField(array(
+                    'id' => 3,
+                    'label' => __('Task Date'),
+                    'required' => false,
+                    'configuration' => array(
+                        'time' => false,
+                        'gmt' => false,
+                        'future' => false,
+                        ),
+                    )),    
                 'duedate'  =>  new DatetimeField(array(
                     'id' => 3,
                     'label' => __('Due Date'),
                     'required' => false,
                     'configuration' => array(
-                        'min' => Misc::gmtime(),
-                        'time' => true,
+                        'time' => false,
                         'gmt' => false,
                         'future' => true,
                         ),
@@ -1542,7 +1626,7 @@ extends AbstractForm {
 
         $mode = @$this->options['mode'];
         if ($mode && $mode == 'edit') {
-            //unset($fields['dept_id']);
+            unset($fields['dept_id']);
             unset($fields['assignee']);
         }
 

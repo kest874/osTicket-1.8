@@ -215,7 +215,7 @@ $pageNav->setURL('tickets.php', $args);
  ?>
 
 
-<div class="subnav" style="z-index: 8;">
+<div class="subnav">
 
 
                         <div class="float-left subnavtitle">
@@ -333,11 +333,14 @@ $pageNav->setURL('tickets.php', $args);
                      value="<?php echo Format::htmlchars($_REQUEST['query'], true); ?>"
                    autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Suggestions" >
                 <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
-                    <button type="submit"  class="input-group-addon" ><i class="fa fa-search"></i>
+                    
+					<div class="input-group-append">
+					<button type="submit"  class="input-group-text" ><i class="fa fa-search"></i>
                     </button>
-                    <button type="submit"  class="input-group-addon advsearch" href="#" onclick="javascript:
+                    <button type="submit"  class="input-group-text advsearch" href="#" onclick="javascript:
                                     $.dialog('ajax.php/tickets/search', 201);"><i class=" fa fa-search-plus help-tip" href="#advanced" ></i>
                     </button>
+					</div>
                 </div>
             </form>
         </div>

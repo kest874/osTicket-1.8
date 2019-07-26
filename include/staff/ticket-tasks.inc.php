@@ -17,7 +17,7 @@ $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
     if ($count) {
         echo '<strong>'.$showing.'</strong>';
     } else {
-        echo sprintf(__('%s does not have any Tasks'), $ticket? 'This suggestion' :
+        echo sprintf(__('%s does not have any tasks'), $ticket? 'This suggestion' :
                 'System');
     }
    ?>
@@ -64,7 +64,7 @@ if ($count) { ?>
             <th width="100"><?php echo __('Date'); ?></th>
             <th width="100"><?php echo __('Status'); ?></th>
             <th width="300"><?php echo __('Title'); ?></th>
-            <th width="200"><?php echo __('Department'); ?></th>
+            <th width="200"><?php echo __('Team'); ?></th>
             <th width="200"><?php echo __('Assignee'); ?></th>
         </tr>
     </thead>

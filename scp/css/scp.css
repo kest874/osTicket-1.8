@@ -569,6 +569,7 @@ input.rlc-search {
     min-width:400px;
     max-width:455px;
     line-height: 1.45rem;
+	margin-top: -80px;
 }
 
 .tip_content .links {
@@ -772,13 +773,13 @@ select {
 
 div#datepicker1.input-group.date > span.input-group-addon{    
     display: inline;
-    padding-top: 4px;
     padding-bottom: 4px;
     padding-right: 7px;
     padding-left: 5px;
     margin-left: -2px;
     border: 1px solid #ccc;
     border-radius: 2px;
+	background-color: #e9ecef;
 }
 
 

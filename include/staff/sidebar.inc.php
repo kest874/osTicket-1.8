@@ -8,17 +8,14 @@ if(!defined('ADMINPAGE')) { ?>
             <li><a href="/scp/dashboard.php?a=1" title="" id="nav1">All Teams</a></li>
         </ul>
     </li>
-    <li class=" has_sub ">
-        <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-user"></i>  <span class="menu-arrow"></span> Associates </a> 
-        <ul class="list-unstyled">
-            <li><a href="/scp/directory.php" title="" id="nav1">Associate Directory</a></li>
-        </ul>
-    </li>
-    <li class=" has_sub "><a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-list"></i>  <span class="menu-arrow"></span> Tasks </a> <ul class="list-unstyled">
-    
-    <li><a href="/scp/tasks.php?status=open" title="" id="nav0">Open Tasks <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $OpenTasks; ?></span></a></li>
-    <li><a href="/scp/tasks.php?status=closed" title="" id="nav1">Closed Tasks <span class="task-count badge badge-pill badge-primary  pull-right"><span class="faded-more"><?php echo $CloseTasks; ?></span></a></li></ul>
-    </li>
+	 <li  class="has_sub">
+		<a class="waves-effect waves-primary" href="/scp/directory.php"><i class=" ti-user"></i> </span> Associates</a> 
+       
+    </li> 
+     <li  class="has_sub">
+		<a class="waves-effect waves-primary" href="/scp/tasks.php?tl=0&ts=0"><i class=" ti-list"></i> </span> Tasks <span class="task-count badge badge-pill badge-primary  pull-right hidden"><span class="faded-more"><?php echo $OpenTasks; ?></span></a> 
+       
+    </li> 
     <!-- Queues -->
     <?php
     $all_queues = CustomQueue::queues()->getIterator();

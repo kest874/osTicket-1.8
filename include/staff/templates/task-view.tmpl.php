@@ -22,7 +22,7 @@ if ($task->isOpen() && $role->hasPerm(Task::PERM_ASSIGN)) {
         $actions += array(
                 'claim' => array(
                     'href' => sprintf('#tasks/%d/claim', $task->getId()),
-                    'icon' => 'icon-user',
+                    'icon' => 'fa fa-user',
                     'label' => __('Claim'),
                     'redirect' => 'tasks.php'
                 ));
@@ -31,25 +31,19 @@ if ($task->isOpen() && $role->hasPerm(Task::PERM_ASSIGN)) {
     $actions += array(
             'assign/agents' => array(
                 'href' => sprintf('#tasks/%d/assign/agents', $task->getId()),
-                'icon' => 'icon-user',
+                'icon' => 'fa fa-user',
                 'label' => __('Assign to Associate'),
                 'redirect' => 'tasks.php'
             ));
 
-    $actions += array(
-            'assign/teams' => array(
-                'href' => sprintf('#tasks/%d/assign/teams', $task->getId()),
-                'icon' => 'icon-user',
-                'label' => __('Assign to Team'),
-                'redirect' => 'tasks.php'
-            ));
+    
 }
 
 if ($role->hasPerm(Task::PERM_TRANSFER)) {
     $actions += array(
             'transfer' => array(
                 'href' => sprintf('#tasks/%d/transfer', $task->getId()),
-                'icon' => 'icon-share',
+                'icon' => 'fa fa-share-square',
                 'label' => __('Transfer Ownership'),
                 'redirect' => 'tasks.php'
             ));
@@ -59,7 +53,7 @@ $actions += array(
         'print' => array(
             'href' => sprintf('tasks.php?id=%d&a=print', $task->getId()),
             'class' => 'no-pjax',
-            'icon' => 'icon-print',
+            'icon' => 'fa fa-print',
             'label' => __('Print')
         ));
 
@@ -67,7 +61,7 @@ if ($role->hasPerm(Task::PERM_EDIT)) {
     $actions += array(
             'edit' => array(
                 'href' => sprintf('#tasks/%d/edit', $task->getId()),
-                'icon' => 'icon-edit',
+                'icon' => 'fa fa-edit',
                 'dialog' => '{"size":"large"}',
                 'label' => __('Edit')
             ));
@@ -78,7 +72,7 @@ if (!$ticket) {
         $actions += array(
                 'delete' => array(
                     'href' => sprintf('#tasks/%d/delete', $task->getId()),
-                    'icon' => 'icon-trash',
+                    'icon' => 'fa fa-trash',
                     'class' => 'red button',
                     'label' => __('Delete'),
                     'redirect' => 'tasks.php'
@@ -89,7 +83,7 @@ if (!$ticket) {
         $actions += array(
                 'delete' => array(
                     'href' => sprintf('#tasks/%d/delete', $task->getId()),
-                    'icon' => 'icon-trash',
+                    'icon' => 'fa fa-trash-alt',
                     'class' => 'danger',
                     'label' => __('Delete'),
                     'redirect' => 'tasks.php'
@@ -156,7 +150,7 @@ if ($task->isOverdue())
                 target="_blank"
                 class="btn btn-light btn-nbg"
                 href="tasks.php?id=<?php
-                 echo $task->getId(); ?>"><i class="icon-share"  data-placement="bottom" data-toggle="tooltip" 
+                 echo $task->getId(); ?>"><i class="fa fa-share-square"  data-placement="bottom" data-toggle="tooltip" 
                  title="<?php echo __('View Task'); ?>"></i></a>
            
                 <div class="btn-group btn-group-sm" role="group">
@@ -172,7 +166,7 @@ if ($task->isOverdue())
                     
                         <a class="dropdown-item no-pjax task-action"
                             href="#tasks/<?php echo $task->getId(); ?>/reopen"><i
-                            class="icon-fixed-width icon-undo"></i> <?php
+                            class="fa fa-undo"></i> <?php
                             echo __('Reopen');?> </a>
                    
                     <?php
@@ -181,7 +175,7 @@ if ($task->isOverdue())
                    
                         <a class="dropdown-item  no-pjax task-action"
                             href="#tasks/<?php echo $task->getId(); ?>/close"><i
-                            class="icon-fixed-width icon-ok-circle"></i> <?php
+                            class="fa fa-check-circle"></i> <?php
                             echo __('Close');?> </a>
                    
                     <?php
@@ -237,7 +231,7 @@ if ($task->isOverdue())
                         if ($task->isClosed()) { ?>
                                 <a class="dropdown-item no-pjax task-action"
                                 href="#tasks/<?php echo $task->getId(); ?>/reopen"><i
-                                class="icon-fixed-width icon-undo"></i> <?php
+                                class="fa fa-undo"></i> <?php
                                 echo __('Reopen');?> </a>
                       
                         <?php
@@ -246,7 +240,7 @@ if ($task->isOverdue())
                        
                             <a class="dropdown-item no-pjax task-action"
                                 href="#tasks/<?php echo $task->getId(); ?>/close"><i
-                                class="icon-fixed-width icon-ok-circle"></i> <?php
+                                class="fa fa-check-circle"></i> <?php
                                 echo __('Close');?> </a>
                        
                         <?php
@@ -276,17 +270,14 @@ if ($task->isOverdue())
                      <a class="dropdown-item no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/claim"><i
-                        class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
+                        class="fa fa-chevron-down"></i> <?php echo __('Claim'); ?></a>
                     <?php
                     } ?>
                      <a class="dropdown-item no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/assign/agents"><i
-                        class="icon-user"></i> <?php echo __('Associate'); ?></a>
-                     <a class="dropdown-item no-pjax task-action"
-                        data-redirect="tasks.php"
-                        href="#tasks/<?php echo $task->getId(); ?>/assign/teams"><i
-                        class="icon-group"></i> <?php echo __('Team'); ?></a>
+                        class="fa fa-user"></i> <?php echo __('Associate'); ?></a>
+                     
                  
                 </div>
                 </div>
@@ -335,21 +326,23 @@ if (!$ticket) { ?>
      <div><label><?php echo __('Status');?>:</label>
                        <?php echo $task->getStatus(); ?></div>
     
-    <div><label><?php echo __('Created');?>:</label>
-                        <td><?php echo Format::datetime($task->getCreateDate()); ?></div>
+    <div><label><?php echo __('Entered');?>:</label>
+                        <td><?php echo Format::date($task->getCreateDate()); ?></div>
+    <div><label><?php echo __('Date');?>:</label>
+                        <td><?php echo Format::date($task->getTaskDate()); ?></div>
     
     <?php if($task->isOpen()){ ?>
                     
                          <div><label><?php echo __('Due Date');?>:</label>
                         <?php echo $task->duedate ?
-                        Format::datetime($task->duedate) : '<span
+                        Format::date($task->duedate) : '<span
                         class="faded">&mdash; '.__('None').' &mdash;</span>'; ?></div>
                     
                     <?php
                     }else { ?>
                    
                          <div><label><?php echo __('Completed');?>:</label>
-                        <?php echo Format::datetime($task->getCloseDate()); ?></div>
+                        <?php echo Format::date($task->getCloseDate()); ?></div>
                     
                     <?php
                     }
@@ -358,7 +351,7 @@ if (!$ticket) { ?>
     </div>
     <div class="col-md-3">
     
-    <div><label><?php echo __('Owned By');?>:</label>
+    <div><label><?php echo __('Location');?>:</label>
                         <?php //echo Format::htmlchars($task->dept->getName()); ?></div>
     
     <?php
@@ -506,7 +499,7 @@ else
                     <div class="error"><?php echo $errors['response']; ?></div>
                     <input type="hidden" name="draft_id" value=""/>
                     <textarea name="response" id="task-response" cols="50"
-                        data-signature-field="signature" data-dept-id="<?php echo $dept->getId(); ?>"
+                        data-signature-field="signature" data-dept-id="<?php //echo //$dept->getId(); ?>"
                         data-signature="<?php
                             echo Format::htmlchars(Format::viewableImages($signature)); ?>"
                         placeholder="<?php echo __( 'Start writing your update here.'); ?>"

@@ -153,17 +153,17 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                 <input type="text"  id="usr" name="usr" value="<?php echo Format::htmlchars($_REQUEST['query']); ?>" class="form-control form-control-sm"  placeholder="Search Associates">
             <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
                 
-                
+               <div class="input-group-append"> 
             
-       <button type="submit" class="input-group-addon"  ><i class="fa fa-search"></i>
+       <button type="submit" class="input-group-text"  ><i class="fa fa-search"></i>
                 </button>
                 
-                    <select name="did" id="did" class="form-control form-control-sm" style="height: 34px;">
+                    <select name="did" id="did" class="form-control form-control-sm"">
              <option value="0">&mdash; <?php echo __( 'All Teams');?> &mdash;</option>
                     <?php if (($depts=Dept::getDepartments())) { foreach ($depts as $id=> $name) if (strlen($name) > 5 ){  $sel=($_REQUEST['did'] && $_REQUEST['did']==$id)?'selected="selected"':''; echo sprintf('
                     <option value="%d" %s>%s</option>',$id,$sel,$name); } } ?>
-             <input type="submit" name="submit" value="&#xf0b0;" class="input-group-addon fa" style="padding-top: 7px"/>
-        
+             <input type="submit" name="submit" value="&#xf0b0;" class="input-group-text fa" />
+        </div>
             </div>
             &nbsp;<i class="help-tip icon-question-sign" href="#apply_filtering_criteria"></i>
         </form>
