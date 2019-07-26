@@ -2986,8 +2986,7 @@ $(function() {
 				select location,
 				case 
 				when days <= 90 then 'Under 3 Months'
-				when days between 90 and 120 then '3 to 6 Months'
-				when days between 120 and 365 then '6 Months to 1 Year'
+				when days between 90 and 365 then '3 Months to 1 Year'
 				when days between 365 and 1095 then '1 Year to 3 Years'
 				when days between 1095 and 1825 then '3 Years to 5 Years'
 				when days >= 1826 then '5 Years Plus'
@@ -3013,9 +3012,7 @@ $(function() {
 				(
 				select 0 as count, 'Under 3 Months' as days
 				union
-				select 0 as count, '3 to 6 Months' as days
-				union
-				select 0 as count, '6 Months to 1 Year' as days
+				select 0 as count, '3 Months to 1 Year' as days
 				union
 				select 0 as count, '1 Year to 3 Years' as days
 				union
@@ -3030,11 +3027,10 @@ $(function() {
     $sql="select location, sum(count) as count, days,
 				case 
 				when days = 'Under 3 Months' then 1
-				when days = '3 to 6 Months' then 2
-				when days = '6 Months to 1 Year' then 3
-				when days = '1 Year to 3 Years' then 4
-				when days = '3 Years to 5 Years' then 5
-				when days = '5 Years Plus' then 6
+				when days = '3 Months to 1 Year' then 2
+				when days = '1 Year to 3 Years' then 3
+				when days = '3 Years to 5 Years' then 4
+				when days = '5 Years Plus' then 5
 				end
 				as sort
 from
@@ -3045,8 +3041,7 @@ select location,count(days) as count, days
 				select location,
 				case 
 				when days <= 90 then 'Under 3 Months'
-				when days between 90 and 120 then '3 to 6 Months'
-				when days between 120 and 365 then '6 Months to 1 Year'
+				when days between 90 and 365 then '3 Months to 1 Year'
 				when days between 365 and 1095 then '1 Year to 3 Years'
 				when days between 1095 and 1825 then '3 Years to 5 Years'
 				when days >= 1826 then '5 Years Plus'
@@ -3072,9 +3067,7 @@ select location,count(days) as count, days
 				(
 				select 0 as count, 'Under 3 Months' as days
 				union
-				select 0 as count, '3 to 6 Months' as days
-				union
-				select 0 as count, '6 Months to 1 Year' as days
+				select 0 as count, '3 Months to 1 Year' as days
 				union
 				select 0 as count, '1 Year to 3 Years' as days
 				union
@@ -3106,7 +3099,7 @@ Highcharts.chart('associatetrend', {
     },
     credits: false,
     xAxis: {
-        categories: ['Under 3 Months','3 to 6 Months','6 Months to 1 Year','1 Year to 3 Years','3 Years to 5 Years','5 Years Plus']
+        categories: ['Under 3 Months','3 Months to 1 Year','1 Year to 3 Years','3 Years to 5 Years','5 Years Plus']
     },
     yAxis: {
         min: 0,
