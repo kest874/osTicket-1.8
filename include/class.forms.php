@@ -4649,14 +4649,14 @@ class CheckboxWidget extends Widget {
         if (isset($config['classes']))
             $classes = array_merge($classes, (array) $config['classes']);
         ?>
-        <label for="<?php echo $this->id; ?>" class="custom-control custom-checkbox m-b-0">
-        <input  class="custom-control-input" id="<?php echo $this->id; ?>"
-            type="checkbox" name="<?php echo $this->name; ?>[]" <?php
-            if ($this->value) echo 'checked="checked"'; ?> value="<?php
-            echo $this->field->get('id'); ?>"/><?php echo $this->field->get('label'); ?>
-        
-        <span class="custom-control-indicator"></span>
-<span class="custom-control-description"><?php
+		
+		<div class="custom-control custom-switch">
+             <input type="checkbox" class="custom-control-input" id="<?php echo $this->id; ?>" name="<?php echo $this->name; ?>[]" value="<?php
+            echo $this->field->get('id'); ?>" <?php
+            if ($this->value) echo 'checked="checked"'; ?>>
+             <label class="custom-control-label" for="<?php echo $this->id; ?>"><?php echo $this->field->get('label'); ?> </label>
+         </div>
+<?php
         if ($config['desc']) {
             echo Format::viewableImages($config['desc']);
         } ?></span>
