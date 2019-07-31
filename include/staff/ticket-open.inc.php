@@ -200,17 +200,11 @@ if ($_POST)
                       <div>
                         <div class=" <?php if ($errors['isrecordable'] || !$topic){ echo 'has-danger';}?>">
                         
-                        <label for="isRecordable" class="custom-control custom-checkbox m-b-0">
-                        <input  class="custom-control-input" id="isRecordable"
-                                    type="checkbox" name="isRecordable" />Recordable
-                                
-                                <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description"></span>
-                                
-                                </label>
-                        
-                        
-                            <?php if ($errors['isrecordable']){ ?>
+						<div class="custom-control custom-switch">
+							 <input type="checkbox" class="custom-control-input" id="isRecordable" name="isRecordable" >
+							 <label class="custom-control-label" for="isRecordable">Recordable</label>
+						</div>
+						<?php if ($errors['isrecordable']){ ?>
                             <div class="form-control-feedback-danger"><?php echo __('');?></div>
                             <?php }?>
                                   </div>    
@@ -220,18 +214,11 @@ if ($_POST)
                 <div class="form-group hidden" id="chkDART">
                       <div>
                         <div class=" <?php if ($errors['isdart'] || !$topic){ echo 'has-danger';}?>">
-                        
-                        <label for="isdart" class="custom-control custom-checkbox m-b-0" style="display:none;" id="isdartlbl">
-                        <input  class="custom-control-input" id="isdart"
-                                    type="checkbox" name="isdart"  />Days Away Restricted or Transferred
-                                
-                                <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description"></span>
-                                
-                                </label>
-                        
-                        
-                            <?php if ($errors['isdart']){ ?>
+						<div class="custom-control custom-switch" id="isdartswitch" style="display:none;">
+							 <input type="checkbox" class="custom-control-input" id="isdart" name="isdart" >
+							 <label class="custom-control-label" for="isdart">Days Away Restricted or Transferred</label>
+						</div>
+	                   <?php if ($errors['isdart']){ ?>
                             <div class="form-control-feedback-danger"><?php echo __('');?></div>
                             <?php }?>
                                   </div>    
@@ -248,7 +235,7 @@ var screensize= $(window).width();
 $("#isRecordable").on("click", function(){
     
     if($('#isRecordable')[0].checked){
-        $("#isdartlbl").css('display','');
+        $("#isdartswitch").css('display','');
         if (screensize < 1400){
             $("#dynamic-form").css('margin-top','-25px');
             
@@ -257,7 +244,7 @@ $("#isRecordable").on("click", function(){
             $("#dynamic-form").css('margin-top','-1px');
         }
     } else {
-        $("#isdartlbl").css('display','none');
+        $("#isdartswitch").css('display','none');
         $('#isdart').prop('checked', false);
         if (screensize < 1400){
             $("#dynamic-form").css('margin-top','0px');

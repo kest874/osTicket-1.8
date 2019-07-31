@@ -52,7 +52,7 @@ background: "rgba(0, 0, 0, 0.2)"
 <div class="subnav">
 
     <div class="float-left subnavtitle" id="ticketviewtitle">
-        <a href="tickets.php?id=<?php echo $ticket->getId(); ?>" title="<?php echo __('Reload'); ?>"><i class="icon-refresh"></i>
+        <a href="tickets.php?id=<?php echo $ticket->getId(); ?>" title="<?php echo __('Reload'); ?>"><i class="fa fa-refresh"> </i>
             <?php echo sprintf(__('Incident #%s'), $ticket->getNumber()); ?></a>
                 
                 <span  class=""> - <span style="color: <?php echo $ticket->isOpen() ? '#51c351;' : '#f00;'; ?>">
@@ -438,17 +438,12 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                       <div>
                         <div class=" <?php if ($errors['isrecordable'] || !$topic){ echo 'has-danger';}?>">
                         
-                        <label for="isRecordable" class="custom-control custom-checkbox m-b-0">
-                        <input  class="custom-control-input isRecordable" id="isRecordable"
-                                    type="checkbox" name="isRecordable" <?php
-                                    if ($recordable==1) echo 'checked="checked"'; ?> />Recordable
-                                
-                                <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description"></span>
-                                
-                                </label>
-                        
-                        
+						
+						<div class="custom-control custom-switch">
+							 <input type="checkbox" class="custom-control-input" id="isRecordable" name="isRecordable" <?php
+                                    if ($recordable==1) echo 'checked="checked"'; ?>>
+							 <label class="custom-control-label" for="isRecordable">Recordable</label>
+						</div>
                             <?php if ($errors['isrecordable']){ ?>
                             <div class="form-control-feedback-danger"><?php echo __('');?></div>
                             <?php }?>
@@ -462,22 +457,16 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                 <div class="form-group">
                       <div>
                         <div class=" <?php if ($errors['isdart'] || !$topic){ echo 'has-danger';}?>">
-                        
-                        <label for="isdart" <?php if ($recordable==0) echo 'style="display:none;"'; ?>   class="custom-control custom-checkbox m-b-0" id="isdartlbl">
-                        <input class="custom-control-input" id="isdart"
-                                    type="checkbox" name="isdart" <?php
-                                    if ($dart==1) echo 'checked="checked"'; ?> />Days Away Restricted or Transferred
-                                
-                                <span class="custom-control-indicator"></span>
-                        <span class="custom-control-description"></span>
-                                
-                                </label>
-                        
-                        
-                            <?php if ($errors['isdart']){ ?>
+						<div class="custom-control custom-switch" id="isdartswitch" <?php
+                                    if (!$recordable==1) echo 'style="display:none;"'; ?>>
+							 <input type="checkbox" class="custom-control-input" id="isdart" name="isdart" <?php
+                                    if ($dart==1) echo 'checked="checked"'; ?>>
+							 <label class="custom-control-label" for="isdart">Days Away Restricted or Transferred</label>
+						</div>
+						<?php if ($errors['isdart']){ ?>
                             <div class="form-control-feedback-danger"><?php echo __('');?></div>
-                            <?php }?>
-                                  </div>    
+                        <?php }?>
+                        </div>    
                         </div>
                     </div>
             </div>
@@ -1035,9 +1024,9 @@ $(".dropdown-menu a").click(function() {
 });
 $("#isRecordable").on("click", function(){
      if($('#isRecordable')[0].checked){
-         $("#isdartlbl").css('display','');
+         $("#isdartswitch").css('display','');
      } else {
-         $("#isdartlbl").css('display','none');
+         $("#isdartswitch").css('display','none');
          $('#isdart').prop('checked', false);
          
      }
