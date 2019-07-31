@@ -183,29 +183,24 @@ if (count($bks) > 1) {
           <td colspan="2">
             <div class="error"><?php echo $errors['isadmin']; ?></div>
             <div class="error"><?php echo $errors['isactive']; ?></div>
-            
-    <label class="custom-control custom-checkbox">
-    <input type="checkbox"  name="islocked" value="1"
-              <?php echo (!$staff->isactive) ? 'checked="checked"' : '';
-                ?> class="custom-control-input">
-    <span class="custom-control-indicator"></span>
-    <span class="custom-control-description"><strong><?php echo __('Disabled'); ?> <strong></span>
-    </label>
-            
-    <label class="custom-control custom-checkbox">
-    <input type="checkbox"  name="isadmin" value="1"
-              <?php echo ($staff->isadmin) ? 'checked="checked"' : '';
-                ?> class="custom-control-input">
-    <span class="custom-control-indicator"></span>
-    <span class="custom-control-description"><strong><?php echo __(Administrator); ?> <strong></span>
-    </label>
-    
-            <br/>
+		
+		
+		<div class="custom-control custom-switch">
+             <input type="checkbox" class="custom-control-input" id="islocked" name="islocked"  value="1"<?php echo (!$staff->isactive) ? 'checked="checked"' : '';
+                ?>>
+             <label class="custom-control-label" for="islocked"><?php echo __('Disabled'); ?> </label>
+         </div>
+
+			<div class="custom-control custom-switch">
+             <input type="checkbox" class="custom-control-input" id="isadmin" name="isadmin" value="1" <?php echo ($staff->isadmin) ? 'checked="checked"' : '';
+                ?>>
+             <label class="custom-control-label" for="isadmin"><?php echo __('Administrator'); ?> </label>
+         </div>    
         </tr>
       </tbody>
     </table>
 
-    <div style="padding:8px 3px; margin-top: 1.6em">
+    <div>
         <strong class="big"><?php echo __('Internal Notes');?>: </strong>
         <?php echo __("Be liberal, they're internal");?>
     </div>
