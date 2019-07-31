@@ -440,12 +440,12 @@ $tcount = $ticket->getThreadEntries($types)->count();
 ?>
 <ul class="nav nav-tabs" id="ticket_tabs" >
     <li class="nav-item "><a class="nav-link active" id="ticket-thread-tab" href="#ticket_thread"  data-toggle="tab"><?php
-        echo sprintf(__('Suggestion Timeline <span class="badge badge-primary badge-pill">%d</span>'), $tcount); ?></a>
+        echo sprintf(__('Suggestion Timeline <span class="badge badge-primary badge-pill">%d</span>'), $tcount); ?></a></li>
     <li class="nav-item"><a class="nav-link" id="ticket-tasks-tab" href="#tasks" data-toggle="tab" ><?php
         echo __('Tasks');
         if ($ticket->getNumTasks())
             echo sprintf('&nbsp; <span class="badge badge-primary badge-pill">%d</span>', $ticket->getNumTasks());
-        ?></a>
+        ?></a></li>
 </ul>
 <div class="tab-content">
  <div id="tasks" class="tab-pane">
@@ -892,7 +892,7 @@ $(function() {
                         
     })
 	
-	    $('#tasks').click(function(e){
+	    $('#ticket-tasks-tab').click(function(e){
     	e.preventDefault();
         $('#ticket_tabs a[href="#tasks"]').tab('show');
         // Scroll to the response section.
