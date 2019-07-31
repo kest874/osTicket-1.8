@@ -1130,7 +1130,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
 		foreach ($results as $result) { return $result['shiftoccuredon'];}
 		
 		case 'ticket_topic':
-		foreach ($results as $result) { return $result['subject'];}
+		foreach ($results as $result) { return $result['topic'];}
 		
 		case 'ticket_isrecordable':
 		foreach ($results as $result) { return $result['isrecordable'];}
