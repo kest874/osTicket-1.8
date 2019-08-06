@@ -578,16 +578,7 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
             $ecb = function($t) {
                 $t->logEvent('closed');
             };
-         
-					$this->AlertClose(array(
-                        'note' => $comments,
-                        'title' => sprintf(
-                            __('Status changed to %s'),
-                            $this->getStatus())
-                        ),
-                    $errors,
-                    $thisstaff);
-		
+        	
             break;
         default:
             return false;
@@ -616,40 +607,6 @@ class Task extends TaskModel implements RestrictedAccess, Threadable {
         return true; 
     }
 
-	
-	function  AlertClose($entry, $vars = array()) {
-        global $cfg;
-
-        if (!($dept=$this->getDept())
-            || !($tpl=$dept->getTemplate())
-            || !($msg=$tpl->getTaskAlertCloseMsgTemplate())
-            || !($email=$dept->getEmail())
-        ) {
-            return;
-        }
-
-        $vars = array_merge($vars, array(
-            'message' => (string) $entry,
-            'poster' => $poster ?: _S('A collaborator'),
-            )
-        );
-
-        $msg = $this->replaceVars($msg->asArray(), $vars);
-
-        //$attachments = $cfg->emailAttachments()?$entry->getAttachments():array();
-        $options = array('thread' => $entry);
-
-        //foreach ($recipients as $recipient) {
-            // Skip folks who have already been included on this part of
-            // the conversation
-           // if (isset($skip[$recipient->getUserId()]))
-            //    continue;
-            $notice = $this->replaceVars($msg, array('recipient' => $recipient));
-            $email->sendAlert($cfg->alertGroupEmail(), $notice['subj'], $notice['body'], null,
-                $options);
-        //}
-    }
-	
     function to_json() {
 
         $info = array(
