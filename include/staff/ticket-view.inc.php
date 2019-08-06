@@ -440,7 +440,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
 ?>
 <ul class="nav nav-tabs" id="ticket_tabs" >
     <li class="nav-item "><a class="nav-link active" id="ticket-thread-tab" href="#ticket_thread"  data-toggle="tab"><?php
-        echo sprintf(__('Suggestion Timeline <span class="badge badge-primary badge-pill">%d</span>'), $tcount); ?></a></li>
+        echo sprintf(__('Suggestion Timeline')); ?></a></li>
     <li class="nav-item"><a class="nav-link" id="ticket-tasks-tab" href="#tasks" data-toggle="tab" ><?php
         echo __('Tasks');
         if ($ticket->getNumTasks())

@@ -458,8 +458,7 @@ class FormField {
             'text'  => array(   /* @trans */ 'Short Answer', 'TextboxField'),
             'memo' => array(    /* @trans */ 'Long Answer', 'TextareaField'),
             'thread' => array(  /* @trans */ 'Thread Entry', 'ThreadEntryField', false),
-            'datetime' => array(/* @trans */ 'Date', 'DatetimeField'),
-            'time' => array(/* @trans */ 'Time', 'TimeField'),
+            'datetime' => array(/* @trans */ 'Date and Time', 'DatetimeField'),
             'phone' => array(   /* @trans */ 'Phone Number', 'PhoneField'),
             'bool' => array(    /* @trans */ 'Checkbox', 'BooleanField'),
             'choices' => array( /* @trans */ 'Choices', 'ChoiceField'),
@@ -1500,12 +1499,6 @@ class ChoiceField extends FormField {
             return implode(', ', array_keys($value));
         return (string) $value;
     }
-    
-    function asVar($value, $id=false) {
-        $value = $this->to_php($value);
-        return $this->toString($this->getChoice($value));
-    }
-    
     function whatChanged($before, $after) {
         $B = (array) $before;
         $A = (array) $after;
@@ -1647,119 +1640,45 @@ class ChoiceField extends FormField {
 }
 class DatetimeField extends FormField {
     static $widget = 'DatetimePickerWidget';
-    var $min = null;
-    var $max = null;
-    static function intervals($count=2, $i='') {
-        $intervals = array(
-            'i' => _N('minute', 'minutes', $count),
-            'h' => _N('hour', 'hours', $count),
-            'd' => _N('day','days', $count),
-            'w' => _N('week', 'weeks', $count),
-            'm' => _N('month', 'months', $count),
-        );
-        return $i ? $intervals[$i] : $intervals;
-    }
-    // Get php DatateTime object of the field  - null if value is empty
-    function getDateTime($value=null) {
-        return Format::parseDateTime($value ?: $this->value);
-    }
-    // Get effective timezone for the field
-    function getTimeZone() {
-        global $cfg;
-        $config = $this->getConfiguration();
-        $timezone = new DateTimeZone($config['timezone'] ?:
-                $cfg->getTimezone());
-        return $timezone;
-    }
-    function getMinDateTime() {
-        if (!isset($this->min)) {
-            $config = $this->getConfiguration();
-            $this->min = $config['min']
-                ? Format::parseDateTime($config['min']) : false;
-        }
-        return $this->min;
-    }
-    function getMaxDateTime() {
-        if (!isset($this->max)) {
-            $config = $this->getConfiguration();
-            $this->max = $config['max']
-                ? Format::parseDateTime($config['max']) : false;
-        }
-        return $this->max;
-    }
-    function getPastPresentLabels() {
-      return array(__('Create Date'), __('Reopen Date'),
-                    __('Close Date'), __('Last Update'));
-    }
     function to_database($value) {
-        // Store time in format given by Date Picker (DateTime::W3C)
-        return $value;
+        // Store time in gmt time, unix epoch format
+        return $value ? date('Y-m-d H:i:s', $value) : $value;
     }
     function to_php($value) {
-        if (strtotime($value) <= 0)
-            return 0;
-        return $value;
-    }
-    function display($value) {
-        global $cfg;
-        if (!$value || !($datetime = Format::parseDateTime($value)))
-            return '';
-        $config = $this->getConfiguration();
-        if ($config['gmt'])
-            return $this->format((int) $datetime->format('U'));
-        // Force timezone if field has one.
-        if ($config['timezone']) {
-            $timezone = new DateTimezone($config['timezone']);
-            $datetime->setTimezone($timezone);
-        }
-        $value = $this->format($datetime->format('U'),
-                $datetime->getTimezone()->getName());
-        // No need to show timezone
-        if (!$config['time'])
+        if (!$value)
             return $value;
-        // Display is NOT timezone aware show entry's timezone.
-        return sprintf('%s (%s)',
-                $value, $datetime->format('T'));
-    }
-    function from_query($row, $name=false) {
-        $value = parent::from_query($row, $name);
-        $timestamp = is_int($value) ? $value : (int) strtotime($value);
-        return ($timestamp > 0) ? $timestamp : '';
-    }
-    function format($timestamp, $timezone=false) {
-        if (!$timestamp || $timestamp <= 0)
-            return '';
-        $config = $this->getConfiguration();
-        if ($config['time'])
-            $formatted = Format::datetime($timestamp, false, $timezone);
         else
-            $formatted = Format::date($timestamp, false, false, $timezone);
-        return $formatted;
-    }
-    function toString($value) {
-        $timestamp = is_int($value) ? $value : (int) strtotime($value);
-        if ($timestamp <= 0)
-            return '';
-        return $this->format($timestamp);
+            return (int) strtotime($value);
     }
     function asVar($value, $id=false) {
-        global $cfg;
-        if (!$value)
-            return null;
-        $datetime = $this->getDateTime($value);
-        $config = $this->getConfiguration();
-        if (!$config['gmt'] || !$config['time'])
-            $timezone  = $datetime->getTimezone()->getName();
-        else
-            $timezone  = false;
-        return  new FormattedDate($value, array(
-                    'timezone'  =>  $timezone,
-                    'format'    =>  $config['time'] ? 'long' : 'short'
-                    )
-                );
+        if (!$value) return null;
+        return new FormattedDate((int) $value, 'UTC', false, false);
     }
     function asVarType() {
         return 'FormattedDate';
+    }
+    function toString($value) {
+        // If GMT is set, convert to local time zone. Otherwise, leave
+        // unchanged (default TZ is UTC)
+        $config = $this->getConfiguration();
+        $fromDb = @$config['fromdb'] ?: false;
+        if (!$value)
+            return '';
+        if (is_array($value) && isset($value['until'])) {
+            $n = $value['until'];
+            $intervals = array(
+                'i' => _N('minute', 'minutes', $n),
+                'h' => _N('hour', 'hours', $n),
+                'd' => _N('day', 'days', $n),
+                'w' => _N('week', 'weeks', $n),
+                'm' => _N('month', 'months', $n),
+            );
+            return sprintf('%d %s', $n, $intervals[$value['int'] ?: 'd']);
+        }
+        if ($config['time'])
+            return Format::datetime($value, $fromDb, !$config['gmt'] ? 'UTC' : false);
+        else
+            return Format::date($value, $fromDb, false, !$config['gmt'] ? 'UTC' : false);
     }
     function getConfigurationOptions() {
         return array(
@@ -1767,59 +1686,34 @@ class DatetimeField extends FormField {
                 'id'=>1, 'label'=>__('Time'), 'required'=>false, 'default'=>false,
                 'configuration'=>array(
                     'desc'=>__('Show time selection with date picker')))),
-            'timezone' => new TimezoneField(array(
-                'id'=>2, 'label'=>__('Timezone'), 'required'=>false,
-                'hint'=>__('Timezone of the date time selection'),
-                'configuration' => array('autodetect'=>false,
-                    'prompt' => __("User's timezone")),
-               'visibility' => new VisibilityConstraint(
-                    new Q(array('time__eq'=> true)),
-                    VisibilityConstraint::HIDDEN
-                ),
-                )),
             'gmt' => new BooleanField(array(
-                'id'=>3, 'label'=>__('Timezone Aware'), 'required'=>false,
+                'id'=>2, 'label'=>__('Timezone Aware'), 'required'=>false,
                 'configuration'=>array(
                     'desc'=>__("Show date/time relative to user's timezone")))),
             'min' => new DatetimeField(array(
-                'id'=>4, 'label'=>__('Earliest'), 'required'=>false,
+                'id'=>3, 'label'=>__('Earliest'), 'required'=>false,
                 'hint'=>__('Earliest date selectable'))),
             'max' => new DatetimeField(array(
-                'id'=>5, 'label'=>__('Latest'), 'required'=>false,
+                'id'=>4, 'label'=>__('Latest'), 'required'=>false,
                 'default'=>null, 'hint'=>__('Latest date selectable'))),
             'future' => new BooleanField(array(
-                'id'=>6, 'label'=>__('Allow Future Dates'), 'required'=>false,
+                'id'=>5, 'label'=>__('Allow Future Dates'), 'required'=>false,
                 'default'=>true, 'configuration'=>array(
                     'desc'=>__('Allow entries into the future' /* Used in the date field */)),
             )),
         );
     }
     function validateEntry($value) {
-        global $cfg;
         $config = $this->getConfiguration();
         parent::validateEntry($value);
-        if (!$value || !($datetime = Format::parseDateTime($value)))
-            return;
-        // Parse value to DateTime object
-        $val = Format::parseDateTime($value);
-        // Get configured min/max (if any)
-        $min = $this->getMinDateTime();
-        $max = $this->getMaxDateTime();
-        if (!$val) {
+        if (!$value) return;
+        if ($config['min'] and $value < $config['min'])
+            $this->_errors[] = __('Selected date is earlier than permitted');
+        elseif ($config['max'] and $value > $config['max'])
+            $this->_errors[] = __('Selected date is later than permitted');
+        // strtotime returns -1 on error for PHP < 5.1.0 and false thereafter
+        elseif ($value === -1 or $value === false)
             $this->_errors[] = __('Enter a valid date');
-        } elseif ($min and $val < $min) {
-            $this->_errors[] = sprintf('%s (%s)',
-                    __('Selected date is earlier than permitted'),
-                     Format::date($min->getTimestamp(), false, false,
-                         $min->getTimezone()->getName() ?: 'UTC')
-                     );
-        } elseif ($max and $val > $max) {
-            $this->_errors[] = sprintf('%s (%s)',
-                    __('Selected date is later than permitted'),
-                    Format::date($max->getTimestamp(), false, false,
-                        $max->getTimezone()->getName() ?: 'UTC')
-                    );
-        }
     }
     // SearchableField interface ------------------------------
     function getSearchMethods() {
@@ -1842,14 +1736,21 @@ class DatetimeField extends FormField {
     function getSearchMethodWidgets() {
         $config_notime = $config = $this->getConfiguration();
         $config_notime['time'] = false;
-        $nday_form = function($x=5) {
+        $nday_form = function() {
+            $intervals = array(
+                'i' => _N('minute', 'minutes', 5),
+                'h' => _N('hour', 'hours', 5),
+                'd' => _N('day','days', 5),
+                'w' => _N('week', 'weeks', 5),
+                'm' => _N('month', 'months', 5),
+            );
             return array(
                 'until' => new TextboxField(array(
                     'configuration' => array('validator'=>'number', 'size'=>4))
                 ),
                 'int' => new ChoiceField(array(
                     'default' => 'd',
-                    'choices' => self::intervals($x),
+                    'choices' => $intervals,
                 )),
             );
         };
@@ -1896,10 +1797,9 @@ class DatetimeField extends FormField {
         $name = $name ?: $this->get('name');
         $now = SqlFunction::NOW();
         $config = $this->getConfiguration();
-       if (is_int($value))
-          $value = DateTime::createFromFormat('U', !$config['gmt'] ? Misc::gmtime($value) : $value) ?: $value;
-       elseif (is_string($value))
-           $value = Format::parseDateTime($value) ?: $value;
+        $value = is_int($value)
+            ? DateTime::createFromFormat('U', !$config['gmt'] ? Misc::gmtime($value) : $value) ?: $value
+            : $value;
         switch ($method) {
         case 'equal':
             $l = clone $value;
@@ -1988,279 +1888,6 @@ class DatetimeField extends FormField {
         }
     }
     function describeSearch($method, $value, $name=false) {
-        $name = $name ?: $this->get('name');
-        $desc = $this->describeSearchMethod($method);
-        switch ($method) {
-            case 'between':
-                return sprintf($desc, $name,
-                        $this->toString($value['left']),
-                        $this->toString($value['right']));
-            case 'ndays':
-            case 'ndaysago':
-            case 'distfut':
-            case 'distpast':
-                $interval = sprintf('%s %s', $value['until'],
-                        self::intervals($value['until'], $value['int']));
-                return sprintf($desc, $name, $interval);
-                break;
-            case 'future':
-            case 'past':
-                return sprintf($desc, $name);
-            case 'before':
-            case 'after':
-                return sprintf($desc, $name, $this->toString($value));
-            default:
-                return parent::describeSearch($method, $value, $name);
-        }
-    }
-    function supportsQuickFilter() {
-        return true;
-    }
-    function getQuickFilterChoices() {
-        return array(
-            'h' => __('Today'),
-            'm' => __('Tomorrow'),
-            'g' => __('Yesterday'),
-            'l7' => __('Last 7 days'),
-            'l30' => __('Last 30 days'),
-            'n7' => __('Next 7 days'),
-            'n30' => __('Next 30 days'),
-            /* Ugh. These boundaries are so difficult in SQL
-            'w' =>  __('This Week'),
-            'm' =>  __('This Month'),
-            'lw' => __('Last Week'),
-            'lm' => __('Last Month'),
-            'nw' => __('Next Week'),
-            'nm' => __('Next Month'),
-            */
-        );
-    }
-    function applyQuickFilter($query, $qf_value, $name=false) {
-        $name = $name ?: $this->get('name');
-        $now = SqlFunction::NOW();
-        $midnight = Misc::dbtime(time() - (time() % 86400));
-        switch ($qf_value) {
-        case 'l7':
-            return $query->filter([
-                "{$name}__range" => array($now->minus(SqlInterval::DAY(7)), $now),
-            ]);
-        case 'l30':
-            return $query->filter([
-                "{$name}__range" => array($now->minus(SqlInterval::DAY(30)), $now),
-            ]);
-        case 'n7':
-            return $query->filter([
-                "{$name}__range" => array($now, $now->plus(SqlInterval::DAY(7))),
-            ]);
-        case 'n30':
-            return $query->filter([
-                "{$name}__range" => array($now, $now->plus(SqlInterval::DAY(30))),
-            ]);
-        case 'g':
-            $midnight -= 86400;
-             // Fall through to the today case
-        case 'm':
-            if ($qf_value === 'm') $midnight += 86400;
-             // Fall through to the today case
-        case 'h':
-            $midnight = DateTime::createFromFormat('U', $midnight);
-            return $query->filter([
-                "{$name}__range" => array($midnight,
-                    SqlExpression::plus($midnight, SqlInterval::DAY(1))),
-            ]);
-        }
-    }
-}
-class TimeField extends FormField {
-    static $widget = 'TimePickerWidget';
-    function to_database($value) {
-        // Store time in gmt time, unix epoch format
-        return $value ? date('H:i:s', $value) : $value;
-    }
-    function to_php($value) {
-        if (!$value)
-            return $value;
-        else
-            return (int) strtotime($value);
-    }
-    function asVar($value, $id=false) {
-        if (!$value) return null;
-        return new FormattedDate((int) $value, 'UTC', false, false);
-    }
-    function asVarType() {
-        return 'FormattedDate';
-    }
-    function toString($value) {
-        // If GMT is set, convert to local time zone. Otherwise, leave
-        // unchanged (default TZ is UTC)
-        $config = $this->getConfiguration();
-        $fromDb = @$config['fromdb'] ?: false;
-        if (!$value)
-            return '';
-        if (is_array($value) && isset($value['until'])) {
-            $n = $value['until'];
-            $intervals = array(
-                'i' => _N('minute', 'minutes', $n),
-                'h' => _N('hour', 'hours', $n),
-                'd' => _N('day', 'days', $n),
-                'w' => _N('week', 'weeks', $n),
-                'm' => _N('month', 'months', $n),
-            );
-            return sprintf('%d %s', $n, $intervals[$value['int'] ?: 'd']);
-        }
-        if ($config['time'])
-            return Format::datetime($value, $fromDb, !$config['gmt'] ? 'UTC' : false);
-        else
-            return Format::date($value, $fromDb, false, !$config['gmt'] ? 'UTC' : false);
-    }
-    function getConfigurationOptions() {
-        return array(
-            'time' => new BooleanField(array(
-                'id'=>1, 'label'=>__('Time'), 'required'=>false, 'default'=>false,
-                'configuration'=>array(
-                    'desc'=>__('Show time selection with date picker')))),
-            'gmt' => new BooleanField(array(
-                'id'=>2, 'label'=>__('Timezone Aware'), 'required'=>false,
-                'configuration'=>array(
-                    'desc'=>__("Show date/time relative to user's timezone")))),
-            
-            
-        );
-    }
-    // function validateEntry($value) {
-        // $config = $this->getConfiguration();
-        // parent::validateEntry($value);
-        // if (!$value) return;
-        // if ($config['min'] and $value < $config['min'])
-            // $this->_errors[] = __('Selected date is earlier than permitted');
-        // elseif ($config['max'] and $value > $config['max'])
-            // $this->_errors[] = __('Selected date is later than permitted');
-        ////strtotime returns -1 on error for PHP < 5.1.0 and false thereafter
-        // elseif ($value === -1 or $value === false)
-            // $this->_errors[] = __('Enter a valid date');
-    // }
-    // SearchableField interface ------------------------------
-    function getSearchMethods() {
-        return array(
-            'set' =>        __('has a value'),
-            'nset' =>       __('does not have a value'),
-            'equal' =>      __('on'),
-            'nequal' =>     __('not on'),
-            'before' =>     __('before'),
-            'after' =>      __('after'),
-            'between' =>    __('between'),
-            
-        );
-    }
-    function getSearchMethodWidgets() {
-        $config_notime = $config = $this->getConfiguration();
-        $config_notime['time'] = false;
-        $nday_form = function() {
-            $intervals = array(
-                'i' => _N('minute', 'minutes', 5),
-                'h' => _N('hour', 'hours', 5),
-                
-            );
-            return array(
-                'until' => new TextboxField(array(
-                    'configuration' => array('validator'=>'number', 'size'=>4))
-                ),
-                'int' => new ChoiceField(array(
-                    'default' => 'd',
-                    'choices' => $intervals,
-                )),
-            );
-        };
-        return array(
-            'set' => null,
-            'nset' => null,
-            'equal' => array('TimeField', array(
-                'configuration' => $config_notime,
-            )),
-            'nequal' => array('TimeField', array(
-                'configuration' => $config_notime,
-            )),
-            'before' => array('TimeField', array(
-                'configuration' => $config,
-            )),
-            'after' => array('TimeField', array(
-                'configuration' => $config,
-            )),
-            'between' => array('InlineformField', array(
-                'form' => array(
-                    'left' => new TimeField(),
-                    'text' => new FreeTextField(array(
-                        'configuration' => array('content' => 'and'))
-                    ),
-                    'right' => new TimeField(),
-                ),
-            )),
-            
-        );
-    }
-    function getSearchQ($method, $value, $name=false) {
-        static $intervals = array(
-            'h' => 'HOUR',
-            'i' => 'MINUTE',
-        );
-        $name = $name ?: $this->get('name');
-        $now = SqlFunction::NOW();
-        $config = $this->getConfiguration();
-        $value = is_int($value)
-            ? DateTime::createFromFormat('U', !$config['gmt'] ? Misc::gmtime($value) : $value) ?: $value
-            : $value;
-        switch ($method) {
-        case 'equal':
-            $l = clone $value;
-            $r = $value->add(new DateInterval('P1D'));
-            return new Q(array(
-                "{$name}__gte" => $l,
-                "{$name}__lt" => $r
-            ));
-        case 'nequal':
-            $l = clone $value;
-            $r = $value->add(new DateInterval('P1D'));
-            return Q::any(array(
-                "{$name}__lt" => $l,
-                "{$name}__gte" => $r,
-            ));
-        
-        case 'after':
-            return new Q(array("{$name}__gte" => $value));
-       
-        case 'before':
-            return new Q(array("{$name}__lt" => $value));
-        case 'between':
-            foreach (array('left', 'right') as $side) {
-                $value[$side] = is_int($value[$side])
-                    ? DateTime::createFromFormat('U', !$config['gmt']
-                        ? Misc::gmtime($value[$side]) : $value[$side]) ?: $value[$side]
-                    : $value[$side];
-            }
-            return new Q(array(
-                "{$name}__gte" => $value['left'],
-                "{$name}__lte" => $value['right'],
-            ));
-       
-        default:
-            return parent::getSearchQ($method, $value, $name);
-        }
-    }
-    function describeSearchMethod($method) {
-        switch ($method) {
-        case 'before':
-            return __('%1$s before %2$s' /* occurs before a time */);
-        case 'after':
-            return __('%1$s after %2$s' /* occurs after a date and time */);
-        
-        case 'between':
-            return __('%1$s between %2$s and %3$s');
-        
-        default:
-            return parent::describeSearchMethod($method);
-        }
-    }
-    function describeSearch($method, $value, $name=false) {
         if ($method === 'between') {
             $l = $this->toString($value['left']);
             $r = $this->toString($value['right']);
@@ -2274,13 +1901,13 @@ class TimeField extends FormField {
     }
     function getQuickFilterChoices() {
         return array(
-            // 'h' => __('Today'),
-            // 'm' => __('Tomorrow'),
-            // 'g' => __('Yesterday'),
-            // 'l7' => __('Last 7 days'),
-            // 'l30' => __('Last 30 days'),
-            // 'n7' => __('Next 7 days'),
-            // 'n30' => __('Next 30 days'),
+            'h' => __('Today'),
+            'm' => __('Tomorrow'),
+            'g' => __('Yesterday'),
+            'l7' => __('Last 7 days'),
+            'l30' => __('Last 30 days'),
+            'n7' => __('Next 7 days'),
+            'n30' => __('Next 30 days'),
             /* Ugh. These boundaries are so difficult in SQL
             'w' =>  __('This Week'),
             'm' =>  __('This Month'),
@@ -2350,9 +1977,6 @@ class SectionBreakField extends FormField {
 }
 class RowStartField extends FormField {
     static $widget = 'RowStartWidget';
-    function isConfigurable() {
-        return false;
-    }
     function hasData() {
         return false;
     }
@@ -2370,9 +1994,6 @@ class RowStartField extends FormField {
 }
 class CarorRowEndField extends FormField {
     static $widget = 'CarorRowEndWidget';
-    function isConfigurable() {
-        return false;
-    }
     function hasData() {
         return false;
     }
@@ -2390,9 +2011,6 @@ class CarorRowEndField extends FormField {
 }
 class CardStartField extends FormField {
     static $widget = 'CardStartWidget';
-    function isConfigurable() {
-        return false;
-    }
     function hasData() {
         return false;
     }
@@ -2410,9 +2028,6 @@ class CardStartField extends FormField {
 }
 class ThreeColumnStartField extends FormField {
     static $widget = 'ThreeColumnStartWidget';
-    function isConfigurable() {
-        return false;
-    }
     function hasData() {
         return false;
     }
@@ -2430,9 +2045,6 @@ class ThreeColumnStartField extends FormField {
 }
 class SixColumnStartField extends FormField {
     static $widget = 'SixColumnStartWidget';
-    function isConfigurable() {
-        return false;
-    }
     function hasData() {
         return false;
     }
@@ -2450,9 +2062,6 @@ class SixColumnStartField extends FormField {
 }
 class NineColumnStartField extends FormField {
     static $widget = 'NineColumnStartWidget';
-    function isConfigurable() {
-        return false;
-    }
     function hasData() {
         return false;
     }
@@ -2470,9 +2079,6 @@ class NineColumnStartField extends FormField {
 }
 class TwelveColumnStartField extends FormField {
     static $widget = 'TwelveColumnStartWidget';
-    function isConfigurable() {
-        return false;
-    }
     function hasData() {
         return false;
     }
@@ -2490,10 +2096,6 @@ class TwelveColumnStartField extends FormField {
 }
 class ColumnEndField extends FormField {
     static $widget = 'ColumnEndWidget';
-    
-    function isConfigurable() {
-        return false;
-    }
     function hasData() {
         return false;
     }
@@ -2730,39 +2332,6 @@ class TopicField extends ChoiceField {
         );
     }
 }
-class TimezoneField extends ChoiceField {
-    static $widget = 'TimezoneWidget';
-    function hasIdValue() {
-        return false;
-    }
-    function getChoices($verbose=false) {
-        global $cfg;
-        $choices = array();
-        foreach (DateTimeZone::listIdentifiers() as $zone)
-            $choices[$zone] =  str_replace('/',' / ',$zone);
-        return $choices;
-    }
-    function whatChanged($before, $after) {
-        return FormField::whatChanged($before, $after);
-    }
-    function searchable($value) {
-        return null;
-    }
-    function getConfigurationOptions() {
-        return array(
-            'autodetect' => new BooleanField(array(
-                'id'=>1, 'label'=>__('Auto Detect'), 'required'=>false, 'default'=>true,
-                'configuration'=>array(
-                    'desc'=>__('Add Auto Detect Button'))
-            )),
-            'prompt' => new TextboxField(array(
-                'id'=>2, 'label'=>__('Prompt'), 'required'=>false, 'default'=>'',
-                'hint'=>__('Leading text shown before a value is selected'),
-                'configuration'=>array('size'=>40, 'length'=>40),
-            )),
-        );
-    }
-}
 class DepartmentField extends ChoiceField {
     function getWidget($widgetClass=false) {
         $widget = parent::getWidget($widgetClass);
@@ -2778,7 +2347,7 @@ class DepartmentField extends ChoiceField {
         $choices = array();
         if (($depts = Dept::getDepartments()))
             foreach ($depts as $id => $name)
-                //if (strlen($name) > 5)
+                if (strlen($name) > 5)
                 $choices[$id] = $name;
         return $choices;
     }
@@ -3574,11 +3143,7 @@ class TextareaWidget extends Widget {
         if (isset($config['html']) && $config['html']) {
             $class = array('richtext', 'no-bar');
             $class[] = @$config['size'] ?: 'small';
-		
-	   			
-		//if ($this->field->isRequiredForStaff() || $this->field->isRequiredForClose()) $class[] = 'requiredfield';
-		
-            $class = sprintf('class="form-control %s"', implode(' ', $class));
+            $class = sprintf('class="input-group %s"', implode(' ', $class));
             $this->value = Format::viewableImages($this->value);
         }
         
@@ -3596,46 +3161,15 @@ class TextareaWidget extends Widget {
         </div>   
        
        <?php } else { ?>
-        <textarea  <?php echo $rows." ".$cols." ".$maxlength." ".$disabled. "" .$class
+        <textarea style="display:none;" <?php echo $rows." ".$cols." ".$maxlength." ".$disabled. "" .$class
                 .' '.Format::array_implode('=', ' ', $attrs)
                 .' placeholder="'.$config['placeholder'].'"'; ?>
-				id="<?php echo $this->id; ?>"
-				name="<?php echo $this->name; ?>"><?php
+            id="<?php echo $this->id; ?>"
+            name="<?php echo $this->name; ?>"><?php
                 echo Format::htmlchars($this->value);
            
             ?></textarea>
-			
-			            <script type="text/javascript">
-                
-        <?php if ($this->field->getId() == 55||$this->field->getId() == 56) {?>        
-                $(function() {
-                var savetrigger = false;
-                        
-                $("#<?php echo $this->id; ?>").keyup(function (e) {
-                              
-                    var charCode = e.which || e.keyCode; 
-                         if (!(charCode === 9)){
-                            if (!savetrigger) {
-                            $("#<?php echo $this->id; ?>").notify({
-                                text: '<strong style="color:red;">Please ensure this field does not contain personal information (associate name, employee ID etc.)</strong>',
-                                image: '<i class="fa fa-exclamation-circle" style="color:red;"></i>'
-                            }, {
-                                style: 'metro',
-								className: 'warning',
-								autoHide: false,
-								clickToHide: true,
-								position:'top'
-                            });
-                                    }
-                                    
-                            savetrigger = true;
-                         }
-                    });
-             });       
-             <?php } ?>
-        
-            </script>
-			
+            
         <?php } ?>
         </span>
         <?php
@@ -3659,12 +3193,12 @@ class PhoneNumberWidget extends Widget {
         $config = $this->field->getConfiguration();
         list($phone, $ext) = explode("X", $this->value);
         ?>
-        <input id="<?php echo $this->id; ?>" type="tel" class="form-control form-control-sm " name="<?php echo $this->name; ?>" value="<?php
+        <input id="<?php echo $this->id; ?>" type="tel" name="<?php echo $this->name; ?>" value="<?php
         echo Format::htmlchars($phone); ?>"/><?php
         // Allow display of extension field even if disabled if the phone
         // number being edited has an extension
-        if ($ext || $config['ext']) { ?> <?php echo __('<label>Ext</label>'); ?>:
-            <input type="text" class="form-control form-control-sm " name="<?php
+        if ($ext || $config['ext']) { ?> <?php echo __('Ext'); ?>:
+            <input type="text" name="<?php
             echo $this->name; ?>-ext" value="<?php echo Format::htmlchars($ext);
                 ?>" size="5"/>
         <?php }
@@ -3727,7 +3261,7 @@ class ChoicesWidget extends Widget {
         if (!is_array($values))
             $values = $have_def ? array($def_key => $choices[$def_key]) : array();
         //if (isset($config['classes']))
-            $classes = 'class="select2 select2-multiple hidden'.$config['classes'].'"';
+            $classes = 'class="form-control form-control-sm '.$config['classes'].'"';
         ?>
         <select <?php echo $disabled ?> name="<?php echo $this->name; ?>[]"
             <?php echo implode(' ', array_filter(array($classes))); ?>
@@ -3746,15 +3280,17 @@ class ChoicesWidget extends Widget {
         }
         $this->emitChoices($choices, $values, $have_def, $def_key); ?>
         </select>
-
+        <?php
+        if ($config['multiselect']) {
+         ?>
         <script type="text/javascript">
         $(function() {
-            $(".select2").select2();
+            $("#<?php echo $this->id; ?>")
+            .select2({'minimumResultsForSearch':10, 'width': '350px'});
         });
-         
         </script>
        <?php
-        
+        }
     }
     function emitChoices($choices, $values=array(), $have_def=false, $def_key=null) {
         reset($choices);
@@ -4102,44 +3638,6 @@ class TabbedBoxChoicesWidget extends BoxChoicesWidget {
 <?php   }
     }
 }
-/**
-* TimezoneWidget extends ChoicesWidget to add auto-detect and select2 search
-* options
-*
-**/
-class TimezoneWidget extends ChoicesWidget {
-    function render($options=array()) {
-        parent::render($options);
-        $config = $this->field->getConfiguration();
-        if (@$config['autodetect']) {
-        ?>
-        <button type="button" class="action-button" onclick="javascript:
-            $('head').append($('<script>').attr('src', '<?php
-            echo ROOT_PATH; ?>js/jstz.min.js'));
-            var recheck = setInterval(function() {
-                if (window.jstz !== undefined) {
-                    clearInterval(recheck);
-                    var zone = jstz.determine();
-                    $('#<?php echo $this->id; ?>').val(zone.name()).trigger('change');
-                }
-            }, 100);
-            return false;"
-            style="vertical-align:middle">
-            <i class="icon-map-marker"></i> <?php echo __('Auto Detect'); ?>
-        </button>
-        <?php
-        } ?>
-        <script type="text/javascript">
-            $(function() {
-                $('#<?php echo $this->id; ?>').select2({
-                    allowClear: true,
-                    width: '300px'
-                });
-            });
-        </script>
-      <?php
-    }
-}
 class CheckboxWidget extends Widget {
     function __construct($field) {
         parent::__construct($field);
@@ -4155,18 +3653,16 @@ class CheckboxWidget extends Widget {
         if (isset($config['classes']))
             $classes = array_merge($classes, (array) $config['classes']);
         ?>
-		
-		<div class="custom-control custom-switch">
+		<span class="custom-control custom-switch">
              <input type="checkbox" class="custom-control-input" id="<?php echo $this->id; ?>" name="<?php echo $this->name; ?>[]" value="<?php
             echo $this->field->get('id'); ?>" <?php
             if ($this->value) echo 'checked="checked"'; ?>>
-             <label class="custom-control-label" for="<?php echo $this->id; ?>"><?php echo $this->field->get('label'); ?> </label>
-         </div>
-<?php
+             <label class="custom-control-label" for="<?php echo $this->id; ?>"><?php
         if ($config['desc']) {
             echo Format::viewableImages($config['desc']);
-        } ?></span>
-        
+        } ?><?php echo $this->field->get('label'); ?> </label>
+         </span>
+              
         </label>
         
 <?php
@@ -4189,117 +3685,6 @@ class DatetimePickerWidget extends Widget {
     function render($options=array()) {
         global $cfg;
         $config = $this->field->getConfiguration();
-        $timezone = $this->field->getTimezone();
-        if (!isset($this->value) && ($default=$this->field->get('default')))
-            $this->value = $default;
-        if ($this->value) {
-            if (is_int($this->value))
-                // Assuming UTC timezone.
-                $datetime = DateTime::createFromFormat('U', $this->value);
-            else {
-                $datetime = Format::parseDateTime($this->value);
-            }
-            if ($config['time']) {
-                // Convert to user's timezone for update.
-                $datetime->setTimezone($timezone);
-            }
-            $this->value = Format::date($datetime->getTimestamp(), false,
-                    false, $timezone ? $timezone->getName() : 'UTC');
-        } else {
-            $datetime = new DateTime('now');
-            $datetime->setTimezone($timezone);
-        }
-        ?>
-         <div class="form-group">
-                <div class="input-group input-group-sm date" id="<?php echo $this->id; ?>" data-target-input="nearest">
-                    <input type="text" name="<?php echo $this->name; ?>" value="<?php echo $this->value; ?>" class="form-control form-control-sm datetimepicker-input" data-target="#<?php echo $this->id; ?>"/>
-                    <div class="input-group-append" data-target="#<?php echo $this->id; ?>" data-toggle="datetimepicker">
-                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                    </div>
-                </div>
-            </div>
-    
-            <script type="text/javascript">
-                $(document).ready(function () {
-                    $('#<?php echo $this->id; ?>').datetimepicker({
-                    format: 'L',
-                    });
-                });
-        <?php if ($_SESSION["alrt"] == 1) {?>        
-                $(function() {
-                var savetrigger = false;
-                        
-                $("#<?php echo $this->id; ?>").on("change.datetimepicker", function (e) {
-                              
-                    var charCode = e.which || e.keyCode; 
-                         if (!(charCode === 9)){
-                            $("#savebutton").css("background-color", "#52bb56");
-                            $("#savebutton").css("color", "#fff");
-                            $("#cancelbutton").css("background-color", "#ef5350");
-                            $("#cancelbutton").css("color", "#fff");
-                            $("i.fa.fa-reply").css("color", "#eeeeee");
-                            $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
-                            $("#updatearea").css("display", "none");
-                            $("#detailschanged").css("display", "inherit");
-                            if (!savetrigger) {
-                            $.notify({
-                                text: 'Changes made please click the save <i class="fa fa-save"></i> or cancel <i //class="fa fa-ban"></i> button on the ribbon.',
-                                image: '<i class="fa fa-floppy-o"></i>'
-                            }, {
-                                style: 'metro',
-                                className: 'error',
-                                autoHide: false,
-                                clickToHide: true
-                            });
-                                    }
-                                    
-                            savetrigger = true;
-                         }
-                    });
-             });       
-             <?php 
-			 $_SESSION["alrt"] == 2;
-			 } ?>
-        
-            </script>
-        <?php
-        if ($config['time']) {
-            list($hr, $min) = explode(':', $datetime ?
-                    $datetime->format('H:i') : '');
-            // TODO: Add time picker -- requires time picker or selection with
-            //       Misc::timeDropdown
-            echo '&nbsp;' . Misc::timeDropdown($hr, $min, $this->name . ':time');
-            echo sprintf('&nbsp;<span class="faded">(<a href="#"
-                        data-placement="top" data-toggle="tooltip"
-                        title="%s">%s</a>)</span>',
-                    $datetime->getTimezone()->getName(),
-                    $datetime->format('T'));
-        }
-    }
-    /**
-     * Function: getValue
-     * Combines the datepicker date value and the time dropdown selected
-     * time value into a single date and time string value in DateTime::W3C
-     */
-    function getValue() {
-        global $cfg;
-        if ($value = parent::getValue()) {
-            // Effective timezone for the selection
-            $timezone = $this->field->getTimezone();
-            // See if we have time
-            $data = $this->field->getSource();
-            if ($value && isset($data[$this->name . ':time']))
-                $value .=' '.$data[$this->name . ':time'];
-            $dt = new DateTime($value, $timezone);
-            $value = $dt->format('Y-m-d H:i:s T');
-        }
-        return $value;
-    }
-}
-class TimePickerWidget extends Widget {
-    function render($options=array()) {
-        global $cfg;
-        $config = $this->field->getConfiguration();
         if ($this->value) {
             $this->value = is_int($this->value) ? $this->value :
                 strtotime($this->value);
@@ -4310,58 +3695,32 @@ class TimePickerWidget extends Widget {
                 $this->value += $tz->getOffset($D);
             }
             list($hr, $min) = explode(':', date('H:i', $this->value));
-            $this->value = Format::time($this->value, false, false, 'UTC');
+            $this->value = Format::date($this->value, false, false, 'UTC');
         }
         ?>
-            <div class="form-group">
-                <div class="input-group input-group-sm  date" id="<?php echo $this->id; ?>" data-target-input="nearest">
-                    <input type="text" name="<?php echo $this->name; ?>" value="<?php echo Format::htmlchars($this->value); ?>" class="form-control form-control-sm datetimepicker-input" data-target="#<?php echo $this->id; ?>"/>
-                    <div class="input-group-append" data-target="#<?php echo $this->id; ?>" data-toggle="datetimepicker">
-                        <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
-                    </div>
-                </div>
-            </div>
-    
-            <script type="text/javascript">
-                $(document).ready(function () {
-                    $('#<?php echo $this->id; ?>').datetimepicker({
-                    format: 'LT',
-                  });
+        <input type="text" name="<?php echo $this->name; ?>"
+            id="<?php echo $this->id; ?>" style="display:inline-block;width:auto"
+            value="<?php echo Format::htmlchars($this->value); ?>" size="12"
+            autocomplete="off" class="dp" />
+        <script type="text/javascript">
+            $(function() {
+                $('input[name="<?php echo $this->name; ?>"]').datepicker({
+                    <?php
+                    if ($config['min'])
+                        echo "minDate: new Date({$config['min']}000),";
+                    if ($config['max'])
+                        echo "maxDate: new Date({$config['max']}000),";
+                    elseif (!$config['future'])
+                        echo "maxDate: new Date().getTime(),";
+                    ?>
+                    numberOfMonths: 2,
+                    showButtonPanel: true,
+                    buttonImage: './images/cal.png',
+                    showOn:'both',
+                    dateFormat: $.translate_format('<?php echo $cfg->getDateFormat(true); ?>')
                 });
-                
-                $(function() {
-                var savetrigger = false;
-                        
-                $("#<?php echo $this->id; ?>").on("change.datetimepicker", function (e) {
-                              
-                    var charCode = e.which || e.keyCode; 
-                         if (!(charCode === 9)){
-                            $("#savebutton").css("background-color", "#52bb56");
-                            $("#savebutton").css("color", "#fff");
-                            $("#cancelbutton").css("background-color", "#ef5350");
-                            $("#cancelbutton").css("color", "#fff");
-                            $("i.fa.fa-reply").css("color", "#eeeeee");
-                            $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
-                            $("#updatearea").css("display", "none");
-                            $("#detailschanged").css("display", "inherit");
-                            if (!savetrigger) {
-                            $.notify({
-                                text: 'Changes made please click the save <i class="fa fa-save"></i> or cancel <i //class="fa fa-remove"></i> button on the ribbon.',
-                                image: '<i class="icon-save"></i>'
-                            }, {
-                                style: 'metro',
-                                className: 'error',
-                                autoHide: false,
-                                clickToHide: true
-                            });
-                                    }
-                                    
-                            savetrigger = true;
-                         }
-                    });
-             });       
-                
-            </script>
+            });
+        </script>
         <?php
         if ($config['time'])
             // TODO: Add time picker -- requires time picker or selection with
@@ -4452,7 +3811,7 @@ class ThreadEntryWidget extends Widget {
         <?php if ($options['modal'] !== 'ticketedit'){ ?>
         <textarea style="width:100%;" name="<?php echo $this->field->get('name'); ?>"
             placeholder="<?php echo Format::htmlchars($this->field->get('placeholder')); ?>"
-            class="form-control <?php if ($config['html']) echo 'richtext';
+            class="<?php if ($config['html']) echo 'richtext';
                 ?> draft draft-delete" <?php echo $attrs; ?>
             cols="21" rows="8" style="width:80%;"><?php echo
             Format::htmlchars($this->value) ?: $draft; ?></textarea>
@@ -4989,10 +4348,10 @@ class TransferForm extends Form {
         $fields = array(
             'dept' => new DepartmentField(array(
                     'id'=>1,
-                    'label' => __('Division'),
+                    'label' => __('Team'),
                     'flags' => hexdec(0X450F3),
                     'required' => true,
-                    'validator-error' => __('Division selection is required'),
+                    'validator-error' => __('Team selection is required'),
                     )
                 ),
             'comments' => new TextareaField(array(
@@ -5003,7 +4362,7 @@ class TransferForm extends Form {
                     'configuration' => array(
                         'html' => true,
                         'size' => 'small',
-                        'placeholder' => __('Optional reason for the change'),
+                        'placeholder' => __('Optional reason for the transfer'),
                         ),
                     )
                 ),

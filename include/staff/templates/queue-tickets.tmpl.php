@@ -337,8 +337,19 @@ $pageNav->setURL('tickets.php', $args);
 					<div class="input-group-append">
 					<button type="submit"  class="input-group-text" ><i class="fa fa-search"></i>
                     </button>
-                    <button type="submit"  class="input-group-text advsearch" href="#" onclick="javascript:
-                                    $.dialog('ajax.php/tickets/search', 201);"><i class=" fa fa-search-plus help-tip" href="#advanced" ></i>
+                    <button type="submit"  class="input-group-text advsearch" href="#" 
+					onclick="javascript:
+                           
+					 $.busyLoadFull('show',  { 
+						text: 'LOADING ...',
+						textColor: '#c82333',
+						color: '#c82333',
+						background: 'rgba(0, 0, 0, 0.3)'
+					});
+
+					$.dialog('ajax.php/tickets/search', 201);
+					document.getElementById('popup').style.display = 'none';"
+					><i class=" fa fa-search-plus help-tip" href="#advanced" ></i>
                     </button>
 					</div>
                 </div>
