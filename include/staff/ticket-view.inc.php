@@ -488,12 +488,14 @@ $tcount = $ticket->getThreadEntries($types)->count();
 ?>
 <ul class="nav nav-tabs" id="ticket_tabs" >
     <li class="nav-item "><a class="nav-link active" id="ticket-thread-tab" href="#ticket_thread"  data-toggle="tab"><?php
+
         echo sprintf(__('Incident Timeline <span class="badge badge-primary badge-pill">%d</span>'), $tcount); ?></a>
+
     <li class="nav-item"><a class="nav-link" id="ticket-tasks-tab" href="#tasks" data-toggle="tab" ><?php
         echo __('Countermeasures');
         if ($ticket->getNumTasks())
             echo sprintf('&nbsp; <span class="badge badge-primary badge-pill">%d</span>', $ticket->getNumTasks());
-        ?></a>
+        ?></a></li>
 </ul>
 <div class="tab-content">
  <div id="tasks" class="tab-pane">
@@ -811,7 +813,20 @@ $(function() {
             $('html, body').animate({scrollTop: $stop}, 'fast');
                         
     })
+
     $('#countermeasures').click(function(e){
+    	e.preventDefault();
+        $('#ticket_tabs a[href="#tasks"]').tab('show');
+        // Scroll to the response section.
+            var $stop = $(document).height();
+            var $s = $('div#ticket_tabs');
+            if ($s.length)
+                $stop = $s.offset().top-125
+            $('html, body').animate({scrollTop: $stop}, 'fast');
+                        
+    })
+	
+	    $('#ticket-tasks-tab').click(function(e){
     	e.preventDefault();
         $('#ticket_tabs a[href="#tasks"]').tab('show');
         // Scroll to the response section.

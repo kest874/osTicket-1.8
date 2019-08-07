@@ -11,6 +11,7 @@ $count = $tasks->count();
 $pageNav = new Pagenate($count,1, 100000); //TODO: support ajax based pages
 $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
 ?>
+
 <div id="tasks_content" style="display:block;" class="m-b-20">
 <div class="pull-left">
    <?php
@@ -47,12 +48,13 @@ $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
 <div>
 <?php
 if ($count) { ?>
+
 <form action="#tickets/<?php echo $ticket->getId(); ?>/tasks" method="POST"
     name='tasks' id="tasks" style="padding-top:7px;">
 <?php csrf_token(); ?>
  <input type="hidden" name="a" value="mass_process" >
  <input type="hidden" name="do" id="action" value="" >
- <table class="list" border="0" cellspacing="1" cellpadding="2" width="940">
+ <table class="table  table-sm table-striped" >
     <thead>
         <tr>
             <?php
@@ -85,10 +87,13 @@ if ($count) { ?>
        
         ?>
         <tr id="<?php echo $id; ?>">
-            <td align="center" class="nohover">
-                <input class="ckb" type="checkbox" name="tids[]"
-                value="<?php echo $id; ?>" <?php echo $sel?'checked="checked"':''; ?>>
-            </td>
+            <td align="center" >
+              <div class="custom-control custom-checkbox"> 
+                    <input type="checkbox"
+				id="chkb<?php echo $id; ?>" name="tids[]"  value="<?php echo $id; ?>" <?php echo $sel?'checked="checked"':''; ?>  class="custom-control-input">
+                    <label for="chkb<?php echo $id; ?>" class="custom-control-label"></label>
+              </div>
+			</td>
             <td align="center" nowrap>
               <a class="Icon no-pjax preview"
                 title="<?php echo __('Preview Task'); ?>"
