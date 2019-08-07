@@ -1,6 +1,6 @@
 <?php
 foreach ($form->errors(true) ?: array() as $message) {
-    ?><div class="error-banner"><?php echo $message;?></div><?php
+    ?><div class="alert alert-danger" role="alert"><?php echo $message;?></div><?php
 }
 $info = $search->getSearchFields($form);
 foreach (array_keys($info) as $F) {
@@ -42,7 +42,7 @@ foreach ($form->getFields() as $name=>$field) {
         ?>>
         <?php echo $field->render(); ?>
         <?php if (!$has_errors && $sub === 'search' && isset($info[$name]) && $info[$name]['active']) { ?>
-            <span class="m-l--15">
+            <span>
             <a href="#"  data-name="<?php echo Format::htmlchars($name); ?>" onclick="javascript:
     var $this = $(this),
         name = $this.data('name'),

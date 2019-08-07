@@ -1,5 +1,3 @@
-
-   
 <?php
 // Calling convention (assumed global scope):
 // $tickets - <QuerySet> with all columns and annotations necessary to
@@ -12,202 +10,101 @@ $view_all_tickets = $queue->ignoreVisibilityConstraints();
 $l = $_GET['l'];
 $t = $_GET['t'];
 $s = $_GET['s'];
-$r = $_GET['r'];
 
-
-if (isset($l)||isset($t)||isset($s)||isset($r)) $_SESSION['filter']=1;
+if (isset($l)||isset($t)||isset($s)) $_SESSION['filter']=1;
 
 $filters=$_SESSION['filter'];
 if ($_GET['a'] == 'search' || $_GET['queue'] == 'adhoc') $filters=0;
 
 if (is_numeric($l)) $_SESSION['loc'] = $l;
-if (is_numeric($t)) $_SESSION['top'] = $t;
+if (is_numeric($t)) $_SESSION['tea'] = $t;
 if (is_numeric($s)) $_SESSION['sta'] = $s;
-if (is_numeric($r)) $_SESSION['rec'] = $r;
 
 $loc = $_SESSION['loc'];
-$top = $_SESSION['top'];
+$tea = $_SESSION['tea'];
 $sta = $_SESSION['sta'];
-$rec = $_SESSION['rec'];
 
 $_SESSION['loc'] = $loc;
-$_SESSION['top'] = $top;
+$_SESSION['tea'] = $tea;
 $_SESSION['sta'] = $sta;
-$_SESSION['rec'] = $rec;
 $_SESSION['filter'] = $filters;
 
 $qfl = array();
 $qft = array();
 $qfs = array();
-$qfr = array();
 
 if ($loc !=='0')
-  $qfl =  array('dept__id' => $loc );
+  $qfl =  array('dept__pid' => $loc );
 
-if ($top !=='0')
-  $qft =  array('topic_id' => $top );
+if ($tea !=='0')
+  $qft =  array('dept_id' => $tea );
 
 if ($sta && $sta !==0)
   $qfs = array('status_id' => $sta);
-
-if ($rec <2)
-  $qfr = array('isrecordable' => $rec); 
   
 // Merge the filters  
-  $qf = array_merge($qfl,$qft,$qfs,$qfr);
+  $qf = array_merge($qfl,$qft,$qfs);
   
  $qfilter = Q::any(new Q($qf));
 
-if (($loc && $loc !==0) || ($top && $top !==0) || ($sta && $sta !==0|| ($rec <2)))
+if (($loc && $loc !==0) || ($sta && $sta !==0) || ($tea && $tea !==0))
 $tickets->filter($qfilter);
 
 
 $states = array('open');
 $states = array_merge($states, array('closed'));
 
-
     
-   
-    
-    
- $Location = Dept::objects()
-                ->order_by('name');
-   // var_dump($Location);           
+    $Location = Dept::objects()
+                ->order_by('name')
+                ->filter(array('ispublic' => '0'));
+   // var_dump($Team);           
                      
     foreach ($Location as $cLocation) {
         $query = Ticket::objects();   
         
-        $lqfilter = Q::any(new Q($qf1));
+        $lqfilter = Q::any(new Q($qfs));
        
         if ($sta  >0){
-         $query->filter($qfilter);
+         $query->filter($lqfilter);
          }     
          
-         if ($loc  >0){
-         $query->filter($qfilter);
-         }   
-         if ($top  >0){
-         $query->filter($qfilter);
-         }   
-         if ($rec  <2){
-         $query->filter($qfilter);
-         }         
         $Q = $queue->getBasicQuery();
         $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
-              
-       $query->aggregate(array(
-            $queue->getId() => SqlAggregate::COUNT($expr)))
-            ->filter(array('dept_id' => $cLocation->getId()));
-         
-        if ($filters == 1){ 
-           $lfiltercount[$cLocation->getId()] = $query->values()->one();
-        }
-    }    
-
-
- $Topic = Topic::objects()
-                ->order_by('topic');
-   // var_dump($Location);           
-                     
-   foreach ($Topic as $cTopic) {
-        $query = Ticket::objects();   
         
-        $tqfilter = Q::any(new Q($qf1));
-       
-        if ($sta  >0){
-         $query->filter($qfilter);
-         }     
-         
-         if ($loc  >0){
-         $query->filter($qfilter);
-         }   
-         if ($rec  <2){
-         $query->filter($qfilter);
+        $query->aggregate(array(
+            $queue->getId() => SqlAggregate::COUNT($expr)))
+            ->filter(array('dept__pid' => $cLocation->getId()));
+         if ($filters == 1){  
+            $lfiltercount[$cLocation->getId()] = $query->values()->one();
          } 
-        $Q = $queue->getBasicQuery();
-        $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
-              
-       $query->aggregate(array(
-            $queue->getId() => SqlAggregate::COUNT($expr)))
-            ->filter(array('topic_id' => $cTopic->getId()));
-         
-        if ($filters == 1){ 
-           $tfiltercount[$cTopic->getId()] = $query->values()->one();
-        }
-    }    
-
+    }      
     
-    $YRecordables = Ticket::objects()
-                ->order_by('ticket_id');
-   // var_dump($Recordables);           
+    
+ $Team = Dept::objects()
+                ->order_by('name');
+   // var_dump($Team);           
                      
-    foreach ($YRecordables as $cyRecordables) {
+    foreach ($Team as $cTeam) {
         $query = Ticket::objects();   
         
-        $rqfilter = Q::any(new Q($qfr));
+        $lqfilter = Q::any(new Q($qfs));
        
         if ($sta  >0){
-         $query->filter($qfilter);
+         $query->filter($lqfilter);
          }     
          
-         if ($loc  >0){
-         $query->filter($qfilter);
-         }   
-         if ($top  >0){
-         $query->filter($qfilter);
-         }   
-         if ($rec  <2){
-         $query->filter($qfilter);
-         }         
         $Q = $queue->getBasicQuery();
         $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
               
        $query->aggregate(array(
             $queue->getId() => SqlAggregate::COUNT($expr)))
-            ->filter(array('isrecordable' => '1'));
+            ->filter(array('dept_id' => $cTeam->getId()));
          
         if ($filters == 1){ 
-           $ryfiltercount[$cyRecordables->getId()] = $query->values()->one();
+           $tfiltercount[$cTeam->getId()] = $query->values()->one();
         }
-        
-    }    
-   
-
-    $NRecordables = Ticket::objects()
-                ->order_by('ticket_id');
-   // var_dump($Recordables);           
-                     
-    foreach ($NRecordables as $cnRecordables) {
-        $query = Ticket::objects();   
-        
-        $rqfilter = Q::any(new Q($qfr));
-       
-        if ($sta  >0){
-         $query->filter($qfilter);
-         }     
-         
-         if ($loc  >0){
-         $query->filter($qfilter);
-         }   
-         if ($top  >0){
-         $query->filter($qfilter);
-         }   
-         if ($rec  <2){
-         $query->filter($qfilter);
-         }         
-        $Q = $queue->getBasicQuery();
-        $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
-              
-       $query->aggregate(array(
-            $queue->getId() => SqlAggregate::COUNT($expr)))
-            ->filter(array('isrecordable' => '0'));
-         
-        if ($filters == 1){ 
-           $rnfiltercount[$cnRecordables->getId()] = $query->values()->one();
-        }
-        
-    }    
-       
+    }                     
 $Statuses = array();
 foreach (TicketStatusList::getStatuses(
             array('states' => $states)) as $status) {
@@ -224,21 +121,17 @@ foreach (TicketStatusList::getStatuses(
     foreach ($Statuses as $stat){
     
     $query = Ticket::objects();   
-   // $sqfilter = Q::any(new Q($qft));
+    $sqfilter = Q::any(new Q($qft));
    
     if ($loc  >0){
      $sqfilter = Q::any(new Q($qfl));
-     $query->filter($qfilter);
+     $query->filter($sqfilter);
      }     
     
-    if ($top  >0){
+    if ($tea  >0){
      $sqfilter = Q::any(new Q($qft));
-     $query->filter($qfilter);
+     $query->filter($sqfilter);
      }  
-    if ($rec  <2){
-        $query->filter($qfilter);
-     } 
-     
     $Q = $queue->getBasicQuery();
     $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
           
@@ -333,20 +226,7 @@ $pageNav->setURL('tickets.php', $args);
             <?php if (isset($queue->id)) { ?> 
             <?php echo $queue->getFullName();} ?>
             <?php if (Dept::getNamebyId($l)){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo Dept::getNamebyId($loc) ?>)</span> <?php }?>
-            <?php if (Topic::getTopicName($t)){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo Topic::getTopicName($top) ?>)</span> <?php }?>
-            
-            <?php switch ($rec){
-                  case 0:
-                    $rselected = 'Recordable (No)';
-                    break;
-                  case 1:
-                  $rselected = 'Recordable (Yes)';
-                    break;
-                 
-                }
-            ?>
-          
-            <?php if ($rec <2){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo $rselected ?>)</span> <?php }?>
+            <?php if (Dept::getNamebyId($t)){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo Dept::getNamebyId($tea) ?>)</span> <?php }?>
                     
             <?php if ($sselected){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo $sselected; ?>)</span> <?php }?>            
                                 </span>
@@ -413,7 +293,7 @@ $pageNav->setURL('tickets.php', $args);
                                         <a class="no-pjax confirm-action" href="#"
                                             data-dialog="ajax.php/queue/<?php
                                             echo $queue->id; ?>/delete"><i
-                                        class="icon-fixed-width fa fa-trash"></i>
+                                        class="icon-fixed-width icon-trash"></i>
                                         <?php echo __('Delete'); ?></a>
                                     </li>
             <?php } ?>
@@ -451,14 +331,26 @@ $pageNav->setURL('tickets.php', $args);
                  <input type="hidden" name="a" value="search">
                     <input type="text" class="form-control form-control-sm rlc-search basic-search" data-url="ajax.php/tickets/lookup" name="query"
                      value="<?php echo Format::htmlchars($_REQUEST['query'], true); ?>"
-                   autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Tickets" >
+                   autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Suggestions" >
                 <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
-                    <div class="input-group-append">
-						<button type="submit"  class="input-group-text" ><i class="fa fa-search"></i>
-						</button>
-						<button type="submit"  class="input-group-text advsearch" href="#" onclick="javascript:
-										$.dialog('ajax.php/tickets/search', 201);"><i class=" fa fa-search-plus help-tip" href="#advanced" ></i>
-						</button>
+                    
+					<div class="input-group-append">
+					<button type="submit"  class="input-group-text" ><i class="fa fa-search"></i>
+                    </button>
+                    <button type="submit"  class="input-group-text advsearch" href="#" 
+					onclick="javascript:
+                           
+					 $.busyLoadFull('show',  { 
+						text: 'LOADING ...',
+						textColor: '#c82333',
+						color: '#c82333',
+						background: 'rgba(0, 0, 0, 0.3)'
+					});
+
+					$.dialog('ajax.php/tickets/search', 201);
+					document.getElementById('popup').style.display = 'none';"
+					><i class=" fa fa-search-plus help-tip" href="#advanced" ></i>
+                    </button>
 					</div>
                 </div>
             </form>
@@ -466,39 +358,31 @@ $pageNav->setURL('tickets.php', $args);
 
 
 <div class="btn-group btn-group-sm float-right m-b-10 <?php if ($filters == 0){ echo 'hidden';}?>" role="group" aria-label="Button group with nested dropdown">
-    
 <?php
       $lselected = Dept::getNamebyId($loc);
      
       if (!$lselected ) {$lselected = 'Location';}
-?>
 
-
+?>                     
  <div class="btn-group btn-group-sm" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" 
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Filter Incident Location'); ?>"><i class="fa fa-filter"></i> <?php echo $lselected;?>
+         title="<?php echo __('Filter Location'); ?>"><i class="fa fa-filter"></i> <?php echo $lselected;?>
         </button>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
               
-              <a href="tickets.php?t=<?php echo $_GET['t']?>&l=0&s=<?php echo $_GET['s'];?>&r=<?php echo $_GET['r']?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
+              <a href="tickets.php?l=0&t=<?php echo $_GET['t']?>&s=<?php echo $_GET['s'];?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
               
               <?php
-    
-                if ($loc =='0'){
+
                 $Location = Dept::objects()
-                ->order_by('name');
-                    
-                } else {
-                $Location = Dept::objects()
-                ->order_by('name') 
-                ->filter(array('id' => $loc));
-                }   
-                     
+                ->order_by('name')
+               ->filter(array('ispublic' => '0'));
+          
                      foreach ($Location as $cLocation) { 
                      if ($lfiltercount[$cLocation->getId()]['__count'] > 0) {?>
                 
-                   <a href="tickets.php?t=<?php echo $_GET['t']?>&l=<?php echo $cLocation->id ?>&s=<?php echo $_GET['s']?>&r=<?php echo $_GET['r']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cLocation->name?>
+                   <a href="tickets.php?l=<?php echo $cLocation->id ?>&t=<?php echo $_GET['t']?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cLocation->name?>
                      <span class="badge badge-pill badge-default  pull-right"><?php echo $lfiltercount[$cLocation->getId()]['__count'] ?></span> </a>
                      <?php }}      
         ?>
@@ -506,78 +390,42 @@ $pageNav->setURL('tickets.php', $args);
     </div>
     
 <?php
-      $tselected = Topic::getTopicName($t);
+      $tselected = Dept::getNamebyId($tea);
      
-      if (!$tselected ) {$tselected = 'Type';}
+      if (!$tselected ) {$tselected = 'Owning Team';}
 ?>
 
 
  <div class="btn-group btn-group-sm" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" 
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Filter Incident Type'); ?>"><i class="fa fa-filter"></i> <?php echo $tselected;?>
+         title="<?php echo __('Filter Owning Team'); ?>"><i class="fa fa-filter"></i> <?php echo $tselected;?>
         </button>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
               
-              <a href="tickets.php?t=0&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s'];?>&r=<?php echo $_GET['r']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
+              <a href="tickets.php?l=<?php echo $_GET['l']?>&t=0&s=<?php echo $_GET['s'];?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
               
               <?php
     
-                if ($top =='0'){
-                $Topic = Topic::objects()
-                ->order_by('topic');
+                if ($loc =='0'){
+                $Team = Dept::objects()
+                ->order_by('name');
                     
                 } else {
-                $Topic = Topic::objects()
-                ->order_by('topic') 
-                ->filter(array('topic_id' => $top));
+                $Team = Dept::objects()
+                ->order_by('name') 
+                ->filter(array('pid' => $loc));
                 }   
-                 
                      
-                     foreach ($Topic as $cTopic) { 
-                     if ($tfiltercount[$cTopic->getId()]['__count'] > 0) {?>
+                     foreach ($Team as $cTeam) { 
+                     if ($tfiltercount[$cTeam->getId()]['__count'] > 0) {?>
                 
-                   <a href="tickets.php?t=<?php echo $cTopic->topic_id ?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s']?>&r=<?php echo $_GET['r']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cTopic->topic?>
-                     <span class="badge badge-pill badge-default  pull-right"><?php echo $tfiltercount[$cTopic->getId()]['__count'] ?></span> </a>
+                   <a href="tickets.php?l=<?php echo $_GET['l']?>&t=<?php echo $cTeam->id ?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cTeam->name?>
+                     <span class="badge badge-pill badge-default  pull-right"><?php echo $tfiltercount[$cTeam->getId()]['__count'] ?></span> </a>
                      <?php }}      
         ?>
             </div>
     </div>
-   <?php
-          
-      switch ($rec){
-          case 0:
-            $rselected = 'Recordable (No)';
-            break;
-          case 1:
-          $rselected = 'Recordable (Yes)';
-            break;
-          case 2:
-          $rselected = 'Recordable';
-            break;
-          
-          }
-?> 
-    <div class="btn-group btn-group-sm" role="group">
-        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" 
-        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Filter Recordables'); ?>"><i class="fa fa-filter"></i> <?php echo $rselected;?>
-        </button>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
-              
-              <a href="tickets.php?r=2&t=<?php echo $_GET['t']?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s'];?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
-              
-                   <?php if ($ryfiltercount[$cnRecordables->getId()]['__count'] > 0) {?>
-                   <a href="tickets.php?r=1&t=<?php echo $_GET['t'] ?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> Yes
-                     <span class="badge badge-pill badge-default  pull-right"><?php echo $ryfiltercount[$cyRecordables->getId()]['__count'] ?></span> </a>
-                   <?php }?>
-                   <?php if ($rnfiltercount[$cnRecordables->getId()]['__count'] > 0) {?>
-                   <a href="tickets.php?r=0&t=<?php echo $_GET['t']?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> No
-                     <span class="badge badge-pill badge-default  pull-right"><?php  echo $rnfiltercount[$cnRecordables->getId()]['__count'] ?></span> </a>     
-                   <?php }?>
-            </div>
-    </div>
-    
     <?php 
     if (!$Statuses)
     return;
@@ -593,7 +441,7 @@ if (!$sselected) {$sselected = 'Status';}
         </button>
             <div class="dropdown-menu dropdown-menu-xlg dropdown-menu-right" aria-labelledby="btnGroupDrop1">
               
-              <a class="dropdown-item no-pjax" href="tickets.php?l=<?php echo $_GET['l']?>&t=<?php echo $_GET['t']?>&s=0&r=<?php echo $_GET['r']?>"><i class="fa fa-filter"></i> All</a>
+              <a class="dropdown-item no-pjax" href="tickets.php?l=<?php echo $_GET['l']?>&t=<?php echo $_GET['t']?>&s=0"><i class="fa fa-filter"></i> All</a>
            <?php foreach ($Statuses as $status) { 
            
            if ($sfiltercount[$status->getId()]['__count'] >0) {
@@ -603,7 +451,7 @@ if (!$sselected) {$sselected = 'Status';}
            
        
             <a class="dropdown-item no-pjax"
-                href="tickets.php?l=<?php echo $_GET['l']?>&t=<?php echo $_GET['t']?>&s=<?php echo $status->getId();?>&r=<?php echo $_GET['r']?>"><i class="fa fa-filter"></i> <?php
+                href="tickets.php?l=<?php echo $_GET['l']?>&t=<?php echo $_GET['t']?>&s=<?php echo $status->getId();?>"><i class="fa fa-filter"></i> <?php
                         echo __($status->name);?> <span class="queue-status-count badge badge-pill badge-default pull-right"
               ><span class="faded-more"> <?php echo $sfiltercount[$status->getId()]['__count'];?></span></a>
       
@@ -611,13 +459,7 @@ if (!$sselected) {$sselected = 'Status';}
            }} ?>
         
             </div>
-  </div> 
-<div class="btn-group btn-group-sm" role="group">
-<button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light" 
-        
-         title="<?php echo __('Clear Filters'); ?>" onclick="location.href = '/scp/tickets.php?queue=1&p=1&l=0&t=0&s=0&r=2';"><span><i class="fa fa-filter"></i><i class="fa fa-ban filtercancel"></i></span> 
-        </button
-</div>  
+  </div>    
 </div>
 
 </div></div>
@@ -656,9 +498,21 @@ if (!$sselected) {$sselected = 'Status';}
         }
         
         
-     switch (Format::htmlchars($C->getLocalHeading())) {
-             case 'Ticket':
+        switch (Format::htmlchars($C->getLocalHeading())) {
+        case 'Suggestion':
             $foo = '';
+            break;
+        case "Due Date":
+           $foo = 'data-breakpoints="xs sm"';
+            break;         
+        case "Last Updated":
+           $foo = 'data-breakpoints="xs sm lg"';
+            break;
+        case "Owned By":
+           $foo = 'data-breakpoints="xs sm"';
+            break;
+         case "Submitter":
+           $foo = 'data-breakpoints="xs sm"';
             break;
         case 'Priority':
             $foo = 'data-breakpoints="xs sm"';
@@ -666,42 +520,46 @@ if (!$sselected) {$sselected = 'Status';}
         case 'Status':
             $foo = 'data-breakpoints="xs"';
             break;
+        case "TCS Status":
+           $foo = 'data-breakpoints="xs sm lg"';
+            break;  
+        case "TCS $":
+           $foo = 'data-breakpoints="xs sm lg"';
+            break; 
+        case "Category":
+            $foo = 'data-breakpoints="xs"';
+            break;
+        case "Assigned To":
+           $foo = 'data-breakpoints="xs"';
+            break;
+        case 'Progress':
+            $foo = 'data-breakpoints="xs sm"';
+            break;
+        
         case "Closed":
            $foo = 'data-breakpoints="xs sm"';
             break;  
         case "Close Date":
            $foo = 'data-breakpoints="xs sm"';
-            break;    
-        case "Days Open":
-           $foo = 'data-breakpoints="xs sm"';
-            break;            
+            break;              
         case "Opened":
            $foo = 'data-breakpoints="xs sm"';
             break;
-        case "Last Updated":
-           $foo = 'data-breakpoints="xs sm"';
-            break; 
+
+         
         case "Date Created":
            $foo = 'data-breakpoints="xs sm"';
             break; 
-        case "Help Topic":
-            $foo = 'data-breakpoints="xs"';
-            break;
+        
         case "Location":
            $foo = 'data-breakpoints="xs"';
             break;
-        case "Purchase Order":
-           $foo = 'data-breakpoints="xs sm"';
-            break;  
+        
         case "Subject":
            $foo = '';
             break;
-        case "From":
-           $foo = '';
-            break;
-        case "Assigned":
-           $foo = 'data-breakpoints="xs"';
-            break;
+       
+        
         default:
              $foo = '';
     }
@@ -713,23 +571,6 @@ if (!$sselected) {$sselected = 'Status';}
       </thead>
       <tbody>
     <?php
-    
-    $sitecolor = array(
-				"AST"=>"#52e462",
-                "BRY"=>"#ff5252",
-                "CAN"=>"rgb(241, 92, 128)",
-                "IND"=>"#e040fb",
-                "MEX"=>"#7c4dff",
-                "NTC"=>"rgb(43, 144, 143)",
-                "OH"=>"rgb(67, 67, 72)",
-                "PAU"=>"#cddc39",
-                "RTA"=>"#18ffff",
-                "RVC"=>"rgb(247, 163, 92)",
-                "TNN1"=>"#69f0ae",
-                "TNN2"=>"rgb(124, 181, 236)",
-                "TNS"=>"#eeff41",
-                "YTD"=>"#c30000");
-
     foreach ($tickets as $T) {
         echo '<tr>';
         if ($canManageTickets) { ?>
@@ -739,9 +580,9 @@ if (!$sselected) {$sselected = 'Status';}
         }
         
         foreach ($columns as $C) {
-                 
+            
         list($contents, $styles) = $C->render($T);
-    
+        
          if (strchr($styles, 'badge')!= false){
                
                 switch ($contents){
@@ -757,32 +598,22 @@ if (!$sselected) {$sselected = 'Status';}
                     break;
                     
                 default:
-                {
-                    
-                    $badgoverride = null;
-                    
-                    if ($C->heading == 'Location'){
-                       
-                        $badgoverride = 'style="background-color: '.$sitecolor[$contents].' !important;"';
-        
-                    } else {
-                       $badgecolor =  strtolower('bg-'.strtok(substr($styles, strpos($styles, "badge:") + 6), ';'));
-                       $badgecolor = preg_replace('/\s+/', '', $badgecolor);
-                   }
-                }
+               
+               $badgecolor =  strtolower('bg-'.strtok(substr($styles, strpos($styles, "badge:") + 6), ';'));
+               $badgecolor = preg_replace('/\s+/', '', $badgecolor);
                }
                               
-               $badge='badge label-table notranslate '.$badgecolor;
+               $badge='badge label-table '.$badgecolor;
                     
                $styles = str_replace('rem','',str_replace(strtok(substr($styles, strpos($styles, "rem:") + 3), ';'),'',str_replace('badge','rem',$styles)));
               
          }
            
             if ($style = $styles ? 'style="'.$styles.'"' : '') {
-                echo "<td $style><div $style><span class =\"$badge\" $badgoverride>$contents</span></div></td>";
+                echo "<td $style><div $style><span class =\"$badge\">$contents</span></div></td>";
             }
             else {
-                echo "<td><span class=\"$badge\" >$contents</span></td>";
+                echo "<td><span class=\"$badge\">$contents</span></td>";
             }
         $badge=null;
         $badgecolor=null;
@@ -823,7 +654,6 @@ if (!$sselected) {$sselected = 'Status';}
             echo $pageNav->getPageLinks();
         ?>
     </ul>
-
     </nav>
     </div>
     <div class="float-left">

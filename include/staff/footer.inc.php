@@ -60,17 +60,8 @@ if(is_object($thisstaff) && $thisstaff->isStaff()) { ?>
 <?php
 } ?>
 
-<div id="overlay"></div>
-<div id="loading">
-    <i class="icon-spinner icon-spin icon-3x pull-left icon-light"></i>
-    <h1><?php echo __('Loading ...');?></h1>
-</div>
 <div class="dialog draggable" style="display:none;" id="popup">
-    <div id="popup-loading">
-        <h1 style="margin-bottom: 20px;"><i class="icon-spinner icon-spin icon-large"></i>
-        <?php echo __('Loading ...');?></h1>
-    </div>
-    <div class="body"></div>
+	<div class="body"></div>
 </div>
 <div style="display:none;" class="dialog" id="alert">
     <h3><i class="icon-warning-sign"></i> <span id="title"></span></h3>
@@ -85,7 +76,6 @@ if(is_object($thisstaff) && $thisstaff->isStaff()) { ?>
      </p>
 </div>
     <div class="clear"></div>
-
 <script src="<?php echo ROOT_PATH; ?>scp/js/popper.min.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/scp.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery.pjax.js"></script>
@@ -93,26 +83,24 @@ if(is_object($thisstaff) && $thisstaff->isStaff()) { ?>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/bootstrap-datetimejs.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-ui-1.10.3.custom.min.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/filedrop.field.js"></script>
-<script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery.multi-select.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/select2.min.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/tips.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/redactor.min.js"></script>
-<!--<script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/redactor-osticket.js"></script>
+<script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/redactor-osticket.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/redactor-plugins.js"></script>
--->
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/jquery.translatable.js"></script>
 <!--<script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/jquery.dropdown.js"></script>-->
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/fabric.min.js"></script>
 <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>scp/css/tooltip.css">
 <script src="<?php echo ROOT_PATH; ?>scp/js/bootstrap.min.js"></script>
 
-<script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/bootstrap-tooltip.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/detect.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/fastclick.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.slimscroll.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.blockUI.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.waypoints.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.counterup.min.js"></script>
+<script src="<?php echo ROOT_PATH; ?>scp/js/jquery.peity.min.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/waves.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/wow.min.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.nicescroll.js"></script>
@@ -122,7 +110,6 @@ if(is_object($thisstaff) && $thisstaff->isStaff()) { ?>
 <script src="<?php echo ROOT_PATH; ?>scp/js/notify-metro.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.core.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.app.js"></script>
-
        
 <script type="text/javascript">
     getConfig().resolve(<?php
@@ -130,6 +117,11 @@ if(is_object($thisstaff) && $thisstaff->isStaff()) { ?>
         $api = new ConfigAjaxAPI();
         print $api->scp(false);
     ?>);
+    
+    $("[data-fancybox]").fancybox({
+		closeClickOutside : true
+       
+	});
 
 jQuery(document).ready(function($) {
                 $('.counter').counterUp({

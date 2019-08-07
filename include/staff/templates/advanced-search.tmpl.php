@@ -1,3 +1,4 @@
+
 <?php
 $parent_id = $_REQUEST['parent_id'] ?: $search->parent_id;
 if ($parent_id
@@ -5,10 +6,12 @@ if ($parent_id
 ) {
     $parent_id = null;
 }
+
 ?>
+
 <div id="advanced-search" class="advanced-search">
-<h3 class="drag-handle"><?php echo __('Advanced Ticket Search');?></h3>
-<a class="close" href=""><i class="icon-remove-circle"></i></a>
+<h3 class="drag-handle"><?php echo __('Advanced Suggestion Search');?></h3>
+<a class="close" href=""><i class="fa fa-times" aria-hidden="true"></i></a>
 <hr/>
 
 <form action="#tickets/search" method="post" name="search">
@@ -108,4 +111,6 @@ foreach (CustomQueue::queues()->order_by('sort', 'title') as $q) { ?>
        }
    });
 }();
+document.getElementById("popup").style.display = "block";
+$.busyLoadFull("hide", {});
 </script>

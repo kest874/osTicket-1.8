@@ -4123,7 +4123,6 @@ class PhoneNumberWidget extends Widget {
 
 class ChoicesWidget extends Widget {
     function render($options=array()) {
-
         $mode = null;
         if (isset($options['disabled']))
             $disabled = 'disabled="disabled"';
@@ -4132,20 +4131,16 @@ class ChoicesWidget extends Widget {
             $mode = $options['mode'];
         elseif (isset($this->field->options['render_mode']))
             $mode = $this->field->options['render_mode'];
-
         if ($mode == 'view') {
             if (!($val = (string) $this->field))
                 $val = sprintf('<span class="faded">%s</span>', __('None'));
-
             echo $val;
             return;
         }
-
         $config = $this->field->getConfiguration();
         if ($mode == 'search') {
             $config['multiselect'] = true;
         }
-
         // Determine the value for the default (the one listed if nothing is
         // selected)
         $choices = $this->field->getChoices(true);
@@ -4153,7 +4148,6 @@ class ChoicesWidget extends Widget {
             ? $this->field->getLocal('prompt', $config['prompt'])
             : __('Select'
             /* Used as a default prompt for a custom drop-down list */);
-
         $have_def = false;
         // We don't consider the 'default' when rendering in 'search' mode
         if (!strcasecmp($mode, 'search')) {
@@ -4167,17 +4161,14 @@ class ChoicesWidget extends Widget {
             $have_def = isset($choices[$def_key]);
             $def_val = $have_def ? $choices[$def_key] : $prompt;
         }
-
         $values = $this->value;
         if (!is_array($values) && isset($values)) {
             $values = array($values => $this->field->getChoice($values));
         }
-
         if (!is_array($values))
             $values = $have_def ? array($def_key => $choices[$def_key]) : array();
-
         //if (isset($config['classes']))
-            $classes = 'class="select2 select2-multiple hidden'.$config['classes'].'"';
+            $classes = 'class="form-control form-control-sm '.$config['classes'].'"';
         ?>
         <select <?php echo $disabled ?> name="<?php echo $this->name; ?>[]"
             <?php echo implode(' ', array_filter(array($classes))); ?>
@@ -4196,15 +4187,17 @@ class ChoicesWidget extends Widget {
         }
         $this->emitChoices($choices, $values, $have_def, $def_key); ?>
         </select>
-
+        <?php
+        if ($config['multiselect']) {
+         ?>
         <script type="text/javascript">
         $(function() {
-            $(".select2").select2();
+            $("#<?php echo $this->id; ?>")
+            .select2({'minimumResultsForSearch':10, 'width': '350px'});
         });
-         
         </script>
        <?php
-        
+        }
     }
 
     function emitChoices($choices, $values=array(), $have_def=false, $def_key=null) {
@@ -4650,17 +4643,16 @@ class CheckboxWidget extends Widget {
             $classes = array_merge($classes, (array) $config['classes']);
         ?>
 		
-		<div class="custom-control custom-switch">
+		<span class="custom-control custom-switch">
              <input type="checkbox" class="custom-control-input" id="<?php echo $this->id; ?>" name="<?php echo $this->name; ?>[]" value="<?php
             echo $this->field->get('id'); ?>" <?php
             if ($this->value) echo 'checked="checked"'; ?>>
-             <label class="custom-control-label" for="<?php echo $this->id; ?>"><?php echo $this->field->get('label'); ?> </label>
-         </div>
-<?php
+             <label class="custom-control-label" for="<?php echo $this->id; ?>"><?php
         if ($config['desc']) {
             echo Format::viewableImages($config['desc']);
-        } ?></span>
-        
+        } ?><?php echo $this->field->get('label'); ?> </label>
+         </span>
+              
         </label>
         
 <?php
