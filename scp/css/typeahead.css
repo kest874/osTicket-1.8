@@ -1,6 +1,6 @@
 /* FROM bootstrap.css - just what is needed for typeahead */
 .dropdown-menu {
-  position: absolute;
+  position: realative;
   top: 100%;
   /*left: 0;*/
   z-index: 7 !important;
@@ -8,7 +8,7 @@
   display: none;
   min-width: 160px;
   padding: 4px 0 2px;
-  /*margin-top: -75px;*/
+  margin-top: -75px;
   list-style: none;
   background-color: #ffffff;
   border-color: #ccc;
@@ -27,6 +27,7 @@
   *border-right-width: 2px;
   *border-bottom-width: 2px;
   opacity: 0.95;
+  overflow-y: auto !important;
 }
 .dropdown-menu.pull-right {
   right: 0;
