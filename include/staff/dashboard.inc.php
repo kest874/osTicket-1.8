@@ -2996,7 +2996,7 @@ $(function() {
 				from
 				(
 					SELECT d.name as location,date(tcd.dateofincident) as incidentdate, date(tcd.hiredate)as hiredate, datediff(date(tcd.dateofincident), date(tcd.hiredate)) as days
-					FROM osticket_saftest.ost_ticket__cdata tcd 
+					FROM ost_ticket__cdata tcd 
 					join ost_ticket t on tcd.ticket_id = t.ticket_id 
 					join ost_department d on t.dept_id = d.id
 					where tcd.hiredate is not null
@@ -3051,7 +3051,7 @@ select location,count(days) as count, days
 				from
 				(
 					SELECT d.name as location,date(tcd.dateofincident) as incidentdate, date(tcd.hiredate)as hiredate, datediff(date(tcd.dateofincident), date(tcd.hiredate)) as days
-					FROM osticket_saftest.ost_ticket__cdata tcd 
+					FROM ost_ticket__cdata tcd 
 					join ost_ticket t on tcd.ticket_id = t.ticket_id 
 					join ost_department d on t.dept_id = d.id
 					where tcd.hiredate is not null and date(tcd.dateofincident) >= '".$sqlbeginperiod."' and date(tcd.dateofincident) <= '".$sqlendperiod."'
