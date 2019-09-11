@@ -29,7 +29,7 @@
     this.highlighter = this.options.highlighter || this.highlighter
     this.$menu = $(this.options.menu).appendTo('body')
     if (this.options.scroll)
-      this.$menu.addClass('scroll');
+      this.$menu.addClass('scroll m-b--75');
     this.source = this.options.source
     this.onselect = this.options.onselect
     this.strings = true
@@ -64,7 +64,7 @@
       })
 
       this.$menu.css({
-        top: pos.top + pos.height
+        top: pos.top + pos.height -77
       , left: pos.left
       })
 
@@ -337,7 +337,7 @@
     source: []
   , items: 8
   , menu: '<ul class="typeahead dropdown-menu"></ul>'
-  , item: '<li><a href="#"></a></li>'
+  , item: '<li><a href="#" class="dropdown-item"></a></li>'
   , onselect: null
   , property: 'value'
   , render: 'info'

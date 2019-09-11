@@ -13,7 +13,7 @@ $s = $_GET['s'];
 $r = $_GET['r'];
 if (isset($l)||isset($t)||isset($s)||isset($r)) $_SESSION['filter']=1;
 $filters=$_SESSION['filter'];
-if ($_GET['a'] == 'search' || $_GET['queue'] == 'adhoc') $filters=0;
+if ($_GET['a'] == 'search' || $_GET['queue'] == 'adhoc') $filters=22;
 if (is_numeric($l)) $_SESSION['loc'] = $l;
 if (is_numeric($t)) $_SESSION['top'] = $t;
 if (is_numeric($s)) $_SESSION['sta'] = $s;
@@ -301,11 +301,12 @@ $pageNav->setURL('tickets.php', $args);
                         <div class="float-left subnavtitle">
                         
                             <span ><a href="<?php echo $refresh_url; ?>"
-                                title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i> 
+                                title="<?php echo __('Refresh'); ?>"><i class="fa fa-refresh"></i> 
                                 </a> &nbsp;
+								Incidents
             <?php if (isset($queue->id)) { ?> 
-            <?php echo $queue->getFullName();} ?>
-            <?php if (Dept::getNamebyId($l)){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo Dept::getNamebyId($loc) ?>)</span> <?php }?>
+            <span class="text-danger">(<i class="fa fa-filter"></i> <?php echo $queue->getFullName();?>)</span> <?php } ?> 
+            <?php if (Dept::getNamebyId($l)){ ?><span class="text-danger">(<i class="fa fa-filter"> </i> <?php echo Dept::getNamebyId($loc) ?>)</span> <?php }?>
             <?php if (Topic::getTopicName($t)){ ?><span class="text-danger">(<i class="fa fa-filter"></i> <?php echo Topic::getTopicName($top) ?>)</span> <?php }?>
             
             <?php switch ($rec){
@@ -421,9 +422,9 @@ $pageNav->setURL('tickets.php', $args);
                  <input type="hidden" name="search-type" value=""/>
                  <div class="input-group input-group-sm">
                  <input type="hidden" name="a" value="search">
-                    <input type="text" class="form-control form-control-sm rlc-search basic-search" data-url="ajax.php/tickets/lookup" name="query"
+                    <input type="text" class="form-control form-control-sm rlc-search data-url="ajax.php/tickets/lookup" name="query"
                      value="<?php echo Format::htmlchars($_REQUEST['query'], true); ?>"
-                   autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Tickets" >
+                   autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Incidents" >
                 <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
                     <div class="input-group-append">
 					<button type="submit"  class="input-group-text" ><i class="fa fa-search"></i>
@@ -499,7 +500,7 @@ $pageNav->setURL('tickets.php', $args);
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
          title="<?php echo __('Filter Incident Type'); ?>"><i class="fa fa-filter"></i> <?php echo $tselected;?>
         </button>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
+            <div class="dropdown-menu  dropdown-menu-xlg  dropdown-menu-right" aria-labelledby="btnGroupDrop1">
               
               <a href="tickets.php?t=0&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s'];?>&r=<?php echo $_GET['r']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
               
@@ -572,7 +573,7 @@ if (!$sselected) {$sselected = 'Status';}
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
          title="<?php echo __('Filter Status'); ?>"><i class="fa fa-filter"></i> <?php echo $sselected; ?>
         </button>
-            <div class="dropdown-menu dropdown-menu-xlg dropdown-menu-right" aria-labelledby="btnGroupDrop1">
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
               
               <a class="dropdown-item no-pjax" href="tickets.php?l=<?php echo $_GET['l']?>&t=<?php echo $_GET['t']?>&s=0&r=<?php echo $_GET['r']?>"><i class="fa fa-filter"></i> All</a>
            <?php foreach ($Statuses as $status) { 

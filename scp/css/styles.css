@@ -832,7 +832,10 @@ a:focus {
   margin-top: 5px; }
 
 .dropdown-menu {
-  z-index: 7 !important;  
+  z-index: 7 !important; 
+  max-height: 500px !important;
+  overflow-y: auto !important;  
+  
 }   /*
   padding: 4px 0;
   -webkit-animation: dropdownOpen 0.3s ease-out;
@@ -1139,7 +1142,8 @@ m-r--5 {
   margin-bottom: -25px; }
 
 .m-b--30 {
-  margin-bottom: -30px !important; }  
+  margin-bottom: -30px !important; } 
+
 .w-xs {
   min-width: 80px; }
 
