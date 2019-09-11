@@ -911,32 +911,33 @@ class DaysOpenField extends ChoiceField {
     }
 
     function from_query($row, $name=false) {
-    
-    $ClosedDate = Ticket::objects()
-        ->filter(array('ticket_id' => $row['ticket_id'])); 
-    
-    foreach ($ClosedDate as $cClosedDate) {
-         $closeddate = $cClosedDate->closed;
-       }
+  
        
 	$sql="SELECT dateofincident FROM ost_ticket__cdata where ticket_id =".$row['ticket_id'];
  
 	$dateofincident= db_query($sql); 
-	 
+	
 	foreach ($dateofincident as $dateofincident) {
 			$opendate = $dateofincident["dateofincident"];
 	}
 	
-	$closeddate = substr($closeddate,0,11).'00:00:00 CDT';
+	$sql="SELECT closed FROM ost_ticket where ticket_id =".$row['ticket_id'];
+	$dateclosed= db_query($sql); 
+	
+	foreach ($dateclosed as $dateclosed) {
+			$dateclose = $dateclosed["closed"];
+	}
+	
+	//$closeddate = substr($closeddate,0,11).'00:00:00 CDT';
 	
     $opened = new DateTime($opendate);
-    $closed = new DateTime($closeddate);
+    $closed = new DateTime($dateclose);
     $current = new DateTime(date("D M d, Y G:i", time()));
     
     if ($row['status__id'] == 3 ){
         $whichdate = $closed;
    } else {
-       $whichdate = $current;
+       $whichdate = $closed;
    }
 
     $interval = $opened->diff($whichdate);
