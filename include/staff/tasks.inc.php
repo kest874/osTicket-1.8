@@ -27,6 +27,7 @@ $sort_options = array(
     'hot' =>                __('Longest Thread'),
 	'ticketnumber' =>       __('Ticker Number'),
     'relevance' =>          __('Relevance'),
+	
 );
 
 // Queues columns
@@ -76,7 +77,7 @@ $queue_columns = array(
             ),
         );
 
-$queue_sort_options = array('closed', 'updated', 'created','closed', 'number','ticketnumber', 'parent');
+$queue_sort_options = array('closed', 'updated', 'created','closed', 'number','ticketnumber', 'parent','daysopen');
 
 $l = $_GET['tl'];
 $s = $_GET['ts'];
@@ -147,7 +148,7 @@ $tasks->annotate(array(
 
 $tasks->values('id', 'number', 'created','closed','staff_id', 'team_id',
         'staff__firstname', 'staff__lastname', 'team__name',
-        'dept__name', 'cdata__title', 'flags','ticket','ticket__number','ticket__source');
+        'dept__name', 'cdata__title', 'flags','ticket','ticket__number','ticket__source','daysopen');
 // Apply requested quick filter
 
 $queue_sort_key = sprintf(':Q%s:%s:sort', ObjectModel::OBJECT_TYPE_TASK, $queue_name);
@@ -187,6 +188,12 @@ case 'due':
     $tasks->values('duedate');
     $tasks->order_by(SqlFunction::COALESCE(new SqlField('duedate'), 'zzz'), $orm_dir_r);
     break;
+case 'created':
+    $queue_columns['date']['heading'] = __('Date Created');
+    $queue_columns['date']['sort'] = 'created';
+    $queue_columns['date']['sort_col'] = $date_col = 'created';
+    $tasks->order_by($sort_dir ? 'created' : '-created');
+    break;
 case 'closed':
     $queue_columns['date']['heading'] = __('Date Closed');
     $queue_columns['date']['sort'] = $sort_cols;
@@ -194,14 +201,6 @@ case 'closed':
     $queue_columns['date']['sort_dir'] = $sort_dir;
     $tasks->values('closed');
     $tasks->order_by($sort_dir ? 'closed' : '-closed');
-    break;
-case 'dayesopen':
-    $queue_columns['date']['heading'] = __('Days Open');
-    $queue_columns['date']['sort'] = $sort_cols;
-    $queue_columns['date']['sort_col'] = $date_col = 'daysopen';
-    $queue_columns['date']['sort_dir'] = $sort_dir;
-    $tasks->values('closed');
-    $tasks->order_by($sort_dir ? 'daysopen' : '-daysopen');
     break;
 case 'updated':
     $queue_columns['date']['heading'] = __('Last Updated');
@@ -237,6 +236,7 @@ case 'created':
     $tasks->order_by($sort_dir ? 'created' : '-created');
     break;
 }
+
 
 if (in_array($sort_cols, array('created', 'due', 'updated')))
     $queue_columns['date']['sort_dir'] = $sort_dir;
@@ -541,13 +541,14 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
 				
 				
 				<td align="left" nowrap><?php echo
-                Format::date($T[$date_col ?: 'created']); ?></td>
+                Format::date($T['created']); ?></td>
 				<td align="left" nowrap><?php echo
-                Format::date($T[$date_col ?: 'closed']); ?></td>
+                Format::date($T['closed']); ?></td>
 				
 
-				<td align="left" nowrap><?php echo
-           $T['daysopen'] ?></td>
+				<td align="left" nowrap>
+					<span class="badge label-table bg-danger" style="font-weight: bold;"><?php echo $T['daysopen'] ?></span>
+				</td>
 				
                 <td><a <?php if ($flag) { ?> class="Icon <?php echo $flag; ?>Ticket" title="<?php echo ucfirst($flag); ?> Ticket" <?php } ?>
                     href="tasks.php?id=<?php echo $T['id']; ?>"><?php
@@ -562,7 +563,51 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                             echo '<i class="icon-fixed-width icon-paperclip"></i>&nbsp;';
                     ?>
                 </td>
-                <td nowrap>&nbsp;<?php echo Format::truncate($dept, 40); ?></td>
+				<?php
+				switch  ($dept) {
+				case 'AST':
+					$sitecolor = '#52e462';
+					break;
+                case 'BRY':
+					$sitecolor = '#ff5252';
+					break;
+                case 'CAN':
+					$sitecolor = 'rgb(241, 92, 128)';
+					break;
+                case 'IND':
+					$sitecolor = '#e040fb';
+					break;
+                case 'MEX':
+					$sitecolor = '#7c4dff';
+					break;
+                case 'NTC':
+					$sitecolor = 'rgb(43, 144, 143)';
+					break;
+                case 'OH':
+					$sitecolor = 'rgb(67, 67, 72)';
+					break;
+                case 'PAU':
+					$sitecolor = '#cddc39';
+					break;
+                case 'NTA':
+					$sitecolor = '#18ffff';
+					break;
+                case 'RVC':
+					$sitecolor = 'rgb(247, 163, 92)';
+					break;
+                case 'TNN1':
+					$sitecolor = '#69f0ae';
+					break;
+                case 'TNN2':
+					$sitecolor = 'rgb(124, 181, 236)';
+					break;
+                case 'TNS':
+					$sitecolor = '#eeff41';
+					break;       
+				}
+			 ?>
+				
+                <td nowrap><span class="badge label-table" style="background: <?php echo $sitecolor; ?> !important;"> <?php echo Format::truncate($dept, 40); ?></span></td>
                 <td align="left" nowrap>&nbsp;<?php echo $assignee; ?></td>
 				<td align="left" nowrap>&nbsp;<?php echo $status; ?></td>
             </tr>

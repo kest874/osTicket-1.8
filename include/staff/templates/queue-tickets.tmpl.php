@@ -1,4 +1,12 @@
-   
+<script>
+	$.busyLoadFull("show",  { 
+	text: "LOADING ...",
+	textColor: "#dd2c00",
+	color: "#dd2c00",
+	background: "rgba(0, 0, 0, 0.2)"
+	});
+</script>
+  
 <?php
 // Calling convention (assumed global scope):
 // $tickets - <QuerySet> with all columns and annotations necessary to

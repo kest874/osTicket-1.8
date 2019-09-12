@@ -141,6 +141,7 @@ class SearchInterface {
                     'team_id'=>     $model->getTeamId(),
                     // Sorting and ranging preferences
                     'created'=>     $model->getCreateDate(),
+					'daysopen'=>     $model->getDaysOpen(),
                     // Add last-updated timestamp
                 )
             );
@@ -907,47 +908,13 @@ class DaysOpenField extends ChoiceField {
 
     function addToQuery($query, $name=false) {
 
-        return $query;
+		return $query->values('daysopen');
+       
     }
 
     function from_query($row, $name=false) {
-  
-       
-	$sql="SELECT dateofincident FROM ost_ticket__cdata where ticket_id =".$row['ticket_id'];
  
-	$dateofincident= db_query($sql); 
-	
-	foreach ($dateofincident as $dateofincident) {
-			$opendate = $dateofincident["dateofincident"];
-	}
-	
-	$sql="SELECT closed FROM ost_ticket where ticket_id =".$row['ticket_id'];
-	$dateclosed= db_query($sql); 
-	
-	foreach ($dateclosed as $dateclosed) {
-			$dateclose = $dateclosed["closed"];
-	}
-	
-	//$closeddate = substr($closeddate,0,11).'00:00:00 CDT';
-	
-    $opened = new DateTime($opendate);
-    $closed = new DateTime($dateclose);
-    $current = new DateTime(date("D M d, Y G:i", time()));
-    
-    if ($row['status__id'] == 3 ){
-        $whichdate = $closed;
-   } else {
-       $whichdate = $closed;
-   }
-
-    $interval = $opened->diff($whichdate);
-        
-    $days = $interval->format('%r%a'); 
-    
-    if ($days ==0 || $opendate == $closeddate) $days = '-';
-
-    return  $days;
-		  
+            return ($row['daysopen']);		  
     }
 
     function display($value) {
@@ -961,7 +928,7 @@ class DaysOpenField extends ChoiceField {
 
     function applyOrderBy($query, $reverse=false, $name=false) {
         $reverse = $reverse ? '-' : '';
-        return $query->order_by("{$reverse}created");
+        return $query->order_by("{$reverse}daysopen");
     }
 }
 

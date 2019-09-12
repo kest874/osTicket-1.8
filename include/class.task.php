@@ -185,6 +185,10 @@ class TaskModel extends VerySimpleModel {
     function isClosed() {
         return !$this->isOpen();
     }
+	
+    function getDaysOpen() {
+        return $this->daysopen;
+    }
 
     function isCloseable() {
 
