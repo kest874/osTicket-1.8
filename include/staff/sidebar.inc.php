@@ -16,89 +16,11 @@ if(!defined('ADMINPAGE')) { ?>
 		<a class="waves-effect waves-primary" href="/scp/tasks.php?tl=0&ts=0"><i class=" ti-list"></i> </span> Tasks <span class="task-count badge badge-pill badge-primary  pull-right hidden"><span class="faded-more"><?php echo $OpenTasks; ?></span></a> 
        
     </li> 
-    <!-- Queues -->
-    <?php
-    $all_queues = CustomQueue::queues()->getIterator();
-    $emitLevel = function($queues, $level=0) use ($all_queues, &$emitLevel) { 
-        $queues->sort(function($a) { return $a->sort; });
-        foreach ($queues as $q) { 
-        
-        $children = $all_queues->findAll(array('parent_id' => $q->id));
-     
-    $icon ='ti-ticket';   
-    $badgecolor='badge-primary';
-
-    switch ($q->getName()){
-        
-        case "All Teams":
-            $icon ='ti-light-bulb';
-            $badgecolor='badge-success';
-            break;
-                    
-        case "My Team(s)":
-        $icon ='ti-check-box';
-        $badgecolor='badge-pink';
-            break;
-     } 
-     
-    if (count($children)) { ?> 
-
-    <li class="has_sub">
-
-    <?php }
-        
-    if (!count($children)) { ?>
-            <li>
-    <?php } ?>
-        <a href=
-        <?php if (count($children)) {echo '"javascript:void(0);"';} else {
-         
-        echo '"tickets.php?queue='. $q->getId().'&p=1&l=0&t=0&s=0"';
-            
-        }
-
-        if (count($children)) {echo 'class="waves-effect waves-primary"';}?>> 
-        
-        <?php if (!$level){echo '<i class="'.$icon.'"></i>';}if (count($children)) {echo '<span class="menu-arrow"></span>';}?>
-        <?php
-              echo Format::htmlchars($q->getName());?> 
-            </span></a>
-            
-    <?php
-    if (!count($children)) { ?>
-            <li>
-    <?php } 
-    if (count($children)) { ?> 
-
-    <ul class="list-unstyled">
-
-    <?php }
-            if (count($children)) {
-                $emitLevel($children, $level+1);
-           }
-    if (count($children)) { ?> 
-
-    </ul></li>
-
-    <?php      
-    }
-    if (!count($children)) { ?> 
-
+	<li  class="has_sub">
+		<a class="waves-effect waves-primary" href="/scp/tickets.php?queue=2&p=1&l=0&t=<?php echo $thisstaff->dept_id ?>&s=0"><i class=" ti-light-bulb"></i> </span> Suggestions</a> 
+       
     </li>
-
-    <?php      
-    }
-        }
-    };
-
-    $emitLevel($all_queues->findAll(array('parent_id' => 0)));
-    ?>
-        
-    <!-- Queues -->
-
-
-
-    <li class="  ">
+	<li class="  ">
     <a class="waves-effect waves-primary" href="/scp/reports.php" ><i class="ti-stats-up"></i>   Reports </a> 
     </li>
 
