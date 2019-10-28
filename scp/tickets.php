@@ -528,7 +528,7 @@ if($ticket) {
 }
 //defaults
 $_SESSION['pageno'] =1;
-$_SESSION['loc'] = 0;
+$_SESSION['loc'] = Dept::getParentId($thisstaff->dept_id);
 $_SESSION['tea'] = $thisstaff->dept_id;
 $_SESSION['sta'] = 0;
 $_SESSION['filter'] = 1;
