@@ -20,15 +20,17 @@ if (is_numeric($l)) $_SESSION['loc'] = $l;
 if (is_numeric($t)) $_SESSION['tea'] = $t;
 if (is_numeric($s)) $_SESSION['sta'] = $s;
 
+
 $loc = $_SESSION['loc'];
 $tea = $_SESSION['tea'];
 $sta = $_SESSION['sta'];
 
+if (isset($l)||isset($t)||isset($s)){
 $_SESSION['loc'] = $loc;
 $_SESSION['tea'] = $tea;
 $_SESSION['sta'] = $sta;
 $_SESSION['filter'] = $filters;
-
+}
 $qfl = array();
 $qft = array();
 $qfs = array();

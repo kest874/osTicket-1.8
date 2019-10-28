@@ -40,7 +40,7 @@ if($_REQUEST['id'] || $_REQUEST['number']) {
 
 if (!$ticket) {
     // Display a ticket queue. Decide the contents
-    $queue_id = null;
+    $queue_id = 1;
 
     // Search for user
     if (isset($_GET['uid'])
@@ -82,10 +82,10 @@ if (!$ticket) {
         $queue_id = "adhoc,{$key}";
     }
 
-    $queue_key = sprintf('::Q:%s', ObjectModel::OBJECT_TYPE_TICKET);
-    $queue_id = $queue_id ?: @$_GET['queue'] ?: $_SESSION[$queue_key]
-        ?: $cfg->getDefaultTicketQueueId();
-
+    $queue_key = 1;//sprintf('::Q:%s', ObjectModel::OBJECT_TYPE_TICKET);
+    //$queue_id = $queue_id ?: @$_GET['queue'] ?: $_SESSION[$queue_key]
+      //  ?: $cfg->getDefaultTicketQueueId();
+	$queue_id = 1;
     // Recover advanced search, if requested
     if (isset($_SESSION['advsearch'])
         && strpos($queue_id, 'adhoc') === 0
@@ -115,7 +115,7 @@ if (!$ticket) {
     }
 
     // Set the queue_id for navigation to turn a top-level item bold
-    $_REQUEST['queue'] = $queue->getId();
+    $_REQUEST['queue'] =1;
 }
 
 
@@ -514,7 +514,7 @@ if($ticket) {
     }
     elseif ($queue) {
         // XXX: Check staff access?
-        $quick_filter = @$_REQUEST['filter'];
+        //$quick_filter = @$_REQUEST['filter'];
         $tickets = $queue->getQuery(false, $quick_filter);
        
     }
@@ -526,6 +526,12 @@ if($ticket) {
             $js);
     }
 }
+//defaults
+$_SESSION['pageno'] =1;
+$_SESSION['loc'] = 0;
+$_SESSION['tea'] = $thisstaff->dept_id;
+$_SESSION['sta'] = 0;
+$_SESSION['filter'] = 1;
 
 require_once(STAFFINC_DIR.'header.inc.php');
 require_once(STAFFINC_DIR.$inc);

@@ -17,7 +17,7 @@ if(!defined('ADMINPAGE')) { ?>
        
     </li> 
 	<li  class="has_sub">
-		<a class="waves-effect waves-primary" href="/scp/tickets.php?queue=2&p=1&l=0&t=<?php echo $thisstaff->dept_id ?>&s=0"><i class=" ti-light-bulb"></i> </span> Suggestions</a> 
+		<a class="waves-effect waves-primary" href="/scp/tickets.php?queue=1&p=1&l=0&t=<?php echo $thisstaff->dept_id ?>&s=0"><i class=" ti-light-bulb"></i> </span> Suggestions</a> 
        
     </li>
 	<li class="  ">
