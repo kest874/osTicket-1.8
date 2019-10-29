@@ -70,6 +70,14 @@ if ($lang) {
 </head>
 <body class="fixed-left">
 <script>
+    $.busyLoadFull("show",  { 
+    text: "LOADING ...",
+    textColor: "#c82333",
+    color: "#c82333",
+    background: "rgba(0, 0, 0, 0.3)"
+});
+ </script>
+<script>
    var resizefunc = [];
 </script>
     <div id="pjax-container" class="<?php if ($_POST) echo 'no-pjax'; ?>">

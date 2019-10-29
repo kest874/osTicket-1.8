@@ -73,7 +73,13 @@ foreach (CustomQueue::queues()->order_by('sort', 'title') as $q) { ?>
   <div>
     <div class="buttons pull-right">
       <button class="btn btn-success btn-sm"" type="submit" name="submit" value="search"
-        id="do_search"><i class="icon-search"></i>
+        id="do_search"  onclick="javascript:
+          $.busyLoadFull('show',  { 
+						text: 'LOADING ...',
+						textColor: '#c82333',
+						color: '#c82333',
+						background: 'rgba(0, 0, 0, 0.3)'
+					});"><i class="icon-search"></i>
         <?php echo __('Search'); ?></button>
       <button class="btn btn-danger btn-sm" type="submit" name="submit" value="save"
         onclick="javascript:
