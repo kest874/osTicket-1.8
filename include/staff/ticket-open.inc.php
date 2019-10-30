@@ -283,10 +283,13 @@ if ($_POST)
 <div id="dynamic-form">
       
         <?php
+		    $_SESSION['tickettype'] =0;
             foreach ($forms as $form) {
+				
                 print $form->getForm()->getMedia();
                 include(STAFFINC_DIR .  'templates/dynamic-form.tmpl.php');
             }
+		
         ?>
 </div>
        

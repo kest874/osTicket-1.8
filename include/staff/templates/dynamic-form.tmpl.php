@@ -119,7 +119,7 @@ if ($form->getTitle()) {
             ?>
                 
                 
-                <div class="multi-line dynamicformdatamulti <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'required ';
+                <div class="multi-line dynamicformdatamulti <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'required ';;
                 ?>" <?php if ($options['width'])
                     echo "width=\"{$options['width']}\""; ?>>
                 <label <?php if (get_class($field) == 'BooleanField' || get_class($field) == 'FileUploadField'){echo 'style="display: none;"';}?>><?php echo Format::htmlchars($field->getLocal('label')); ?>:</label>
@@ -128,9 +128,14 @@ if ($form->getTitle()) {
                         data-title="<?php echo __('Required to close ticket'); ?>"
                         data-content="<?php echo __('Data is required in this field in order to close the related ticket'); ?>"
                     /></i>
-                <?php } ?>
-            <div <?php if ($field->errors()){echo ' class="has-danger"';}?>style="position:relative" <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) echo 'id="requiredfield"';
-                ?>><?php
+                <?php } 
+           
+				if ($_SESSION['tickettype'] ==0) {?>
+				<div <?php if ($field->errors()){echo ' class="has-danger"';}?>style="position:relative" <?php if ($field->isRequiredForStaff() && !$field->isRequiredForClose()) 	echo 'id="requiredfield"'; ?>>
+				<?php
+				} else { ?>
+				<div <?php if ($field->errors()){echo ' class="has-danger"';}?>style="position:relative" <?php if ($field->isRequiredForStaff() || $field->isRequiredForClose()) 	echo 'id="requiredfield"'; ?>>
+				<?php }
             }
 			
             $field->render($options); 

@@ -419,15 +419,16 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
         </div>
             
             
-                     <?php 
+         <?php 
+			$_SESSION['tickettype'] =1;
 			foreach (DynamicFormEntry::forTicket($ticket->getId()) as $form) {
-			
+		
 				  if ($haspermission){
 								$form->render(true, false, array('mode'=>'edit','modal'=>'ticketedit','width'=>140,'entry'=>$form));
-                                } else {
+								} else {
 								$form->render(true, false, array('mode'=>'edit','modal'=>'ticketedit','width'=>140,'disabled'=>1,'entry'=>$form));
-                                 
-                                }
+								 
+                    }
 		} ?>
              
         
