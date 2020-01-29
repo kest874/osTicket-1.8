@@ -4193,7 +4193,7 @@ class ChoicesWidget extends Widget {
         <script type="text/javascript">
         $(function() {
             $("#<?php echo $this->id; ?>")
-            .select2({'minimumResultsForSearch':10, 'width': '350px'});
+            .select2({'minimumResultsForSearch':10});
         });
         </script>
        <?php

@@ -931,6 +931,9 @@ div#requiredfield select {
     background-color: #ffffcc !important;
 }
 
+div#requiredfield .select2-selection--multiple {
+    background-color: #ffffcc !important;
+}
 /* Line 582 */
 .thread-entry .header
 {
