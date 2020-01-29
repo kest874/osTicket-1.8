@@ -927,6 +927,10 @@ width: 100%;
 
 }
 
+div#requiredfield select {
+    background-color: #ffffcc !important;
+}
+
 /* Line 582 */
 .thread-entry .header
 {
