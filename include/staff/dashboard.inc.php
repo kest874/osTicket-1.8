@@ -296,7 +296,7 @@ $('svg').height(700);
                                     <i class="ti-info-alt text-success"></i>
                                 </div>
                                 <div class="text-right">
-                                    <a href="tickets.php?queue=14&p=1"><h3 class="text-dark"><b class="counter"><?php echo round($SugTargetPerMonth/$MemberCount,1) ;?></b></h3></a>
+                                    <a href="tickets.php?queue=14&p=1"><h3 class="text-dark"><b class="counter"><?php echo round($SugTargetPerMonth/12,1) ;?></b></h3></a>
                                     <p class="text-muted mb-0">Suggestion Target (Month/Associate)</p>
                                 </div>
                                 <div class="clearfix"></div>

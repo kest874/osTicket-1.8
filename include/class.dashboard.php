@@ -268,7 +268,7 @@ $CMImplemented = (int)$CMonthImplemented["count"];
 $YTDNotImplemented = (int)$YearToDateNotImplemented["count"];
 
 
-$SugYearTarget = ($MemberCount * $ost->getConfig()->getSugPerYr());
+$SugYearTarget = ($ost->getConfig()->getSugPerYr());
 $SugTargetPerMonth = $SugYearTarget;
 $SugPreviousMonthTarget = round(($MemberCount * $SugTargetPerMonth)* (int) date('m', strtotime(date('Y-m')." -1 month")));
 $SugCurrentMonthTarget = round(($MemberCount * $SugTargetPerMonth)* (int) date('m', strtotime(date('Y-m'))));
