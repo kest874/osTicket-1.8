@@ -90,7 +90,7 @@
         </tr>
         
         <?php
-        $sql = "SELECT * FROM osticket_saftest.ost_recordable_record;";
+        $sql = "SELECT * FROM ost_recordable_record;";
 $locsdata = db_query($sql);
 ?>
         <tr>
