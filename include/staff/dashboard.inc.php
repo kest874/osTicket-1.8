@@ -59,6 +59,59 @@
 	  
    <div class="clearfix"></div> 
 </div> 
+
+<div class="row">
+  <div class="col-lg-12">		
+		<div class="portlet" >
+			<?php 
+				$sql="SELECT d.name as LOCATION,DATEDIFF(CURDATE(),max(dateofincident)) AS 'DaysSinceRecordable'
+				 FROM osticket_saftest.ost_ticket__cdata tcd join ost_ticket t on t.ticket_id = tcd.ticket_id 
+				 join ost_department d on t.dept_id = d.id where  t.isrecordable = 1 group by d.name order by d.name";
+			 
+			  $locsdata = db_query($sql);
+			?>	    
+				<table class="table table-hover table-condensed table-sm m-b-0"><thead>
+         <tr class="bg-graphgreen"><th></th>
+       		<?php
+                            
+         	 foreach ($locsdata as $loc) {
+             echo '<th>'.$loc["LOCATION"].'</th>'; 
+            }
+        ?> </tr> <tr><td><b>Days since last recordable</b></td>
+        	
+        	 <?php
+                            
+          foreach ($locsdata as $loc) {
+
+              echo '<td>'.$loc["DaysSinceRecordable"].'</td>'; 
+          }
+        ?>
+        	
+        </tr>
+        
+        <?php
+        $sql = "SELECT * FROM osticket_saftest.ost_recordable_record;";
+$locsdata = db_query($sql);
+?>
+        <tr>
+        	<td><b>Previous Record (days)</b></td>
+        	<?php
+                            
+          foreach ($locsdata as $loc) {
+
+              echo '<td>'.$loc["RECORD"].'</td>'; 
+          }
+        ?>
+        	
+        </tr>
+        
+        
+        
+        </table>
+   		</div>
+	</div>
+</div>
+
 <div class="row">
     <div class="col-lg-6">
         <div class="portlet" id="openincidentspie" ><!-- /primary heading -->
@@ -72,8 +125,9 @@
     </div>
     
 </div>
+
 <div class="row">
-    <div class="col-lg-12">		
+	  <div class="col-lg-12">		
 	
 	    
         <div class="portlet" id="IncidentRate" ><!-- /primary heading -->
