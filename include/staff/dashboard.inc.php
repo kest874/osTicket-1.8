@@ -19,7 +19,7 @@
 	
 	$sqlbegindate =  substr($begindate, 6, 4)."-". substr($begindate, 0, 2)."-".substr($begindate, 3, 2);
 	$sqlenddate = substr($enddate, 6, 4)."-". substr($enddate, 0, 2)."-".substr($enddate, 3, 2);
-	
+
 	$sqlbeginmonth = substr($begindate, 0, 2);
 	$sqlendmonth = substr($enddate, 0, 2);
 	
@@ -2407,6 +2407,7 @@ where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') 
 group by data.CALENDARYEAR,data.MONTHNUM,data.location
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
+
 $locsdata = db_query($sql1); 
 $sql2="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR, concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period  from (
 	select sum(isrecordable)as recordables,0 as hours, d.name as location,
@@ -2735,7 +2736,9 @@ where str_to_date(concat('01/',data.MONTHNUM,'/',data.CALENDARYEAR),'%d/%m/%Y') 
 group by data.location,data.CALENDARYEAR,data.MONTHNUM
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
+
 $locsdata = db_query($sql1); 
+
 $sql2="select sum(data.dart) as dart, h.hours, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR from (
 	select sum(isdart)as dart,0 as hours, d.name as location,
 	DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') AS MONTHNAME,

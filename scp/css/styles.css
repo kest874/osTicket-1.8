@@ -1086,7 +1086,7 @@ m-r--5 {
 
 .m-t-50 {
   margin-top: 50px; }
-
+  
 .m-t--5 {
   margin-top: -5px !important; }
 
@@ -1143,6 +1143,9 @@ m-r--5 {
 
 .m-b--30 {
   margin-bottom: -30px !important; } 
+
+.t-120 {
+ top: 120px; }
 
 .w-xs {
   min-width: 80px; }
@@ -3310,6 +3313,8 @@ div#requiredfield.has-danger > input {
 .table > thead > tr.danger > td, .table > thead > tr.danger > th,
 .table > thead > tr > td.danger, .table > thead > tr > th.danger {
   background-color: fade(#ef5350, 15%); }
+  
+  
 
 /* Datatable */
 div.dataTables_paginate ul.pagination {

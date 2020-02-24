@@ -25,74 +25,16 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
     <div>
         
             <strong>
-                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_AssociateActivity&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
-                Associate Activity</a>
+                <a href="rates.php">
+                Incident and Dart Rates</a>
             </strong>
     </div>
     <div>
-            <em>&nbsp; Report showing associate system activity.</em>
+            <em>&nbsp; Report showing Incident and Date Rates.</em>
         
     </div>
 </div>    
-<div class="row table">
-    <div>
-        
-            <strong>
-                <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_AssociateSummary&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
-                Associate Suggestion Summary</a>
-            </strong>
-     </div>
-    <div>       
-        
-            <em>&nbsp; Report showing associate activity by month.</em>
-        
-    </div>
-</div> 
-<div class="row table">
-    <div>
-        
-            <strong>
-               <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_OpenSuggesitonAge&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
-                Suggestions Open Age</a>
-            </strong>
-    </div>
 
-    <div>        
-        
-            <em>&nbsp; Report showing Suggestions By Age<</em>
-        
-    </div>
-</div>
-<div class="row table">
-        <div>
-        
-            <strong>
-                 <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_Suggestions&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
-                Suggestions</a>
-            </strong>
-     </div>
-    <div>       
-        
-            <em>&nbsp; Report showing Suggestions with filters (Catagory, Status)</em>
-        
-    </div>
-    
- </div>
- <div class="row table">
-        <div>
-        
-            <strong>
-                 <a href="http://crpsql01/ReportServer/Pages/ReportViewer.aspx?%2fosTicket%2fSuggestions%2fsug_Statistics&rs:Command=Render&Location=<?php echo $DeptId; ?>&Teams=<?php echo $TeamId; ?>" target="_blank">
-                Suggestions Statistics</a>
-            </strong>
-     </div>
-    <div>       
-        
-            <em>&nbsp; Report showing Suggestions Statistics</em>
-        
-    </div>
-    
- </div>
 
 
  </div> </div> </div>
