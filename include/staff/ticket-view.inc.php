@@ -87,33 +87,7 @@ background: "rgba(0, 0, 0, 0.2)"
             }
         ?>
 
-        <?php
-            // Assign
-            if ($ticket->isOpen() && $role->hasPerm(Ticket::PERM_ASSIGN)) {?>
-
-            <div class="btn-group btn-group-sm" role="group">
-            <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle waves-effect" 
-            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-            title="<?php echo $ticket->isAssigned() ? __('Assign') : __('Reassign'); ?>"><i class="fa fa-user"></i>
-            </button>
-                <div class="dropdown-menu " aria-labelledby="btnGroupDrop1">
-                    
-                <?php   
-                    // Agent can claim team assigned ticket
-                    if (!$ticket->getStaff()
-                            && (!$dept->assignMembersOnly()
-                                || $dept->isMember($thisstaff))
-                            ) { ?>
-                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/claim"><i class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
-                    <?php
-                    } ?>
-                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/agents"><i class="fa fa-user"></i> <?php echo __('Agent'); ?></a>
-                    <a class="dropdown-item ticket-action" data-redirect="tickets.php" href="#tickets/<?php echo $ticket->getId(); ?>/assign/teams"><i class="fa fa-users"></i> <?php echo __('Team'); ?></a>
-            
-                </div>
-            </div>
-      <?php } ?>
-                
+                   
             <a  class="btn btn-light waves-effect" id="savebutton" onclick="document.getElementById('save').submit();" 
             data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Save'); ?>"><i class="fa fa-save"></i></a>
          
@@ -275,9 +249,26 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
 				<input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
                 
                 <label width="100"><?php echo __('Status');?>:</label> 
-                    <?php echo ($S = $ticket->getStatus()) ? $S->display() : ''; ?>
+               
+                    <?php 
+                    
+                    
+                    switch ($ticket->getStatusId()){
+               
+                case '3':
+                    $badgecolor = 'bg-success';
+                    break;
+                case '1':
+                    $badgecolor = 'bg-danger';
+                    break;
+                                 
+                default:
+                    }
+                    
+                    echo '<span class="badge label-table '.$badgecolor.'">'.$ticket->getStatus().'</span>'; ?>
+                    
                 </div>  
-        <div>
+				<div>
                 <label><?php echo __('Priority');?>:</label>
                     <?php 
                     
@@ -299,7 +290,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
         </div>
 		<div>
             <label><?php echo __('Division');?>:</label>
-                    <?php echo Format::htmlchars($ticket->getdeptName()); ?>
+                   <span class="badge label-table bg-danger"> <?php echo Format::htmlchars($ticket->getdeptName()); ?></span>
 		</div>
                 </div>
             </div>

@@ -40,29 +40,7 @@ if ($agent->hasPerm(Ticket::PERM_EDIT, false)) {?>
 
 <?php } ?>
 
-<?php
-// Mass Claim/Assignment
-if ($agent->hasPerm(Ticket::PERM_ASSIGN, false)) {?>
 
-<div class="btn-group btn-group-sm" role="group">
-        <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
-        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Assign'); ?>"><i class="fa fa-user"></i>
-        </button>
-    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1" id="action-dropdown-change-priority">
-
-   <a class="dropdown-item no-pjax tickets-action"
-        href="#tickets/mass/claim"><i
-        class="fa fa-chevron-down"></i> <?php echo __('Claim'); ?></a>
-     <a class="dropdown-item no-pjax tickets-action"
-        href="#tickets/mass/assign/agents"><i
-        class="fa fa-user"></i> <?php echo __('Agent'); ?></a>
-      <a class="dropdown-item no-pjax tickets-action"
-        href="#tickets/mass/assign/teams"><i
-        class="fa fa-users"></i> <?php echo __('Team'); ?></a>
-    
-    </div>
-</div>
 <?php
 }
 // Mass Transfer
@@ -82,7 +60,7 @@ if ($agent->hasPerm(Ticket::PERM_DELETE, false)) {?>
     href="#tickets/mass/delete"><i class="fa fa-trash"></i></a>
 
 <?php
-}
+
 }
 ?>
 
