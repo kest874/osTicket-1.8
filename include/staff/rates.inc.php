@@ -54,42 +54,45 @@
 			<?php					       
 					       
 				$sql="select LOCATION,RECORDABLES,DARTS,HOURS,MTH,INCIDENTMONTH from (
-select sum(RECORDABLES) as RECORDABLES,sum(DARTS) as DARTS, h.hours as HOURS, data.LOCATION, data.MTH, data.INCIDENTMONTH from
+							select sum(RECORDABLES) as RECORDABLES,sum(DARTS) as DARTS, h.hours as HOURS, data.LOCATION, data.MTH, data.INCIDENTMONTH from
 
-(select sum(isrecordable) as RECORDABLES,sum(isdart) as DARTS, d.name as LOCATION, MONTH(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) as MTH,
-DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') as INCIDENTMONTH
+							(select sum(isrecordable) as RECORDABLES,sum(isdart) as DARTS, d.name as LOCATION, MONTH(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) as MTH,
+							DATE_FORMAT(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'),'%b') as INCIDENTMONTH
 
-from ost_ticket t 
-join ost_department d on d.id = t.dept_id
-join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id
-where t.isrecordable = 1 and year(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = ".$syear."
-group by d.name, MONTH(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')), year(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
+							from ost_ticket t 
+							join ost_department d on d.id = t.dept_id
+							join ost_ticket__cdata tc on t.ticket_id = tc.ticket_id
+							where t.isrecordable = 1 and year(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = ".$syear."
+							group by d.name, MONTH(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')), year(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d'))
 
-union all
+							union all
 
-select 0 as RECORDABLES,0 as DARTS , d1.name as LOCATION, m.MTH, m.INCIDENTMONTH from ost_department d1 join (
-SELECT 1 AS MTH, 'Jan' as INCIDENTMONTH
-UNION SELECT 2 AS MTH, 'Feb' as INCIDENTMONTH
-UNION SELECT 3 AS MTH, 'Mar' as INCIDENTMONTH
-UNION SELECT 4 AS MTH, 'Apr' as INCIDENTMONTH
-UNION SELECT 5 AS MTH, 'May' as INCIDENTMONTH
-UNION SELECT 6 AS MTH, 'Jun' as INCIDENTMONTH
-UNION SELECT 7 AS MTH, 'Jul' as INCIDENTMONTH
-UNION SELECT 8 AS MTH, 'Aug' as INCIDENTMONTH
-UNION SELECT 9 AS MTH, 'Sep' as INCIDENTMONTH
-UNION SELECT 10 AS MTH, 'Oct' as INCIDENTMONTH
-UNION SELECT 11 AS MTH, 'Nov' as INCIDENTMONTH
-UNION SELECT 12 AS MTH, 'Dec' as INCIDENTMONTH)m on 1=1) data
+							select 0 as RECORDABLES,0 as DARTS , d1.name as LOCATION, m.MTH, m.INCIDENTMONTH from ost_department d1 join (
+							SELECT 1 AS MTH, 'Jan' as INCIDENTMONTH
+							UNION SELECT 2 AS MTH, 'Feb' as INCIDENTMONTH
+							UNION SELECT 3 AS MTH, 'Mar' as INCIDENTMONTH
+							UNION SELECT 4 AS MTH, 'Apr' as INCIDENTMONTH
+							UNION SELECT 5 AS MTH, 'May' as INCIDENTMONTH
+							UNION SELECT 6 AS MTH, 'Jun' as INCIDENTMONTH
+							UNION SELECT 7 AS MTH, 'Jul' as INCIDENTMONTH
+							UNION SELECT 8 AS MTH, 'Aug' as INCIDENTMONTH
+							UNION SELECT 9 AS MTH, 'Sep' as INCIDENTMONTH
+							UNION SELECT 10 AS MTH, 'Oct' as INCIDENTMONTH
+							UNION SELECT 11 AS MTH, 'Nov' as INCIDENTMONTH
+							UNION SELECT 12 AS MTH, 'Dec' as INCIDENTMONTH)m on 1=1) data
 
-left join ost_hours h on h.location = data.LOCATION and h.month = data.INCIDENTMONTH and h.year = ".$syear."
+							left join ost_hours h on h.location = data.LOCATION and h.month = data.INCIDENTMONTH and h.year = ".$syear."
 
-group by data.LOCATION, data.MTH, data.INCIDENTMONTH)alldata /*where LOCATION = 'TNN2'*/";		       
+							group by data.LOCATION, data.MTH, data.INCIDENTMONTH)alldata /*where LOCATION = 'TNN2'*/";		       
 	
 			  $locsdata = db_query($sql);
 			  $locsdata1 = db_query($sql);
 			  $locsdata2 = db_query($sql);
 			  $locsdata3 = db_query($sql);
-			  
+	
+				$sql = "SELECT * FROM ost_targets where year = ".$syear." order by location";			  
+				$targets = db_query($sql);
+				
 			?>
 				<table class="table table-hover table-condensed table-sm text-xsmall"><thead>
         <thead>
@@ -108,7 +111,9 @@ group by data.LOCATION, data.MTH, data.INCIDENTMONTH)alldata /*where LOCATION = 
 					<th class="bg-graphgreen sticky-top t-120">Oct</th>
 					<th class="bg-graphgreen sticky-top t-120">Nov</th>
 					<th class="bg-graphgreen sticky-top t-120">Dec</th>
-					<th class="bg-graphgreen sticky-top t-120">YTD</th>        
+					<th class="bg-graphgreen sticky-top t-120">YTD</th>   
+					<th class="bg-graphgreen sticky-top t-120">TGT</th>     
+					   
         </thead>
         	 <?php
           $ploc = null;             
@@ -135,7 +140,7 @@ group by data.LOCATION, data.MTH, data.INCIDENTMONTH)alldata /*where LOCATION = 
           					  
           			}
           			$style='style=color:black;font-weight:bold;';
-          		  echo '<td '.$style.'>'.$it.'</td>';
+          		  echo '<td '.$style.'>'.$it.'</td><td></td>';
           		}
           		  echo '</tr><tr><td style="font-weight: 600;">DART Injuries</td>';
           			$dt = null;
@@ -148,7 +153,7 @@ group by data.LOCATION, data.MTH, data.INCIDENTMONTH)alldata /*where LOCATION = 
           		
           			}
           			$style='style=color:black;font-weight:bold;';
-          			echo '<td '.$style.'>'.$dt.'</td>';
+          			echo '<td '.$style.'>'.$dt.'</td><td></td>';
           			echo '</tr><tr><td style="font-weight: 600;">Hours Worked</td>';
           		
           			$ht = null;
@@ -159,7 +164,7 @@ group by data.LOCATION, data.MTH, data.INCIDENTMONTH)alldata /*where LOCATION = 
           				} 
           			}
           			$style='style=color:black;font-weight:bold;';
-          			echo '<td '.$style.'>'.number_format($ht).'</td>';
+          			echo '<td '.$style.'>'.number_format($ht).'</td><td></td>';
           			
           			 			
           			
@@ -170,6 +175,7 @@ group by data.LOCATION, data.MTH, data.INCIDENTMONTH)alldata /*where LOCATION = 
           			foreach ($locsdata3 as $hour) {
 									if ($loc["LOCATION"]==$hour["LOCATION"]){
 									$style ='style="font-weight: 600;"';						
+									if ($hour['HOURS']==0) $h = 0;
 									$h = $hour['HOURS'] +$h;
           				$i = $hour['RECORDABLES'] +$i;
           				if ($h !=0){ 
@@ -188,13 +194,20 @@ group by data.LOCATION, data.MTH, data.INCIDENTMONTH)alldata /*where LOCATION = 
                   }	
           			echo '<td '.$style.'>'.$irt.'</td>';
           			
+          			foreach ($targets as $target) {
+		          		if ($loc["LOCATION"]==$target["location"]){
+		          			$style='style=color:black;font-weight:bold;';
+		          			echo '<td '.$style.'>'.$target["incident"].'</td>';
+		          		}
+          		  }	
           		
           		  echo '</tr><tr><td style="font-weight: 600;">DART Rate</td>';
           			$h = null;
           			$d = null;
           			foreach ($locsdata3 as $hour) {
 									if ($loc["LOCATION"]==$hour["LOCATION"]){
-									$style ='style="font-weight: 600;"';						
+									$style ='style="font-weight: 600;"';		
+									if ($hour['HOURS']==0) $h = 0;				
 									$h = $hour['HOURS'] +$h;
           				$d = $hour['DARTS'] +$d;
           				if ($h !=0){ 
@@ -213,11 +226,17 @@ group by data.LOCATION, data.MTH, data.INCIDENTMONTH)alldata /*where LOCATION = 
                   }	
           			echo '<td '.$style.'>'.$drt.'</td>';
           			
-          		  echo '</tr>';
-          			
+          		$style='style=color:black;font-weight:bold;';
+          		foreach ($targets as $target) {
+	          		if ($loc["LOCATION"]==$target["location"]){
+	          		
+	          			echo '<td '.$style.'>'.$target["dart"].'</td>';
+	          		}
+          		}		
+          		echo '</tr>';
           	}
 							if ($cloc != $ploc){
-          		echo '<tr><td colspan=15>&nbsp;</td></tr>';
+          		echo '<tr><td colspan=16>&nbsp;</td></tr>';
           		}
           		$ploc = $loc["LOCATION"];
           }
