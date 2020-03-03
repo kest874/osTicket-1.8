@@ -150,7 +150,7 @@ toastr.options = {
      { Location: "NTC", Id: 'NTC' },
      { Location: "OH", Id: 'OH' }, 
      { Location: "PAU", Id: 'PAU' },
-     { Location: "RTA", Id: 'RTA' },
+     { Location: "NTA", Id: 'NTA' },
      { Location: "RVC", Id: 'RVC' },
      { Location: "TNN1", Id: 'TNN1' },
      { Location: "TNN2", Id: 'TNN2' },
