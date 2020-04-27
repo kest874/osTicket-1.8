@@ -1,16 +1,18 @@
 <?php
 $qs = array();
-$select = 'SELECT user.*, email.address as email ';
+$select = 'SELECT user.*, email.address as email, account.status as status, account.id as account_id ';
 
 $from = 'FROM '.USER_TABLE.' user '
-      . 'LEFT JOIN '.USER_EMAIL_TABLE.' email ON (user.id = email.user_id) ';
+      . 'LEFT JOIN '.USER_EMAIL_TABLE.' email ON (user.id = email.user_id) '
+      . 'LEFT JOIN '.USER_ACCOUNT_TABLE.' account ON (user.id = account.user_id) ';
 
 $where = ' WHERE user.org_id='.db_input($org->getId());
 
 $sortOptions = array('name' => 'user.name',
                      'email' => 'email.address',
                      'create' => 'user.created',
-                     'update' => 'user.updated');
+                     'update' => 'user.updated',
+                     'status' => 'account.status');
 $orderWays = array('DESC'=>'DESC','ASC'=>'ASC');
 $sort= ($_REQUEST['sort'] && $sortOptions[strtolower($_REQUEST['sort'])]) ? strtolower($_REQUEST['sort']) : 'name';
 //Sorting options...
@@ -36,7 +38,10 @@ $pageNav=new Pagenate($total,$page,PAGE_LIMIT);
 $qstr = '&amp;'. Http::build_query($qs);
 $qs += array('sort' => $_REQUEST['sort'], 'order' => $_REQUEST['order']);
 
-$pageNav->setURL('users.php', $qs);
+if (strpos($_SERVER['REQUEST_URI'], 'orgs.php') !== false)
+    $pageNav->setURL('orgs.php?id='.$org->getId().'&amp;', $qs);
+else
+    $pageNav->setURL('users.php', $qs);
 //Ok..lets roll...create the actual query
 $qstr .= '&amp;order='.($order=='DESC' ? 'ASC' : 'DESC');
 
@@ -56,34 +61,46 @@ else
     $showing .= __("This organization doesn't have any users yet");
 
 ?>
+
 <form action="orgs.php?id=<?php echo $org->getId(); ?>" method="POST" name="users" >
 
-<div style="margin-top:5px;" class="pull-left"><b><?php echo $showing; ?></b></div>
+<div style="padding-bottom:15px">
 <?php if ($thisstaff->hasPerm(User::PERM_EDIT)) { ?>
-<div class="pull-right flush-right" style="margin-bottom:10px;">
-    <a href="#orgs/<?php echo $org->getId(); ?>/add-user" class="green button action-button add-user"
-        ><i class="icon-plus"></i> <?php echo __('Add User'); ?></a>
-    <a href="#orgs/<?php echo $org->getId(); ?>/import-users" class="button action-button add-user">
-        <i class="icon-cloud-upload icon-large"></i>
-    <?php echo __('Import'); ?></a>
-    <button id="actions" class="red button action-button" type="submit" name="remove-users"><i class="icon-trash"></i> <?php echo __('Remove'); ?></button>
+
+<div class="pull-left" style="margin-top:5px;margin-left: 15px;">
+<div style="margin-top:5px;" class="pull-left"><b><?php echo $showing; ?></b></div>
+</div>
+<div class="btn-group btn-group-sm pull-right" style="margin-top:5px;margin-right:15px;">
+        
+            <a href="#orgs/<?php echo $org->getId(); ?>/add-user" class="btn btn-light btn-small btn-nbg add-user"
+        data-placement="bottom"
+                    data-toggle="tooltip" title="<?php echo __('Add User'); ?>"><i class="fa fa-plus-square"></i> </a>
+    <a href="#orgs/<?php echo $org->getId(); ?>/import-users" class="btn btn-light btn-small btn-nbg add-user"   data-placement="bottom"
+                    data-toggle="tooltip" title="<?php echo __('Import'); ?>" >
+        <i class="fa fa-arrow-circle-up"></i></a>
+    <button id="actions" class="btn btn-light btn-small btn-nbg" type="submit" name="remove-users"  data-placement="bottom"
+                    data-toggle="tooltip" title="<?php echo __('Remove'); ?>"><i class="icon-trash"></i></button>
+        
+</div>
 </div>
 <?php } ?>
-<div class="clear"></div>
+
+<br>
+<div>
 <?php
 if ($num) { ?>
  <?php csrf_token(); ?>
  <input type="hidden" name="do" value="mass_process" >
  <input type="hidden" id="id" name="id" value="<?php echo $org->getId(); ?>" >
  <input type="hidden" id="action" name="a" value="" >
- <table class="list" border="0" cellspacing="1" cellpadding="0" width="100%">
+ <table class="table table-striped table-hover table-condensed table-sm">
     <thead>
         <tr>
-            <th width="4%">&nbsp;</th>
-            <th width="38%"><?php echo __('Name'); ?></th>
-            <th width="35%"><?php echo __('Email'); ?></th>
-            <th width="8%"><?php echo __('Status'); ?></th>
-            <th width="15%"><?php echo __('Created'); ?></th>
+            <th>&nbsp;</th>
+            <th><?php echo __('Name'); ?></th>
+            <th><?php echo __('Email'); ?></th>
+            <th><?php echo __('Status'); ?></th>
+            <th><?php echo __('Created'); ?></th>
         </tr>
     </thead>
     <tbody>
@@ -93,7 +110,10 @@ if ($num) { ?>
             while ($row = db_fetch_array($res)) {
 
                 $name = new UsersName($row['name']);
-                $status = 'Active';
+                if (!$row['account_id'])
+                    $status = __('Guest');
+                else
+                    $status = new UserAccountStatus($row['status']);
                 $sel=false;
                 if($ids && in_array($row['id'], $ids))
                     $sel=true;
@@ -107,8 +127,8 @@ if ($num) { ?>
                     <a class="preview"
                         href="users.php?id=<?php echo $row['id']; ?>"
                         data-preview="#users/<?php
-                        echo $row['id']; ?>/preview" ><?php
-                        echo Format::htmlchars($name); ?></a>
+                        echo $row['id']; ?>/preview" ><span class="notranslate"><?php
+                        echo Format::htmlchars($name); ?></span></a>
                     &nbsp;
                     <?php
                     if ($row['tickets'])
@@ -143,16 +163,27 @@ if ($num) { ?>
      </tr>
     </tfoot>
 </table>
-<?php
-if ($res && $num) { //Show options..
-    echo '<div>&nbsp;'.__('Page').':'.$pageNav->getPageLinks().'&nbsp;</div>';
-
-    ?>
-
-<?php
-}
-?>
+<div class="row">
+    <div class="col">
+        <div class="float-left">
+        <nav>
+        <ul class="pagination">   
+            <?php
+                echo $pageNav->getPageLinks('user', '#users');
+            ?>
+        </ul>
+        </nav>
+        </div>
+     
+            
+           
+            <div class="float-right">
+                  <span class="faded"><?php echo $pageNav->showing(); ?></span>
+            </div>  
+    </div>
+</div></div>
 </form>
+
 <?php
 } ?>
 

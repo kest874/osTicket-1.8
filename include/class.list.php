@@ -398,7 +398,6 @@ class DynamicList extends VerySimpleModel implements CustomList {
     }
 
     function update($vars, &$errors) {
-
         $required = array();
         if ($this->isEditable())
             $required = array('name');
@@ -406,8 +405,14 @@ class DynamicList extends VerySimpleModel implements CustomList {
         foreach (static::$fields as $f) {
             if (in_array($f, $required) && !$vars[$f])
                 $errors[$f] = sprintf(__('%s is required'), mb_convert_case($f, MB_CASE_TITLE));
-            elseif (isset($vars[$f]))
-                $this->set($f, $vars[$f]);
+            elseif (isset($vars[$f])) {
+                if ($vars[$f] != $this->get($f)) {
+                    $type = array('type' => 'edited', 'key' => $f);
+                    Signal::send('object.edited', $this, $type);
+                    $this->set($f, $vars[$f]);
+                }
+            }
+
         }
 
         if ($errors)
@@ -435,6 +440,9 @@ class DynamicList extends VerySimpleModel implements CustomList {
 
         if (!parent::delete())
             return false;
+
+            $type = array('type' => 'deleted');
+            Signal::send('object.deleted', $this, $type);
 
         if (($form = $this->getForm(false))) {
             $form->delete(false);
@@ -522,7 +530,7 @@ class DynamicList extends VerySimpleModel implements CustomList {
         foreach (DynamicList::objects() as $list) {
             $selections['list-'.$list->id] =
                 array($list->getPluralName(),
-                    SelectionField, $list->get('id'));
+                    'SelectionField', $list->get('id'));
         }
         return $selections;
     }
@@ -785,6 +793,9 @@ class DynamicListItem extends VerySimpleModel implements CustomListItem {
     }
 
     function display() {
+
+        return $this->getValue();
+        //TODO: Allow for display mode (edit, preview or both)
         return sprintf('<a class="preview" href="#"
                 data-preview="#list/%d/items/%d/preview">%s</a>',
                 $this->getListId(),
@@ -804,7 +815,10 @@ class DynamicListItem extends VerySimpleModel implements CustomListItem {
                     'sort' => 'sort',
                     'value' => 'value',
                     'abbrev' => 'extra') as $k => $v) {
-            if (isset($vars[$k]))
+            if ($k == 'abbrev' && empty($vars[$k])) {
+                $vars[$k] = NULL;
+                $this->set($v, $vars[$k]);
+            } elseif (isset($vars[$k]))
                 $this->set($v, $vars[$k]);
         }
 
@@ -1418,10 +1432,41 @@ implements CustomListItem, TemplateVariable, Searchable {
     }
 
     function display() {
-        return sprintf('<a class="preview" href="#"
-                data-preview="#list/%d/items/%d/preview">%s</a>',
+        
+        switch ($this->getLocalName()){
+            case "Assigned":
+            $badge = 'badge label-table bg-primary';
+            break;
+            case "Awaiting Submitter Action":
+            $badge = 'badge label-table bg-success';
+            break;
+            case "Awaiting Agent Action":
+            $badge = 'badge label-table bg-flatorange';
+            break;
+            case "Hold":
+            $badge = 'badge label-table badge-warning';
+            break;
+            case "Awaiting 3rd Party":
+            $badge = 'badge label-table bg-purple';
+            break;
+            case "Awaiting Quote":
+            $badge = 'badge label-table bg-flatpurple';
+            break;
+            case "Auto-Closed":
+            $badge = 'badge label-table bg-flatgreenalt2';
+            break;
+            case "Closed":
+            $badge = 'badge label-table badge-success';
+            break;
+            case "Unassigned":
+            $badge = 'badge label-table bg-flatred';
+            break;
+        }
+        
+        return sprintf('<a class="" href="#" data-preview="#list/%d/items/%d/preview"><span class="%s">%s</span></a>',
                 $this->getListId(),
                 $this->getId(),
+                $badge,
                 $this->getLocalName()
                 );
     }
@@ -1483,6 +1528,10 @@ implements CustomListItem, TemplateVariable, Searchable {
 
     static function status_options() {
         include(STAFFINC_DIR . 'templates/status-options.tmpl.php');
+    }
+    
+    static function status_filter_options() {
+        include(STAFFINC_DIR . 'templates/status-filter-options.tmpl.php');
     }
 }
 ?>

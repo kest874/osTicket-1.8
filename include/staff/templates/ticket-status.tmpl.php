@@ -43,6 +43,8 @@ $action = $info['action'] ?: ('#tickets/status/'. $state);
                 $statuses = TicketStatusList::getStatuses(array('states'=>array($state)))->all();
                 $verb = TicketStateField::getVerb($state);
             }
+            
+            $verb = 'Submit';
 
             if ($statuses) {
             ?>
@@ -91,16 +93,26 @@ $action = $info['action'] ?: ('#tickets/status/'. $state);
                     </td>
                 </tr>
             </tbody>
+           <?php if ($info['children']) { ?>
+            <tbody>
+                <tr>
+                    <td>
+                        <input type="checkbox" name="children">
+                        <?php echo __('Set status for all children.'); ?>
+                    </td>
+                </tr>
+            </tbody>
+           <?php } ?>
         </table>
         <hr>
         <p class="full-width">
             <span class="buttons pull-left">
-                <input type="reset" value="<?php echo __('Reset'); ?>">
-                <input type="button" name="cancel" class="close"
+                <input class="btn btn-warning btn-sm" type="reset" value="<?php echo __('Reset'); ?>">
+                <input type="button" name="cancel" class="close btn-danger"
                 value="<?php echo __('Cancel'); ?>">
             </span>
             <span class="buttons pull-right">
-                <input type="submit" value="<?php
+                <input class="btn btn-primary btn-sm" type="submit" value="<?php
                 echo $verb ?: __('Submit'); ?>">
             </span>
          </p>

@@ -1,5 +1,51 @@
 <?php
 
+require_once INCLUDE_DIR . 'class.variable.php';
+
+// Used by the email system
+interface EmailContact {
+    function getId();
+    function getUserId();
+    function getName();
+    function getEmail();
+}
+
+
+class EmailRecipient
+implements EmailContact {
+    protected $contact;
+    protected $type;
+
+    function __construct(EmailContact $contact, $type='to') {
+        $this->contact = $contact;
+        $this->type = $type;
+    }
+
+    function getContact() {
+        return $this->contact;
+    }
+
+    function getId() {
+        return $this->contact->getId();
+    }
+
+    function getUserId() {
+        return $this->contact->getUserId();
+    }
+
+    function getEmail() {
+        return $this->contact->getEmail();
+    }
+
+    function getName() {
+        return $this->contact->getName();
+    }
+
+    function getType() {
+        return $this->type;
+    }
+}
+
 abstract class BaseList
 implements IteratorAggregate, Countable {
     protected $storage = array();
@@ -175,5 +221,82 @@ implements ArrayAccess, Serializable {
     }
     function unserialize($what) {
         $this->storage = unserialize($what);
+    }
+}
+
+class MailingList extends ListObject
+implements TemplateVariable {
+
+    function add($recipient) {
+        if (!$recipient instanceof EmailRecipient)
+            throw new InvalidArgumentException('Email Recipient expected');
+
+        return parent::add($recipient);
+    }
+
+    function addRecipient($contact, $to='to') {
+        return $this->add(new EmailRecipient($contact, $to));
+    }
+
+    function addTo(EmailContact $contact) {
+        return $this->addRecipient($contact, 'to');
+    }
+
+    function addCc(EmailContact $contact) {
+        return $this->addRecipient($contact, 'cc');
+    }
+
+    function addBcc(EmailContact $contact) {
+        return $this->addRecipient($contact, 'bcc');
+    }
+
+    function __toString() {
+        return $this->getNames();
+    }
+
+    // Recipients' email addresses
+    function getEmailAddresses() {
+        $list = array();
+        foreach ($this->storage as $u) {
+            $list[$u->getType()][$u->getId()] = sprintf("%s <%s>",
+                    $u->getName(), $u->getEmail());
+        }
+        return $list;
+    }
+
+    function getNames() {
+        $list = array();
+        foreach($this->storage as $user) {
+            if (is_object($user))
+                $list [] = $user->getName();
+        }
+        return $list ? implode(', ', $list) : '';
+    }
+
+    function getFull() {
+        $list = array();
+        foreach($this->storage as $user) {
+            if (is_object($user))
+                $list[] = sprintf("%s <%s>", $user->getName(), $user->getEmail());
+        }
+
+        return $list ? implode(', ', $list) : '';
+    }
+
+    function getEmails() {
+        $list = array();
+        foreach($this->storage as $user) {
+            if (is_object($user))
+                $list[] = $user->getEmail();
+        }
+        return $list ? implode(', ', $list) : '';
+    }
+
+    static function getVarScope() {
+        return array(
+            'names' => __('List of names'),
+            'emails' => __('List of email addresses'),
+            'full' => __('List of names and email addresses'),
+        );
     }
 }

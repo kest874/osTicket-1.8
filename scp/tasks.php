@@ -1,13 +1,10 @@
 <?php
 /*************************************************************************
     tasks.php
-
     Copyright (c)  2006-2013 osTicket
     http://www.osticket.com
-
     Released under the GNU General Public License WITHOUT ANY WARRANTY.
     See LICENSE.TXT for details.
-
     vim: expandtab sw=4 ts=4 sts=4:
 **********************************************************************/
 
@@ -41,17 +38,14 @@ $reply_attachments_form = new SimpleForm(array(
 
 //At this stage we know the access status. we can process the post.
 if($_POST && !$errors):
-
     if ($task) {
         //More coffee please.
         $errors=array();
-        $role = $thisstaff->getRole($task->getDeptId());
+        $role = $thisstaff->getRole($task->getDept());
         switch(strtolower($_POST['a'])):
         case 'postnote': /* Post Internal Note */
             $vars = $_POST;
-            $attachments = $note_attachments_form->getField('attachments')->getClean();
-            $vars['cannedattachments'] = array_merge(
-                $vars['cannedattachments'] ?: array(), $attachments);
+            $vars['files'] = $note_attachments_form->getField('attachments')->getFiles();
 
             $wasOpen = ($task->isOpen());
             if(($note=$task->postNote($vars, $errors, $thisstaff))) {
@@ -79,9 +73,7 @@ if($_POST && !$errors):
             break;
         case 'postreply': /* Post an update */
             $vars = $_POST;
-            $attachments = $reply_attachments_form->getField('attachments')->getClean();
-            $vars['cannedattachments'] = array_merge(
-                $vars['cannedattachments'] ?: array(), $attachments);
+            $vars['files'] = $reply_attachments_form->getField('attachments')->getFiles();
 
             $wasOpen = ($task->isOpen());
             if (($response=$task->postReply($vars, $errors))) {
@@ -95,7 +87,7 @@ if($_POST && !$errors):
                     $task = null; //Going back to main listing.
                 else
                     // Task is still open -- clear draft for the note
-                    Draft::deleteForNamespace('task.reply.'.$task->getId(),
+                    Draft::deleteForNamespace('task.response.'.$task->getId(),
                         $thisstaff->getId());
 
             } else {
@@ -110,6 +102,24 @@ if($_POST && !$errors):
         default:
             $errors['err']=__('Unknown action');
         endswitch;
+
+        switch(strtolower($_POST['do'])):
+          case 'addcc':
+              $errors = array();
+              if (!$role->hasPerm(Ticket::PERM_EDIT)) {
+                  $errors['err']=__('Permission Denied. You are not allowed to add collaborators');
+              } elseif (!$_POST['user_id'] || !($user=User::lookup($_POST['user_id']))) {
+                  $errors['err'] = __('Unknown user selected');
+            } elseif ($c2 = $task->addCollaborator($user, array(), $errors)) {
+                  $c2->setFlag(Collaborator::FLAG_CC, true);
+                  $c2->save();
+                  $msg = sprintf(__('Collaborator %s added'),
+                      Format::htmlchars($user->getName()));
+              }
+              else
+                $errors['err'] = sprintf('%s %s', __('Unable to add collaborator.'), __('Please try again!'));
+              break;
+      endswitch;
     }
     if(!$errors)
         $thisstaff->resetStats(); //We'll need to reflect any changes just made!
@@ -178,21 +188,6 @@ if ($stats['closed']) {
                            'href'=>'tasks.php?status=closed',
                            'iconclass'=>'closedTickets'),
                         ($_REQUEST['status']=='closed'));
-}
-
-if (isset($_SESSION['advsearch:tasks'])) {
-    // XXX: De-duplicate and simplify this code
-    $search = SavedSearch::create();
-    $form = $search->getFormFromSession('advsearch:tasks');
-    $form->loadState($_SESSION['advsearch:tasks']);
-    $tasks = Task::objects();
-    $tasks = $search->mangleQuerySet($tasks, $form);
-    $count = $tasks->count();
-    $nav->addSubMenu(array('desc' => __('Search').' ('.number_format($count).')',
-                           'title'=>__('Advanced Task Search'),
-                           'href'=>'tasks.php?status=search',
-                           'iconclass'=>'Ticket'),
-                        (!$_REQUEST['status'] || $_REQUEST['status']=='search'));
 }
 
 if ($thisstaff->hasPerm(TaskModel::PERM_CREATE, false)) {

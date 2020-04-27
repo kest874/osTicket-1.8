@@ -20,7 +20,7 @@ require('admin.inc.php');
 $nav->setTabActive('settings', 'settings.php?t='.urlencode($_GET['t']));
 $errors = array();
 
-if ($_REQUEST['id']) {
+if ($_REQUEST['id'] && is_numeric($_REQUEST['id'])) {
     $queue = CustomQueue::lookup($_REQUEST['id']);
 }
 
@@ -42,12 +42,14 @@ if ($_POST) {
 
     case 'create':
         $queue = CustomQueue::create(array(
-            'flags' => CustomQueue::FLAG_PUBLIC,
-            'root' => $_POST['root'] ?: 'Ticket'
+            'staff_id' => 0,
+            'title' => $_POST['queue-name'],
+            'root' => 'T'
         ));
 
         if ($queue->update($_POST, $errors) && $queue->save(true)) {
-            $msg = sprintf(__('Successfully added %s'), Format::htmlchars($_POST['name']));
+            $msg = sprintf(__('Successfully added %s'),
+                    Format::htmlchars($queue->getName()));
         }
         elseif (!$errors['err']) {
             $errors['err']=sprintf(__('Unable to add %s. Correct error(s) below and try again.'),
@@ -70,11 +72,13 @@ if ($_POST) {
                 if ($queue->save()) $updated++;
                 break;
             case 'delete':
-                if ($queue->delete()) $updated++;
+                if ($queue->getId() == $cfg->getDefaultTicketQueueId())
+                    $err = __('This queue is the default queue. Unable to delete. ');
+                elseif ($queue->delete()) $updated++;
             }
         }
         if (!$updated) {
-            Messages::error(__(
+            Messages::error($err ?: __(
                 'Unable to manage any of the selected queues'));
         }
         elseif ($_POST['count'] && $updated != $_POST['count']) {

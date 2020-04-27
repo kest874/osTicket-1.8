@@ -5,7 +5,7 @@ $date_header = $date_col = false;
 // Make sure the cdata materialized view is available
 TaskForm::ensureDynamicDataView();
 
-// Figure out REFRESH url — which might not be accurate after posting a
+// Figure out REFRESH url — which might not be accurate after posting a
 // response
 list($path,) = explode('?', $_SERVER['REQUEST_URI'], 2);
 $args = array();
@@ -20,11 +20,10 @@ $refresh_url = $path . '?' . http_build_query($args);
 $sort_options = array(
     'updated' =>            __('Most Recently Updated'),
     'created' =>            __('Most Recently Created'),
-    'due' =>                __('Due Soon'),
+    'due' =>                __('Due Date'),
     'number' =>             __('Task Number'),
     'closed' =>             __('Most Recently Closed'),
     'hot' =>                __('Longest Thread'),
-	'ticketnumber' =>       __('Ticker Number'),
     'relevance' =>          __('Relevance'),
 );
 
@@ -35,9 +34,10 @@ $queue_columns = array(
             'width' => '8%',
             'heading' => __('Task'),
             ),
-        'parent' => array(
-            'width' => '8%',
-            'heading' => __('Parent Ticket'),
+        'ticket' => array(
+            'width' => '16%',
+            'heading' => __('Ticket'),
+            'sort_col'  => 'ticket__number',
             ),
         'date' => array(
             'width' => '20%',
@@ -71,25 +71,25 @@ case 'closed':
     $status='closed';
     $results_type=__('Completed Tasks');
     $showassigned=true; //closed by.
-    $queue_sort_options = array('closed', 'updated', 'created', 'number','ticketnumber', 'hot');
+    $queue_sort_options = array('closed', 'updated', 'created', 'number', 'hot');
 
     break;
 case 'overdue':
     $status='open';
     $results_type=__('Overdue Tasks');
     $tasks->filter(array('isoverdue'=>1));
-    $queue_sort_options = array('updated', 'created', 'number','ticketnumber', 'hot');
+    $queue_sort_options = array('updated', 'created', 'number', 'hot');
     break;
 case 'assigned':
     $status='open';
     $staffId=$thisstaff->getId();
     $results_type=__('My Tasks');
     $tasks->filter(array('staff_id'=>$thisstaff->getId()));
-    $queue_sort_options = array('updated', 'created', 'hot', 'number','ticketnumber');
+    $queue_sort_options = array('updated', 'created', 'hot', 'number');
     break;
 default:
 case 'search':
-    $queue_sort_options = array('closed', 'updated', 'created', 'number','ticketnumber', 'hot');
+    $queue_sort_options = array('closed', 'updated', 'created', 'number', 'hot');
     // Consider basic search
     if ($_REQUEST['query']) {
         $results_type=__('Search Results');
@@ -99,20 +99,12 @@ case 'search':
         )));
         unset($_SESSION[$queue_key]);
         break;
-    } elseif (isset($_SESSION['advsearch:tasks'])) {
-        // XXX: De-duplicate and simplify this code
-        $form = $search->getFormFromSession('advsearch:tasks');
-        $form->loadState($_SESSION['advsearch:tasks']);
-        $tasks = $search->mangleQuerySet($tasks, $form);
-        $results_type=__('Advanced Search')
-            . '<a class="action-button" href="?clear_filter"><i class="icon-ban-circle"></i> <em>' . __('clear') . '</em></a>';
-        break;
     }
     // Fall-through and show open tickets
 case 'open':
     $status='open';
     $results_type=__('Open Tasks');
-    $queue_sort_options = array('created', 'updated', 'due', 'number','ticketnumber', 'hot');
+    $queue_sort_options = array('created', 'updated', 'due', 'number', 'hot');
     break;
 }
 
@@ -132,19 +124,24 @@ if ($filters)
 // Impose visibility constraints
 // ------------------------------------------------------------
 // -- Open and assigned to me
-$visibility = array(
+$visibility = Q::any(
     new Q(array('flags__hasbit' => TaskModel::ISOPEN, 'staff_id' => $thisstaff->getId()))
 );
+// -- Task for tickets assigned to me
+$visibility->add(new Q( array(
+                'ticket__staff_id' => $thisstaff->getId(),
+                'ticket__status__state' => 'open'))
+        );
 // -- Routed to a department of mine
 if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
-    $visibility[] = new Q(array('dept_id__in' => $depts));
+    $visibility->add(new Q(array('dept_id__in' => $depts)));
 // -- Open and assigned to a team of mine
 if (($teams = $thisstaff->getTeams()) && count(array_filter($teams)))
-    $visibility[] = new Q(array(
+    $visibility->add(new Q(array(
         'team_id__in' => array_filter($teams),
         'flags__hasbit' => TaskModel::ISOPEN
-    ));
-$tasks->filter(Q::any($visibility));
+    )));
+$tasks->filter(new Q($visibility));
 
 // Add in annotations
 $tasks->annotate(array(
@@ -165,7 +162,7 @@ $tasks->annotate(array(
 
 $tasks->values('id', 'number', 'created', 'staff_id', 'team_id',
         'staff__firstname', 'staff__lastname', 'team__name',
-        'dept__name', 'cdata__title', 'flags','ticket','ticket__number','ticket__source');
+        'dept__name', 'cdata__title', 'flags', 'ticket__number', 'ticket__ticket_id');
 // Apply requested quick filter
 
 $queue_sort_key = sprintf(':Q%s:%s:sort', ObjectModel::OBJECT_TYPE_TASK, $queue_name);
@@ -284,51 +281,59 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
 
 
 ?>
+
+<div class="subnav">
+
+    <div class="float-left subnavtitle">
+                          
+     <a href="<?php echo $refresh_url; ?>"
+                title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i></a> Tasks / <?php echo
+                $results_type.$showing; ?>                          
+    
+    </div>
+    <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
+    <a class="btn btn-icon waves-effect waves-light btn-success newTicket new-task" href="#tasks/add" title="Open a New Task" id="new-task" data-dialog-config="{&quot;size&quot;:&quot;large&quot;}"><i class="fa fa-plus-square" data-placement="bottom"
+        data-toggle="tooltip" title="<?php echo __('New Task'); ?>"></i></a>
+           <?php
+           if ($count)
+                echo Task::getAgentActions($thisstaff, array('status' => $status));
+            ?>
+      </div>   
+   <div class="clearfix"></div> 
+</div> 
+
 <!-- SEARCH FORM START -->
-<div id='basic_search'>
-  <div class="pull-right" style="height:25px">
-    <span class="valign-helper"></span>
-    <?php
-        require STAFFINC_DIR.'templates/tasks-queue-sort.tmpl.php';
-    ?>
-   </div>
-    <form action="tasks.php" method="get" onsubmit="javascript:
+<div class="card-box">
+<div class="row">
+    <div class="col">
+
+        <div class="float-right">
+
+    <form class="form-inline float-right" action="tasks.php" method="get" onsubmit="javascript:
         $.pjax({
         url:$(this).attr('action') + '?' + $(this).serialize(),
         container:'#pjax-container',
         timeout: 2000
         });
         return false;">
+        <div class="input-group input-group-sm ">
         <input type="hidden" name="a" value="search">
         <input type="hidden" name="search-type" value=""/>
-        <div class="attached input">
-            <input type="text" class="basic-search" data-url="ajax.php/tasks/lookup" name="query"
+     
+            <input type="text" class="form-control form-control-sm basic-search" data-url="ajax.php/tasks/lookup" name="query"
                    autofocus size="30" value="<?php echo Format::htmlchars($_REQUEST['query'], true); ?>"
-                   autocomplete="off" autocorrect="off" autocapitalize="off">
-            <button type="submit" class="attached button"><i class="icon-search"></i>
+                   autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Tasks">
+           <div class="input-group-append">
+						<button type="submit" class="input-group-text"><i class="fa fa-search"></i>
             </button>
-        </div>
+           </div> 
+      
     </form>
 
-</div>
+
+</div></div></div></div>
 <!-- SEARCH FORM END -->
-<div class="clear"></div>
-<div class=style="margin-bottom:20px; padding-top:5px;">
-<div class="sticky bar opaque">
-    <div class="content">
-        <div class="pull-left flush-left">
-            <h2><a href="<?php echo $refresh_url; ?>"
-                title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i> <?php echo
-                $results_type.$showing; ?></a></h2>
-        </div>
-        <div class="pull-right flush-right">
-           <?php
-           if ($count)
-                echo Task::getAgentActions($thisstaff, array('status' => $status));
-            ?>
-        </div>
-    </div>
-</div>
+
 <div class="clear"></div>
 <form action="tasks.php" method="POST" name='tasks' id="tasks">
 <?php csrf_token(); ?>
@@ -336,12 +341,13 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
  <input type="hidden" name="do" id="action" value="" >
  <input type="hidden" name="status" value="<?php echo
  Format::htmlchars($_REQUEST['status'], true); ?>" >
- <table class="list" border="0" cellspacing="1" cellpadding="2" width="940">
+ <table class="table table-striped table-hover table-condensed table-sm">
     <thead>
         <tr>
             <?php if ($thisstaff->canManageTickets()) { ?>
 	        <th width="4%">&nbsp;</th>
             <?php } ?>
+
             <?php
             // Query string
             unset($args['sort'], $args['dir'], $args['_pjax']);
@@ -382,7 +388,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
             $assinee ='';
             if ($T['staff_id']) {
                 $staff =  new AgentsName($T['staff__firstname'].' '.$T['staff__lastname']);
-                $assignee = sprintf('<span>%s</span>',
+                $assignee = sprintf('<span class="Icon staffAssigned">%s</span>',
                         Format::truncate((string) $staff, 40));
             } elseif($T['team_id']) {
                 $assignee = sprintf('<span class="Icon teamAssigned">%s</span>',
@@ -391,7 +397,6 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
 
             $threadcount=$T['thread_count'];
             $number = $T['number'];
-						
             if ($T['isopen'])
                 $number = sprintf('<b>%s</b>', $number);
 
@@ -410,24 +415,16 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                 </td>
                 <?php } ?>
                 <td nowrap>
-                  <a class="preview"
+                  <a class=""
                     href="tasks.php?id=<?php echo $T['id']; ?>"
                     data-preview="#tasks/<?php echo $T['id']; ?>/preview"
                     ><?php echo $number; ?></a></td>
-				
-				<?php if(empty($T['ticket__number'])) {?>				
-				<td></td>
-				<?php }
-				else { ?>
-				<td title="<?php echo $T['user__default_email__address']; ?>" nowrap>
-                  <a class="Icon <?php echo strtolower($T['ticket__source']); ?>Ticket preview"
-                    title="Preview Ticket"
-                    href="tickets.php?id=<?php echo $T['ticket']; ?>"
-                    data-preview="#tickets/<?php echo $T['ticket']; ?>/preview"
+                <td nowrap>
+                  <a class="preview"
+                    href="tickets.php?id=<?php echo $T['ticket__ticket_id']; ?>"
+                    data-preview="#tickets/<?php echo $T['ticket__ticket_id']; ?>/preview"
                     ><?php echo $T['ticket__number']; ?></a></td>
-	
-				<?php } ?>
-				<td align="left" nowrap><?php echo
+                <td align="center" nowrap><?php echo
                 Format::datetime($T[$date_col ?: 'created']); ?></td>
                 <td><a <?php if ($flag) { ?> class="Icon <?php echo $flag; ?>Ticket" title="<?php echo ucfirst($flag); ?> Ticket" <?php } ?>
                     href="tasks.php?id=<?php echo $T['id']; ?>"><?php
@@ -443,7 +440,7 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
                     ?>
                 </td>
                 <td nowrap>&nbsp;<?php echo Format::truncate($dept, 40); ?></td>
-                <td align="left" nowrap>&nbsp;<?php echo $assignee; ?></td>
+                <td nowrap>&nbsp;<?php echo $assignee; ?></td>
             </tr>
             <?php
             } //end of foreach
@@ -468,17 +465,40 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
      </tr>
     </tfoot>
     </table>
-    <?php
-    if ($total>0) { //if we actually had any tasks returned.
-        echo '<div>&nbsp;'.__('Page').':'.$pageNav->getPageLinks().'&nbsp;';
-        echo sprintf('<a class="export-csv no-pjax" href="?%s">%s</a>',
-                Http::build_query(array(
+<div class="row">
+    <div class="col">
+        <div class="float-left">
+        <nav>
+        <ul class="pagination">   
+            <?php
+                echo $pageNav->getPageLinks();
+            ?>
+        </ul>
+        </nav>
+        </div>
+        <div class="float-left">
+
+        <div class="btn btn-icon waves-effect btn-default m-b-5"> 
+               <?php
+                echo sprintf('<a class="export-csv no-pjax" href="?%s">%s</a>',
+                       Http::build_query(array(
                         'a' => 'export', 'h' => $hash,
                         'status' => $_REQUEST['status'])),
-                __('Export'));
-        echo '&nbsp;<i class="help-tip icon-question-sign" href="#export"></i></div>';
-    } ?>
-    </form>
+                ('<i class="ti-cloud-down faded"></i>'));
+                ?>
+        </div>
+                <i class=" hidden help-tip icon-question-sign" href="#export"></i>
+        </div>
+
+
+            <div class="float-right">
+                  <span class="faded"><?php echo $pageNav->showing(); ?></span>
+            </div>  
+    </div>
+</div>
+
+
+</div>
 </div>
 
 <div style="display:none;" class="dialog" id="confirm-action">

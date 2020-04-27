@@ -11,6 +11,8 @@ elseif (strpos($_GET['sort'], 'qs-') === 0) {
     $sort_id = substr($_GET['sort'], 3);
     $queuesort = QueueSort::lookup($sort_id);
     $sort_dir = $_GET['dir'];
+} elseif ($queuesort = $queue->getDefaultSort()) {
+    $sort_id = $queuesort->id;
 }
 ?>
 
@@ -27,7 +29,8 @@ var $et = $(event.target),
 $.pjax({
     url: '?' + query,
     timeout: 2000,
-    container: '#pjax-container'});">
+    container: '#pjax-container'});
+return false;">
   <ul class="bleed-left">
     <?php foreach ($queue->getSortOptions() as $qs) {
     $desc = $qs->getName();

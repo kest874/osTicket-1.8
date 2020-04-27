@@ -1,8 +1,6 @@
 <?php
 if(!defined('OSTADMININC') || !$thisstaff || !$thisstaff->isAdmin()) die('Access Denied');
-
 $info = $qs = array();
-
 if ($_REQUEST['a']=='add'){
     if (!$staff) {
         $staff = Staff::create(array(
@@ -33,28 +31,50 @@ else {
     $info['id'] = $staff->getId();
     $qs += array('id' => $staff->getId());
 }
-?>
 
+$extras = new ArrayObject();
+?>
+<div class="subnav">
+
+    <div class="float-left subnavtitle" id="ticketviewtitle">
+       <?php echo __('Manage Agent');?> <?php if ($staff->staff_id) { ?>
+    -  <span class ="text-pink"><?php echo $staff->getName(); ?><span>
+    <?php } ?>
+    </div>
+
+    <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
+    &nbsp;
+    </div>
+    <div class="clearfix"></div>
+</div>
+
+<div class="card-box">
+
+<div class="row">
+    <div class="col">
 <form action="staff.php?<?php echo Http::build_query($qs); ?>" method="post" class="save" autocomplete="off">
   <?php csrf_token(); ?>
   <input type="hidden" name="do" value="<?php echo $action; ?>">
   <input type="hidden" name="a" value="<?php echo Format::htmlchars($_REQUEST['a']); ?>">
   <input type="hidden" name="id" value="<?php echo $info['id']; ?>">
 
-  <h2><?php echo $title; ?>
-      <?php if (isset($staff->staff_id)) { ?><small>
-      — <?php echo $staff->getName(); ?></small>
-      <?php } ?>
-</h2>
-
-  <ul class="clean tabs">
-    <li class="active"><a href="#account"><i class="icon-user"></i> <?php echo __('Account'); ?></a></li>
-    <li><a href="#access"><?php echo __('Access'); ?></a></li>
-    <li><a href="#permissions"><?php echo __('Permissions'); ?></a></li>
-    <li><a href="#teams"><?php echo __('Teams'); ?></a></li>
-  </ul>
-
-  <div class="tab_content" id="account">
+  <ul class="nav nav-tabs" role="tablist" style="margin-top:10px;">
+  <li class="nav-item">
+    <a class="nav-link active" href="#account" role="tab" data-toggle="tab"><i class="icon-user"></i>&nbsp;<?php echo __('Account'); ?></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#access" role="tab" data-toggle="tab"><i class="icon-lock"></i>&nbsp;<?php echo __('Access'); ?></a>
+  </li>
+    <li class="nav-item">
+    <a class="nav-link" href="#permissions" role="tab" data-toggle="tab"><i class="icon-cog"></i>&nbsp;<?php echo __('Permissions'); ?></a>
+  </li>
+    <li class="nav-item">
+    <a class="nav-link" href="#teams" role="tab" data-toggle="tab"><i class="icon-group"></i>&nbsp;<?php echo __('Teams'); ?></a>
+  </li>
+   <?php Signal::send('agenttab.audit', $staff, $extras); ?>
+</ul>
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane active" id="account">
     <table class="table two-column" width="940" border="0" cellspacing="0" cellpadding="2">
       <tbody>
         <tr><td colspan="2"><div>
@@ -172,27 +192,27 @@ if (count($bks) > 1) {
           <td colspan="2">
             <div class="error"><?php echo $errors['isadmin']; ?></div>
             <div class="error"><?php echo $errors['isactive']; ?></div>
-            <label class="checkbox">
-            <input type="checkbox" name="islocked" value="1"
-              <?php echo (!$staff->isactive) ? 'checked="checked"' : ''; ?> />
-              <?php echo __('Locked'); ?>
-            </label>
-            <label class="checkbox">
-            <input type="checkbox" name="isadmin" value="1"
-              <?php echo ($staff->isadmin) ? 'checked="checked"' : ''; ?> />
-              <?php echo __('Administrator'); ?>
-            </label>
-            <label class="checkbox">
-            <input type="checkbox" name="assigned_only"
-              <?php echo ($staff->assigned_only) ? 'checked="checked"' : ''; ?> />
-              <?php echo __('Limit ticket access to ONLY assigned tickets'); ?>
-            </label>
-            <label class="checkbox">
-            <input type="checkbox" name="onvacation"
-              <?php echo ($staff->onvacation) ? 'checked="checked"' : ''; ?> />
-              <?php echo __('Vacation Mode'); ?>
-            </label>
-            <br/>
+			<div class="custom-control custom-switch">
+             <input type="checkbox" class="custom-control-input" id="islocked" name="islocked"  value="1"<?php echo (!$staff->isactive) ? 'checked="checked"' : '';
+                ?>>
+             <label class="custom-control-label" for="islocked"><?php echo __('Disabled'); ?> </label>
+         </div>
+
+			<div class="custom-control custom-switch">
+             <input type="checkbox" class="custom-control-input" id="isadmin" name="isadmin" value="1" <?php echo ($staff->isadmin) ? 'checked="checked"' : '';
+                ?>>
+             <label class="custom-control-label" for="isadmin"><?php echo __('Administrator'); ?> </label>
+         </div>    
+		 			<div class="custom-control custom-switch">
+             <input type="checkbox" class="custom-control-input" id="assigned_only" name="assigned_only" value="1" <?php echo ($staff->assigned_only) ? 'checked="checked"' : '';
+                ?>>
+             <label class="custom-control-label" for="assigned_only"><?php echo __('Limit ticket access to ONLY assigned tickets'); ?> </label>
+         </div>
+		 			<div class="custom-control custom-switch">
+             <input type="checkbox" class="custom-control-input" id="onvacation" name="onvacation" value="1" <?php echo ($staff->onvacation) ? 'checked="checked"' : '';
+                ?>>
+             <label class="custom-control-label" for="onvacation"><?php echo __('Vacation Mode'); ?> </label>
+         </div>
         </tr>
       </tbody>
     </table>
@@ -209,7 +229,7 @@ if (count($bks) > 1) {
 
   <!-- ============== DEPARTMENT ACCESS =================== -->
 
-  <div class="hidden tab_content" id="access">
+    <div role="tabpanel" class="tab-pane" id="access">
     <table class="table two-column" width="940" border="0" cellspacing="0" cellpadding="2">
       <tbody>
         <tr class="header">
@@ -228,15 +248,25 @@ if (count($bks) > 1) {
             <select name="dept_id" id="dept_id" data-quick-add="department">
               <option value="0">&mdash; <?php echo __('Select Department');?> &mdash;</option>
               <?php
-              foreach (Dept::getDepartments() as $id=>$name) {
-                $sel=($staff->dept_id==$id)?'selected="selected"':'';
-                echo sprintf('<option value="%d" %s>%s</option>',$id,$sel,$name);
+              if($depts = Dept::getPublicDepartments()) {
+                if($staff->dept_id && !array_key_exists($staff->dept_id, $depts))
+                {
+                  $depts[$staff->dept_id] = $staff->dept;
+                  $warn = sprintf(__('%s selected must be active'), __('Department'));
+                }
+                  foreach($depts as $id =>$name) {
+                    $sel=($staff->dept_id==$id)?'selected="selected"':'';
+                      echo sprintf('<option value="%d" %s>%s</option>',$id,$sel,$name);
+                  }
               }
               ?>
               <option value="0" data-quick-add>&mdash; <?php echo __('Add New');?> &mdash;</option>
             </select>
             <i class="offset help-tip icon-question-sign" href="#primary_department"></i>
-            <div class="error"><?php echo $errors['dept_id']; ?></div>
+            <?php
+            if($warn) { ?>
+                &nbsp;<span class="error">*&nbsp;<?php echo $warn; ?></span>
+            <?php } ?>
           </td>
           <td style="vertical-align:top">
             <select name="role_id" data-quick-add="role">
@@ -327,7 +357,7 @@ foreach ($staff->dept_access as $dept_access) {
 
   <!-- ================= PERMISSIONS ====================== -->
 
-  <div id="permissions" class="hidden">
+    <div role="tabpanel" class="tab-pane" id="permissions">
 <?php
     $permissions = array();
     foreach (RolePermission::allPermissions() as $g => $perms) {
@@ -340,20 +370,22 @@ foreach ($staff->dept_access as $dept_access) {
         }
     }
 ?>
-    <ul class="alt tabs">
+    <ul class="nav nav-tabs" role="tablist" style="margin-top:10px;">
 <?php
     $first = true;
     foreach ($permissions as $g => $perms) { ?>
-      <li <?php if ($first) { echo 'class="active"'; $first=false; } ?>>
-        <a href="#<?php echo Format::slugify($g); ?>"><?php echo Format::htmlchars(__($g));?></a>
+      
+       <li class="nav-item">
+        <a class="nav-link <?php if ($first) { echo ' active'; $first=false; } ?>" role="tab" data-toggle="tab" href="#<?php echo Format::slugify($g); ?>"><?php echo Format::htmlchars(__($g));?></a>
       </li>
 <?php } ?>
     </ul>
+    <div class="tab-content">
 <?php
     $first = true;
     foreach ($permissions as $g => $perms) { ?>
-    <div class="tab_content <?php if (!$first) { echo 'hidden'; } else { $first = false; }
-      ?>" id="<?php echo Format::slugify($g); ?>">
+    <div role="tabpanel" class="tab-pane <?php if ($first) { echo ' active'; $first=false; } ?>" id="<?php echo Format::slugify($g); ?>">
+  
       <table class="table">
 <?php foreach ($perms as $k => $v) { ?>
         <tr>
@@ -374,11 +406,11 @@ foreach ($staff->dept_access as $dept_access) {
       </table>
     </div>
 <?php } ?>
-  </div>
+  </div></div>
 
   <!-- ============== TEAM MEMBERSHIP =================== -->
 
-  <div class="hidden tab_content" id="teams">
+   <div role="tabpanel" class="tab-pane" id="teams">
     <table class="table two-column" width="100%">
       <tbody>
         <tr class="header">
@@ -431,19 +463,21 @@ foreach ($staff->teams as $TM) {
       </tbody>
     </table>
   </div>
+ </div>
+ <div><br> 
+ 	  <!-- ============== Audits =================== -->
+<?php Signal::send('agent.audit', $staff, $extras); ?>
 
-  <p style="text-align:center;">
-      <input type="submit" name="submit" value="<?php echo $submit_text; ?>">
-      <input type="reset"  name="reset"  value="<?php echo __('Reset');?>">
-      <input type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick="window.history.go(-1);">
-  </p>
+      <input type="submit" name="submit" value="<?php echo $submit_text; ?>" class="btn btn-sm btn-primary">
+      <input type="reset"  name="reset"  value="<?php echo __('Reset');?>" class="btn btn-sm btn-warning">
+      <input type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick="window.history.go(-1);" class="btn btn-sm btn-danger">
+</div>
 </form>
-
+</div></div>
 <script type="text/javascript">
 var addAccess = function(daid, name, role, alerts, error) {
   if (!daid) return;
   var copy = $('#extended_access_template').clone();
-
   copy.find('[data-name=dept_access\\[\\]]')
     .attr('name', 'dept_access[]')
     .val(daid);
@@ -468,7 +502,6 @@ var addAccess = function(daid, name, role, alerts, error) {
     return false;
   });
 };
-
 $('#add_extended_access').find('button').on('click', function() {
   var selected = $('#add_access').find(':selected'),
       id = parseInt(selected.val());
@@ -478,11 +511,9 @@ $('#add_extended_access').find('button').on('click', function() {
   selected.remove();
   return false;
 });
-
 var joinTeam = function(teamid, name, alerts, error) {
   if (!teamid) return;
   var copy = $('#team_member_template').clone();
-
   copy.find('[data-name=teams\\[\\]]')
     .attr('name', 'teams[]')
     .val(teamid);
@@ -504,7 +535,6 @@ var joinTeam = function(teamid, name, alerts, error) {
     return false;
   });
 };
-
 $('#join_team').find('button').on('click', function() {
   var selected = $('#add_team').find(':selected'),
       id = parseInt(selected.val());
@@ -514,8 +544,6 @@ $('#join_team').find('button').on('click', function() {
   selected.remove();
   return false;
 });
-
-
 <?php
 foreach ($staff->dept_access as $dept_access) {
   if (!$dept_access->dept_id) continue;
@@ -526,14 +554,13 @@ foreach ($staff->dept_access as $dept_access) {
     JsonDataEncoder::encode(@$errors['dept_access'][$dept_access->dept_id])
   );
 }
-
 foreach ($staff->teams as $member) {
+  if (!$member->team) continue;
   echo sprintf('joinTeam(%d, %s, %d, %s);', $member->team_id,
     JsonDataEncoder::encode($member->team->getName()),
     $member->isAlertsEnabled(),
     JsonDataEncoder::encode(@$errors['teams'][$member->team_id])
   );
 }
-
 ?>
 </script>

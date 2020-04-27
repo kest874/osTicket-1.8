@@ -26,23 +26,43 @@ if($dept && $_REQUEST['a']!='add') {
 
 $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
 ?>
+
+<div class="subnav">
+
+    <div class="float-left subnavtitle" id="ticketviewtitle">
+       <?php echo __('Manage Department');?> <?php if (isset($info['name'])) { ?>
+    -  <span class ="text-pink"><?php echo $info['name']; ?><span>
+    <?php } ?>
+    </div>
+
+    <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
+    &nbsp;
+    </div>
+    <div class="clearfix"></div>
+</div>
+
+<div class="card-box">
+
+<div class="row">
+    <div class="col">
 <form action="departments.php?<?php echo Http::build_query($qs); ?>" method="post" class="save">
  <?php csrf_token(); ?>
  <input type="hidden" name="do" value="<?php echo $action; ?>">
  <input type="hidden" name="a" value="<?php echo Format::htmlchars($_REQUEST['a']); ?>">
  <input type="hidden" name="id" value="<?php echo $info['id']; ?>">
-<h2><?php echo $title; ?>
-    <?php if (isset($info['name'])) { ?><small>
-    — <?php echo $info['name']; ?></small>
-    <?php } ?>
-</h2>
-<ul class="clean tabs">
-    <li class="active"><a href="#settings">
-        <i class="icon-file"></i> <?php echo __('Settings'); ?></a></li>
-    <li><a href="#access">
-      <i class="icon-user"></i> <?php echo __('Access'); ?></a></li>
+
+<ul class="nav nav-tabs" role="tablist" style="margin-top:10px;">
+  <li class="nav-item">
+    <a class="nav-link active" href="#Settings" role="tab" data-toggle="tab"><i class="icon-file"></i>&nbsp;<?php echo __('Settings'); ?></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#access" role="tab" data-toggle="tab"><i class="icon-user"></i>&nbsp;<?php echo __('Access'); ?></a>
+  </li>
 </ul>
-<div id="settings" class="tab_content">
+
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane active" id="Settings">
+
  <table class="form_table" width="940" border="0" cellspacing="0" cellpadding="2">
     <thead>
         <tr>
@@ -59,14 +79,24 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
             <td>
                 <select name="pid">
                     <option value="">&mdash; <?php echo __('Top-Level Department'); ?> &mdash;</option>
-<?php foreach (Dept::getDepartments() as $id=>$name) {
-    if ($info['id'] && $id == $info['id'])
-        continue; ?>
-                    <option value="<?php echo $id; ?>" <?php
-                    if ($info['pid'] == $id) echo 'selected="selected"';
-                    ?>><?php echo $name; ?></option>
-<?php } ?>
-                </select>
+                    <?php
+                    if($info['pid'])
+                      $current_name = Dept::getNameById($info['pid']);
+                    if ($depts=Dept::getPublicDepartments())
+                    {
+                      if(!array_key_exists($info['pid'], $depts) && $info['pid'])
+                      {
+                        $depts[$info['pid']] = $current_name;
+                        $errors['pid'] = sprintf(__('%s selected must be active'), __('Parent Department'));
+                      }
+                    foreach ($depts as $id=>$name) {
+                        $selected=($info['pid'] && $id==$info['pid'])?'selected="selected"':'';
+                        echo sprintf('<option value="%d" %s>%s</option>',$id,$selected,$name);
+                    }
+                  }
+                  ?>
+              </select>
+              &nbsp;<span class="error">*&nbsp;<?php echo $errors['pid']; ?></span>
             </td>
         </tr>
         <tr>
@@ -82,6 +112,19 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
         </tr>
         <tr>
             <td width="180" class="required">
+                <?php echo __('Status');?>:
+            </td>
+            <td>
+                <select name="status">
+                  <option value="active"<?php echo (!strcasecmp($info['status'], 'active'))?'selected="selected"':'';?>><?php echo __('Active'); ?></option>
+                  <option value="disabled"<?php echo (!strcasecmp($info['status'], 'disabled'))?'selected="selected"':'';?>><?php echo __('Disabled'); ?></option>
+                  <option value="archived"<?php echo (!strcasecmp($info['status'], 'archived'))?'selected="selected"':'';?>><?php echo __('Archived'); ?></option>
+                </select>
+                &nbsp;<span class="error">&nbsp;</span> <i class="help-tip icon-question-sign" href="#status"></i>
+            </td>
+        </tr>
+        <tr>
+            <td width="180" class="required">
                 <?php echo __('Type');?>:
             </td>
             <td>
@@ -93,6 +136,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
                 <input type="radio" name="ispublic" value="0" <?php echo !$info['ispublic']?'checked="checked"':''; ?>><strong><?php echo __('Private');?></strong> <?php echo mb_convert_case(__('(internal)'), MB_CASE_TITLE);?>
                 </label>
                 &nbsp;<i class="help-tip icon-question-sign" href="#type"></i>
+                &nbsp;<span class="error"><?php echo $errors['ispublic']; ?></span>
             </td>
         </tr>
         <tr>
@@ -112,6 +156,26 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
                     ?>
                 </select>
                 &nbsp;<span class="error"><?php echo $errors['sla_id']; ?></span>&nbsp;<i class="help-tip icon-question-sign" href="#sla"></i>
+            </td>
+        </tr>
+        <tr>
+            <td width="180">
+                <?php echo __('Schedule');?>:
+            </td>
+            <td>
+                <select name="schedule_id">
+                    <option value="0" selected="selected" >&mdash; <?php
+                    echo __("SLA's Default");?> &mdash;</option>
+                    <?php
+                    if ($schedules=BusinessHoursSchedule::getSchedules()) {
+                        foreach ($schedules as $s) {
+                            echo sprintf('<option value="%d" %s>%s</option>',
+                                    $s->getId(), ($info['schedule_id']==$s->getId()) ? 'selected="selected"' : '', $s->getName());
+                        }
+                    }
+                    ?>
+                </select>
+                &nbsp;<span class="error"><?php echo $errors['schedule_id']; ?></span>&nbsp;<i class="help-tip icon-question-sign" href="#schedule"></i>
             </td>
         </tr>
         <tr>
@@ -140,17 +204,16 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
             </td>
         </tr>
         <tr>
-            <td><?php echo __('Ticket Assignment'); ?>:</td>
+          <td><?php echo __('Ticket Assignment'); ?>:</td>
             <td>
-                <label>
-                <input type="checkbox" name="assign_members_only" <?php echo
-                $info['assign_members_only']?'checked="checked"':''; ?>>
-                <?php echo __('Restrict ticket assignment to department members'); ?>
-                </label>
-                <i class="help-tip icon-question-sign" href="#sandboxing"></i>
+                <select name="assignment_flag">
+                  <option value="all"<?php echo ($info['assignment_flag'] == 'all')?'selected="selected"':'';?>><?php echo __('All'); ?></option>
+                  <option value="members"<?php echo ($info['assignment_flag'] == 'members') ?'selected="selected"':'';?>><?php echo __('Department Members'); ?></option>
+                  <option value="primary"<?php echo ($info['assignment_flag'] == 'primary') ?'selected="selected"':'';?>><?php echo __('Primary Members'); ?></option>
+                </select>
+                &nbsp;<span class="error">&nbsp;</span> <i class="help-tip icon-question-sign" href="#sandboxing"></i>
             </td>
         </tr>
-
         <tr>
             <td><?php echo __('Claim on Response'); ?>:</td>
             <td>
@@ -163,6 +226,21 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
                 </label>
                 <i class="help-tip icon-question-sign"
                 href="#disable_auto_claim"></i>
+            </td>
+        </tr>
+
+        <tr>
+            <td><?php echo __('Reopen Auto Assignment'); ?>:</td>
+            <td>
+                <label>
+                <input type="checkbox" name="disable_reopen_auto_assign" <?php echo
+                 $info['disable_reopen_auto_assign'] ? 'checked="checked"' : ''; ?>>
+                <?php echo sprintf('<strong>%s</strong> %s',
+                        __('Disable'),
+                        __('auto assign on reopen')); ?>
+                </label>
+                <i class="help-tip icon-question-sign"
+                href="#disable_reopen_auto_assign"></i>
             </td>
         </tr>
 
@@ -286,6 +364,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
                 <select name="group_membership">
 <?php foreach (array(
     Dept::ALERTS_DISABLED =>        __("No one (disable Alerts and Notices)"),
+    Dept::ALERTS_ADMIN_ONLY =>       __("Admin Email Only"),
     Dept::ALERTS_DEPT_ONLY =>       __("Department members only"),
     Dept::ALERTS_DEPT_AND_EXTENDED => __("Department and extended access members"),
 ) as $mode=>$desc) { ?>
@@ -315,7 +394,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
 </table>
 </div>
 
-<div id="access" class="hidden tab_content">
+<div role="tabpanel" class="tab-pane" id="access">
   <table class="two-column table" width="100%">
     <tbody>
         <tr class="header" id="primary-members">
@@ -325,7 +404,17 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
                 <?php echo sprintf(__('Agents who are primary members of %s'), __('this department')); ?>
                 </small></div>
             </td>
-        </tr>
+            <td>
+              <?php
+                echo sprintf(
+                    '<a class="no-pjax" href="departments.php?id=%d&a=export"</a>',
+                    $dept->getId());
+                    ?>
+              <span class="action-button pull-right" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Export');?>">
+                  <i class="icon-download-alt icon-fixed-width"></i>
+              </span>
+            </td>
+          </tr>
         <?php
         if (!count($dept->members)) { ?>
         <tr><td colspan=2><em><?php
@@ -393,15 +482,15 @@ foreach ($dept->getMembers() as $member) {
     </tbody>
   </table>
 </div>
+ <div><br>
+      <input type="submit" name="submit" value="<?php echo $submit_text; ?>" class="btn btn-sm btn-primary">
+      <input type="reset"  name="reset"  value="<?php echo __('Reset');?>" class="btn btn-sm btn-warning">
+      <input type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick="window.history.go(-1);" class="btn btn-sm btn-danger">
+</div>
 
-<p style="text-align:center">
-    <input type="submit" name="submit" value="<?php echo $submit_text; ?>">
-    <input type="reset"  name="reset"  value="<?php echo __('Reset');?>">
-    <input type="button" name="cancel" value="<?php echo __('Cancel');?>"
-        onclick='window.location.href="?"'>
-</p>
+</div>
 </form>
-
+</div></div></div>
 <script type="text/javascript">
 var addAccess = function(staffid, name, role, alerts, primary, error) {
 

@@ -3,23 +3,39 @@ if(!defined('OSTADMININC') || !$thisstaff || !$thisstaff->isAdmin() || !$config)
 if(!($maxfileuploads=ini_get('max_file_uploads')))
     $maxfileuploads=DEFAULT_MAX_FILE_UPLOADS;
 ?>
-<h2><?php echo __('Ticket Settings and Options');?></h2>
+
+
+<div class="subnav">
+
+    <div class="float-left subnavtitle" id="ticketviewtitle">
+       <?php echo __('Ticket Settings and Options');?>
+    </div>
+
+    <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
+    &nbsp;
+    </div>
+    <div class="clearfix"></div>
+</div>
+
+<div class="card-box">
+<h2></h2>
 <form action="settings.php?t=tickets" method="post" class="save">
 <?php csrf_token(); ?>
 <input type="hidden" name="t" value="tickets" >
 
-<ul class="clean tabs">
-    <li class="active"><a href="#settings"><i class="icon-asterisk"></i>
+<ul class="nav nav-tabs">
+    <li class="nav-item"><a href="#settings" data-toggle="tab" class="nav-link active"><i class="icon-asterisk"></i>
         <?php echo __('Settings'); ?></a></li>
-    <li><a href="#autoresp"><i class="icon-mail-reply-all"></i>
+    <li class="nav-item"><a href="#autoresp" data-toggle="tab" class="nav-link"><i class="icon-mail-reply-all"></i>
         <?php echo __('Autoresponder'); ?></a></li>
-    <li><a href="#alerts"><i class="icon-bell-alt"></i>
+    <li class="nav-item"><a href="#alerts" data-toggle="tab" class="nav-link"><i class="icon-bell-alt"></i>
         <?php echo __('Alerts and Notices'); ?></a></li>
-    <li><a href="#queues"><i class="icon-table"></i>
+    <li class="nav-item"><a href="#queues" data-toggle="tab" class="nav-link"><i class="icon-table"></i>
         <?php echo __('Queues'); ?></a></li>
 </ul>
-<div class="tab_content" id="settings">
-<table class="form_table settings_table" width="940" border="0" cellspacing="0" cellpadding="2">
+<div class="tab-content">
+<div class="tab-pane fade show active" id="settings">
+<table class="form_table settings_table" border="0" cellspacing="0" cellpadding="2">
     <thead>
         <tr>
             <th colspan="2">
@@ -65,6 +81,12 @@ if(!($maxfileuploads=ini_get('max_file_uploads')))
                 <i class="help-tip icon-question-sign" href="#sequence_id"></i>
             </td>
         </tr>
+        <tr><td width="220"><?php echo __('Top-Level Ticket Counts'); ?>:</td>
+            <td>
+                <input type="checkbox" name="queue_bucket_counts" <?php echo $config['queue_bucket_counts']?'checked="checked"':''; ?>>
+                <?php echo __('Enable'); ?>&nbsp;<i class="help-tip icon-question-sign" href="#queue_bucket_counts"></i>
+            </td>
+        </tr>
         <tr>
             <td width="180" class="required">
                 <?php echo __('Default Status'); ?>:
@@ -78,7 +100,6 @@ if(!($maxfileuploads=ini_get('max_file_uploads')))
                     $name = $status->getName();
                     if (!($isenabled = $status->isEnabled()))
                         $name.=' '.__('(disabled)');
-
                     echo sprintf('<option value="%d" %s %s>%s</option>',
                             $status->getId(),
                             ($config['default_ticket_status_id'] ==
@@ -200,12 +221,32 @@ if(!($maxfileuploads=ini_get('max_file_uploads')))
             </td>
         </tr>
         <tr>
-            <td><?php echo __('Maximum <b>Open</b> Tickets');?>:</td>
+            <td><?php echo __('Collaborator Tickets Visibility'); ?>:</td>
             <td>
-                <input type="text" name="max_open_tickets" size=4 value="<?php echo $config['max_open_tickets']; ?>">
-                <?php echo __('per end user'); ?>
-                <span class="error">*&nbsp;<?php echo $errors['max_open_tickets']; ?></span>
-                <i class="help-tip icon-question-sign" href="#maximum_open_tickets"></i>
+                <input type="checkbox" name="collaborator_ticket_visibility" <?php echo $config['collaborator_ticket_visibility']?'checked="checked"':''; ?>>
+                <?php echo __('Enable'); ?>&nbsp;<i class="help-tip icon-question-sign" href="#collaborator_ticket_visibility"></i>
+            </td>
+        </tr>
+        <tr>
+            <td><?php echo __('Claim on Response'); ?>:</td>
+            <td>
+                <input type="checkbox" name="auto_claim_tickets" <?php echo $config['auto_claim_tickets']?'checked="checked"':''; ?>>
+                <?php echo __('Enable'); ?>&nbsp;<i class="help-tip icon-question-sign" href="#claim_tickets"></i>
+            </td>
+        </tr>
+        <tr>
+            <td><?php echo __('Auto-refer on Close'); ?>:</td>
+            <td>
+                <input type="checkbox" name="auto_refer_closed" <?php echo $config['auto_refer_closed']?'checked="checked"':''; ?>>
+                <?php echo __('Enable'); ?>&nbsp;<i class="help-tip
+                icon-question-sign" href="#auto_refer"></i>
+            </td>
+        </tr>
+        <tr>
+            <td><?php echo __('Require Help Topic to Close'); ?>:</td>
+            <td>
+                <input type="checkbox" name="require_topic_to_close" <?php echo $config['require_topic_to_close']?'checked="checked"':''; ?>>
+                <?php echo __('Enable'); ?>&nbsp;<i class="help-tip icon-question-sign" href="#require_topic_to_close"></i>
             </td>
         </tr>
         <tr>
@@ -222,7 +263,6 @@ if(!($maxfileuploads=ini_get('max_file_uploads')))
                     $name = $status->getName();
                     if (!($isenabled = $status->isEnabled()))
                         $name.=' '.__('(disabled)');
-
                     echo sprintf('<option value="%d" %s %s>%s</option>',
                             $status->getId(),
                             ($config['autoclose_status_id'] ==
@@ -248,36 +288,15 @@ if(!($maxfileuploads=ini_get('max_file_uploads')))
                 <i class="help-tip icon-question-sign" href="#autoclose_duration"></i>
             </td>
         </tr>
-        <tr>
-            <th colspan="2">
-                <em><b><?php echo __('Attachments');?></b>:  <?php echo __('Size and maximum uploads setting mainly apply to web tickets.');?></em>
-            </th>
-        </tr>
-        <tr>
-            <td width="180"><?php echo __('Ticket Attachment Settings');?>:</td>
-            <td>
-<?php
-                $tform = TicketForm::objects()->one()->getForm();
-                $f = $tform->getField('message');
-?>
-                <a class="action-button field-config" style="overflow:inherit"
-                    href="#ajax.php/form/field-config/<?php
-                        echo $f->get('id'); ?>"
-                    onclick="javascript:
-                        $.dialog($(this).attr('href').substr(1), [201]);
-                        return false;
-                    "><i class="icon-edit"></i> <?php echo __('Config'); ?></a>
-                <i class="help-tip icon-question-sign" href="#ticket_attachment_settings"></i>
-            </td>
-        </tr>
+        
     </tbody>
 </table>
 </div>
-<div class="hidden tab_content" id="autoresp"
+<div class="tab-pane fade" id="autoresp"
     data-tip-namespace="settings.autoresponder">
     <?php include STAFFINC_DIR . 'settings-autoresp.inc.php'; ?>
 </div>
-<div class="hidden tab_content" id="alerts"
+<div class="tab-pane fade" id="alerts"
     data-tip-namespace="settings.alerts">
     <?php include STAFFINC_DIR . 'settings-alerts.inc.php'; ?>
 </div>
@@ -291,6 +310,7 @@ if(!($maxfileuploads=ini_get('max_file_uploads')))
     <input class="button" type="reset" name="reset" value="<?php echo __('Reset Changes');?>">
 </p>
 </form>
+</div>
 <script type="text/javascript">
 $(function() {
     var request = null,

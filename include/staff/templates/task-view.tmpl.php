@@ -1,7 +1,7 @@
 <?php
 if (!defined('OSTSCPINC')
     || !$thisstaff || !$task
-    || !($role = $thisstaff->getRole($task->getDeptId())))
+    || !($role = $thisstaff->getRole($task->getDept())))
     die('Invalid path');
 
 global $cfg;
@@ -13,6 +13,7 @@ $thread = $task->getThread();
 $iscloseable = $task->isCloseable();
 $canClose = ($role->hasPerm(TaskModel::PERM_CLOSE) && $iscloseable === true);
 $actions = array();
+$object = $task->ticket;
 
 if ($task->isOpen() && $role->hasPerm(Task::PERM_ASSIGN)) {
 
@@ -78,23 +79,25 @@ if ($role->hasPerm(Task::PERM_DELETE)) {
             'delete' => array(
                 'href' => sprintf('#tasks/%d/delete', $task->getId()),
                 'icon' => 'icon-trash',
-                'class' => 'red button',
+                'class' => (strpos($_SERVER['REQUEST_URI'], 'tickets.php') !== false) ? 'danger' : 'red button',
                 'label' => __('Delete'),
                 'redirect' => 'tasks.php'
             ));
 }
 
 $info=($_POST && $errors)?Format::input($_POST):array();
+$type = array('type' => 'viewed');
+Signal::send('object.view', $task, $type);
 
 if ($task->isOverdue())
     $warn.='&nbsp;&nbsp;<span class="Icon overdueTicket">'.__('Marked overdue!').'</span>';
 
 ?>
-<div>
-    <div class="sticky bar">
-       <div class="content">
-        <div class="pull-left flush-left">
-            <?php
+
+ <div class="subnav"<?php if ($ticket) {echo 'style = "margin-top: 5px;"';} ?>>
+          
+            <div class="float-left subnavtitle" ></div>               
+                <?php
             if ($ticket) { ?>
                 <strong>
                 <a id="all-ticket-tasks" href="#">
@@ -111,63 +114,80 @@ if ($task->isOverdue())
                             $ticket->getId(), $task->getId()
                             );
                     ?>><?php echo sprintf(__('Task #%s'), $task->getNumber()); ?></a>
-                </strong>
+                
+                
+                - <?php
+						        $title = TaskForm::getInstance()->getField('title');
+						        echo $title->display($task->getTitle());
+						        ?>
+            </strong>
             <?php
             } else { ?>
-               <h2>
+             
                 <a  id="reload-task"
                     href="tasks.php?id=<?php echo $task->getId(); ?>"><i
                     class="icon-refresh"></i>&nbsp;<?php
                     echo sprintf(__('Task #%s'), $task->getNumber()); ?></a>
-                </h2>
+                <?php if ($object) { ?>
+                    &nbsp;/&nbsp;
+                    <a class="preview"
+                      href="tickets.php?id=<?php echo $object->getId(); ?>"
+                      data-preview="#tickets/<?php echo $object->getId(); ?>/preview"
+                      ><?php echo sprintf(__('Ticket #%s'), $object->getNumber()); ?></a>
+                <?php } ?>
+               
+                  - <?php
+						        $title = TaskForm::getInstance()->getField('title');
+						        echo $title->display($task->getTitle());
+            }
+            ?>
+               
+
+        
             <?php
-            } ?>
-        </div>
-        <div class="flush-right">
-            <?php
+            
+            
             if ($ticket) { ?>
+            <!-- Ticket view -->	
+           <div class="btn-group btn-group-sm  float-right subnavbuttons" role="group" aria-label="Button group with nested dropdown">
             <a  id="task-view"
                 target="_blank"
-                class="action-button"
+                class="btn btn-light btn-nbg"
                 href="tasks.php?id=<?php
-                 echo $task->getId(); ?>"><i class="icon-share"></i> <?php
-                            echo __('View Task'); ?></a>
-            <span
-                class="action-button"
-                data-dropdown="#action-dropdown-task-options">
-                <i class="icon-caret-down pull-right"></i>
-                <a class="task-action"
-                    href="#task-options"><i
-                    class="icon-reorder"></i> <?php
-                    echo __('Actions'); ?></a>
-            </span>
-            <div id="action-dropdown-task-options"
-                class="action-dropdown anchor-right">
-                <ul>
+                 echo $task->getId(); ?>"><i class="icon-share"  data-placement="bottom" data-toggle="tooltip" 
+                 title="<?php echo __('View Task'); ?>"></i></a>
+           
+                <div class="btn-group btn-group-sm" role="group">
+                
+                <button id="btnGroupDrop1" type="button" class="btn btn-light btn-nbg dropdown-toggle" 
+                data-toggle="dropdown"><i class="fa fa-cog" data-placement="bottom" data-toggle="tooltip" 
+                 title="<?php echo __('more'); ?>"></i>
+                </button>
+                    <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1">
 
                     <?php
                     if ($task->isOpen()) { ?>
-                    <li>
-                        <a class="no-pjax task-action"
+                    
+                        <a class="dropdown-item no-pjax task-action"
                             href="#tasks/<?php echo $task->getId(); ?>/reopen"><i
                             class="icon-fixed-width icon-undo"></i> <?php
                             echo __('Reopen');?> </a>
-                    </li>
+                   
                     <?php
                     } else {
                     ?>
-                    <li>
-                        <a class="no-pjax task-action"
+                   
+                        <a class="dropdown-item  no-pjax task-action"
                             href="#tasks/<?php echo $task->getId(); ?>/close"><i
                             class="icon-fixed-width icon-ok-circle"></i> <?php
                             echo __('Close');?> </a>
-                    </li>
+                   
                     <?php
                     } ?>
                     <?php
                     foreach ($actions as $a => $action) { ?>
-                    <li <?php if ($action['class']) echo sprintf("class='%s'", $action['class']); ?> >
-                        <a class="no-pjax task-action" <?php
+                    
+                        <a class="dropdown-item no-pjax task-action" <?php
                             if ($action['dialog'])
                                 echo sprintf("data-dialog-config='%s'", $action['dialog']);
                             if ($action['redirect'])
@@ -182,134 +202,143 @@ if ($task->isOverdue())
                             ><i class="<?php
                             echo $action['icon'] ?: 'icon-tag'; ?>"></i> <?php
                             echo  $action['label']; ?></a>
-                    </li>
+                    
                 <?php
                 } ?>
-                </ul>
+                
             </div>
+           </div>
+           
+                <a class="btn btn-light btn-nbg" id="all-ticket-tasks" href="#" >
+                <i class="fa fa-list-alt"  data-placement="bottom" data-toggle="tooltip" 
+                 title="<?php echo __('All Tasks'); ?>"></i></a>
+
+                 
+           </div>
+           </div>
+           </div>
+           
             <?php
-           } else { ?>
-                <span
-                    class="action-button"
-                    data-dropdown="#action-dropdown-tasks-status">
-                    <i class="icon-caret-down pull-right"></i>
-                    <a class="tasks-status-action"
-                        href="#statuses"
-                        data-placement="bottom"
-                        data-toggle="tooltip"
-                        title="<?php echo __('Change Status'); ?>"><i
-                        class="icon-flag"></i></a>
-                </span>
+        } else { ?>
+
+				<!-- task only view -->
+        	<div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
+        	 <div class="btn-group btn-group-sm" role="group">
+								<button type="button" class="btn btn-light dropdown-toggle" 
+                data-toggle="dropdown"><i class="fa fa-flag" data-placement="bottom" data-toggle="tooltip" 
+                 title="<?php echo __('Change Status'); ?>"></i>
+                </button>
                 <div id="action-dropdown-tasks-status"
-                    class="action-dropdown anchor-right">
-                    <ul>
+                    class="dropdown-menu dropdown-menu-right">
+                
                         <?php
                         if ($task->isClosed()) { ?>
-                        <li>
-                            <a class="no-pjax task-action"
+                            <a class="dropdown-item no-pjax task-action"
                                 href="#tasks/<?php echo $task->getId(); ?>/reopen"><i
                                 class="icon-fixed-width icon-undo"></i> <?php
                                 echo __('Reopen');?> </a>
-                        </li>
                         <?php
-                        } else {
+                        } elseif ($canClose) {
                         ?>
-                        <li>
-                            <a class="no-pjax task-action"
+                           <a class="dropdown-item no-pjax task-action"
                                 href="#tasks/<?php echo $task->getId(); ?>/close"><i
                                 class="icon-fixed-width icon-ok-circle"></i> <?php
                                 echo __('Close');?> </a>
-                        </li>
                         <?php
                         } ?>
-                    </ul>
-                </div>
+                </div></div>
                 <?php
                 // Assign
                 unset($actions['claim'], $actions['assign/agents'], $actions['assign/teams']);
                 if ($task->isOpen() && $role->hasPerm(Task::PERM_ASSIGN)) {?>
-                <span class="action-button"
-                    data-dropdown="#action-dropdown-assign"
-                    data-placement="bottom"
-                    data-toggle="tooltip"
-                    title=" <?php echo $task->isAssigned() ? __('Reassign') : __('Assign'); ?>"
-                    >
-                    <i class="icon-caret-down pull-right"></i>
-                    <a class="task-action" id="task-assign"
-                        data-redirect="tasks.php"
-                        href="#tasks/<?php echo $task->getId(); ?>/assign"><i class="icon-user"></i></a>
-                </span>
-                <div id="action-dropdown-assign" class="action-dropdown anchor-right">
-                  <ul>
+                
+                <div class="btn-group btn-group-sm" role="group">
+                
+                <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
+                data-toggle="dropdown"><i class="fa fa-user" data-placement="bottom" data-toggle="tooltip" 
+                 title="<?php echo __('Assign'); ?>"></i>
+                </button>
+                    <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1">
+                
                     <?php
                     // Agent can claim team assigned ticket
                     if ($task->getStaffId() != $thisstaff->getId()
                             && (!$dept->assignMembersOnly()
                                 || $dept->isMember($thisstaff))
                             ) { ?>
-                     <li><a class="no-pjax task-action"
+                     <a class="dropdown-item no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/claim"><i
                         class="icon-chevron-sign-down"></i> <?php echo __('Claim'); ?></a>
                     <?php
                     } ?>
-                     <li><a class="no-pjax task-action"
+                     <a class="dropdown-item no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/assign/agents"><i
                         class="icon-user"></i> <?php echo __('Agent'); ?></a>
-                     <li><a class="no-pjax task-action"
+                     <a class="dropdown-item no-pjax task-action"
                         data-redirect="tasks.php"
                         href="#tasks/<?php echo $task->getId(); ?>/assign/teams"><i
                         class="icon-group"></i> <?php echo __('Team'); ?></a>
-                  </ul>
+                 
+                </div>
                 </div>
                 <?php
                 } ?>
                 <?php
                 foreach ($actions as $action) {?>
-                <span class="action-button <?php echo $action['class'] ?: ''; ?>">
-                    <a class="task-action"
+										<a class="btn btn-light <?php echo ($action['class'] == 'no-pjax') ? '' : 'task-action'; ?>"
                         <?php
                         if ($action['dialog'])
                             echo sprintf("data-dialog-config='%s'", $action['dialog']);
                         if ($action['redirect'])
                             echo sprintf("data-redirect='%s'", $action['redirect']);
                         ?>
+                        id="<?php echo $id ?>"
+                        href="<?php echo $action['href']; ?>"
+                        id="<?php echo $id ?>"
                         href="<?php echo $action['href']; ?>"
                         data-placement="bottom"
                         data-toggle="tooltip"
                         title="<?php echo $action['label']; ?>">
                         <i class="<?php
-                        echo $action['icon'] ?: 'icon-tag'; ?>"></i>
+                        echo $action['icon'] ?: 'icon-tag'; ?>" data-placement="bottom"
+                        data-toggle="tooltip"
+                        title="<?php echo $action['label']; ?>"></i>
                     </a>
-                </span>
            <?php
                 }
            } ?>
         </div>
-    </div>
-   </div>
-</div>
-<div class="task_content">
-<div class="clear tixTitle has_bottom_border">
-    <h3>
-    <?php
-        $title = TaskForm::getInstance()->getField('title');
-        echo $title->display($task->getTitle());
-    ?>
-    </h3>
-</div>
+   <div class="clearfix"></div>
+	</div>
+	
+</div>		
+
+<!-- Task Details -->
 <?php
 if (!$ticket) { ?>
-    <table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
+<div class="card-box">	
+    <table class="ticket_info" cellspacing="0" cellpadding="0" width="940" border="0">
         <tr>
             <td width="50%">
                 <table border="0" cellspacing="" cellpadding="4" width="100%">
                     <tr>
                         <th width="100"><?php echo __('Status');?>:</th>
-                        <td><?php echo $task->getStatus(); ?></td>
+                        <?php
+                             if ($role->hasPerm(Task::PERM_CLOSE)) {
+                                 $state = $task->isClosed() ? 'reopen' : 'close'; ?>
+                            <td>
+                                <a class="task-action"
+                                    href=<?php echo sprintf('#tasks/%s/%s', $task->getId(), $state); ?>
+                                    data-placement="bottom"
+                                    data-toggle="tooltip"
+                                    title="<?php echo __('Change Status'); ?>"><?php echo $task->getStatus(); ?></a>
+                            </td>
+                          <?php } else { ?>
+                              <td><?php echo ($S = $task->getStatus()) ? $S->display() : ''; ?></td>
+                          <?php } ?>
                     </tr>
-
                     <tr>
                         <th><?php echo __('Created');?>:</th>
                         <td><?php echo Format::datetime($task->getCreateDate()); ?></td>
@@ -318,9 +347,15 @@ if (!$ticket) { ?>
                     if($task->isOpen()){ ?>
                     <tr>
                         <th><?php echo __('Due Date');?>:</th>
-                        <td><?php echo $task->duedate ?
-                        Format::datetime($task->duedate) : '<span
-                        class="faded">&mdash; '.__('None').' &mdash;</span>'; ?></td>
+                        <td>
+                            <a class="inline-edit" data-placement="bottom"
+                                href="#tasks/<?php echo $task->getId();
+                                 ?>/field/duedate/edit">
+                                 <span id="field_duedate"><?php echo $task->duedate ?
+                                    (Format::datetime($task->duedate)) :
+                                    '&mdash;' . __('None') .  '&mdash;' ; ?></span>
+                            </a>
+                        </td>
                     </tr>
                     <?php
                     }else { ?>
@@ -338,20 +373,44 @@ if (!$ticket) { ?>
 
                     <tr>
                         <th><?php echo __('Department');?>:</th>
-                        <td><?php echo Format::htmlchars($task->dept->getName()); ?></td>
+                        <td>
+                            <a class="task-action" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Transfer'); ?>"
+                              data-redirect="tasks.php?id=<?php echo $task->getId(); ?>"
+                              href="#tasks/<?php echo $task->getId(); ?>/transfer"
+                              onclick="javascript:
+                                  saveDraft();"
+                              ><?php echo Format::htmlchars($task->dept->getName()); ?>
+                        </td>
                     </tr>
                     <?php
                     if ($task->isOpen()) { ?>
                     <tr>
                         <th width="100"><?php echo __('Assigned To');?>:</th>
+                        <?php
+                        if ($role->hasPerm(Task::PERM_ASSIGN)) {?>
                         <td>
-                            <?php
-                            if ($assigned=$task->getAssigned())
-                                echo Format::htmlchars($assigned);
-                            else
-                                echo '<span class="faded">&mdash; '.__('Unassigned').' &mdash;</span>';
-                            ?>
+                            <a class="inline-edit" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Update'); ?>"
+                                href="#tasks/<?php echo $task->getId(); ?>/assign">
+                                <span id="field_assign">
+                                    <?php if($task->isAssigned())
+                                            echo Format::htmlchars(implode('/', $task->getAssignees()));
+                                          else
+                                            echo '<span class="faded">&mdash; '.__('Unassigned').' &mdash;</span>';
+                            ?></span>
+                            </a>
                         </td>
+                        <?php
+                        } else { ?>
+                        <td>
+                          <?php
+                          if($task->isAssigned())
+                              echo Format::htmlchars(implode('/', $task->getAssignees()));
+                          else
+                              echo '<span class="faded">&mdash; '.__('Unassigned').' &mdash;</span>';
+                          ?>
+                        </td>
+                        <?php
+                        } ?>
                     </tr>
                     <?php
                     } else { ?>
@@ -372,13 +431,13 @@ if (!$ticket) { ?>
                         <th><?php echo __('Collaborators');?>:</th>
                         <td>
                             <?php
-                            $collaborators = __('Add Participants');
+                            $collaborators = __('Collaborators');
                             if ($task->getThread()->getNumCollaborators())
-                                $collaborators = sprintf(__('Participants (%d)'),
+                                $collaborators = sprintf(__('Collaborators (%d)'),
                                         $task->getThread()->getNumCollaborators());
 
                             echo sprintf('<span><a class="collaborators preview"
-                                    href="#thread/%d/collaborators"><span
+                                    href="#thread/%d/collaborators/1"><span
                                     id="t%d-collaborators">%s</span></a></span>',
                                     $task->getThreadId(),
                                     $task->getThreadId(),
@@ -392,34 +451,73 @@ if (!$ticket) { ?>
     </table>
     <br>
     <br>
-    <table class="ticket_info" cellspacing="0" cellpadding="0" width="100%" border="0">
+    <table class="ticket_info custom-data" cellspacing="0" cellpadding="0" width="940" border="0">
     <?php
     $idx = 0;
     foreach (DynamicFormEntry::forObject($task->getId(),
                 ObjectModel::OBJECT_TYPE_TASK) as $form) {
+        $form->addMissingFields(); ?>
+        <thead>
+            <th colspan="2"><?php echo Format::htmlchars($form->getTitle()); ?></th>
+        </thead>
+        <tbody> <?php
         $answers = $form->getAnswers()->exclude(Q::any(array(
             'field__flags__hasbit' => DynamicFormField::FLAG_EXT_STORED,
             'field__name__in' => array('title')
         )));
-        if (!$answers || count($answers) == 0)
+        $displayed = array();
+        foreach($answers as $a) {
+            if (!$a->getField()->isVisibleToStaff())
+                continue;
+            $displayed[] = $a;
+        }
+        if (count($displayed) == 0)
             continue;
-
         ?>
             <tr>
             <td colspan="2">
                 <table cellspacing="0" cellpadding="4" width="100%" border="0">
-                <?php foreach($answers as $a) {
-                    if (!($v = $a->display())) continue; ?>
+                <?php foreach($displayed as $a) {
+                    $field = $a->getField();
+                    $id =  $a->getLocal('id');
+                    $label = $a->getLocal('label');
+                    $v = $a->display();
+                    $class = (Format::striptags($v)) ? '' : 'class="faded"';
+                    $clean = (Format::striptags($v)) ? $v : '&mdash;' . __('Empty') .  '&mdash;';
+                    $field = $a->getField();
+                    $isFile = ($field instanceof FileUploadField);
+                    ?>
                     <tr>
-                        <th width="100"><?php
-                            echo $a->getField()->get('label');
-                        ?>:</th>
-                        <td><?php
+                        <td width="200"><?php echo Format::htmlchars($label); ?>:</td>
+                        <td>
+                        <?php if ($role->hasPerm(Task::PERM_EDIT)
+                                && $field->isEditableToStaff()) {
+                                $isEmpty = strpos($v, 'Empty');
+                                if ($isFile && !$isEmpty) {
+                                    echo sprintf('<span id="field_%s" %s >%s</span><br>', $id,
+                                        $class,
+                                        $clean);
+                                }
+                                     ?>
+                              <a class="inline-edit" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Update'); ?>"
+                                  href="#tasks/<?php echo $task->getId(); ?>/field/<?php echo $id; ?>/edit">
+                              <?php
+                                if ($isFile && !$isEmpty) {
+                                  echo "<i class=\"icon-edit\"></i>";
+                                } elseif (strlen($v) > 200) {
+                                  $clean = Format::truncate($v, 200);
+                                  echo sprintf('<span id="field_%s" %s >%s</span>', $id, $class, $clean);
+                                  echo "<br><i class=\"icon-edit\"></i>";
+                                } else
+                                    echo sprintf('<span id="field_%s" %s >%s</span>', $id, $class, $clean); ?>
+                              </a>
+                            <?php } else
                             echo $v;
                         ?></td>
                     </tr>
                     <?php
                 } ?>
+                </tbody>
                 </table>
             </td>
             </tr>
@@ -427,10 +525,10 @@ if (!$ticket) { ?>
         $idx++;
     } ?>
     </table>
+</div>    
 <?php
 } ?>
-<div class="clear"></div>
-<div id="task_thread_container">
+<div class="card-box p-b-0" >
     <div id="task_thread_content" class="tab_content">
      <?php
      $task->getThread()->render(array('M', 'R', 'N'),
@@ -441,7 +539,7 @@ if (!$ticket) { ?>
                  )
              );
      ?>
-   </div>
+   
 </div>
 <div class="clear"></div>
 <?php if($errors['err']) { ?>
@@ -458,52 +556,52 @@ if ($ticket)
 else
     $action = 'tasks.php?id='.$task->getId();
 ?>
-<div id="task_response_options" class="<?php echo $ticket ? 'ticket_task_actions' : ''; ?> sticky bar stop actions">
-    <ul class="tabs">
+<div class="<?php echo $ticket ? 'ticket_task_actions' : ''; ?> ">
+<div id="ReponseTabs" >
+    <ul class="nav nav-pills">
         <?php
         if ($role->hasPerm(TaskModel::PERM_REPLY)) { ?>
-        <li class="active"><a href="#task_reply"><?php echo __('Post Update');?></a></li>
-        <li><a href="#task_note"><?php echo __('Post Internal Note');?></a></li>
+        <li class="nav-item"><a class="nav-link active" href="#task_reply" data-toggle="tab" ><?php echo __('Post Update');?></a></li>
+        <li class="nav-item"><a class="nav-link" href="#task_note" data-toggle="tab" ><?php echo __('Post Internal Note');?></a></li>
         <?php
         }?>
     </ul>
     <?php
+    
+    
     if ($role->hasPerm(TaskModel::PERM_REPLY)) { ?>
-    <form id="task_reply" class="tab_content spellcheck save"
+    <div class="tab-content clearfix">
+    <div class="tab-pane active" id="task_reply">
+    <form  class="spellcheck save"
         action="<?php echo $action; ?>"
         name="task_reply" method="post" enctype="multipart/form-data">
         <?php csrf_token(); ?>
+        
+        
         <input type="hidden" name="id" value="<?php echo $task->getId(); ?>">
         <input type="hidden" name="a" value="postreply">
         <input type="hidden" name="lockCode" value="<?php echo ($mylock) ? $mylock->getCode() : ''; ?>">
         <span class="error"></span>
-        <table style="width:100%" border="0" cellspacing="0" cellpadding="3">
-            <tbody id="collab_sec" style="display:table-row-group">
-             <tr>
-                <td>
+         <div  class="form-group">
                     <input type='checkbox' value='1' name="emailcollab" id="emailcollab"
                         <?php echo ((!$info['emailcollab'] && !$errors) || isset($info['emailcollab']))?'checked="checked"':''; ?>
                         style="display:<?php echo $thread->getNumCollaborators() ? 'inline-block': 'none'; ?>;"
                         >
                     <?php
-                    $recipients = __('Add Participants');
                     if ($thread->getNumCollaborators())
-                        $recipients = sprintf(__('Recipients (%d of %d)'),
+                        $recipients = sprintf(__('(%d of %d)'),
                                 $thread->getNumActiveCollaborators(),
                                 $thread->getNumCollaborators());
 
                     echo sprintf('<span><a class="collaborators preview"
-                            href="#thread/%d/collaborators"><span id="t%d-recipients">%s</span></a></span>',
+                            href="#thread/%d/collaborators/1"> %s &nbsp;<span id="t%d-recipients">%s</span></a></span>',
                             $thread->getId(),
+                            __('Collaborators'),
                             $thread->getId(),
                             $recipients);
                    ?>
-                </td>
-             </tr>
-            </tbody>
-            <tbody id="update_sec">
-            <tr>
-                <td>
+         </div>
+        <div  class="form-group">
                     <div class="error"><?php echo $errors['response']; ?></div>
                     <input type="hidden" name="draft_id" value=""/>
                     <textarea name="response" id="task-response" cols="50"
@@ -523,12 +621,10 @@ else
                         print $reply_attachments_form->getField('attachments')->render();
                 ?>
                 </div>
-               </td>
-            </tr>
-            <tr>
-                <td>
-                    <div><?php echo __('Status');?>
-                        <span class="faded"> - </span>
+            </div>
+            <div  class="form-group">
+            <label><?php echo __('Status');?>
+                        <span class="faded"> - </span></label>
                         <select  name="task:status">
                             <option value="open" <?php
                                 echo $task->isOpen() ?
@@ -546,29 +642,30 @@ else
                         </select>
                         &nbsp;<span class='error'><?php echo
                         $errors['task:status']; ?></span>
-                    </div>
-                </td>
-            </tr>
-        </table>
-       <p  style="text-align:center;">
-           <input class="save pending" type="submit" value="<?php echo __('Post Update');?>">
-           <input type="reset" value="<?php echo __('Reset');?>">
-       </p>
+            </div>
+           
+      
+       <div>
+           <input class="btn btn-primary btn-sm" type="submit" value="<?php echo __('Post Update');?>">
+           <input class="btn btn-warning btn-sm" type="reset" value="<?php echo __('Reset');?>">
+       </div>
     </form>
+    </div>
     <?php
     } ?>
-    <form id="task_note"
-        action="<?php echo $action; ?>"
-        class="tab_content spellcheck save <?php
-            echo $role->hasPerm(TaskModel::PERM_REPLY) ? 'hidden' : ''; ?>"
+    
+    
+   <div class="tab-pane" id="task_note">
+    
+    <form action="<?php echo $action; ?>"class="spellcheck save"
         name="task_note"
         method="post" enctype="multipart/form-data">
         <?php csrf_token(); ?>
+        
+        <div class="form-group">
         <input type="hidden" name="id" value="<?php echo $task->getId(); ?>">
         <input type="hidden" name="a" value="postnote">
-        <table width="100%" border="0" cellspacing="0" cellpadding="3">
-            <tr>
-                <td>
+        <div>    
                     <div><span class='error'><?php echo $errors['note']; ?></span></div>
                     <textarea name="note" id="task-note" cols="80"
                         placeholder="<?php echo __('Internal Note details'); ?>"
@@ -583,10 +680,9 @@ else
                             print $note_attachments_form->getField('attachments')->render();
                     ?>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
+        </div>
+        </div>
+        <div class="form-group">
                     <div><?php echo __('Status');?>
                         <span class="faded"> - </span>
                         <select  name="task:status">
@@ -606,20 +702,21 @@ else
                         </select>
                         &nbsp;<span class='error'><?php echo
                         $errors['task:status']; ?></span>
-                    </div>
-                </td>
-            </tr>
-        </table>
-       <p  style="text-align:center;">
+                        </div>
+        </div>
+        <div>
            <input class="save pending" type="submit" value="<?php echo __('Post Note');?>">
            <input type="reset" value="<?php echo __('Reset');?>">
-       </p>
+        </div>
+       
     </form>
- </div>
+    </div>
+    </div>
+    </div>
+
 <?php
 echo $reply_attachments_form->getMedia();
 ?>
-
 <script type="text/javascript">
 $(function() {
     $(document).off('.tasks-content');
@@ -665,9 +762,13 @@ $(function() {
                 .slideUp();
             }
         })
-        .done(function() { })
+        .done(function() {
+            $('#loading').hide();
+            $.toggleOverlay(false);
+        })
         .fail(function() { });
      });
+
     <?php
     if ($ticket) { ?>
     $('#ticket-tasks-count').html(<?php echo $ticket->getNumTasks(); ?>);

@@ -4,7 +4,7 @@ if (!defined('OSTADMININC') || !$thisstaff->isAdmin()) die('Access Denied');
 
 $page = ($_GET['p'] && is_numeric($_GET['p'])) ? $_GET['p'] : 1;
 $count = Topic::objects()->count();
-$pageNav = new Pagenate($count, $page, PAGE_LIMIT);
+$pageNav = new Pagenate($count, $page,500);
 $pageNav->setURL('helptopics.php', $_qstr);
 $showing = $pageNav->showing().' '._N('help topic', 'help topics', $count);
 
@@ -12,7 +12,7 @@ $order_by = 'sort';
 
 ?>
 <form action="helptopics.php" method="POST" name="topics">
-    <div class="sticky bar opaque">
+    <div>
         <div class="content">
             <div class="pull-left flush-left">
                 <h2><?php echo __('Help Topics');?></h2>
@@ -41,6 +41,12 @@ $order_by = 'sort';
                                 <?php echo __( 'Disable'); ?>
                             </a>
                         </li>
+                        <li>
+                            <a class="confirm" data-name="archive" href="helptopics.php?a=archive">
+                                <i class="icon-folder-close icon-fixed-width"></i>
+                                <?php echo __( 'Archive'); ?>
+                            </a>
+                        </li>
                         <li class="danger">
                             <a class="confirm" data-name="delete" href="helptopics.php?a=delete">
                                 <i class="icon-trash icon-fixed-width"></i>
@@ -56,7 +62,7 @@ $order_by = 'sort';
  <?php csrf_token(); ?>
  <input type="hidden" name="do" value="mass_process" >
 <input type="hidden" id="action" name="a" value="sort" >
- <table class="list" border="0" cellspacing="1" cellpadding="0" width="940">
+ <table class="table table-striped table-sm">
 
     <thead>
 <tr><td colspan="7">
@@ -75,7 +81,7 @@ $order_by = 'sort';
         <tr>
             <th width="4%" style="height:20px;">&nbsp;</th>
             <th style="padding-left:4px;vertical-align:middle" width="36%"><?php echo __('Help Topic'); ?></th>
-            <th style="padding-left:4px;vertical-align:middle" width="8%"><?php echo __('Status'); ?></th>
+            <th style="padding-left:4px;vertical-align:middle" width="10%"><?php echo __('Status'); ?></th>
             <th style="padding-left:4px;vertical-align:middle" width="8%"><?php echo __('Type'); ?></th>
             <th style="padding-left:4px;vertical-align:middle" width="10%"><?php echo __('Priority'); ?></th>
             <th style="padding-left:4px;vertical-align:middle" width="14%"><?php echo __('Department'); ?></th>
@@ -142,7 +148,13 @@ $order_by = 'sort';
                     <a href="helptopics.php?id=<?php echo $id; ?>"><?php
                     echo Topic::getTopicName($id); ?></a>&nbsp;
                 </td>
-                <td><?php echo $topic->isactive ? __('Active') : '<b>'.__('Disabled').'</b>'; ?></td>
+                <td><?php
+                  if($topic->getStatus() == __('Active'))
+                    echo $topic->getStatus();
+                  else
+                    echo '<b>'.$topic->getStatus();
+                  ?>
+                </td>
                 <td><?php echo $topic->ispublic ? __('Public') : '<b>'.__('Private').'</b>'; ?></td>
                 <td><?php echo $priority; ?></td>
                 <td><a href="departments.php?id=<?php echo $deptId;
@@ -167,14 +179,7 @@ $order_by = 'sort';
      </tr>
     </tfoot>
 </table>
-<?php
-if ($count): //Show options..
-     echo '<div>&nbsp;'.__('Page').':'.$pageNav->getPageLinks().'&nbsp;</div>';
-?>
 
-<?php
-endif;
-?>
 </form>
 
 <div style="display:none;" class="dialog" id="confirm-action">
@@ -187,6 +192,10 @@ endif;
     </p>
     <p class="confirm-action" style="display:none;" id="disable-confirm">
         <?php echo sprintf(__('Are you sure you want to <b>disable</b> %s?'),
+            _N('selected help topic', 'selected help topics', 2));?>
+    </p>
+    <p class="confirm-action" style="display:none;" id="archive-confirm">
+        <?php echo sprintf(__('Are you sure you want to <b>archive</b> %s?'),
             _N('selected help topic', 'selected help topics', 2));?>
     </p>
     <p class="confirm-action" style="display:none;" id="delete-confirm">

@@ -24,21 +24,8 @@ if ($user) {
 $tickets->filter(array('ticket_id__in' => $filter));
 
 // Apply staff visibility
-if (!$thisstaff->hasPerm(SearchBackend::PERM_EVERYTHING)) {
-    // -- Open and assigned to me
-    $visibility = array(
-        new Q(array('status__state'=>'open', 'staff_id' => $thisstaff->getId()))
-    );
-    // -- Routed to a department of mine
-    if (!$thisstaff->showAssignedOnly() && ($depts=$thisstaff->getDepts()))
-        $visibility[] = new Q(array('dept_id__in' => $depts));
-    // -- Open and assigned to a team of mine
-    if (($teams = $thisstaff->getTeams()) && count(array_filter($teams)))
-        $visibility[] = new Q(array(
-            'team_id__in' => array_filter($teams), 'status__state'=>'open'
-        ));
-    $tickets->filter(Q::any($visibility));
-}
+if (!$thisstaff->hasPerm(SearchBackend::PERM_EVERYTHING))
+    $tickets->filter($thisstaff->getTicketsVisibility());
 
 $tickets->constrain(array('lock' => array(
                 'lock__expire__gt' => SqlFunction::NOW())));
@@ -80,52 +67,57 @@ $tickets->order_by('-created');
 TicketForm::ensureDynamicDataView();
 // Fetch the results
 ?>
-<div class="pull-left" style="margin-top:5px;">
+
+<div class="tab-content">
+<div style="padding-bottom:15px">
+<div class="pull-left" style="margin-top:5px;margin-left: 15px;">
    <?php
     if ($total) {
-        echo '<strong>'.$pageNav->showing().'</strong>';
+        echo '<div><strong>'.$pageNav->showing().'</strong></div>';
     } else {
-        echo sprintf(__('%s does not have any tickets'), $user? 'User' : 'Organization');
+        echo sprintf(__('%s does not have any tickets'), $user? __('User') : __('Organization'));
     }
    ?>
 </div>
-<div style="margin-bottom:10px;">
-    <div class="pull-right flush-right">
-        <?php
+<?php
         if ($user) { ?>
-            <a class="green button action-button" href="tickets.php?a=open&uid=<?php echo $user->getId(); ?>">
-                <i class="icon-plus"></i> <?php print __('Create New Ticket'); ?></a>
-        <?php
-        } ?>
+    <div class="btn-group btn-group-sm pull-right navbuttonsnobg" style="margin-top:5px;margin-right:15px;">
+        
+            <a class="btn btn-light btn-small btn-nbg" href="tickets.php?a=open&uid=<?php echo $user->getId(); ?>"  data-placement="bottom"
+                    data-toggle="tooltip" title="<?php echo __('New Ticket'); ?>">
+                <i class="fa fa-plus-square"></i></a>
+        
     </div>
+    <?php
+        } ?>
 </div>
-<br/>
+<br>
 <div>
 <?php
 if ($total) { ?>
-<form action="users.php" method="POST" name='tickets' style="padding-top:10px;">
+
 <?php csrf_token(); ?>
  <input type="hidden" name="a" value="mass_process" >
  <input type="hidden" name="do" id="action" value="" >
- <table class="list" border="0" cellspacing="1" cellpadding="2" width="100%">
+ <table class="table table-striped table-hover table-condensed table-sm">
     <thead>
         <tr>
             <?php
             if (0) {?>
-            <th width="4%">&nbsp;</th>
+            <th >&nbsp;</th>
             <?php
             } ?>
-            <th width="10%"><?php echo __('Ticket'); ?></th>
-            <th width="18%"><?php echo __('Last Updated'); ?></th>
-            <th width="8%"><?php echo __('Status'); ?></th>
-            <th width="30%"><?php echo __('Subject'); ?></th>
+            <th ><?php echo __('Ticket'); ?></th>
+            <th class="hidden-sm-down"><?php echo __('Last Updated'); ?></th>
+            <th><?php echo __('Status'); ?></th>
+            <th><?php echo __('Subject'); ?></th>
             <?php
             if ($user) { ?>
-            <th width="15%"><?php echo __('Department'); ?></th>
-            <th width="15%"><?php echo __('Assignee'); ?></th>
+            <th class="hidden-sm-down"><?php echo __('Department'); ?></th>
+            <th><?php echo __('Assignee'); ?></th>
             <?php
             } else { ?>
-            <th width="30%"><?php echo __('User'); ?></th>
+            <th><?php echo __('User'); ?></th>
             <?php
             } ?>
         </tr>
@@ -178,17 +170,17 @@ if ($total) { ?>
                     echo '<span class="pull-right faded-more" data-toggle="tooltip" title="'
                             .__('Collaborator').'"><i class="icon-eye-open"></i></span>';
             ?></td>
-            <td nowrap><?php echo Format::datetime($T['lastupdate']); ?></td>
+            <td class="hidden-sm-down" nowrap><?php echo Format::datetime($T['lastupdate']); ?></td>
             <td><?php echo $status; ?></td>
             <td><a class="truncate <?php if ($flag) { ?> Icon <?php echo $flag; ?>Ticket" title="<?php echo ucfirst($flag); ?> Ticket<?php } ?>"
-                style="max-width: 230px;"
+                
                 href="tickets.php?id=<?php echo $T['ticket_id']; ?>"><?php echo $subject; ?></a>
                  <?php
                     if ($T['attachment_count'])
                         echo '<i class="small icon-paperclip icon-flip-horizontal" data-toggle="tooltip" title="'
                             .$T['attachment_count'].'"></i>';
                     if ($threadcount > 1) { ?>
-                            <span class="pull-right faded-more"><i class="icon-comments-alt"></i>
+                            <span class="faded-more"><i class="icon-comments-alt"></i>
                             <small><?php echo $threadcount; ?></small></span>
 <?php               }
                     if ($T['attachments'])
@@ -201,13 +193,13 @@ if ($total) { ?>
             <?php
             if ($user) {
                 $dept = Dept::getLocalById($T['dept_id'], 'name', $T['dept__name']); ?>
-            <td><span class="truncate" style="max-wdith:125px"><?php
+            <td class="hidden-sm-down"><span class="truncate" style="max-wdith:125px"><?php
                 echo Format::htmlchars($dept); ?></span></td>
-            <td><span class="truncate" style="max-width:125px"><?php
+            <td><span class="truncate" ><?php
                 echo Format::htmlchars($assigned); ?></span></td>
             <?php
             } else { ?>
-            <td><a class="truncate" style="max-width:250px" href="users.php?id="<?php
+            <td><a href="users.php?id="<?php
                 echo $T['user_id']; ?>><?php echo Format::htmlchars($T['user__name']);
                     ?> <em>&lt;<?php echo Format::htmlchars($T['user__default_email__address']);
                 ?>&gt;</em></a>
@@ -220,19 +212,21 @@ if ($total) { ?>
     ?>
     </tbody>
 </table>
+
 <?php
 if ($total>0) {
     echo '<div>';
     echo __('Page').':'.$pageNav->getPageLinks('tickets', '#tickets').'&nbsp;';
-    echo sprintf('<a class="export-csv no-pjax" href="?%s">%s</a>',
-            Http::build_query(array(
-                    'id' => $user ? $user->getId(): $org->getId(),
-                    'a' => 'export',
-                    't' => 'tickets')),
-            __('Export'));
+    echo sprintf('<a href="#%s/%d/tickets/export" id="%s" class="no-pjax export">%s</a>',
+          $user ? 'users' : 'orgs',
+          $user ? $user->getId() : $org->getId(),
+          'queue-export',
+        __('Export'));
     echo '</div>';
 } ?>
 </form>
+
 <?php
  } ?>
+</div>
 </div>

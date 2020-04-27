@@ -56,7 +56,7 @@ $data_form = $data_form ?: $column->getDataConfigForm($_POST);
     <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #bbb">
       <i class="icon-plus-sign"></i>
       <select class="add-annotation">
-        <option>— <?php echo __("Add a annotation"); ?> —</option>
+        <option>— <?php echo __("Add a annotation"); ?> —</option>
 <?php
 $annotations = array();
 foreach (QueueColumnAnnotation::getAnnotations('Ticket') as $class)
@@ -72,7 +72,8 @@ foreach (Internationalization::sortKeyedList($annotations) as $class=>$desc) {
       $(function() {
         var addAnnotation = function(type, desc, icon, pos) {
           var template = $('.annotation.template', '#annotations'),
-              clone = template.clone().show().removeClass('template').insertBefore(template),
+              clone = template.clone().removeClass('hidden')
+                  .removeClass('template').insertBefore(template),
               input = clone.find('[data-field=input]'),
               colid = clone.closest('.tab_content').data('colId'),
               column = clone.find('[data-field=column]'),
@@ -132,7 +133,7 @@ if ($column->getConditions(false)) {
     <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #bbb">
       <i class="icon-plus-sign"></i>
       <select class="add-condition">
-        <option>— <?php echo __("Add a condition"); ?> —</option>
+        <option>— <?php echo __("Add a condition"); ?> —</option>
 <?php
       foreach (CustomQueue::getSearchableFields('Ticket') as $path=>$f) {
           list($label) = $f;

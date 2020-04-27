@@ -1,11 +1,11 @@
 <?php
 global $thisstaff;
 
-$role = $thisstaff->getRole($ticket->getDeptId());
+$role = $ticket->getRole($thisstaff);
 
 $tasks = Task::objects()
     ->select_related('dept', 'staff', 'team')
-    ->order_by('-created');
+    ->order_by('sort');
 
 $tasks->filter(array(
             'object_id' => $ticket->getId(),
@@ -17,10 +17,10 @@ $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
 
 ?>
 <div id="tasks_content" style="display:block;">
-<div class="pull-left">
+<div class="pull-left subnavtitle">
    <?php
     if ($count) {
-        echo '<strong>'.$showing.'</strong>';
+         echo '<strong>'.$showing.'</strong>';
     } else {
         echo sprintf(__('%s does not have any tasks'), $ticket? 'This ticket' :
                 'System');
@@ -28,24 +28,29 @@ $showing = $pageNav->showing().' '._N('task', 'tasks', $count);
    ?>
 </div>
 <div class="pull-right">
-    <?php
-    if ($role && $role->hasPerm(Task::PERM_CREATE)) { ?>
+   
         <a
-        class="green button action-button ticket-task-action"
+        class="btn btn-sm btn-success  ticket-task-action" title="Add New Task" 
         data-url="tickets.php?id=<?php echo $ticket->getId(); ?>#tasks"
         data-dialog-config='{"size":"large"}'
         href="#tickets/<?php
             echo $ticket->getId(); ?>/add-task">
-            <i class="icon-plus-sign"></i> <?php
-            print __('Add New Task'); ?></a>
+            <i class="fa fa-plus"></i>
+            </a>
+            
     <?php
-    }
+    
+    foreach ($tasks as $task)
+        $taskStatus .= $task->isOpen() ? 'open' : 'closed';
+
     if ($count)
         Task::getAgentActions($thisstaff, array(
                     'container' => '#tasks_content',
                     'callback_url' => sprintf('ajax.php/tickets/%d/tasks',
                         $ticket->getId()),
-                    'morelabel' => __('Options')));
+                    'morelabel' => __('Options'),
+                    'status' => $taskStatus ? $taskStatus : '')
+                );
     ?>
 </div>
 <div class="clear"></div>
@@ -57,7 +62,7 @@ if ($count) { ?>
 <?php csrf_token(); ?>
  <input type="hidden" name="a" value="mass_process" >
  <input type="hidden" name="do" id="action" value="" >
- <table class="list" border="0" cellspacing="1" cellpadding="2" width="940">
+ <table class="table table-striped table-hover table-condensed table-sm">
     <thead>
         <tr>
             <?php
@@ -73,15 +78,19 @@ if ($count) { ?>
             <th width="200"><?php echo __('Assignee'); ?></th>
         </tr>
     </thead>
-    <tbody class="tasks">
+    <tbody class="tasks row_position">
     <?php
     foreach($tasks as $task) {
         $id = $task->getId();
         $access = $task->checkStaffPerm($thisstaff);
         $assigned='';
-        if ($task->staff)
-            $assigned=sprintf('<span class="Icon staffAssigned">%s</span>',
-                    Format::truncate($task->staff->getName(),40));
+        if ($task->staff || $task->team) {
+            $assigneeType = $task->staff ? 'staff' : 'team';
+            $icon = $assigneeType == 'staff' ? 'staffAssigned' : 'teamAssigned';
+            $assigned=sprintf('<span class="Icon %s">%s</span>',
+                    $icon,
+                    Format::truncate($task->getAssigned(),40));
+        }
 
         $status = $task->isOpen() ? '<strong>open</strong>': 'closed';
 
@@ -96,17 +105,18 @@ if ($count) { ?>
 
         ?>
         <tr id="<?php echo $id; ?>">
+        <td><i class="fa fa-sort" title="Change Order"></i>
             <td align="center" class="nohover">
                 <input class="ckb" type="checkbox" name="tids[]"
                 value="<?php echo $id; ?>" <?php echo $sel?'checked="checked"':''; ?>>
             </td>
-            <td align="center" nowrap>
+            <td nowrap>
               <a class="Icon no-pjax preview"
                 title="<?php echo __('Preview Task'); ?>"
                 href="<?php echo $viewhref; ?>"
                 data-preview="#tasks/<?php echo $id; ?>/preview"
                 ><?php echo $task->getNumber(); ?></a></td>
-            <td align="center" nowrap><?php echo
+            <td nowrap><?php echo
             Format::datetime($task->created); ?></td>
             <td><?php echo $status; ?></td>
             <td>
@@ -155,7 +165,7 @@ $(function() {
             var url = 'ajax.php/'+$(this).attr('href').substr(1);
             var $container = $('div#task_content');
             var $stop = $('ul#ticket_tabs').offset().top;
-            $.pjax({url: url, container: $container, push: false, scrollTo: $stop})
+            $.pjax({url: url, container: 'div#task_content', push: false, scrollTo: $stop})
             .done(
                 function() {
                 $container.show();
@@ -186,15 +196,38 @@ $(function() {
                 $container.load(url+'/'+tid+'/view', function () {
                     $('.tip_box').remove();
                     $('div#tasks_content').hide();
-                    $.pjax({url: url, container: '#tasks_content', push: false});
+                    $.pjax({url: url, container: '#tasks_content', timeout: 30000, push: false});
                 }).show();
             } else {
                 window.location.href = $redirect ? $redirect : window.location.href;
             }
-        }, $options);
+        }, $options); 
         return false;
     });
 
     $('#ticket-tasks-count').html(<?php echo $count; ?>);
+    
+    $( ".row_position" ).sortable({
+        delay: 150,
+        stop: function() {
+            var selectedData = new Array();
+            $('.row_position>tr').each(function() {
+                selectedData.push($(this).attr("id"));
+            });
+            updateOrder(selectedData);
+        }
+    });
+
+
+    function updateOrder(data) {
+         $.ajax({
+            url:"ajax.php/tasks/sort",
+            type:'post',
+            data:{position:data},
+            // success:function(){
+                // alert(data);
+            // }
+            })
+    }
 });
 </script>

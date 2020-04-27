@@ -335,8 +335,8 @@
 
   $.fn.typeahead.defaults = {
     source: []
-  , items: 8
-  , menu: '<ul class="typeahead dropdown-menu"></ul>'
+  , items: 25
+  , menu: '<ul class="typeahead typeaheadmargin dropdown-menu"></ul>'
   , item: '<li><a href="#"></a></li>'
   , onselect: null
   , property: 'value'

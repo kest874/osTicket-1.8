@@ -161,7 +161,7 @@
         </div>
         <div style="width:100%">
         <textarea style="width:90%; width:calc(100% - 20px)" name="hint" rows="2" cols="40"
-            class="richtext small no-bar"
+            class="richtext small"
             data-translate-tag="<?php echo $field->getTranslateTag('hint'); ?>"><?php
             echo Format::htmlchars($field->get('hint')); ?></textarea>
         </div>
@@ -170,11 +170,11 @@
         <hr>
         <p class="full-width">
             <span class="buttons pull-left">
-                <input type="reset" value="<?php echo __('Reset'); ?>">
-                <input type="button" value="<?php echo __('Cancel'); ?>" class="close">
+                <input class="btn btn-danger" type="reset" value="<?php echo __('Reset'); ?>">
+                <input class="btn btn-warning" type="button" value="<?php echo __('Cancel'); ?>">
             </span>
             <span class="buttons pull-right">
-                <input type="submit" value="<?php echo __('Save'); ?>">
+                <input class="btn btn-primary" type="submit" value="<?php echo __('Save'); ?>">
             </span>
          </p>
     </form>

@@ -19,23 +19,20 @@ elseif($msg)
     echo sprintf('<div id="msg_notice">%s</div>',$msg);
 elseif($warn)
     echo sprintf('<div id="msg_warning">%s</div>',$warn);
+?>
+<ul class="nav nav-tabs" id="ticket-preview">
+        <li class="nav-item"><a class="nav-link active" id="preview_tab" href="#summary" data-toggle="tab"><i class="icon-list-alt"></i>&nbsp;Task Summary</a></li>
+        <li class="nav-item"><a class="nav-link" id="collab_tab" href="#collab" data-toggle="tab"><i class="icon-fixed-width icon-group
+            faded"></i>&nbsp;Collaborators <span class="badge badge-primary badge-pill"><?php echo $task->getThread()->getNumCollaborators(); ?></span></a></li>
+            	
+</ul>
+			
+			
+			<div class="tab-content clearfix">
+				<div class="tab-pane active" id="summary">
+								<table border="0" cellspacing="" cellpadding="1" width="100%" class="ticket_info">
 
-echo '<ul class="tabs" id="task-preview">';
-
-echo '
-        <li class="active"><a href="#summary"
-            ><i class="icon-list-alt"></i>&nbsp;'.__('Task Summary').'</a></li>';
-if ($task->getThread()->getNumCollaborators()) {
-    echo sprintf('
-        <li><a id="collab_tab" href="#collab"
-            ><i class="icon-fixed-width icon-group
-            faded"></i>&nbsp;'.__('Collaborators (%d)').'</a></li>',
-            $task->getThread()->getNumCollaborators());
-}
-echo '</ul>';
-echo '<div id="task-preview_container">';
-echo '<div class="tab_content" id="summary">';
-echo '<table border="0" cellspacing="" cellpadding="1" width="100%" class="ticket_info">';
+<?php
 $status=sprintf('<span>%s</span>',ucfirst($task->getStatus()));
 echo sprintf('
         <tr>
@@ -64,12 +61,13 @@ if ($task->isClosed()) {
                 <td>%s</td>
             </tr>',
             Format::datetime($task->duedate));
-}
-echo '</table>';
+} ?>
+</table>
 
 
-echo '<hr>
-    <table border="0" cellspacing="" cellpadding="1" width="100%" class="ticket_info">';
+<hr>
+    <table border="0" cellspacing="" cellpadding="1" width="100%" class="ticket_info">
+<?php
 if ($task->isOpen()) {
     echo sprintf('
             <tr>
@@ -85,16 +83,12 @@ echo sprintf(
         </tr>',
     Format::htmlchars($task->dept->getName())
     );
+?>
+</table>			
+	</div>	
 
-echo '
-    </table>';
-echo '</div>';
-?>
-<?php
-//TODO: add link to view if the user has permission
-?>
-<div class="hidden tab_content" id="collab">
-    <table border="0" cellspacing="" cellpadding="1">
+<div class="tab-pane" id="collab">
+<table border="0" cellspacing="" cellpadding="1">
         <colgroup><col style="min-width: 250px;"></col></colgroup>
         <?php
         if (($collabs=$task->getThread()->getCollaborators())) {?>
@@ -115,12 +109,13 @@ echo '</div>';
     <br>
     <?php
     echo sprintf('<span><a class="collaborators"
-                            href="#thread/%d/collaborators">%s</a></span>',
+                            href="#thread/%d/collaborators/1">%s</a></span>',
                             $task->getThreadId(),
                             $task->getThread()->getNumCollaborators()
                                 ? __('Manage Collaborators') : __('Add Collaborator')
                                 );
-    ?>
+    ?>	
 </div>
-</div>
+
+
 </div>

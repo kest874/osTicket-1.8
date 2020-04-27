@@ -12,7 +12,7 @@ AttachmentFile::objects()->filter(array(
             ))->all();
 
 $entries = $thread->getEntries();
-$entries->filter(array('type__in' => array_keys($entryTypes)));
+$entries->filter(array('type__in' => array_keys($entryTypes)))->order_by("{$order}id");
 ?>
 <style type="text/css">
     div {font-family: sans-serif;}
@@ -68,11 +68,10 @@ $entries->filter(array('type__in' => array_keys($entryTypes)));
                                                 Format::file_size($a->file->size));
 
                                     $filename = Format::htmlchars($a->getFilename());
-                                    echo sprintf('<a href="%s/%s" download="%s"
+                                    echo sprintf('<a href="%s" download="%s"
                                             style="font-size:11px; color:#0088cc;"
                                             target="_blank">%s</a>&nbsp;&nbsp;&nbsp;%s<br/>',
-                                            $cfg->getBaseUrl(),
-                                            $a->file->getDownloadUrl(),
+                                            $a->file->getExternalDownloadUrl(),
                                             $filename,
                                             $filename,
                                             $size);
@@ -84,6 +83,7 @@ $entries->filter(array('type__in' => array_keys($entryTypes)));
                         </div>
                     </td>
                 </tr>
+                <tr><td>&nbsp;</td></tr>
             <?php
             } ?>
         </tbody>

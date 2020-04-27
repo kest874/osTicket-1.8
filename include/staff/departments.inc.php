@@ -1,30 +1,26 @@
 <?php
 if (!defined('OSTADMININC') || !$thisstaff->isAdmin())
     die('Access Denied');
-
 $qs = array();
 $sortOptions=array(
     'name' => 'name',
+    'status' => 'flags',
     'type' => 'ispublic',
     'members'=> 'members_count',
     'email'=> 'email__name',
     'manager'=>'manager__lastname'
     );
-
 $orderWays = array('DESC'=>'DESC', 'ASC'=>'ASC');
 $sort = ($_REQUEST['sort'] && $sortOptions[strtolower($_REQUEST['sort'])]) ? strtolower($_REQUEST['sort']) : 'name';
 if ($sort && $sortOptions[$sort]) {
     $order_column = $sortOptions[$sort];
 }
-
 $order_column = $order_column ? $order_column : 'name';
-
 if ($_REQUEST['order'] && isset($orderWays[strtoupper($_REQUEST['order'])])) {
     $order = $orderWays[strtoupper($_REQUEST['order'])];
 } else {
     $order = 'ASC';
 }
-
 if ($order_column && strpos($order_column,',')) {
     $order_column=str_replace(','," $order,",$order_column);
 }
@@ -39,7 +35,47 @@ $qs += array('sort' => $_REQUEST['sort'], 'order' => $_REQUEST['order']);
 $pageNav->setURL('departments.php', $qs);
 $showing = $pageNav->showing().' '._N('department', 'departments', $count);
 ?>
+
 <form action="departments.php" method="POST" name="depts">
+<<<<<<< HEAD
+
+<div class="subnav">
+
+
+                        <div class="float-left subnavtitle">
+                        
+                            <span ><a href="<?php echo $refresh_url; ?>"
+                                title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i> 
+                                </a> &nbsp;
+            <?php echo __('Departments');?>
+                                
+                                </span>
+                        
+                       
+                       
+                        </div>
+ 
+        <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
+                    
+                    <a class="btn btn-icon waves-effect waves-light btn-success"
+                       href="departments.php?a=add" data-placement="bottom"
+                    data-toggle="tooltip" title="<?php echo __('Add Department'); ?>">
+                        <i class="fa fa-plus-square"></i>
+                    </a>
+            
+        <div class="btn-group btn-group-sm" role="group">
+            <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
+            data-toggle="dropdown"><i class="fa fa-cog" data-placement="bottom" data-toggle="tooltip" 
+             title="More"></i>
+            </button>
+                    <div class="dropdown-menu dropdown-menu-right " aria-labelledby="btnGroupDrop1" id="actions">
+                    
+                   <a class="confirm" data-name="delete" href="departments.php?a=delete">
+                        <i class="icon-trash icon-fixed-width"></i>
+                        <?php echo __('Delete'); ?></a>
+                              
+                    </div>
+=======
 <div class="sticky bar">
     <div class="content">
         <div class="pull-left">
@@ -53,25 +89,53 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
             </span>
             <div id="action-dropdown-more" class="action-dropdown anchor-right">
                 <ul id="actions">
+                    <li>
+                        <a class="confirm" data-name="enable" href="departments.php?a=enable">
+                            <i class="icon-ok-sign icon-fixed-width"></i>
+                            <?php echo __( 'Enable'); ?>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="confirm" data-name="disable" href="departments.php?a=disable">
+                            <i class="icon-ban-circle icon-fixed-width"></i>
+                            <?php echo __( 'Disable'); ?>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="confirm" data-name="archive" href="departments.php?a=archive">
+                            <i class="icon-folder-close icon-fixed-width"></i>
+                            <?php echo __( 'Archive'); ?>
+                        </a>
+                    </li>
                     <li class="danger"><a class="confirm" data-name="delete" href="departments.php?a=delete">
                         <i class="icon-trash icon-fixed-width"></i>
-                        <?php echo __('Delete'); ?></a></li>
+                        <?php echo __('Delete'); ?></a>
+                    </li>
                 </ul>
+>>>>>>> 5461f80c778f7915826f2385a848fde692c9d4c2
             </div>
-        </div>
-        <div class="clear"></div>
-    </div>
-</div>
+        </div>   
+        
+        <div class="clearfix"></div>                      
+ </div>
+<div class="card-box">
+
+<div class="row">
+    <div class="col">
+                   
  <?php csrf_token(); ?>
  <input type="hidden" name="do" value="mass_process" >
  <input type="hidden" id="action" name="a" value="" >
- <table class="list" border="0" cellspacing="1" cellpadding="0" width="940">
+  <table class="table table-striped table-hover table-condensed table-sm">
     <thead>
         <tr>
             <th width="4%">&nbsp;</th>
             <th width="28%"><a <?php echo $name_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=name"><?php echo __('Name');?></a></th>
+            <th width="8%"><a <?php echo $status_sort; ?> href="departments.php?<?php echo $qstr;?>&sort=status"><?php echo __('Status');?></a></th>
+            <!-- <th style="padding-left:4px;vertical-align:middle" width="8%"><?php echo __('Status'); ?></th> -->
             <th width="8%"><a  <?php echo $type_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=type"><?php echo __('Type');?></a></th>
-            <th width="8%"><a  <?php echo $users_sort; ?>href="departments.php?<?php echo $qstr; ?>&sort=users"><?php echo __('Agents');?></a></th>
+            <!-- <th width="8%"><a  <?php echo $users_sort; ?>href="departments.php?<?php echo $qstr; ?>&sort=users"><?php echo __('Agents');?></a></th> -->
+            <th width="8%"><a  <?php echo $users_sort; ?>href="departments.php?<?php echo $qstr; ?>&sort=members"><?php echo __('Agents');?></a></th>
             <th width="30%"><a  <?php echo $email_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=email"><?php echo __('Email Address');?></a></th>
             <th width="22%"><a  <?php echo $manager_sort; ?> href="departments.php?<?php echo $qstr; ?>&sort=manager"><?php echo __('Manager');?></a></th>
         </tr>
@@ -97,7 +161,6 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
                 $sel=false;
                 if($ids && in_array($dept->getId(), $ids))
                     $sel=true;
-
                 if ($dept->email) {
                     $email = (string) $dept->email;
                     $emailId = $dept->email->getId();
@@ -105,7 +168,6 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
                     $emailId = $defaultEmailId;
                     $email = $defaultEmailAddress;
                 }
-
                 $default= ($defaultId == $dept->getId()) ?' <small>'.__('(Default)').'</small>' : '';
                 ?>
             <tr id="<?php echo $id; ?>">
@@ -115,8 +177,17 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
                   <?php echo $sel? 'checked="checked"' : ''; ?>
                   <?php echo $default? 'disabled="disabled"' : ''; ?> >
                 </td>
-                <td><a href="departments.php?id=<?php echo $id; ?>"><?php
-                echo Dept::getNameById($id); ?></a>&nbsp;<?php echo $default; ?></td>
+                <td>
+                  <a href="departments.php?id=<?php echo $id; ?>"><?php
+                echo Dept::getNameById($id); ?></a>&nbsp;<?php echo $default; ?>
+                </td>
+                <td><?php
+                  if(!strcasecmp($dept->getStatus(), 'Active'))
+                    echo $dept->getStatus();
+                  else
+                    echo '<b>'.$dept->getStatus();
+                  ?>
+                </td>
                 <td><?php echo $dept->isPublic() ? __('Public') :'<b>'.__('Private').'</b>'; ?></td>
                 <td>&nbsp;&nbsp;
                     <b>
@@ -136,7 +207,7 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
         } ?>
     <tfoot>
      <tr>
-        <td colspan="6">
+        <td colspan="7">
             <?php
             if ($count) { ?>
             <?php echo __('Select');?>:&nbsp;
@@ -150,14 +221,24 @@ $showing = $pageNav->showing().' '._N('department', 'departments', $count);
      </tr>
     </tfoot>
 </table>
-<?php
-if ($count):
-    echo '<div>&nbsp;'.__('Page').':'.$pageNav->getPageLinks().'&nbsp;</div>';
-?>
-<?php
-endif;
-?>
-</form>
+<div class="row">
+<div class="col">
+    <div class="float-left">
+    <nav>
+    <ul class="pagination">   
+        <?php
+            echo $pageNav->getPageLinks();
+        ?>
+    </ul>
+    </nav>
+    </div>
+
+   
+    <div class="float-right">
+          <span class="faded"><?php echo $pageNav->showing(); ?></span>
+    </div>  
+</div></div>
+</div></div></form>
 <div style="display:none;" class="dialog" id="confirm-action">
     <h3><?php echo __('Please Confirm');?></h3>
     <a class="close" href=""><i class="icon-remove-circle"></i></a>
@@ -170,6 +251,18 @@ endif;
         <?php echo sprintf(__('Are you sure you want to make %s <b>private</b> (internal)?'),
             _N('selected department', 'selected departments', 2));?>
     </p>
+    <p class="confirm-action" style="display:none;" id="enable-confirm">
+        <?php echo sprintf(__('Are you sure you want to <b>enable</b> %s?'),
+            _N('selected department', 'selected departments', 2));?>
+    </p>
+    <p class="confirm-action" style="display:none;" id="disable-confirm">
+        <?php echo sprintf(__('Are you sure you want to <b>disable</b> %s?'),
+            _N('selected department', 'selected departments', 2));?>
+    </p>
+    <p class="confirm-action" style="display:none;" id="archive-confirm">
+        <?php echo sprintf(__('Are you sure you want to <b>archive</b> %s?'),
+            _N('selected department', 'selected departments', 2));?>
+    </p>
     <p class="confirm-action" style="display:none;" id="delete-confirm">
         <font color="red"><strong><?php echo sprintf(__('Are you sure you want to DELETE %s?'),
             _N('selected department', 'selected departments', 2));?></strong></font>
@@ -179,10 +272,10 @@ endif;
     <hr style="margin-top:1em"/>
     <p class="full-width">
         <span class="buttons pull-left">
-            <input type="button" value="<?php echo __('No, Cancel');?>" class="close">
+            <input type="button" value="<?php echo __('No, Cancel');?>" class="btn btn-sm btn-warning close">
         </span>
         <span class="buttons pull-right">
-            <input type="button" value="<?php echo __('Yes, Do it!');?>" class="confirm">
+            <input type="button" value="<?php echo __('Yes, Do it!');?>" class="btn btn-sm btn-danger confirm">
         </span>
      </p>
     <div class="clear"></div>

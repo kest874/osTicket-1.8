@@ -3,6 +3,9 @@ div#client-helptopic>span.textbox.combo{
     width: 90%  !important;
     
 }
+.combo-p{
+    margin-top:-75px !important;
+}
 
 div#client-helptopic input:hover, select:hover, textarea:hover
 {
@@ -21,6 +24,7 @@ div#client-helptopic .textbox .textbox-text
 }
 
 .panel {
+  position:absolute;
   overflow: hidden;
   text-align: left;
   margin: 0;
@@ -165,6 +169,7 @@ div#client-helptopic .textbox .textbox-text
 
 
 .textbox {
+  height: 1.8125rem !important;
   position: relative;
   border: 1px solid #95B8E7;
   background-color: #ffffcc;
@@ -176,10 +181,16 @@ div#client-helptopic .textbox .textbox-text
   padding: 0;
   -moz-border-radius: 5px 5px 5px 5px;
   -webkit-border-radius: 5px 5px 5px 5px;
-  border-radius: 5px 5px 5px 5px;
+  border-radius: 2px;
 }
+
+div.has-danger .textbox{ 
+     border-color: #d9534f !important;
+}
+
 .textbox .textbox-text {
-  font-size: 13px;
+  height: 1.8125rem  !important;
+  font-size: 0.875rem;
   background-color: #ffffcc;
   border: 0;
   margin: 0;
@@ -190,8 +201,11 @@ div#client-helptopic .textbox .textbox-text
   resize: none;
   -moz-border-radius: 5px 5px 5px 5px;
   -webkit-border-radius: 5px 5px 5px 5px;
-  border-radius: 5px 5px 5px 5px;
+  border-radius: 2px;
 }
+
+
+
 .textbox .textbox-text::-ms-clear,
 .textbox .textbox-text::-ms-reveal {
   display: none;

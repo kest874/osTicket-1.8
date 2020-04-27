@@ -106,7 +106,7 @@ else
                 if($ids && in_array($row['tpl_id'],$ids))
                     $sel=true;
 
-                $default=($defaultTplId==$row['tpl_id'])?'<small class="fadded">('.__('System Default').')</small>':'';
+                $default=($defaultTplId==$row['tpl_id'])?'<small class="faded">('.__('System Default').')</small>':'';
                 ?>
             <tr id="<?php echo $row['tpl_id']; ?>">
                 <td align="center">
@@ -169,10 +169,10 @@ endif;
     <hr style="margin-top:1em"/>
     <p class="full-width">
         <span class="buttons pull-left">
-            <input type="button" value="<?php echo __('No, Cancel');?>" class="close">
+            <input class="btn btn-danger" type="button" value="<?php echo __('No, Cancel');?>" class="close">
         </span>
         <span class="buttons pull-right">
-            <input type="button" value="<?php echo __('Yes, Do it!');?>" class="confirm">
+            <input class="btn btn-primary" type="button" value="<?php echo __('Yes, Do it!');?>" class="confirm">
         </span>
      </p>
     <div class="clear"></div>

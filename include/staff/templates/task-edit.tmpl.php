@@ -29,13 +29,15 @@ if ($info['error']) {
     <div>
     <?php
     if ($forms) {
-        foreach ($forms as $form)
+        foreach ($forms as $form) {
+            $form->addMissingFields();
             echo $form->getForm(false, array('mode' => 'edit'))->asTable(
                     __('Task Information'),
                     array(
                         'draft-namespace' => $namespace,
                         )
                     );
+        }
     }
     ?>
     </div>
@@ -52,12 +54,12 @@ if ($info['error']) {
     <hr>
     <p class="full-width">
         <span class="buttons pull-left">
-            <input type="reset" value="<?php echo __('Reset'); ?>">
-            <input type="button" name="cancel" class="close"
+            <input type="reset" value="<?php echo __('Reset'); ?>" class="btn btn-sm btn-warning">
+            <input type="button" name="cancel" class="close btn-danger"
                 value="<?php echo __('Cancel'); ?>">
         </span>
         <span class="buttons pull-right">
-            <input type="submit" value="<?php echo __('Update'); ?>">
+            <input type="submit" value="<?php echo __('Update'); ?>"  class="btn btn-sm btn-success">
         </span>
      </p>
 </form>

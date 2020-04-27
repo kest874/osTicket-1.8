@@ -84,7 +84,7 @@ var scp_prep = function() {
         return false;
      });
 
-    $('#actions:submit, #actions :submit.button:not(.no-confirm), #actions .confirm').bind('click', function(e) {
+    $('#actions:submit, #actions :submit.button:not(.no-confirm), #actions .confirm, .cr-confirm, .category-action').bind('click', function(e) {
 
         var formObj,
             name = this.name || $(this).data('name');
@@ -114,9 +114,10 @@ var scp_prep = function() {
         e.preventDefault();
         return false;
      });
-
+     
     $('a.confirm-action').click(function(e) {
         $dialog = $('.dialog#confirm-action');
+  
         if ($($(this).attr('href')+'-confirm', $dialog).length) {
             e.preventDefault();
             var action = $(this).attr('href').substr(1, $(this).attr('href').length);
@@ -164,7 +165,21 @@ var scp_prep = function() {
     $('form.save, form:has(table.list)').submit(function() {
         $(window).unbind('beforeunload');
         $.toggleOverlay(true);
+        
+        // Disable staff-side Post Reply/Open buttons to help prevent
+        // duplicate POST
+        var form = $(this);
+        $(this).find('input[type="submit"]').each(function (index) {
+            // Clone original input
+            $(this).clone(false).removeAttr('id').prop('disabled', true).insertBefore($(this));
+
+            // Hide original input and add it to top of form
+            $(this).hide();
+            form.prepend($(this));
+        });
         $('#loading').show();
+        return true;
+
      });
 
     $('select#tpl_options').change(function() {
@@ -193,6 +208,13 @@ var scp_prep = function() {
         }
      });
 
+    $('form select#cannedResp').select2({width: '350px'});
+    $('form select#cannedResp').on('select2:opening', function (e) {
+        var redactor = $('.richtext', $(this).closest('form')).data('redactor');
+        if (redactor)
+            redactor.api('selection.save');
+    });
+
     $('form select#cannedResp').change(function() {
 
         var fObj = $(this).closest('form');
@@ -211,16 +233,14 @@ var scp_prep = function() {
                 cache: false,
                 success: function(canned){
                     //Canned response.
-                    var box = $('#response',fObj),
-                        redactor = box.data('redactor');
-                    if(canned.response) {
-                        if (redactor)
-                            redactor.insert.html(canned.response);
-                        else
+                    var box = $('#response', fObj),
+                        redactor = $R('#response');
+                    if (canned.response) {
+                        if (redactor) {
+                            redactor.api('selection.restore');
+                            redactor.insertion.insertHtml(canned.response);
+                        } else
                             box.val(box.val() + canned.response);
-
-                        if (redactor)
-                            redactor.observe.load();
                     }
                     //Canned attachments.
                     var ca = $('.attachments', fObj);
@@ -245,7 +265,7 @@ var scp_prep = function() {
             showButtonPanel: true,
             buttonImage: './images/cal.png',
             showOn:'both',
-            dateFormat: $.translate_format(c.date_format||'m/d/Y')
+            dateFormat: c.date_format || 'm/d/Y'
         });
 
     });
@@ -376,7 +396,8 @@ var scp_prep = function() {
            $('input[name^='+attr+']', ui.item.parent('tbody')).each(function(i, el) {
                $(el).val(i + 1 + offset);
            });
-       }
+       },
+       'cancel': ':input,button,div[contenteditable=true]'
    });
 
     // Scroll to a stop or top on scroll-up click
@@ -467,7 +488,7 @@ var scp_prep = function() {
 
   $('div.tab_content[id] div.error:not(:empty)').each(function() {
     var div = $(this).closest('.tab_content');
-    $('a[href^=#'+div.attr('id')+']').parent().addClass('error');
+    $('a[href^="#'+div.attr('id')+'"]').parent().addClass('error');
   });
 
   $('[data-toggle="tooltip"]').tooltip()
@@ -509,16 +530,16 @@ var scp_prep = function() {
   });
 
   // Auto fetch queue counts
-  $(function() {
+   $(function() {
     var fired = false;
-    $('li.top-queue.item').hover(function() {
+    $('li.top-queue.item').ready(function() {
       if (fired) return;
       fired = true;
       $.ajax({
         url: 'ajax.php/queue/counts',
         dataType: 'json',
         success: function(json) {
-          $('li > span.queue-count').each(function(i, e) {
+          $('a > span.queue-count').each(function(i, e) {
             var $e = $(e);
             $e.text(json['q' + $e.data('queueId')]);
           });
@@ -536,10 +557,7 @@ var fixupDatePickers = function() {
         var $e = $(e),
             d = $e.datepicker('getDate');
         if (!d || $e.data('fixed')) return;
-        var day = ('0'+d.getDate()).substr(-2),
-            month = ('0'+(d.getMonth()+1)).substr(-2),
-            year = d.getFullYear();
-        $e.val(year+'-'+month+'-'+day);
+        $e.val(d.toISOString());
         $e.data('fixed', true);
         $e.on('change', function() { $(this).data('fixed', false); });
     });
@@ -578,30 +596,7 @@ $(document).ajaxSend(function(event, xhr, settings) {
 /* Get config settings from the backend */
 jQuery.fn.exists = function() { return this.length>0; };
 
-$.translate_format = function(str) {
-    var translation = {
-        'DD':   'oo',
-        'D':    'o',
-        'EEEE': 'DD',
-        'EEE':  'D',
-        'MMMM': '||',   // Double replace necessary
-        'MMM':  '|',
-        'MM':   'mm',
-        'M':    'm',
-        '||':   'MM',
-        '|':    'M',
-        'yyyy': '`',
-        'yyy':  '`',
-        'yy':   'y',
-        'y':    'yy',
-        '`':    'yy'
-    };
-    // Change PHP formats to datepicker ones
-    $.each(translation, function(php, jqdp) {
-        str = str.replace(php, jqdp);
-    });
-    return str;
-};
+$.pjax.defaults.timeout = 30000;
 $(document).keydown(function(e) {
 
     if (e.keyCode == 27 && !$('#overlay').is(':hidden')) {
@@ -716,11 +711,13 @@ $.dialog = function (url, codes, cb, options) {
                         }
                         catch (e) { }
                         $('div.body', $popup).html(resp);
-                        $popup.effect('shake');
+                        if ($('#msg_error, .error-banner', $popup).length) {
+                            $popup.effect('shake');
+                        }
                         $('#msg_notice, #msg_error', $popup).delay(5000).slideUp();
                         $('div.tab_content[id] div.error:not(:empty)', $popup).each(function() {
                           var div = $(this).closest('.tab_content');
-                          $('a[href^=#'+div.attr('id')+']').parent().addClass('error');
+                          $('a[href^="#'+div.attr('id')+'"]').parent().addClass('error');
                         });
                     }
                 }
@@ -804,7 +801,7 @@ $.confirm = function(message, title, options) {
             .append($('<span class="buttons pull-left"></span>')
                 .append($('<input type="button" class="close"/>')
                     .attr('value', __('Cancel'))
-                    .click(function() { hide(); })
+                    .click(function() { hide();  D.resolve(false); })
             )).append($('<span class="buttons pull-right"></span>')
                 .append($('<input type="button"/>')
                     .attr('value', __('OK'))
@@ -816,8 +813,9 @@ $.confirm = function(message, title, options) {
 };
 
 $.userLookup = function (url, cb) {
-    $.dialog(url, 201, function (xhr) {
-        var user = $.parseJSON(xhr.responseText);
+    $.dialog(url, 201, function (xhr, user) {
+        if ($.type(user) == 'string')
+            user = $.parseJSON(user);
         if (cb) return cb(user);
     }, {
         onshow: function() { $('#user-search').focus(); }
@@ -825,8 +823,9 @@ $.userLookup = function (url, cb) {
 };
 
 $.orgLookup = function (url, cb) {
-    $.dialog(url, 201, function (xhr) {
-        var org = $.parseJSON(xhr.responseText);
+    $.dialog(url, 201, function (xhr, org) {
+        if ($.type(org) == 'string')
+            org = $.parseJSON(user);
         if (cb) cb(org);
     }, {
         onshow: function() { $('#org-search').focus(); }
@@ -1027,6 +1026,38 @@ $.changeHash = function(hash, quiet) {
   }
 };
 
+// Exports
+$(document).on('click', 'a.export', function(e) {
+    e.preventDefault();
+    var url = 'ajax.php/'+$(this).attr('href').substr(1)
+    $.dialog(url, 201, function (xhr) {
+        var resp = $.parseJSON(xhr.responseText);
+        var checker = 'ajax.php/export/'+resp.eid+'/check';
+        $.dialog(checker, 201, function (xhr) { });
+        return false;
+     });
+    return false;
+});
+
+$(document).on('click', 'a.nomodalexport', function(e) {
+    e.preventDefault();
+    var url = 'ajax.php/'+$(this).attr('href').substr(1);
+
+     $.ajax({
+          type: "GET",
+          url: url,
+          dataType: 'json',
+          error:function(XMLHttpRequest, textStatus, errorThrown) {
+          },
+          success: function(resp) {
+              var checker = 'ajax.php/export/'+resp.eid+'/check';
+              $.dialog(checker, 201, function (xhr) { });
+              return false;
+          }
+    });
+    return false;
+});
+
 // Forms — submit, stay on same tab
 $(document).on('submit', 'form', function() {
     if (!!$(this).attr('action') && $(this).attr('action').indexOf('#') == -1)
@@ -1034,12 +1065,11 @@ $(document).on('submit', 'form', function() {
 });
 
 //Collaborators
-$(document).on('click', 'a.collaborator, a.collaborators', function(e) {
+$(document).on('click', 'a.collaborator, a.collaborators:not(.noclick)', function(e) {
     e.preventDefault();
     var url = 'ajax.php/'+$(this).attr('href').substr(1);
     $.dialog(url, 201, function (xhr) {
        var resp = $.parseJSON(xhr.responseText);
-       $('input#t'+resp.id+'-emailcollab').show();
        $('#t'+resp.id+'-recipients').text(resp.text);
        $('.tip_box').remove();
     }, {
@@ -1047,6 +1077,20 @@ $(document).on('click', 'a.collaborator, a.collaborators', function(e) {
     });
     return false;
  });
+
+ //Merge
+ $(document).on('click', 'a.merge, a.merge:not(.noclick)', function(e) {
+     e.preventDefault();
+     var url = 'ajax.php/'+$(this).attr('href').substr(1);
+     $.dialog(url, 201, function (xhr) {
+        var resp = $.parseJSON(xhr.responseText);
+        $('#t'+resp.id+'-recipients').text(resp.text);
+        $('.tip_box').remove();
+     }, {
+         onshow: function() { $('#user-search').focus(); }
+     });
+     return false;
+  });
 
 // NOTE: getConfig should be global
 getConfig = (function() {
@@ -1073,8 +1117,6 @@ $(document).on('pjax:start', function() {
     // Cancel save-changes warning banner
     $(document).unbind('pjax:beforeSend.changed');
     $(window).unbind('beforeunload');
-    // Close popups
-    $('.dialog .body').empty().parent().hide();
     $.toggleOverlay(false);
     // Close tooltips
     $('.tip_box').remove();
@@ -1108,10 +1150,11 @@ $(document).on('pjax:complete', function() {
 if ($.support.pjax) {
   $(document).on('click', 'a', function(event) {
     var $this = $(this);
+    var href = $this.attr('href');
     if (!$this.hasClass('no-pjax')
         && !$this.closest('.no-pjax').length
-        && $this.attr('href').charAt(0) != '#')
-      $.pjax.click(event, {container: $this.data('pjaxContainer') || $('#pjax-container'), timeout: 2000});
+        && href && href.charAt(0) != '#')
+      $.pjax.click(event, {container: $this.data('pjaxContainer') || '#pjax-container', timeout: 30000});
   })
 }
 
@@ -1147,15 +1190,16 @@ $(document).on('change', 'select[data-quick-add]', function() {
 });
 
 // Quick note interface
-$(document).on('click.note', '.quicknote .action.edit-note', function() {
+$(document).on('click.note', '.quicknote .action.edit-note', function(e) {
+    // Prevent Auto-Scroll to top of page
+    e.preventDefault();
     var note = $(this).closest('.quicknote'),
         body = note.find('.body'),
         T = $('<textarea>').text(body.html());
     if (note.closest('.dialog, .tip_box').length)
         T.addClass('no-bar small');
     body.replaceWith(T);
-    $.redact(T);
-    $(T).redactor('focus.setStart');
+    T.redactor({ focusEnd: true });
     note.find('.action.edit-note').hide();
     note.find('.action.save-note').show();
     note.find('.action.cancel-edit').show();
@@ -1167,7 +1211,7 @@ $(document).on('click.note', '.quicknote .action.cancel-edit', function() {
         T = note.find('textarea'),
         body = $('<div class="body">');
     body.load('ajax.php/note/' + note.data('id'), function() {
-      try { T.redactor('core.destroy'); } catch (e) {}
+      try { T.redactor('stop'); } catch (e) {}
       T.replaceWith(body);
       note.find('.action.save-note').hide();
       note.find('.action.cancel-edit').hide();
@@ -1180,10 +1224,10 @@ $(document).on('click.note', '.quicknote .action.save-note', function() {
     var note = $(this).closest('.quicknote'),
         T = note.find('textarea');
     $.post('ajax.php/note/' + note.data('id'),
-      { note: T.redactor('code.get') },
+      { note: T.redactor('source.getCode') },
       function(html) {
         var body = $('<div class="body">').html(html);
-        try { T.redactor('core.destroy'); } catch (e) {}
+        try { T.redactor('stop'); } catch (e) {}
         T.replaceWith(body);
         note.find('.action.save-note').hide();
         note.find('.action.cancel-edit').hide();
@@ -1195,6 +1239,8 @@ $(document).on('click.note', '.quicknote .action.save-note', function() {
     return false;
 });
 $(document).on('click.note', '.quicknote .delete', function() {
+  if (!window.confirm(__('Confirm Deletion')))
+    return;
   var that = $(this),
       id = $(this).closest('.quicknote').data('id');
   $.ajax('ajax.php/note/' + id, {
@@ -1211,12 +1257,13 @@ $(document).on('click.note', '.quicknote .delete', function() {
 $(document).on('click', '#new-note', function() {
   var note = $(this).closest('.quicknote'),
     T = $('<textarea>'),
-    button = $('<input type="button">').val(__('Create'));
+    button = $('<input class="btn btn-primary btn-sm pull-left" type="button">').val(__('Add Note'));
     button.click(function() {
       $.post('ajax.php/' + note.data('url'),
-        { note: T.redactor('code.get'), no_options: note.hasClass('no-options') },
+        { note: T.redactor('source.getCode'), no_options: note.hasClass('no-options') },
         function(response) {
-          $(T).redactor('core.destroy').replaceWith(note);
+          T.redactor('stop');
+          T.replaceWith(note);
           $(response).show('highlight').insertBefore(note.parent());
           $('.submit', note.parent()).remove();
         },
@@ -1228,8 +1275,7 @@ $(document).on('click', '#new-note', function() {
     note.replaceWith(T);
     $('<p>').addClass('submit').css('text-align', 'center')
         .append(button).appendTo(T.parent());
-    $.redact(T);
-    $(T).redactor('focus.setStart');
+    T.redactor({ focusEnd: true });
     return false;
 });
 
@@ -1281,49 +1327,66 @@ window.relativeAdjust = setInterval(function() {
 
 // Add 'afterShow' event to jQuery elements,
 // thanks http://stackoverflow.com/a/1225238/1025836
-(function ($) {
+
+jQuery(function($) {
     var _oldShow = $.fn.show;
 
-    $.fn.show = function (/*speed, easing, callback*/) {
+    // This should work with jQuery 3 with or without jQuery UI
+    $.fn.show = function() {
         var argsArray = Array.prototype.slice.call(arguments),
-            duration = argsArray[0],
-            easing,
-            callback,
-            callbackArgIndex;
-
-        // jQuery recursively calls show sometimes; we shouldn't
-        //  handle such situations. Pass it to original show method.
-        if (!this.selector) {
-            _oldShow.apply(this, argsArray);
-            return this;
-        }
-
-        if (argsArray.length === 2) {
-            if ($.isFunction(argsArray[1])) {
-                callback = argsArray[1];
-                callbackArgIndex = 1;
-            } else {
-                easing = argsArray[1];
-            }
-        } else if (argsArray.length === 3) {
-            easing = argsArray[1];
-            callback = argsArray[2];
-            callbackArgIndex = 2;
-        }
-        return $(this).each(function () {
-            var obj = $(this),
-                oldCallback = callback,
-                newCallback = function () {
-                    if ($.isFunction(oldCallback)) {
-                        oldCallback.apply(obj);
-                    }
-                };
-            if (callback) {
-                argsArray[callbackArgIndex] = newCallback;
-            }
-            obj.trigger('beforeShow');
-            _oldShow.apply(obj, argsArray);
-            obj.trigger('afterShow');
+            arg = argsArray[0],
+            options = argsArray[1] || {duration: 0};
+        if (typeof(arg) === 'number')
+            options.duration = arg;
+        else
+            options.effect = arg;
+        return this.each(function () {
+            var obj = $(this);
+            _oldShow.call(obj, $.extend(options, {
+                complete: function() {
+                    obj.trigger('afterShow');
+                }
+            }));
         });
-    };
-})(jQuery);
+    }
+});
+
+$(document).off('.inline-edit');
+$(document).on('click.inline-edit', 'a.inline-edit', function(e) {
+        e.preventDefault();
+        var url = 'ajax.php/'
+        +$(this).attr('href').substr(1)
+        +'?_uid='+new Date().getTime();
+        var $options = $(this).data('dialog');
+        $.dialog(url, [201], function (xhr) {
+            var obj = $.parseJSON(xhr.responseText);
+            if (obj.id && obj.value) {
+                $('#field_'+obj.id).html(obj.value);
+                if (obj.value.includes('Empty'))
+                    $('#field_'+obj.id).addClass('faded');
+                else
+                    $('#field_'+obj.id).removeClass('faded');
+                $('#msg-txt').text(obj.msg);
+                $('div#msg_notice').show();
+            }
+            // If Help Topic was set and statuses are returned 
+            if (obj.statuses) {
+                var reply = $('select[name=reply_status_id]');
+                var note = $('select[name=note_status_id]');
+                // Foreach status see if exists, if not appned to options
+                $.each(obj.statuses, function(key, value) {
+                    var option = $('<option></option>').attr('value', key).text(value);
+                    if (reply)
+                        if (reply.find('option[value='+key+']').length == 0)
+                            reply.append(option);
+                    if (note)
+                        if (note.find('option[value='+key+']').length == 0)
+                            note.append(option);
+                });
+                // Hide warning banner
+                reply.closest('td').find('.warning-banner').hide();
+            }
+        }, $options);
+
+        return false;
+    });

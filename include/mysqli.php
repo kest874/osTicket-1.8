@@ -74,6 +74,7 @@ function db_connect($host, $user, $passwd, $options = array()) {
         'CHARACTER SET'         => 'utf8',
         'COLLATION_CONNECTION'  => 'utf8_general_ci',
         'SQL_MODE'              => '',
+        'TIME_ZONE'             => 'SYSTEM',
     ), 'session');
     $__db->set_charset('utf8');
 
@@ -234,7 +235,7 @@ function db_fetch_field($res) {
     return ($res) ? $res->fetch_field() : NULL;
 }
 
-function db_assoc_array($res, $mode=false) {
+function db_assoc_array($res, $mode=MYSQLI_ASSOC) {
     $result = array();
     if($res && db_num_rows($res)) {
         while ($row=db_fetch_array($res, $mode))

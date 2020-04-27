@@ -128,18 +128,18 @@ class StaffNav {
         if(!$this->tabs) {
             $this->tabs = array();
             $this->tabs['dashboard'] = array(
-                'desc'=>__('Dashboard'),'href'=>'dashboard.php','title'=>__('Agent Dashboard'), "class"=>"no-pjax"
-            );
+                'desc'=>__('Dashboard'),'href'=>'','title'=>__('Agent Dashboard'), "class"=>"no-pjax","top"=>1
+            ,"icon"=>'<i class=" ti-dashboard"></i> ');
             if ($thisstaff->hasPerm(User::PERM_DIRECTORY)) {
                 $this->tabs['users'] = array(
-                    'desc' => __('Users'), 'href' => 'users.php', 'title' => __('User Directory')
-                );
+                    'desc' => __('Users'), 'href' => 'javascript:void(0);', 'title' => __('User Directory'),"top"=>1
+                ,"icon"=>'<i class="ti-user"></i> ');
             }
-            $this->tabs['tasks'] = array('desc'=>__('Tasks'), 'href'=>'tasks.php', 'title'=>__('Task Queue'));
-            $this->tabs['tickets'] = array('desc'=>__('Tickets'),'href'=>'tickets.php','title'=>__('Ticket Queue'));
+            $this->tabs['tasks'] = array('desc'=>__('Tasks'), 'href'=>'javascript:void(0);', 'title'=>__('Task Queue'),"top"=>1,"icon"=>'<i class="ti-list"></i> ');
+            $this->tabs['tickets'] = array('desc'=>__('Tickets'),'href'=>'javascript:void(0);','title'=>__('Ticket Queue'),"top"=>1,"icon"=>'<i class="ti-ticket"></i> ');
 
-            $this->tabs['kbase'] = array('desc'=>__('Knowledgebase'),'href'=>'kb.php','title'=>__('Knowledgebase'));
-            $this->tabs['reports'] = array('desc'=>__('Reports'),'href'=>'reports.php','title'=>__('Reports'));
+            $this->tabs['kbase'] = array('desc'=>__('Knowledgebase'),'href'=>'javascript:void(0);','title'=>__('Knowledgebase'),"top"=>1,"icon"=>'<i class="ti-book"></i> ');
+            $this->tabs['reports'] = array('desc'=>__('Reports'),'href'=>'reports.php','title'=>__('Reports'),'nodrop'=>1,"icon"=>'<i class="ti-stats-up"></i> ');
             if (count($this->getRegisteredApps()))
                 $this->tabs['apps']=array('desc'=>__('Applications'),'href'=>'apps.php','title'=>__('Applications'));
         }
@@ -156,25 +156,27 @@ class StaffNav {
             $subnav=array();
             switch(strtolower($k)){
                 case 'tasks':
-                    $subnav[]=array('desc'=>__('Tasks'), 'href'=>'tasks.php', 'iconclass'=>'Ticket', 'droponly'=>true);
-                    break;
-                case 'tickets':
-                    $subnav[]=array('desc'=>__('Tickets'),'href'=>'tickets.php','iconclass'=>'Ticket', 'droponly'=>true);
-                    if($staff) {
-                        if(($assigned=$staff->getNumAssignedTickets()))
-                            $subnav[]=array('desc'=>__('My&nbsp;Tickets')." ($assigned)",
-                                            'href'=>'tickets.php?status=assigned',
-                                            'iconclass'=>'assignedTickets',
-                                            'droponly'=>true);
-
-                        if ($staff->hasPerm(Ticket::PERM_CREATE, false))
-                            $subnav[]=array('desc'=>__('New Ticket'),
-                                            'title' => __('Open a New Ticket'),
-                                            'href'=>'tickets.php?a=open',
-                                            'iconclass'=>'newTicket',
-                                            'id' => 'new-ticket',
-                                            'droponly'=>true);
+                
+                    $OpenTask = task::objects()
+                    ->filter(array('flags__ne' => '0')) //closed
+                    ->aggregate(array('count' => SqlAggregate::COUNT('id')));
+                     
+                     foreach ($OpenTask as $cOpenTask) { 
+                        $OpenTasks = $cOpenTask["count"];
                     }
+                    
+                    $ClosedTask = task::objects()
+                    ->filter(array('flags__ne' => '1')) //closed
+                    ->aggregate(array('count' => SqlAggregate::COUNT('id')));
+                     
+                     foreach ($ClosedTask as $cClosedTask) { 
+                        $ClosedTasks = $cClosedTask["count"];
+                    }
+                    //$subnav[]=array('desc'=>__('All Tasks <span class="task-count badge badge-primary"><span class="faded-more">'.($OpenTasks+$ClosedTasks).'</span>'), 'href'=>'tasks.php?status=open', 'iconclass'=>'Ticket', 'droponly'=>false);
+                    $subnav[]=array('desc'=>__('Open Tasks <span class="task-count badge badge-primary"><span class="faded-more">'.$OpenTasks.'</span>'), 'href'=>'tasks.php?status=open', 'iconclass'=>'Ticket', 'droponly'=>false);
+                    $subnav[]=array('desc'=>__('Closed Tasks <span class="task-count badge badge-primary"><span class="faded-more">'.$ClosedTasks.'</span>'), 'href'=>'tasks.php?status=closed', 'iconclass'=>'Ticket', 'droponly'=>false);
+                    
+                    
                     break;
                 case 'dashboard':
                     $subnav[]=array('desc'=>__('Dashboard'),'href'=>'dashboard.php','iconclass'=>'logs');
@@ -237,7 +239,7 @@ class AdminNav extends StaffNav{
             $tabs['manage']=array('desc'=>__('Manage'),'href'=>'helptopics.php','title'=>__('Manage Options'));
             $tabs['emails']=array('desc'=>__('Emails'),'href'=>'emails.php','title'=>__('Email Settings'));
             $tabs['staff']=array('desc'=>__('Agents'),'href'=>'staff.php','title'=>__('Manage Agents'));
-            if (count($this->getRegisteredApps()))
+            if (!is_null($this->getRegisteredApps()))
                 $tabs['apps']=array('desc'=>__('Applications'),'href'=>'apps.php','title'=>__('Applications'));
             $this->tabs=$tabs;
         }
@@ -253,6 +255,8 @@ class AdminNav extends StaffNav{
             switch(strtolower($k)){
                 case 'dashboard':
                     $subnav[]=array('desc'=>__('System Logs'),'href'=>'logs.php','iconclass'=>'logs');
+                    if (PluginManager::auditPlugin())
+                        $subnav[]=array('desc'=>__('Audit Logs'),'href'=>'audits.php','iconclass'=>'lists');
                     $subnav[]=array('desc'=>__('Information'),'href'=>'system.php','iconclass'=>'preferences');
                     break;
                 case 'settings':
@@ -266,10 +270,11 @@ class AdminNav extends StaffNav{
                     break;
                 case 'manage':
                     $subnav[]=array('desc'=>__('Help Topics'),'href'=>'helptopics.php','iconclass'=>'helpTopics');
-                    $subnav[]=array('desc'=>__('Ticket Filters'),'href'=>'filters.php',
+                    $subnav[]=array('desc'=>__('Filters'),'href'=>'filters.php',
                                         'title'=>__('Ticket Filters'),'iconclass'=>'ticketFilters');
-                    $subnav[]=array('desc'=>__('SLA Plans'),'href'=>'slas.php','iconclass'=>'sla');
-                    $subnav[]=array('desc'=>__('API Keys'),'href'=>'apikeys.php','iconclass'=>'api');
+                    $subnav[]=array('desc'=>__('SLA'),'href'=>'slas.php','iconclass'=>'sla');
+                    $subnav[]=array('desc'=>__('Schedules'),'href'=>'schedules.php','iconclass'=>'lists');
+                    $subnav[]=array('desc'=>__('API'),'href'=>'apikeys.php','iconclass'=>'api');
                     $subnav[]=array('desc'=>__('Pages'), 'href'=>'pages.php','title'=>'Pages','iconclass'=>'pages');
                     $subnav[]=array('desc'=>__('Forms'),'href'=>'forms.php','iconclass'=>'forms');
                     $subnav[]=array('desc'=>__('Lists'),'href'=>'lists.php','iconclass'=>'lists');
