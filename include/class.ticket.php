@@ -3268,8 +3268,7 @@ implements RestrictedAccess, Threadable, Searchable {
         $ticket->onMessage($message, ($autorespond && $alerts), $reopen); //must be called b4 sending alerts to staff.
 
         if ($autorespond && $alerts
-            && $cfg && $cfg->notifyCollabsONNewMessage()
-            && strcasecmp($origin, 'email')) {
+            && $cfg && $cfg->notifyCollabsONNewMessage()) {
           //when user replies, this is where collabs notified
           $ticket->notifyCollaborators($message, array('signature' => ''));
         }
