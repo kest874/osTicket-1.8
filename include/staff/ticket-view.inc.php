@@ -957,44 +957,24 @@ if ($errors['err'] && isset($_POST['a'])) {
 							                        <span style="margin: 10px 5px 1px 0;" class="faded pull-left"><?php echo __('Select or Add New Collaborators'); ?>&nbsp;</span>
 							                        <?php
 							                        if ($role->hasPerm(Ticket::PERM_REPLY) && $thread && $ticket->getId() == $thread->getObjectId()) { ?>
-							                        <span class="action-button pull-left" style="margin: 2px  0 5px 20px;"
-							                            data-dropdown="#action-dropdown-collaborators"
-							                            data-placement="bottom"
-							                            data-toggle="tooltip"
-							                            title="<?php echo __('Manage Collaborators'); ?>"
-							                            >
-							                            <i class="icon-caret-down pull-right"></i>
-							                            <a class="ticket-action" id="collabs-button"
-							                                data-redirect="tickets.php?id=<?php echo
-							                                $ticket->getId(); ?>"
-							                                href="#thread/<?php echo
-							                                $ticket->getThreadId(); ?>/collaborators/1">
-							                                <i class="icon-group"></i></a>
-							                         </span>
+																				<div class="btn-group btn-group-sm show" role="group">
+														            	<button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle waves-effect" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" 
+														            		data-placement="bottom" title="<?php echo __('Manage Collaborators'); ?>"><i class="icon-group"></i>
+														            	</button>
+														                <div class="dropdown-menu ">
+														                    
+														                    <a class="dropdown-item ticket-action" href="#thread/<?php echo
+							                                $ticket->getThreadId(); ?>/add-collaborator/addcc"><i class="icon-plus"></i> <?php echo __('Add New'); ?></a>
+														                    <a class="dropdown-item ticket-action" href="#thread/<?php echo
+							                                $ticket->getThreadId(); ?>/collaborators/1"><i class="icon-cog"></i> <?php echo __('Manage Collaborators'); ?></a>
+														            
+														                </div>
+														            </div>
 							                         <?php
 							                        }  ?>
 							                         <span class="error">&nbsp;&nbsp;<?php echo $errors['ccs']; ?></span>
 							                        </div>
-							                        <?php
-							                        if ($role->hasPerm(Ticket::PERM_REPLY) && $thread && $ticket->getId() == $thread->getObjectId()) { ?>
-							                       
-							                        <div id="action-dropdown-collaborators" class="action-dropdown anchor-right">
-							                          <ul>
-							                             <li><a class="manage-collaborators"
-							                                href="#thread/<?php echo
-							                                $ticket->getThreadId(); ?>/add-collaborator/addcc"><i
-							                                class="icon-plus"></i> <?php echo __('Add New'); ?></a>
-							                             <li><a class="manage-collaborators"
-							                                href="#thread/<?php echo
-							                                $ticket->getThreadId(); ?>/collaborators/1"><i
-							                                class="icon-cog"></i> <?php echo __('Manage Collaborators'); ?></a>
-							                          </ul>
-							                        </div>
 							                        
-							                        
-							                        
-							                        <?php
-							                        } ?>
 							                     <div class="clearfix">
 							                      <select class="form-control" id="collabselection" name="ccs[]" multiple="multiple"
 							                          data-placeholder="<?php echo __('Select Active Collaborators'); ?>"> <?php
