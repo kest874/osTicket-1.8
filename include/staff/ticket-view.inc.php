@@ -61,17 +61,7 @@ if (!$errors['err']) {
 
 $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
 
-if (!$topic) { ?>
-<div class="alert alert-danger">
-      <strong>Type!</strong> Please set the Type..
-</div>
- <?php } 
-
-if($ticket->isOverdue()) { ?>
-<div class="alert alert-warning">
-      <strong>Overdue!</strong> Ticket is maked overdue..
-</div>
- <?php } ?>
+ ?>
 
 <!-- Begin Subnav -->
 <div class="subnav">
@@ -296,6 +286,21 @@ if($ticket->isOverdue()) { ?>
           
 </div>
 <!--End of Subnav -->
+
+<?php
+if (!$topic) { ?>
+<div class="alert alert-danger">
+      <strong>Type!</strong> Please set the Type..
+</div>
+ <?php } 
+
+
+if($ticket->isOverdue()) { ?>
+<div class="alert alert-warning">
+      <strong>Overdue!</strong> Ticket is maked overdue..
+</div>
+ <?php }
+ ?>
 <div>
     <div id="msg_notice" style="display: none;"><span id="msg-txt"><?php echo $msg ?: ''; ?></span></div>
  </div>
