@@ -448,15 +448,12 @@ div#ReponseTabs > div.tab-content.clearfix > div#reply.tab-pane.active > form.ta
 #msg_notice,
 .success-banner,
 .notice-banner {
-    margin-left: -15px;
-    margin-right: -15px;
-    margin-top: -8px;
-    padding: 5px 10px 5px 36px; 
-    margin-bottom: 0px; 
-    border-top: 1px solid #0a0;
-    border-bottom: 1px solid #0a0;
-    background: url('../images/icons/ok.png') 10px 50% no-repeat #e0ffe0; 
-}
+		position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+  }
 
     
 .ticket-success-banner {

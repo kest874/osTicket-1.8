@@ -1368,6 +1368,13 @@ $(document).on('click.inline-edit', 'a.inline-edit', function(e) {
                     $('#field_'+obj.id).removeClass('faded');
                 $('#msg-txt').text(obj.msg);
                 $('div#msg_notice').show();
+                if (obj.id == 'topic') {
+                $('div#topicwarning').hide()	
+                $('#post-reply').show();
+                $('#post-note').show();
+                $('div#UpdateArea').show();
+                }
+                
             }
             // If Help Topic was set and statuses are returned 
             if (obj.statuses) {
@@ -1385,6 +1392,7 @@ $(document).on('click.inline-edit', 'a.inline-edit', function(e) {
                 });
                 // Hide warning banner
                 reply.closest('td').find('.warning-banner').hide();
+                $('div#topicwarning').hide();
             }
         }, $options);
 

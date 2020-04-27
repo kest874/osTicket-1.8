@@ -19,7 +19,7 @@ $user     = $ticket->getOwner(); //Ticket User (EndUser)
 $team     = $ticket->getTeam();  //Assigned team.
 $sla      = $ticket->getSLA();
 $lock     = $ticket->getLock();  //Ticket lock obj
-$topic = $ticket->getHelpTopicId();
+$topicset = $ticket->getHelpTopicId();
 $children = Ticket::getChildTickets($ticket->getId());
 $thread = $ticket->getThread();
 if (!$lock && $cfg->getTicketLockMode() == Lock::MODE_ON_VIEW)
@@ -137,21 +137,21 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
       <?php } ?>
                 
               
-            <?php If  ($topic) { ?>
+           
                 
                 <?php if ($role->hasPerm(Ticket::PERM_REPLY)) { ?>
                     
-                    <a class="btn btn-light waves-effect" href="#reply" class="post-response" id="post-reply" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Post Reply'); ?>">
+                    <a class="btn btn-light waves-effect  <?php If  (!$topicset) { echo "hidden";} ?>" href="#reply" class="post-response" id="post-reply" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Post Reply'); ?>">
                     <i class="fa fa-reply"></i></a>
                          
                 <?php }  ?> 
                 
-                    <a class="btn btn-light waves-effect" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Post Internal Note'); ?>">
+                    <a class="btn btn-light waves-effect <?php If  (!$topicset) { echo "hidden";} ?>" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Post Internal Note'); ?>">
                     <i class="fa fa-pencil-square-o"></i></a>
                    <!-- <a class="btn btn-light waves-effect" href="#tasks" id="quicktask" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Tasks'); ?>">
                     <i class="fa fa-check-square-o"></i></a> -->
                 
-            <?php	}
+           			 <?php	
                 
                  if ($thisstaff->hasPerm(Email::PERM_BANLIST)
                         || $role->hasPerm(Ticket::PERM_EDIT)
@@ -288,8 +288,8 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
 <!--End of Subnav -->
 
 <?php
-if (!$topic) { ?>
-<div class="alert alert-danger">
+if (!$topicset) { ?>
+<div id="topicwarning" class="alert alert-danger">
       <strong>Type!</strong> Please set the Type..
 </div>
  <?php } 
@@ -301,9 +301,8 @@ if($ticket->isOverdue()) { ?>
 </div>
  <?php }
  ?>
-<div>
-    <div id="msg_notice" style="display: none;"><span id="msg-txt"><?php echo $msg ?: ''; ?></span></div>
- </div>
+<div id="msg_notice" class="alert alert-success" style="display: none;"><i class="fa fa-check-square" aria-hidden="true"></i> <span id="msg-txt"><?php echo $msg ?: ''; ?></span></div>
+ 
 <div class="card-box"> <!--ticketinfo-->
 	<table class=" " cellspacing="0" cellpadding="0" width="100%" border="0">
 	    <tr>
@@ -832,7 +831,7 @@ if ($errors['err'] && isset($_POST['a'])) {
 
 
 
-<div id="updatearea"  <?php if (!$topic) { echo ' class="hidden"';} ?>>
+<div id="UpdateArea"  <?php if (!$topicset) { echo ' class="hidden"';} ?>>
 <div class="sticky bar stop actions " id="response_options">
 	<div id="ReponseTabs">   
    
