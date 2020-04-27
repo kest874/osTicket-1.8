@@ -2869,7 +2869,7 @@ implements RestrictedAccess, Threadable, Searchable {
         return $this->assignToStaff($assignee, $form->getComments(), false);
     }
 
-    function assignToStaff($staff, $note, $alert=true, $user=null) {
+    function assignToStaff($staff, $note, $alert=true, $user=null, $statuschg=true) {
 
         if(!is_object($staff) && !($staff = Staff::lookup($staff)))
             return false;
@@ -3204,8 +3204,8 @@ implements RestrictedAccess, Threadable, Searchable {
 
         $ticket->setLastMessage($message);
 				// Set Status to Responded
-				if ($this->getStatusId() !== 10 && $this->getStatusId() !== 9  && $this->getStatusId() !== 0  && $this->getStatusId() !== 1)
-					$this->setStatusId(7);	
+				if ($ticket->getStatusId() !== 10 && $ticket->getStatusId() !== 9  && $ticket->getStatusId() !== 0  && $ticket->getStatusId() !== 1)
+					$ticket->setStatusId(7);	
         
         // Add email recipients as collaborators...
         if ($vars['recipients']
@@ -3464,7 +3464,12 @@ implements RestrictedAccess, Threadable, Searchable {
                 && !$dept->disableAutoClaim());
         if ($claim && $thisstaff && $this->isOpen() && !$this->getStaffId()) {
             $this->setStaffId($thisstaff->getId()); //direct assignment;
-        }
+         } else {
+			
+				if ($this->getStatusId() !== 10 && $this->getStatusId() !== 9 
+						&& $this->getStatusId() !== 3  && $this->getTopicId() !==12)
+					$this->setStatusId(6);			
+				}
 
         $this->lastrespondent = $response->staff;
 
