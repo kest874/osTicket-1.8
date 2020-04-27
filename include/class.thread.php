@@ -175,6 +175,8 @@ implements Searchable {
     }
 
     function addCollaborator($user, $vars, &$errors, $event=true) {
+        global $cfg, $thisstaff;
+
         if (!$user)
             return null;
 
@@ -183,27 +185,22 @@ implements Searchable {
 
         $vars = array_merge(array(
                 'threadId' => $this->getId(),
-                'userId' => $user->getId()), $vars);
+                'userId' => $user->getId()), $vars ?: array());
         if (!($c=Collaborator::add($vars, $errors)))
             return null;
+
+        $c->active = true;
+        // Disable Agent Collabs (if configured) for User created tickets
+        if (!$thisstaff && $this->object_type === 'T'
+                && $cfg->disableAgentCollaborators()
+                && Staff::lookup($user->getDefaultEmailAddress()))
+            $c->active = false;
 
         $this->_collaborators = null;
 
         if ($event) {
-          $this->getEvents()->log($this->getObject(),
-              'collab',
-              array('add' => array($user->getId() => array(
-                      'name' => $user->getName()->getOriginal(),
-                      'src' => @$vars['source'],
-                  ))
-              )
-          );
-
-          $type = array('type' => 'collab', 'add' => array($user->getId() => array(
-                  'name' => $user->getName()->name,
-                  'src' => @$vars['source'],
-              )));
-          Signal::send('object.created', $this->getObject(), $type);
+          $vars['add'] = true;
+          $this->logCollaboratorEvents($user, $vars);
         }
 
 
@@ -224,14 +221,7 @@ implements Searchable {
                         && $c->delete())
                      $collabs[] = $c;
 
-                 $this->getEvents()->log($this->getObject(), 'collab', array(
-                     'del' => array($c->user_id => array('name' => $c->getName()->getOriginal()))
-                 ));
-                 $type = array('type' => 'collab', 'del' => array($c->user_id => array(
-                         'name' => $c->getName()->getOriginal(),
-                         'src' => @$vars['source'],
-                     )));
-                 Signal::send('object.deleted', $this->getObject(), $type);
+                 $this->logCollaboratorEvents($c, $vars);
             }
         }
 
@@ -272,6 +262,23 @@ implements Searchable {
         $this->_collaborators = null;
 
         return true;
+    }
+
+    function logCollaboratorEvents($collaborator, $vars) {
+        $name = $collaborator->getName()->getOriginal();
+        $userId = (get_class($collaborator) == 'User')
+            ? $collaborator->getId() : $collaborator->user_id;
+        $action = $vars['del'] ? 'object.deleted' : 'object.created';
+        $addDel = $vars['del'] ? 'del' : 'add';
+
+        $this->getEvents()->log($this->getObject(), 'collab', array(
+            $addDel => array($userId => array('name' => $name))
+        ));
+        $type = array('type' => 'collab', $addDel => array($userId => array(
+                'name' => $name,
+                'src' => @$vars['source'],
+            )));
+        Signal::send($action, $this->getObject(), $type);
     }
 
     //UserList of participants (collaborators)
@@ -1754,7 +1761,7 @@ implements TemplateVariable {
             'created' => SqlFunction::NOW(),
             'type' => $vars['type'],
             'thread_id' => $vars['threadId'],
-            'title' => Format::sanitize($vars['title'], true),
+            'title' => Format::strip_emoticons(Format::sanitize($vars['title'], true)),
             'format' => $vars['body']->getType(),
             'staff_id' => $vars['staffId'],
             'user_id' => $vars['userId'],
@@ -3571,6 +3578,7 @@ interface Threadable {
     function getThreadId();
     function getThread();
     function postThreadEntry($type, $vars, $options=array());
+    function addCollaborator($user, $vars, &$errors, $event=true);
 }
 
 /**

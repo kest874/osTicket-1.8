@@ -59,7 +59,6 @@ if ($_POST)
         <div class="form-group">
                 <em><strong><?php echo __('User and Collaborators:'); ?></strong>: </em>
                 <div class="error"><?php echo $errors['user']; ?></div>
-            
         </div>
 <div class="form-group">	
 	 					<label>
@@ -69,6 +68,7 @@ if ($_POST)
         <div class="input-group select2open"> 
           
                   <select class="custom-select custom-select-sm userSelection hidden" name="name" id="user-name"
+
                     data-placeholder="<?php echo __('Select User'); ?>">
                   </select>
               

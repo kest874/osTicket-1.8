@@ -220,6 +220,7 @@ if ($task->isOverdue())
            
             <?php
         } else { ?>
+
 				<!-- task only view -->
         	<div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
         	 <div class="btn-group btn-group-sm" role="group">
@@ -293,6 +294,7 @@ if ($task->isOverdue())
                         if ($action['redirect'])
                             echo sprintf("data-redirect='%s'", $action['redirect']);
                         ?>
+                        id="<?php echo $id ?>"
                         href="<?php echo $action['href']; ?>"
                         id="<?php echo $id ?>"
                         href="<?php echo $action['href']; ?>"
