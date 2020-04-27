@@ -1,25 +1,14 @@
-<div class="subnav">
-
-    <div class="float-left subnavtitle">
-                          
-    Manage Your Profile Information                        
-    
-    </div>
-    <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
-   &nbsp;
-      </div>   
-   <div class="clearfix"></div> 
-</div>
-
-<div class="card-box">
-<div class="row">
-
+<h1><?php echo __('Manage Your Profile Information'); ?></h1>
+<p><?php echo __(
+'Use the forms below to update the information we have on file for your account'
+); ?>
+</p>
 <form action="profile.php" method="post">
   <?php csrf_token(); ?>
-<table class="padded">
+<table width="800" class="padded">
 <?php
 foreach ($user->getForms() as $f) {
-    $f->render(false);
+    $f->render(['staff' => false]);
 }
 if ($acct = $thisclient->getAccount()) {
     $info=$acct->getInfo();
@@ -32,7 +21,7 @@ if ($acct = $thisclient->getAccount()) {
     </td>
 </tr>
     <tr>
-        <td class="text-nowrap">
+        <td width="180">
             <?php echo __('Time Zone');?>:
         </td>
         <td>
@@ -43,8 +32,26 @@ if ($acct = $thisclient->getAccount()) {
             <div class="error"><?php echo $errors['timezone']; ?></div>
         </td>
     </tr>
-
-<?php 
+<?php if ($cfg->getSecondaryLanguages()) { ?>
+    <tr>
+        <td width="180">
+            <?php echo __('Preferred Language'); ?>:
+        </td>
+        <td>
+    <?php
+    $langs = Internationalization::getConfiguredSystemLanguages(); ?>
+            <select name="lang">
+                <option value="">&mdash; <?php echo __('Use Browser Preference'); ?> &mdash;</option>
+<?php foreach($langs as $l) {
+$selected = ($info['lang'] == $l['code']) ? 'selected="selected"' : ''; ?>
+                <option value="<?php echo $l['code']; ?>" <?php echo $selected;
+                    ?>><?php echo Internationalization::getLanguageDescription($l['code']); ?></option>
+<?php } ?>
+            </select>
+            <span class="error">&nbsp;<?php echo $errors['lang']; ?></span>
+        </td>
+    </tr>
+<?php }
       if ($acct->isPasswdResetEnabled()) { ?>
 <tr>
     <td colspan="2">
@@ -53,30 +60,30 @@ if ($acct = $thisclient->getAccount()) {
 </tr>
 <?php if (!isset($_SESSION['_client']['reset-token'])) { ?>
 <tr>
-    <td class="text-nowrap">
+    <td width="180">
         <?php echo __('Current Password'); ?>:
     </td>
     <td>
-        <input class="form-control" type="password" size="18" name="cpasswd" value="<?php echo $info['cpasswd']; ?>">
+        <input type="password" size="18" name="cpasswd" value="<?php echo $info['cpasswd']; ?>">
         &nbsp;<span class="error">&nbsp;<?php echo $errors['cpasswd']; ?></span>
     </td>
 </tr>
 <?php } ?>
 <tr>
-    <td class="text-nowrap">
+    <td width="180">
         <?php echo __('New Password'); ?>:
     </td>
     <td>
-        <input class="form-control" type="password" size="18" name="passwd1" value="<?php echo $info['passwd1']; ?>">
+        <input type="password" size="18" name="passwd1" value="<?php echo $info['passwd1']; ?>">
         &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd1']; ?></span>
     </td>
 </tr>
 <tr>
-    <td class="text-nowrap">
-        <?php echo __('Confirm New Password'); ?>:&nbsp;
+    <td width="180">
+        <?php echo __('Confirm New Password'); ?>:
     </td>
     <td>
-        <input class="form-control" type="password" size="18" name="passwd2" value="<?php echo $info['passwd2']; ?>">
+        <input type="password" size="18" name="passwd2" value="<?php echo $info['passwd2']; ?>">
         &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd2']; ?></span>
     </td>
 </tr>
@@ -85,11 +92,9 @@ if ($acct = $thisclient->getAccount()) {
 </table>
 <hr>
 <p style="text-align: center;">
-    <input type="submit" class="btn btn-success" value="Update"/>
-    <input type="reset" class="btn btn-warning" value="Reset"/>
-    <input type="button" class="btn btn-default" value="Cancel" onclick="javascript:
+    <input type="submit" value="Update"/>
+    <input type="reset" value="Reset"/>
+    <input type="button" value="Cancel" onclick="javascript:
         window.location.href='index.php';"/>
 </p>
 </form>
-</div>
-</div>

@@ -28,6 +28,7 @@ class CustomQueue extends VerySimpleModel {
             ),
             'columns' => array(
                 'reverse' => 'QueueColumnGlue.queue',
+                'constrain' => array('staff_id' =>'QueueColumnGlue.staff_id'),
                 'broker' => 'QueueColumnListBroker',
             ),
             'sorts' => array(
@@ -37,6 +38,10 @@ class CustomQueue extends VerySimpleModel {
             'default_sort' => array(
                 'constraint' => array('sort_id' => 'QueueSort.id'),
                 'null' => true,
+            ),
+
+            'exports' => array(
+                'reverse' => 'QueueExport.queue',
             ),
             'parent' => array(
                 'constraint' => array(
@@ -59,8 +64,9 @@ class CustomQueue extends VerySimpleModel {
     const FLAG_INHERIT_COLUMNS =  0x0010; // Inherit column layout from parent
     const FLAG_INHERIT_SORTING =  0x0020; // Inherit advanced sorting from parent
     const FLAG_INHERIT_DEF_SORT = 0x0040; // Inherit default selected sort
+    const FLAG_INHERIT_EXPORT  =  0x0080; // Inherit export fields from parent
+    const FLAG_INHERIT_EVERYTHING = 0x158; // Maskf or all INHERIT flags
 
-    const FLAG_INHERIT_EVERYTHING = 0x78; // Maskf or all INHERIT flags
 
     var $criteria;
     var $_conditions;
@@ -75,6 +81,9 @@ class CustomQueue extends VerySimpleModel {
         // Ensure valid state
         if ($this->hasFlag(self::FLAG_INHERIT_COLUMNS) && !$this->parent_id)
             $this->clearFlag(self::FLAG_INHERIT_COLUMNS);
+
+       if ($this->hasFlag(self::FLAG_INHERIT_EXPORT) && !$this->parent_id)
+            $this->clearFlag(self::FLAG_INHERIT_EXPORT);
     }
 
     function getId() {
@@ -103,20 +112,26 @@ class CustomQueue extends VerySimpleModel {
         return $this->path ?: $this->buildPath();
     }
 
+    function criteriaRequired() {
+        return true;
+    }
+
     function getCriteria($include_parent=false) {
         if (!isset($this->criteria)) {
-            $old = @$this->config[0] === '{';
             $this->criteria = is_string($this->config)
                 ? JsonDataParser::decode($this->config)
                 : $this->config;
+            // XXX: Drop this block in v1.12
             // Auto-upgrade v1.10 saved-search criteria to new format
             // But support new style with `conditions` support
+            $old = @$this->config[0] === '{';
             if ($old && is_array($this->criteria)
                 && !isset($this->criteria['conditions'])
             ) {
-
                 // TODO: Upgrade old ORM path names
-                $this->criteria = $this->isolateCriteria($this->criteria);
+                // Parse criteria out of JSON if any.
+                $this->criteria = self::isolateCriteria($this->criteria,
+                        $this->getRoot());
             }
         }
         $criteria = $this->criteria ?: array();
@@ -135,7 +150,8 @@ class CustomQueue extends VerySimpleModel {
         $all = $this->getSupportedMatches($this->getRoot());
         $items = array();
         $criteria = $criteria ?: $this->getCriteria(true);
-        foreach ($criteria as $C) {
+
+        foreach ($criteria ?: array() as $C) {
             list($path, $method, $value) = $C;
             if ($path === ':keywords') {
                 $items[] = Format::htmlchars("\"{$value}\"");
@@ -156,38 +172,43 @@ class CustomQueue extends VerySimpleModel {
      * Parameters:
      * $search - <array> Request parameters ($_POST) used to update the
      *      search beyond the current configuration of the search criteria
+     * $searchables - search fields - default to current if not provided
      */
-    function getForm($source=null) {
-        $searchable = $this->getCurrentSearchFields($source);
-        $fields = array(
-            ':keywords' => new TextboxField(array(
-                'id' => 3001,
-                'configuration' => array(
-                    'size' => 40,
-                    'length' => 400,
-                    'autofocus' => true,
-                    'classes' => 'full-width headline',
-                    'placeholder' => __('Keywords — Optional'),
-                ),
-            )),
-        );
-        foreach ($searchable as $path=>$field) {
-            $fields = array_merge($fields, static::getSearchField($field, $path));
+    function getForm($source=null, $searchable=null) {
+        $fields = array();
+        if (!isset($searchable)) {
+            $fields = array(
+                ':keywords' => new TextboxField(array(
+                    'id' => 3001,
+                    'configuration' => array(
+                        'size' => 40,
+                        'length' => 400,
+                        'autofocus' => true,
+                        'classes' => 'full-width headline',
+                        'placeholder' => __('Keywords — Optional'),
+                    ),
+                    'validators' => function($self, $v) {
+                        if (mb_str_wc($v) > 3)
+                            $self->addError(__('Search term cannot have more than 3 keywords'));
+                    },
+                )),
+            );
+
+            $searchable = $this->getCurrentSearchFields($source);
         }
 
+        foreach ($searchable ?: array() as $path => $field)
+            $fields = array_merge($fields, static::getSearchField($field, $path));
+
         $form = new AdvancedSearchForm($fields, $source);
-        $form->addValidator(function($form) {
-            $selected = 0;
-            foreach ($form->getFields() as $F) {
-                if (substr($F->get('name'), -7) == '+search' && $F->getClean())
-                    $selected += 1;
-                // Consider keyword searches
-                elseif ($F->get('name') == ':keywords' && $F->getClean())
-                    $selected += 1;
-            }
-            if (!$selected)
-                $form->addError(__('No fields selected for searching'));
-        });
+
+        // Field selection validator
+        if ($this->criteriaRequired()) {
+            $form->addValidator(function($form) {
+                    if (!$form->getNumFieldsSelected())
+                        $form->addError(__('No fields selected for searching'));
+                });
+        }
 
         // Load state from current configuraiton
         if (!$source) {
@@ -227,15 +248,18 @@ class CustomQueue extends VerySimpleModel {
      *      to contain a list extra fields by ORM path, of newly added
      *      fields not yet saved in this object's getCriteria().
      */
-    function getCurrentSearchFields($source=array()) {
+
+    function getCurrentSearchFields($source=array(), $criteria=array()) {
         static $basic = array(
             'Ticket' => array(
+                'status__id',
                 'status__state',
                 'dept_id',
                 'assignee',
                 'topic_id',
                 'created',
                 'est_duedate',
+                'duedate',
             )
         );
 
@@ -249,7 +273,7 @@ class CustomQueue extends VerySimpleModel {
                     $core[$path] = $all[$path];
 
         // Add others from current configuration
-        foreach ($this->getCriteria() as $C) {
+        foreach ($criteria ?: $this->getCriteria() as $C) {
             list($path) = $C;
             if (isset($all[$path]))
                 $core[$path] = $all[$path];
@@ -261,6 +285,27 @@ class CustomQueue extends VerySimpleModel {
                     $core[$path] = $all[$path];
 
         return $core;
+    }
+
+    /**
+    * Fetch all supported ORM fields filterable by this search object.
+    */
+    function getSupportedFilters() {
+        return static::getFilterableFields($this->getRoot());
+    }
+
+
+    /**
+     * Get get supplemental matches for public queues.
+     *
+     */
+
+    function getSupplementalMatches() {
+        return array();
+    }
+
+    function getSupplementalCriteria() {
+        return array();
     }
 
     /**
@@ -356,7 +401,7 @@ class CustomQueue extends VerySimpleModel {
         if (function_exists('collator_create')) {
             $coll = Collator::create(Internationalization::getCurrentLanguage());
             $keys = array_map(function($a) use ($coll) {
-                return $coll->getSortKey($a[0]);
+                return $coll->getSortKey($a[0]); #nolint
             }, $fields);
         }
         else {
@@ -366,6 +411,20 @@ class CustomQueue extends VerySimpleModel {
         array_multisort($keys, $fields);
 
         return $fields;
+    }
+
+  /**
+     * Fetch all searchable fileds, for the base object  which support quick filters.
+     */
+    function getFilterableFields($object) {
+        $filters = array();
+        foreach (static::getSearchableFields($object) as $p => $f) {
+            list($label, $field) = $f;
+            if ($field && $field->supportsQuickFilter())
+                $filters[$p] = $f;
+        }
+
+        return $filters;
     }
 
     /**
@@ -391,6 +450,11 @@ class CustomQueue extends VerySimpleModel {
             ),
         ));
         $methods = $field->getSearchMethods();
+
+        //remove future options for datetime fields that can't be in the future
+        if (in_array($field->getLabel(), DateTimeField::getPastPresentLabels()))
+          unset($methods['ndays'], $methods['future'], $methods['distfut']);
+
         $pieces["{$name}+method"] = new ChoiceField(array(
             'choices' => $methods,
             'default' => key($methods),
@@ -454,11 +518,14 @@ class CustomQueue extends VerySimpleModel {
      * field name being search, the method used for searhing, and the method-
      * specific data entered in the UI.
      */
-    function isolateCriteria($criteria, $root=null) {
-        $searchable = static::getSearchableFields($root ?: $this->getRoot());
-        $items = array();
+
+    static function isolateCriteria($criteria, $base='Ticket') {
+
         if (!is_array($criteria))
             return null;
+
+        $items = array();
+        $searchable = static::getSearchableFields($base);
         foreach ($criteria as $k=>$v) {
             if (substr($k, -7) === '+method') {
                 list($name,) = explode('+', $k, 2);
@@ -471,9 +538,8 @@ class CustomQueue extends VerySimpleModel {
 
                 // Lookup the field to search this condition
                 list($label, $field) = $searchable[$name];
-
-                // Get the search method and value
-                $method = $v;
+                // Get the search method
+                $method = is_array($v) ? key($v) : $v;
                 // Not all search methods require a value
                 $value = $criteria["{$name}+{$method}"];
 
@@ -504,6 +570,98 @@ class CustomQueue extends VerySimpleModel {
         return $this->_conditions;
     }
 
+    function getExportableFields() {
+        $cdata = $fields = array();
+        foreach (TicketForm::getInstance()->getFields() as $f) {
+            // Ignore core fields
+            if (in_array($f->get('name'), array('priority')))
+                continue;
+            // Ignore non-data fields
+            elseif (!$f->hasData() || $f->isPresentationOnly())
+                continue;
+            // Ignore disabled fields
+            elseif (!$f->hasFlag(DynamicFormField::FLAG_ENABLED))
+                continue;
+
+            $name = $f->get('name') ?: 'field_'.$f->get('id');
+            $key = 'cdata__'.$name;
+            $cdata[$key] = $f->getLocal('label');
+        }
+
+        // Standard export fields if none is provided.
+        $fields = array(
+                'number' =>         __('Ticket Number'),
+                'created' =>        __('Date Created'),
+                'cdata__subject' =>  __('Subject'),
+                'user__name' =>      __('From'),
+                'user__emails__address' => __('From Email'),
+                'cdata__priority' => __('Priority'),
+                'dept_id' => __('Department'),
+                'topic_id' => __('Help Topic'),
+                'source' =>         __('Source'),
+                'status__id' =>__('Current Status'),
+                'lastupdate' =>     __('Last Updated'),
+                'est_duedate' =>    __('SLA Due Date'),
+                'duedate' =>        __('Due Date'),
+                'closed' =>         __('Closed Date'),
+                'isoverdue' =>      __('Overdue'),
+                'merged' =>       __('Merged'),
+                'linked' =>       __('Linked'),
+                'isanswered' =>     __('Answered'),
+                'staff_id' => __('Agent Assigned'),
+                'team_id' =>  __('Team Assigned'),
+                'thread_count' =>   __('Thread Count'),
+                'reopen_count' =>   __('Reopen Count'),
+                'attachment_count' => __('Attachment Count'),
+                'task_count' => __('Task Count'),
+                ) + $cdata;
+
+        return $fields;
+    }
+
+    function getExportFields($inherit=true) {
+
+        $fields = array();
+        if ($inherit
+            && $this->parent_id
+            && $this->hasFlag(self::FLAG_INHERIT_EXPORT)
+            && $this->parent
+        ) {
+            $fields = $this->parent->getExportFields();
+        }
+        elseif (count($this->exports)) {
+            foreach ($this->exports as $f)
+                $fields[$f->path] = $f->getHeading();
+        }
+        elseif ($this->isAQueue())
+            $fields = $this->getExportableFields();
+
+        if (!count($fields))
+            $fields = $this->getExportableFields();
+
+        return $fields;
+    }
+
+    function getExportColumns($fields=array()) {
+        $columns = array();
+        $fields = $fields ?: $this->getExportFields();
+        $i = 0;
+        foreach ($fields as $path => $label) {
+            $c = QueueColumn::placeholder(array(
+                        'id' => $i++,
+                        'heading' => $label,
+                        'primary' => $path,
+                        ));
+            $c->setQueue($this);
+            $columns[$path] = $c;
+        }
+        return $columns;
+    }
+
+    function getStandardColumns() {
+        return $this->getColumns();
+    }
+
     function getColumns($use_template=false) {
         if ($this->columns_id
             && ($q = CustomQueue::lookup($this->columns_id))
@@ -525,46 +683,61 @@ class CustomQueue extends VerySimpleModel {
         }
 
         // Use the columns of the "Open" queue as a default template
-        if (($template = CustomQueue::lookup(1)))
+        if ($use_template && ($template = CustomQueue::lookup(1)))
             return $template->getColumns();
 
         // Last resort — use standard columns
         foreach (array(
             QueueColumn::placeholder(array(
+                "id" => 1,
                 "heading" => "Number",
                 "primary" => 'number',
                 "width" => 85,
+                "bits" => QueueColumn::FLAG_SORTABLE,
                 "filter" => "link:ticketP",
-                "annotations" => '[{"c":"TicketSourceDecoration","p":"b"}]',
-                "conditions" => '[{"crit":["isanswered","set",null],"prop":{"font-weight":"bold"}}]',
+                "annotations" => '[{"c":"TicketSourceDecoration","p":"b"}, {"c":"MergedFlagDecoration","p":">"}]',
+                "conditions" => '[{"crit":["isanswered","nset",null],"prop":{"font-weight":"bold"}}]',
             )),
             QueueColumn::placeholder(array(
+                "id" => 2,
                 "heading" => "Created",
                 "primary" => 'created',
-                "width" => 100,
+                "filter" => 'date:full',
+                "truncate" =>'wrap',
+                "width" => 120,
+                "bits" => QueueColumn::FLAG_SORTABLE,
             )),
             QueueColumn::placeholder(array(
+                "id" => 3,
                 "heading" => "Subject",
                 "primary" => 'cdata__subject',
                 "width" => 250,
+                "bits" => QueueColumn::FLAG_SORTABLE,
                 "filter" => "link:ticket",
                 "annotations" => '[{"c":"TicketThreadCount","p":">"},{"c":"ThreadAttachmentCount","p":"a"},{"c":"OverdueFlagDecoration","p":"<"}]',
+                "conditions" => '[{"crit":["isanswered","nset",null],"prop":{"font-weight":"bold"}}]',
                 "truncate" => 'ellipsis',
             )),
             QueueColumn::placeholder(array(
+                "id" => 4,
                 "heading" => "From",
                 "primary" => 'user__name',
                 "width" => 150,
+                "bits" => QueueColumn::FLAG_SORTABLE,
             )),
             QueueColumn::placeholder(array(
+                "id" => 5,
                 "heading" => "Priority",
                 "primary" => 'cdata__priority',
                 "width" => 120,
+                "bits" => QueueColumn::FLAG_SORTABLE,
             )),
             QueueColumn::placeholder(array(
+                "id" => 8,
                 "heading" => "Assignee",
                 "primary" => 'assignee',
                 "width" => 100,
+                "bits" => QueueColumn::FLAG_SORTABLE,
             )),
         ) as $col)
             $this->addColumn($col);
@@ -575,6 +748,13 @@ class CustomQueue extends VerySimpleModel {
     function addColumn(QueueColumn $col) {
         $this->columns->add($col);
         $col->queue = $this;
+    }
+
+    function getColumn($id) {
+        // TODO: Got to be easier way to search instrumented list.
+        foreach ($this->getColumns() as $C)
+            if ($C->getId() == $id)
+                return $C;
     }
 
     function getSortOptions() {
@@ -630,6 +810,73 @@ class CustomQueue extends VerySimpleModel {
         ));
     }
 
+    function export(CsvExporter $exporter, $options=array()) {
+        global $thisstaff;
+
+        if (!$thisstaff
+                || !($query=$this->getQuery())
+                || !($fields=$this->getExportFields()))
+            return false;
+
+        // See if we have cached export preference
+        if (isset($_SESSION['Export:Q'.$this->getId()])) {
+            $opts = $_SESSION['Export:Q'.$this->getId()];
+            if (isset($opts['fields'])) {
+                $fields = array_intersect_key($fields,
+                        array_flip($opts['fields']));
+                $exportableFields = CustomQueue::getExportableFields();
+                foreach ($opts['fields'] as $key => $name) {
+                    if (is_null($fields[$name]) && isset($exportableFields)) {
+                        $fields[$name] = $exportableFields[$name];
+                    }
+                 }
+            }
+        }
+
+        // Apply columns
+        $columns = $this->getExportColumns($fields);
+        $headers = array(); // Reset fields based on validity of columns
+        foreach ($columns as $column) {
+            $query = $column->mangleQuery($query, $this->getRoot());
+            $headers[] = $column->getHeading();
+        }
+
+        // Apply visibility
+        if (!$this->ignoreVisibilityConstraints($thisstaff))
+            $query->filter($thisstaff->getTicketsVisibility());
+
+        // Get stashed sort or else get the default
+        if (!($sort = $_SESSION['sort'][$this->getId()]))
+            $sort = $this->getDefaultSort();
+
+        // Apply sort
+        if ($sort instanceof QueueSort)
+            $sort->applySort($query);
+        elseif ($sort && isset($sort['queuesort']))
+            $sort['queuesort']->applySort($query, $sort['dir']);
+        elseif ($sort && $sort['col'] &&
+                ($C=$this->getColumn($sort['col'])))
+            $query = $C->applySort($query, $sort['dir']);
+        else
+            $query->order_by('-created');
+
+        // Render Util
+        $render = function ($row) use($columns) {
+            if (!$row) return false;
+
+            $record = array();
+            foreach ($columns as $path => $column) {
+                $record[] = (string) $column->from_query($row) ?:
+                    $row[$path] ?: '';
+            }
+            return $record;
+        };
+
+        $exporter->write($headers);
+        foreach ($query as $row)
+            $exporter->write($render($row));
+    }
+
     /**
      * Add critiera to a query based on the constraints configured for this
      * queue. The criteria of the parent queue is also automatically added
@@ -669,6 +916,7 @@ class CustomQueue extends VerySimpleModel {
 
         // Apply column, annotations and conditions additions
         foreach ($this->getColumns() as $C) {
+            $C->setQueue($this);
             $query = $C->mangleQuery($query, $this->getRoot());
         }
         return $query;
@@ -702,6 +950,7 @@ class CustomQueue extends VerySimpleModel {
      * array retrieved in ::getSearchFields()
      */
     function describeField($info, $name=false) {
+        $name = $name ?: $info['field']->get('label');
         return $info['field']->describeSearch($info['method'], $info['value'], $name);
     }
 
@@ -746,25 +995,48 @@ class CustomQueue extends VerySimpleModel {
     }
 
     function checkAccess(Staff $agent) {
-        return $agent->getId() == $this->staff_id
-            || $this->hasFlag(self::FLAG_PUBLIC);
+        return $this->isPublic() || $this->checkOwnership($agent);
     }
 
-    function ignoreVisibilityConstraints() {
-        global $thisstaff;
+    function checkOwnership(Staff $agent) {
 
-        // For saved searches (not queues), staff can have a permission to
+        return ($agent->getId() == $this->staff_id &&
+                !$this->isAQueue());
+    }
+
+    function isOwner(Staff $agent) {
+        return $agent && $this->isPrivate() && $this->checkOwnership($agent);
+    }
+
+    function isSaved() {
+        return true;
+    }
+
+    function ignoreVisibilityConstraints(Staff $agent) {
+        // For searches (not queues), some staff can have a permission to
         // see all records
-        return !$this->isAQueue()
-            && $thisstaff->hasPerm(SearchBackend::PERM_EVERYTHING);
+        return ($this->isASearch()
+                && $this->isOwner($agent)
+                && $agent->canSearchEverything());
     }
 
     function inheritCriteria() {
-        return $this->flags & self::FLAG_INHERIT_CRITERIA;
+        return $this->flags & self::FLAG_INHERIT_CRITERIA &&
+            $this->parent_id;
     }
 
     function inheritColumns() {
         return $this->hasFlag(self::FLAG_INHERIT_COLUMNS);
+    }
+
+    function useStandardColumns() {
+        return ($this->hasFlag(self::FLAG_INHERIT_COLUMNS) ||
+                !count($this->columns));
+    }
+
+    function inheritExport() {
+        return ($this->hasFlag(self::FLAG_INHERIT_EXPORT) ||
+                !count($this->exports));
     }
 
     function inheritSorting() {
@@ -790,19 +1062,25 @@ class CustomQueue extends VerySimpleModel {
         return $base;
     }
 
-    function getDashboardName() {
-        $base = $this->getName();
-        if ($this->parent)
-            $base = sprintf("%s.%s", $this->parent->getDashboardName(), $base);
-        return $base;
+    function isASubQueue() {
+        return $this->parent ? $this->parent->isASubQueue() :
+            $this->isAQueue();
     }
-    
+
     function isAQueue() {
         return $this->hasFlag(self::FLAG_QUEUE);
     }
 
+    function isASearch() {
+        return !$this->isAQueue() || !$this->isSaved();
+    }
+
     function isPrivate() {
-        return !$this->isAQueue() && !$this->hasFlag(self::FLAG_PUBLIC);
+        return !$this->isAQueue() && $this->staff_id;
+    }
+
+    function isPublic() {
+        return $this->hasFlag(self::FLAG_PUBLIC);
     }
 
     protected function hasFlag($flag) {
@@ -827,12 +1105,119 @@ class CustomQueue extends VerySimpleModel {
         $this->clearFlag(self::FLAG_DISABLED);
     }
 
-    function update($vars, &$errors=array()) {
-        // Set basic search information
-        if (!$vars['name'])
-            $errors['name'] = __('A title is required');
+    function getRoughCount() {
+        if (($count = $this->getRoughCountAPC()) !== false)
+            return $count;
 
-        $this->title = $vars['name'];
+        $query = Ticket::objects();
+        $Q = $this->getBasicQuery();
+        $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)),
+            new SqlField('ticket_id'));
+        $query = $query->aggregate(array(
+            "ticket_count" => SqlAggregate::COUNT($expr)
+        ));
+
+        $row = $query->values()->one();
+        return $row['ticket_count'];
+    }
+
+    function getRoughCountAPC() {
+        if (!function_exists('apcu_store'))
+            return false;
+
+        $key = "rough.counts.".SECRET_SALT;
+        $cached = false;
+        $counts = apcu_fetch($key, $cached);
+        if ($cached === true && isset($counts["q{$this->id}"]))
+            return $counts["q{$this->id}"];
+
+        // Fetch rough counts of all queues. That is, fetch a total of the
+        // counts based on the queue criteria alone. Do no consider agent
+        // access. This should be fast and "rought"
+        $queues = static::objects()
+            ->filter(['flags__hasbit' => CustomQueue::FLAG_PUBLIC])
+            ->exclude(['flags__hasbit' => CustomQueue::FLAG_DISABLED]);
+
+        $query = Ticket::objects();
+        $prefix = "";
+
+        foreach ($queues as $queue) {
+            $Q = $queue->getBasicQuery();
+            $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)),
+                new SqlField('ticket_id'));
+            $query = $query->aggregate(array(
+                "q{$queue->id}" => SqlAggregate::COUNT($expr)
+            ));
+        }
+
+        $counts = $query->values()->one();
+
+        apcu_store($key, $counts, 900);
+        return @$counts["q{$this->id}"];
+    }
+
+    function updateExports($fields, $save=true) {
+
+        if (!$fields)
+            return false;
+
+        $order = array_keys($fields);
+
+        $new = $fields;
+        foreach ($this->exports as $f) {
+            $heading = $f->getHeading();
+            $key = $f->getPath();
+            if (!isset($fields[$key])) {
+                $this->exports->remove($f);
+                continue;
+            }
+
+            $f->set('heading', $heading);
+            $f->set('sort', array_search($key, $order)+1);
+            unset($new[$key]);
+        }
+
+        $exportableFields = CustomQueue::getExportableFields();
+        foreach ($new as $k => $field) {
+            if (isset($exportableFields[$k]))
+                $heading = $exportableFields[$k];
+            elseif (is_array($field))
+                $heading = $field['heading'];
+            else
+                $heading = $field;
+
+            $f = QueueExport::create(array(
+                        'path' => $k,
+                        'heading' => $heading,
+                        'sort' => array_search($k, $order)+1));
+            $this->exports->add($f);
+        }
+
+        $this->exports->sort(function($f) { return $f->sort; });
+
+        if (!count($this->exports) && $this->parent)
+            $this->hasFlag(self::FLAG_INHERIT_EXPORT);
+
+        if ($save)
+            $this->exports->saveAll();
+
+        return true;
+    }
+
+    function update($vars, &$errors=array()) {
+
+        // Set basic search information
+        if (!$vars['queue-name'])
+            $errors['queue-name'] = __('A title is required');
+        elseif (($q=CustomQueue::lookup(array(
+                        'title' => $vars['queue-name'],
+                        'parent_id' => $vars['parent_id'] ?: 0,
+                        'staff_id'  => $this->staff_id)))
+                && $q->getId() != $this->id
+                )
+            $errors['queue-name'] = __('Saved queue with same name exists');
+
+        $this->title = $vars['queue-name'];
         $this->parent_id = @$vars['parent_id'] ?: 0;
         if ($this->parent_id && !$this->parent)
             $errors['parent_id'] = __('Select a valid queue');
@@ -861,54 +1246,45 @@ class CustomQueue extends VerySimpleModel {
 
         // Set basic queue information
         $this->path = $this->buildPath();
-        $this->setFlag(self::FLAG_INHERIT_CRITERIA,
-            $this->parent_id > 0 && isset($vars['inherit']));
+        $this->setFlag(self::FLAG_INHERIT_CRITERIA, $this->parent_id);
         $this->setFlag(self::FLAG_INHERIT_COLUMNS,
             $this->parent_id > 0 && isset($vars['inherit-columns']));
+        $this->setFlag(self::FLAG_INHERIT_EXPORT,
+            $this->parent_id > 0 && isset($vars['inherit-exports']));
         $this->setFlag(self::FLAG_INHERIT_SORTING,
             $this->parent_id > 0 && isset($vars['inherit-sorting']));
 
+        // Saved Search - Use standard columns
+        if ($this instanceof SavedSearch && isset($vars['inherit-columns']))
+            $this->setFlag(self::FLAG_INHERIT_COLUMNS);
         // Update queue columns (but without save)
         if (!isset($vars['columns']) && $this->parent) {
             // No columns -- imply column inheritance
             $this->setFlag(self::FLAG_INHERIT_COLUMNS);
         }
-        if (isset($vars['columns']) && !$this->hasFlag(self::FLAG_INHERIT_COLUMNS)) {
-            $new = $vars['columns'];
-            $order = array_keys($new);
-            foreach ($this->columns as $col) {
-                $key = $col->column_id;
-                if (!isset($vars['columns'][$key])) {
-                    $this->columns->remove($col);
-                    continue;
-                }
-                $info = $vars['columns'][$key];
-                $col->set('sort', array_search($key, $order));
-                $col->set('heading', $info['heading']);
-                $col->set('width', $info['width']);
-                $col->setSortable($info['sortable']);
-                unset($new[$key]);
-            }
-            // Add new columns
-            foreach ($new as $info) {
-                $glue = new QueueColumnGlue(array(
-                    'column_id' => $info['column_id'], 
-                    'sort' => array_search($info['column_id'], $order),
-                    'heading' => $info['heading'],
-                    'width' => $info['width'] ?: 100,
-                    'bits' => $info['sortable'] ?  QueueColumn::FLAG_SORTABLE : 0,
-                ));
-                $glue->queue = $this;
-                $this->columns->add(
-                    QueueColumn::lookup($info['column_id']), $glue);
-            }
-            // Re-sort the in-memory columns array
-            $this->columns->sort(function($c) { return $c->sort; });
+
+        if ($this->getId()
+                && isset($vars['columns'])
+                && !$this->hasFlag(self::FLAG_INHERIT_COLUMNS)) {
+
+
+            if ($this->columns->updateColumns($vars['columns'], $errors, array(
+                                'queue_id' => $this->getId(),
+                                'staff_id' => $this->staff_id)))
+                $this->columns->reset();
         }
+
+        // Update export fields for the queue
+        if (isset($vars['exports']) &&
+                 !$this->hasFlag(self::FLAG_INHERIT_EXPORT)) {
+            $this->updateExports($vars['exports'], false);
+        }
+
+        if (!count($this->exports) && $this->parent)
+            $this->hasFlag(self::FLAG_INHERIT_EXPORT);
 
         // Update advanced sorting options for the queue
         if (isset($vars['sorts']) && !$this->hasFlag(self::FLAG_INHERIT_SORTING)) {
-
             $new = $order = $vars['sorts'];
             foreach ($this->sorts as $sort) {
                 $key = $sort->sort_id;
@@ -935,7 +1311,6 @@ class CustomQueue extends VerySimpleModel {
             // Re-sort the in-memory columns array
             $this->sorts->sort(function($c) { return $c->sort; });
         }
-
         if (!count($this->sorts) && $this->parent) {
             // No sorting -- imply sorting inheritance
             $this->setFlag(self::FLAG_INHERIT_SORTING);
@@ -948,6 +1323,8 @@ class CustomQueue extends VerySimpleModel {
             if ($vars['sort_id'] === '::') {
                 if (!$this->parent)
                     $errors['sort_id'] = __('No parent selected');
+                else
+                     $this->sort_id = 0;
             }
             elseif ($qs = QueueSort::lookup($vars['sort_id'])) {
                 $this->sort_id = $vars['sort_id'];
@@ -955,8 +1332,8 @@ class CustomQueue extends VerySimpleModel {
             else {
                 $errors['sort_id'] = __('Select an item from the list');
             }
-        }
-
+        } else
+             $this->sort_id = 0;
 
         list($this->_conditions, $conditions)
             = QueueColumn::getConditionsFromPost($vars, $this->id, $this->getRoot());
@@ -971,22 +1348,33 @@ class CustomQueue extends VerySimpleModel {
             $errors['criteria'] = __('Validation errors exist on criteria');
         }
         else {
-            $this->criteria = $this->isolateCriteria($form->getClean());
+            $this->criteria = static::isolateCriteria($form->getClean(),
+                $this->getRoot());
             $this->config = JsonDataEncoder::encode([
                 'criteria' => $this->criteria,
                 'conditions' => $conditions,
             ]);
+            
+            // Clear currently set criteria.and conditions.
+             $this->criteria = $this->_conditions = null;
         }
 
         return 0 === count($errors);
     }
 
+    function psave() {
+        return parent::save();
+    }
+
     function save($refetch=false) {
+
         $nopath = !isset($this->path);
         $path_changed = isset($this->dirty['parent_id']);
 
         if ($this->dirty)
             $this->updated = SqlFunction::NOW();
+
+        $clearCounts = ($this->dirty || $this->__new__);
         if (!($rv = parent::save($refetch || $this->dirty)))
             return $rv;
 
@@ -1005,8 +1393,64 @@ class CustomQueue extends VerySimpleModel {
             };
             $move_children($this);
         }
+
+        // Refetch the queue counts
+        if ($clearCounts)
+            SavedQueue::clearCounts();
+
         return $this->columns->saveAll()
+            && $this->exports->saveAll()
             && $this->sorts->saveAll();
+    }
+
+    /**
+     * Fetch a tree-organized listing of the queues. Each queue is listed in
+     * the tree exactly once, and every visible queue is represented. The
+     * returned structure is an array where the items are two-item arrays
+     * where the first item is a CustomQueue object an the second is a list
+     * of the children using the same pattern (two-item arrays of a CustomQueue
+     * and its children). Visually:
+     *
+     * [ [ $queue, [ [ $child, [] ], [ $child, [] ] ], [ $queue, ... ] ]
+     *
+     * Parameters:
+     * $staff - <Staff> staff object which should be used to determine
+     *      visible queues.
+     * $pid - <int> parent_id of root queue. Default is zero (top-level)
+     */
+    static function getHierarchicalQueues(Staff $staff, $pid=0,
+            $primary=true) {
+        $query = static::objects()
+            ->annotate(array('_sort' =>  SqlCase::N()
+                        ->when(array('sort' => 0), 999)
+                        ->otherwise(new SqlField('sort'))))
+            ->filter(Q::any(array(
+                'flags__hasbit' => self::FLAG_PUBLIC,
+                'flags__hasbit' => static::FLAG_QUEUE,
+                'staff_id' => $staff->getId(),
+            )))
+            ->exclude(['flags__hasbit' => self::FLAG_DISABLED])
+            ->order_by('parent_id', '_sort', 'title');
+        $all = $query->asArray();
+        // Find all the queues with a given parent
+        $for_parent = function($pid) use ($primary, $all, &$for_parent) {
+            $results = [];
+            foreach (new \ArrayIterator($all) as $q) {
+                if ($q->parent_id != $pid)
+                    continue;
+
+                if ($pid == 0 && (
+                            ($primary &&  !$q->isAQueue())
+                            || (!$primary && $q->isAQueue())))
+                    continue;
+
+                $results[] = [ $q, $for_parent($q->getId()) ];
+            }
+
+            return $results;
+        };
+
+        return $for_parent($pid);
     }
 
     static function getOrmPath($name, $query=null) {
@@ -1039,21 +1483,21 @@ class CustomQueue extends VerySimpleModel {
 
 
     static function create($vars=false) {
-        global $thisstaff;
 
         $queue = new static($vars);
         $queue->created = SqlFunction::NOW();
-        $queue->setFlag(self::FLAG_QUEUE);
-        if ($thisstaff)
-            $queue->staff_id = $thisstaff->getId();
+        if (!isset($vars['flags'])) {
+            $queue->setFlag(self::FLAG_PUBLIC);
+            $queue->setFlag(self::FLAG_QUEUE);
+        }
 
         return $queue;
     }
 
     static function __create($vars) {
         $q = static::create($vars);
-        $q->save();
-        foreach ($vars['columns'] as $info) {
+        $q->psave();
+        foreach ($vars['columns'] ?: array() as $info) {
             $glue = new QueueColumnGlue($info);
             $glue->queue_id = $q->getId();
             $glue->save();
@@ -1102,10 +1546,10 @@ abstract class QueueColumnAnnotation {
 
     function decorate($text, $dec) {
         static $positions = array(
-            '<' => '<span class="pull-left">%2$s</span>%1$s',
-            '>' => '<span class="pull-right">%2$s</span>%1$s',
-            'a' => '%1$s%2$s',
-            'b' => '%2$s%1$s',
+            '<' => '<span class="pull-left"> %2$s </span>%1$s',
+            '>' => '<span class="pull-right"> %2$s </span>%1$s',
+            'a' => '%1$s %2$s',
+            'b' => '%2$s %1$s',
         );
 
         $pos = $this->getPosition();
@@ -1125,7 +1569,7 @@ abstract class QueueColumnAnnotation {
     }
 
     // Add the annotation to a QuerySet
-    abstract function annotate($query);
+    abstract function annotate($query, $name);
 
     // Fetch some HTML to render the decoration on the page. This function
     // can return boolean FALSE to indicate no decoration should be applied
@@ -1160,6 +1604,17 @@ abstract class QueueColumnAnnotation {
     function isVisible($row) {
         return true;
     }
+
+    static function addToQuery($query, $name=false) {
+        $name = $name ?: static::$qname;
+        $annotation = new Static(array());
+        return $annotation->annotate($query, $name);
+    }
+
+    static function from_query($row, $name=false) {
+        $name = $name ?: static::$qname;
+        return $row[$name];
+    }
 }
 
 class TicketThreadCount
@@ -1168,9 +1623,10 @@ extends QueueColumnAnnotation {
     static $qname = '_thread_count';
     static $desc = /* @trans */ 'Thread Count';
 
-    function annotate($query) {
+    function annotate($query, $name=false) {
+        $name = $name ?: static::$qname;
         return $query->annotate(array(
-        static::$qname => TicketThread::objects()
+            $name => TicketThread::objects()
             ->filter(array('ticket__ticket_id' => new SqlField('ticket_id', 1)))
             ->exclude(array('entries__flags__hasbit' => ThreadEntry::FLAG_HIDDEN))
             ->aggregate(array('count' => SqlAggregate::COUNT('entries__id')))
@@ -1181,7 +1637,7 @@ extends QueueColumnAnnotation {
         $threadcount = $row[static::$qname];
         if ($threadcount > 1) {
             return sprintf(
-                '<small class="faded-more"><i class="icon-comments-alt"></i> %s</small>',
+                '&nbsp;<small class="faded-more"><i class="icon-comments-alt"></i> %s </small>',
                 $threadcount
             );
         }
@@ -1192,16 +1648,49 @@ extends QueueColumnAnnotation {
     }
 }
 
+class TicketReopenCount
+extends QueueColumnAnnotation {
+    static $icon = 'folder-open-alt';
+    static $qname = '_reopen_count';
+    static $desc = /* @trans */ 'Reopen Count';
+
+    function annotate($query, $name=false) {
+        $name = $name ?: static::$qname;
+        return $query->annotate(array(
+            $name => TicketThread::objects()
+            ->filter(array('ticket__ticket_id' => new SqlField('ticket_id', 1)))
+            ->filter(array('events__annulled' => 0, 'events__event_id' => Event::getIdByName('reopened')))
+            ->aggregate(array('count' => SqlAggregate::COUNT('events__id')))
+        ));
+    }
+
+    function getDecoration($row, $text) {
+        $reopencount = $row[static::$qname];
+        if ($reopencount) {
+            return sprintf(
+                '&nbsp;<small class="faded-more"><i class="icon-%s"></i> %s </small>',
+                static::$icon,
+                $reopencount > 1 ? $reopencount : ''
+            );
+        }
+    }
+
+    function isVisible($row) {
+        return $row[static::$qname];
+    }
+}
+
 class ThreadAttachmentCount
 extends QueueColumnAnnotation {
     static $icon = 'paperclip';
     static $qname = '_att_count';
     static $desc = /* @trans */ 'Attachment Count';
 
-    function annotate($query) {
+    function annotate($query, $name=false) {
         // TODO: Convert to Thread attachments
+        $name = $name ?: static::$qname;
         return $query->annotate(array(
-        static::$qname => TicketThread::objects()
+            $name => TicketThread::objects()
             ->filter(array('ticket__ticket_id' => new SqlField('ticket_id', 1)))
             ->filter(array('entries__attachments__inline' => 0))
             ->aggregate(array('count' => SqlAggregate::COUNT('entries__attachments__id')))
@@ -1212,7 +1701,7 @@ extends QueueColumnAnnotation {
         $count = $row[static::$qname];
         if ($count) {
             return sprintf(
-                '<i class="small icon-paperclip icon-flip-horizontal" data-toggle="tooltip" title="%s"></i>',
+                '&nbsp;<i class="small icon-paperclip icon-flip-horizontal" data-toggle="tooltip" title="%s"></i>',
                 $count);
         }
     }
@@ -1222,15 +1711,45 @@ extends QueueColumnAnnotation {
     }
 }
 
+class TicketTasksCount
+extends QueueColumnAnnotation {
+    static $icon = 'list-ol';
+    static $qname = '_task_count';
+    static $desc = /* @trans */ 'Tasks Count';
+
+    function annotate($query, $name=false) {
+        $name = $name ?: static::$qname;
+        return $query->annotate(array(
+            $name => Task::objects()
+            ->filter(array('ticket__ticket_id' => new SqlField('ticket_id', 1)))
+            ->aggregate(array('count' => SqlAggregate::COUNT('id')))
+        ));
+    }
+
+    function getDecoration($row, $text) {
+        $count = $row[static::$qname];
+        if ($count) {
+            return sprintf(
+                '<small class="faded-more"><i class="icon-%s"></i> %s</small>',
+                static::$icon, $count);
+        }
+    }
+
+    function isVisible($row) {
+        return $row[static::$qname];
+    }
+}
+
 class ThreadCollaboratorCount
 extends QueueColumnAnnotation {
     static $icon = 'group';
     static $qname = '_collabs';
     static $desc = /* @trans */ 'Collaborator Count';
 
-    function annotate($query) {
+    function annotate($query, $name=false) {
+        $name = $name ?: static::$qname;
         return $query->annotate(array(
-        static::$qname => TicketThread::objects()
+            $name => TicketThread::objects()
             ->filter(array('ticket__ticket_id' => new SqlField('ticket_id', 1)))
             ->aggregate(array('count' => SqlAggregate::COUNT('collaborators__id')))
         ));
@@ -1240,7 +1759,7 @@ extends QueueColumnAnnotation {
         $count = $row[static::$qname];
         if ($count) {
             return sprintf(
-                '<span class="pull-right faded-more" data-toggle="tooltip" title="%d"><i class="icon-group"></i></span>',
+                '<span class="pull-right faded-more" data-toggle="tooltip" title="%d">&nbsp;<i class="icon-group"> </i></span>',
                 $count);
         }
     }
@@ -1255,7 +1774,7 @@ extends QueueColumnAnnotation {
     static $icon = 'exclamation';
     static $desc = /* @trans */ 'Overdue Icon';
 
-    function annotate($query) {
+    function annotate($query, $name=false) {
         return $query->values('isoverdue');
     }
 
@@ -1269,12 +1788,60 @@ extends QueueColumnAnnotation {
     }
 }
 
+class MergedFlagDecoration
+extends QueueColumnAnnotation {
+    static $icon = 'code-fork';
+    static $desc = /* @trans */ 'Merged Icon';
+
+    function annotate($query, $name=false) {
+        return $query->values('ticket_pid', 'flags');
+    }
+
+    function getDecoration($row, $text) {
+        $flags = $row['flags'];
+        $combine = ($flags & Ticket::FLAG_COMBINE_THREADS) != 0;
+        $separate = ($flags & Ticket::FLAG_SEPARATE_THREADS) != 0;
+        $linked = ($flags & Ticket::FLAG_LINKED) != 0;
+
+        if ($combine || $separate) {
+            return sprintf('<a data-placement="bottom" data-toggle="tooltip" title="%s" <i class="icon-code-fork"></i></a>',
+                           $combine ? __('Combine') : __('Separate'));
+        } elseif ($linked)
+            return '<i class="icon-link"></i>';
+    }
+
+    function isVisible($row) {
+        return $row['ticket_pid'];
+    }
+}
+
+class LinkedFlagDecoration
+extends QueueColumnAnnotation {
+    static $icon = 'link';
+    static $desc = /* @trans */ 'Linked Icon';
+
+    function annotate($query, $name=false) {
+        return $query->values('ticket_pid', 'flags');
+    }
+
+    function getDecoration($row, $text) {
+        $flags = $row['flags'];
+        $linked = ($flags & Ticket::FLAG_LINKED) != 0;
+        if ($linked && $_REQUEST['a'] == 'search')
+            return '<i class="icon-link"></i>';
+    }
+
+    function isVisible($row) {
+        return $row['ticket_pid'];
+    }
+}
+
 class TicketSourceDecoration
 extends QueueColumnAnnotation {
     static $icon = 'phone';
     static $desc = /* @trans */ 'Ticket Source';
 
-    function annotate($query) {
+    function annotate($query, $name=false) {
         return $query->values('source');
     }
 
@@ -1289,7 +1856,7 @@ extends QueueColumnAnnotation {
     static $icon = "lock";
     static $desc = /* @trans */ 'Locked';
 
-    function annotate($query) {
+    function annotate($query, $name=false) {
         global $thisstaff;
 
         return $query
@@ -1316,7 +1883,7 @@ extends QueueColumnAnnotation {
     static $icon = "user";
     static $desc = /* @trans */ 'Assignee Avatar';
 
-    function annotate($query) {
+    function annotate($query, $name=false) {
         return $query->values('staff_id', 'team_id');
     }
 
@@ -1355,7 +1922,7 @@ extends QueueColumnAnnotation {
     static $icon = "user";
     static $desc = /* @trans */ 'User Avatar';
 
-    function annotate($query) {
+    function annotate($query, $name=false) {
         return $query->values('user_id');
     }
 
@@ -1462,8 +2029,9 @@ class QueueColumnCondition {
      * field name being search, the method used for searhing, and the method-
      * specific data entered in the UI.
      */
-    static function isolateCriteria($criteria, $root='Ticket') {
-        $searchable = CustomQueue::getSearchableFields($root);
+
+    static function isolateCriteria($criteria, $base='Ticket') {
+        $searchable = CustomQueue::getSearchableFields($base);
         foreach ($criteria as $k=>$v) {
             if (substr($k, -7) === '+method') {
                 list($name,) = explode('+', $k, 2);
@@ -1666,6 +2234,7 @@ extends VerySimpleModel {
     var $_annotations;
     var $_conditions;
     var $_queue;            // Apparent queue if being inherited
+    var $_fields;
 
     function getId() {
         return $this->id;
@@ -1684,7 +2253,16 @@ extends VerySimpleModel {
     // These getters fetch data from the annotated overlay from the
     // queue_column table
     function getQueue() {
-        return $this->_queue ?: $this->queue;
+        if (!isset($this->_queue)) {
+            $queue = $this->queue;
+
+            if (!$queue && ($queue_id = $this->queue_id) && is_numeric($queue_id))
+                $queue = CustomQueue::lookup($queue_id);
+
+            $this->_queue = $queue;
+        }
+
+        return $this->_queue;
     }
     /**
      * If a column is inherited into a child queue and there are conditions
@@ -1695,6 +2273,24 @@ extends VerySimpleModel {
         $this->_queue = $queue;
     }
 
+    function getFields() {
+        if (!isset($this->_fields)) {
+            $root = ($q = $this->getQueue()) ? $q->getRoot() : 'Ticket';
+            $fields = CustomQueue::getSearchableFields($root);
+            $primary = CustomQueue::getOrmPath($this->primary);
+            $secondary = CustomQueue::getOrmPath($this->secondary);
+            if (($F = $fields[$primary]) && (list(,$field) = $F))
+                $this->_fields[$primary] = $field;
+            if (($F = $fields[$secondary]) && (list(,$field) = $F))
+                $this->_fields[$secondary] = $field;
+        }
+        return $this->_fields;
+    }
+
+    function getField($path=null) {
+        $fields = $this->getFields();
+        return @$fields[$path ?: $this->primary];
+    }
     function getWidth() {
         return $this->width ?: 100;
     }
@@ -1762,8 +2358,7 @@ extends VerySimpleModel {
     }
 
     function renderBasicValue($row) {
-        $root = ($q = $this->getQueue()) ? $q->getRoot() : 'Ticket';
-        $fields = CustomQueue::getSearchableFields($root);
+        $fields = $this->getFields();
         $primary = CustomQueue::getOrmPath($this->primary);
         $secondary = CustomQueue::getOrmPath($this->secondary);
 
@@ -1772,17 +2367,28 @@ extends VerySimpleModel {
         // converted to a string.
 
         if (($F = $fields[$primary])
-            && (list(,$field) = $F)
-            && ($T = $field->from_query($row, $primary))
+            && ($T = $F->from_query($row, $primary))
         ) {
-            return new LazyDisplayWrapper($field, $T);
+            return new LazyDisplayWrapper($F, $T);
         }
         if (($F = $fields[$secondary])
-            && (list(,$field) = $F)
-            && ($T = $field->from_query($row, $secondary))
+            && ($T = $F->from_query($row, $secondary))
         ) {
-            return new LazyDisplayWrapper($field, $T);
+            return new LazyDisplayWrapper($F, $T);
         }
+
+         return new LazyDisplayWrapper($F, '');
+    }
+
+    function from_query($row) {
+        if (!($f = $this->getField($this->primary)))
+            return '';
+
+        $val = $f->to_php($f->from_query($row, $this->primary));
+        if (!is_string($val))
+            $val = $f->display($val);
+
+        return $val;
     }
 
     function applyTruncate($text, $row) {
@@ -1826,14 +2432,12 @@ extends VerySimpleModel {
 
     function mangleQuery($query, $root=null) {
         // Basic data
-        $fields = CustomQueue::getSearchableFields($root ?: $this->getQueue()->getRoot());
-        if ($primary = $fields[$this->primary]) {
-            list(,$field) = $primary;
+        $fields = $this->getFields();
+        if ($field = $fields[$this->primary]) {
             $query = $this->addToQuery($query, $field,
                 CustomQueue::getOrmPath($this->primary, $query));
         }
-        if ($secondary = $fields[$this->secondary]) {
-            list(,$field) = $secondary;
+        if ($field = $fields[$this->secondary]) {
             $query = $this->addToQuery($query, $field,
                 CustomQueue::getOrmPath($this->secondary, $query));
         }
@@ -1855,17 +2459,44 @@ extends VerySimpleModel {
     }
 
     function applySort($query, $reverse=false) {
-        $fields = CustomQueue::getSearchableFields($this->getQueue()->getRoot());
+	    $root = ($q = $this->getQueue()) ? $q->getRoot() : 'Ticket';
+        $fields = CustomQueue::getSearchableFields($root);
+
+        $keys = array();
         if ($primary = $fields[$this->primary]) {
             list(,$field) = $primary;
-            $query = $field->applyOrderBy($query, $reverse,
-                CustomQueue::getOrmPath($this->primary, $query));
+            $keys[] = array(CustomQueue::getOrmPath($this->primary, $query),
+                    $field);
         }
+
         if ($secondary = $fields[$this->secondary]) {
             list(,$field) = $secondary;
-            $query = $field->applyOrderBy($query, $reverse,
-                CustomQueue::getOrmPath($this->secondary, $query));
+            $keys[] = array(CustomQueue::getOrmPath($this->secondary,
+                        $query), $field);
         }
+
+        if (count($keys) > 1) {
+            $fields = array();
+            foreach ($keys as $key) {
+                list($path, $field) = $key;
+                foreach ($field->getSortKeys($path) as $field)
+                    $fields[]  = new SqlField($field);
+            }
+            // Force nulls to the buttom.
+            $fields[] = 'zzz';
+
+            $alias = sprintf('C%d', $this->getId());
+            $expr = call_user_func_array(array('SqlFunction', 'COALESCE'),
+                    $fields);
+            $query->annotate(array($alias => $expr));
+
+            $reverse = $reverse ? '-' : '';
+            $query = $query->order_by("{$reverse}{$alias}");
+        } elseif($keys[0]) {
+            list($path, $field) = $keys[0];
+            $query = $field->applyOrderBy($query, $reverse, $path);
+        }
+
         return $query;
     }
 
@@ -1903,7 +2534,8 @@ extends VerySimpleModel {
             if ($include_queue && ($q = $this->getQueue())
                 && ($q_conds = $q->getConditions())
             ) {
-                $this->_conditions = array_merge($this->_conditions, $q_conds);
+
+                $this->_conditions = array_merge($q_conds, $this->_conditions);
             }
         }
         return $this->_conditions;
@@ -2000,20 +2632,125 @@ extends VerySimpleModel {
     }
 }
 
+
+class QueueConfig
+extends VerySimpleModel {
+    static $meta = array(
+        'table' => QUEUE_CONFIG_TABLE,
+        'pk' => array('queue_id', 'staff_id'),
+        'joins' => array(
+            'queue' => array(
+                'constraint' => array(
+                    'queue_id' => 'CustomQueue.id'),
+            ),
+            'staff' => array(
+                'constraint' => array(
+                    'staff_id' => 'Staff.staff_id',
+                )
+            ),
+            'columns' => array(
+                'reverse' => 'QueueColumnGlue.config',
+                'constrain' => array('staff_id' =>'QueueColumnGlue.staff_id'),
+                'broker' => 'QueueColumnListBroker',
+            ),
+        ),
+    );
+
+    function getSettings() {
+        return JsonDataParser::decode($this->setting);
+    }
+
+
+    function update($vars, &$errors) {
+
+        // settings of interest
+        $setting = array(
+                'sort_id' => (int) $vars['sort_id'],
+                'filter' => $vars['filter'],
+                'inherit-sort' => ($vars['sort_id'] == '::'),
+                'inherit-columns' => isset($vars['inherit-columns']),
+                'criteria' => $vars['criteria'] ?: array(),
+                );
+
+        if (!$setting['inherit-columns'] && $vars['columns']) {
+            if (!$this->columns->updateColumns($vars['columns'], $errors, array(
+                                'queue_id' => $this->queue_id,
+                                'staff_id' => $this->staff_id)))
+                $setting['inherit-columns'] = true;
+            $this->columns->reset();
+        }
+
+        $this->setting =  JsonDataEncoder::encode($setting);
+        return $this->save(true);
+    }
+
+    function save($refetch=false) {
+        if ($this->dirty)
+            $this->updated = SqlFunction::NOW();
+        return parent::save($refetch || $this->dirty);
+    }
+
+    static function create($vars=false) {
+        $inst = new static($vars);
+        return $inst;
+    }
+}
+
+
+class QueueExport
+extends VerySimpleModel {
+    static $meta = array(
+        'table' => QUEUE_EXPORT_TABLE,
+        'pk' => array('id'),
+        'joins' => array(
+            'queue' => array(
+                'constraint' => array('queue_id' => 'CustomQueue.id'),
+            ),
+        ),
+        'select_related' => array('queue'),
+        'ordering' => array('sort'),
+    );
+
+
+    function getPath() {
+        return $this->path;
+    }
+
+    function getField() {
+        return $this->getPath();
+    }
+
+    function getHeading() {
+        return $this->heading;
+    }
+
+    static function create($vars=false) {
+        $inst = new static($vars);
+        return $inst;
+    }
+}
+
 class QueueColumnGlue
 extends VerySimpleModel {
     static $meta = array(
         'table' => QUEUE_COLUMN_TABLE,
-        'pk' => array('queue_id', 'column_id'),
+        'pk' => array('queue_id', 'staff_id', 'column_id'),
         'joins' => array(
             'column' => array(
                 'constraint' => array('column_id' => 'QueueColumn.id'),
             ),
             'queue' => array(
-                'constraint' => array('queue_id' => 'CustomQueue.id'),
+                'constraint' => array(
+                    'queue_id' => 'CustomQueue.id',
+                    'staff_id' => 'CustomQueue.staff_id'),
+            ),
+            'config' => array(
+                'constraint' => array(
+                    'queue_id' => 'QueueConfig.queue_id',
+                    'staff_id' => 'QueueConfig.staff_id'),
             ),
         ),
-        'select_related' => array('column', 'queue'),
+        'select_related' => array('column'),
         'ordering' => array('sort'),
     );
 }
@@ -2045,6 +2782,42 @@ extends InstrumentedList {
         parent::add($anno, false);
         return $anno;
     }
+
+    function updateColumns($columns, &$errors, $options=array()) {
+        $new = $columns;
+        $order = array_keys($new);
+        foreach ($this as $col) {
+            $key = $col->column_id;
+            if (!isset($columns[$key])) {
+                $this->remove($col);
+                continue;
+            }
+            $info = $columns[$key];
+            $col->set('sort', array_search($key, $order));
+            $col->set('heading', $info['heading']);
+            $col->set('width', $info['width']);
+            $col->setSortable($info['sortable']);
+            unset($new[$key]);
+        }
+        // Add new columns
+        foreach ($new as $info) {
+            $glue = new QueueColumnGlue(array(
+                'staff_id' => $options['staff_id'] ?: 0 ,
+                'queue_id' => $options['queue_id'] ?: 0,
+                'column_id' => $info['column_id'],
+                'sort' => array_search($info['column_id'], $order),
+                'heading' => $info['heading'],
+                'width' => $info['width'] ?: 100,
+                'bits' => $info['sortable'] ?  QueueColumn::FLAG_SORTABLE : 0,
+            ));
+
+            $this->add(QueueColumn::lookup($info['column_id']), $glue);
+        }
+        // Re-sort the in-memory columns array
+        $this->sort(function($c) { return $c->sort; });
+
+        return $this->saveAll();
+    }
 }
 
 class QueueSort
@@ -2061,6 +2834,7 @@ extends VerySimpleModel {
     );
 
     var $_columns;
+    var $_extra;
 
     function getRoot($hint=false) {
         switch ($hint ?: $this->root) {
@@ -2078,6 +2852,12 @@ extends VerySimpleModel {
         return $this->id;
     }
 
+    function getExtra() {
+        if (isset($this->extra) && !isset($this->_extra))
+            $this->_extra = JsonDataParser::decode($this->extra);
+        return $this->_extra;
+    }
+
     function applySort(QuerySet $query, $reverse=false, $root=false) {
         $fields = CustomQueue::getSearchableFields($this->getRoot($root));
         foreach ($this->getColumnPaths() as $path=>$descending) {
@@ -2087,6 +2867,11 @@ extends VerySimpleModel {
                 $query = $field->applyOrderBy($query, $descending,
                     CustomQueue::getOrmPath($path, $query));
             }
+        }
+
+        // Add index hint if defined
+        if (($extra = $this->getExtra()) && isset($extra['index'])) {
+            $query->setOption(QuerySet::OPT_INDEX_HINT, $extra['index']);
         }
         return $query;
     }
@@ -2118,6 +2903,11 @@ extends VerySimpleModel {
 
     function getDataConfigForm($source=false) {
         return new QueueSortDataConfigForm($source ?: $this->getDbFields(),
+            array('id' => $this->id));
+    }
+
+    function getAdvancedConfigForm($source=false) {
+        return new QueueSortAdvancedConfigForm($source ?: $this->getExtra(),
             array('id' => $this->id));
     }
 
@@ -2154,6 +2944,11 @@ extends VerySimpleModel {
                 $columns[] = ($descending ? '-' : '') . $path;
             }
             $this->columns = JsonDataEncoder::encode($columns);
+        }
+
+        if ($this->getExtra() !== null) {
+            $extra = $this->getAdvancedConfigForm($vars)->getClean();
+            $this->extra = JsonDataEncoder::encode($extra);
         }
 
         if (count($errors))
@@ -2335,14 +3130,15 @@ extends TicketLinkFilter {
 }
 QueueColumnFilter::register('TicketLinkWithThreadPreviewFilter', __('Link'));
 
+
 class DateTimeFilter
 extends QueueColumnFilter {
     static $id = 'date:full';
     static $desc = /* @trans */ "Date and Time";
 
     function filter($text, $row) {
-		if ($text)
-        return $text->changeTo(Format::datetime($text->value));
+        return $text ?
+            $text->changeTo(Format::datetime($text->value)) : '';
     }
 }
 
@@ -2423,6 +3219,27 @@ extends AbstractForm {
                     ? _H('queuesort.name.'.$this->options['id']) : false,
                 'configuration' => array(
                     'placeholder' => __('Sort Criteria Title'),
+                ),
+            )),
+        );
+    }
+}
+
+class QueueSortAdvancedConfigForm
+extends AbstractForm {
+    function getInstructions() {
+        return __('If unsure, leave these options blank and unset');
+    }
+
+    function buildFields() {
+        return array(
+            'index' => new TextboxField(array(
+                'label' => __('Database Index'),
+                'hint' => __('Use this index when sorting on this column'),
+                'required' => false,
+                'layout' => new GridFluidCell(12),
+                'configuration' => array(
+                    'placeholder' => __('Automatic'),
                 ),
             )),
         );

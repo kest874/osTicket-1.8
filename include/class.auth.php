@@ -488,6 +488,9 @@ abstract class StaffAuthenticationBackend  extends AuthenticationBackend {
             sprintf(_S("%s logged in [%s], via %s"), $staff->getUserName(),
                 $_SERVER['REMOTE_ADDR'], get_class($bk))); //Debug.
 
+        $agent = Staff::lookup($staff->getId());
+        $type = array('type' => 'login');
+        Signal::send('person.login', $agent, $type);
         // Tag the authkey.
         $authkey = $bk::$id.':'.$authkey;
 
@@ -528,6 +531,9 @@ abstract class StaffAuthenticationBackend  extends AuthenticationBackend {
                     $staff->getUserName(),
                     $_SERVER['REMOTE_ADDR'])); //Debug.
 
+        $agent = Staff::lookup($staff->getId());
+        $type = array('type' => 'logout');
+        Signal::send('person.logout', $agent, $type);
         Signal::send('auth.logout', $staff);
     }
 
@@ -677,6 +683,10 @@ abstract class UserAuthenticationBackend  extends AuthenticationBackend {
                 $user->getUserName(), $user->getId(), $_SERVER['REMOTE_ADDR']);
         $ost->logDebug(_S('User login'), $msg);
 
+        $u = $user->getSessionUser()->getUser();
+        $type = array('type' => 'login');
+        Signal::send('person.login', $u, $type);
+
         if ($bk->supportsInteractiveAuthentication() && ($acct=$user->getAccount()))
             $acct->cancelResetTokens();
 
@@ -712,6 +722,10 @@ abstract class UserAuthenticationBackend  extends AuthenticationBackend {
         $ost->logDebug(_S('User logout'),
             sprintf(_S("%s logged out [%s]" /* Tokens are <username> and <ip> */),
                 $user->getUserName(), $_SERVER['REMOTE_ADDR']));
+
+        $u = $user->getSessionUser()->getUser();
+        $type = array('type' => 'logout');
+        Signal::send('person.logout', $u, $type);
     }
 
     protected function getAuthKey($user) {
@@ -887,8 +901,16 @@ class StaffAuthStrikeBackend extends  AuthStrikeBackend {
                    ._S('Time').": ".date('M j, Y, g:i a T')."\n\n"
                    ._S('Attempts').": {$authsession['strikes']}\n"
                    ._S('Timeout').": ".sprintf(_N('%d minute', '%d minutes', $timeout), $timeout)."\n\n";
+            $admin_alert = ($cfg->alertONLoginError() == 1) ? TRUE : FALSE;
             $ost->logWarning(sprintf(_S('Excessive login attempts (%s)'),$username),
-                    $alert, $cfg->alertONLoginError());
+                    $alert, $admin_alert);
+
+              if ($username) {
+                $agent = Staff::lookup($username);
+                $type = array('type' => 'login', 'msg' => sprintf('Excessive login attempts (%s)', $authsession['strikes']));
+                Signal::send('person.login', $agent, $type);
+              }
+
             return new AccessDenied(__('Forgot your login info? Contact Admin.'));
         //Log every other third failed login attempt as a warning.
         } elseif($authsession['strikes']%3==0) {
@@ -947,14 +969,30 @@ class UserAuthStrikeBackend extends  AuthStrikeBackend {
                     _S('IP').": {$_SERVER['REMOTE_ADDR']}\n".
                     _S('Time').": ".date('M j, Y, g:i a T')."\n\n".
                     _S('Attempts').": {$authsession['strikes']}";
-            $ost->logError(_S('Excessive login attempts (user)'), $alert, ($cfg->alertONLoginError()));
+            $admin_alert = ($cfg->alertONLoginError() == 1 ? TRUE : FALSE);
+            $ost->logError(_S('Excessive login attempts (user)'), $alert, $admin_alert);
+
+            if ($username) {
+              $account = UserAccount::lookupByUsername($username);
+              $id = UserEmailModel::getIdByEmail($username);
+              if ($account)
+                  $user = User::lookup($account->user_id);
+              elseif ($id)
+                $user = User::lookup($id);
+
+              if ($user) {
+                $type = array('type' => 'login', 'msg' => sprintf('Excessive login attempts (%s)', $authsession['strikes']));
+                Signal::send('person.login', $user, $type);
+              }
+            }
+
             return new AccessDenied(__('Access denied'));
         } elseif($authsession['strikes']%3==0) { //Log every third failed login attempt as a warning.
             $alert=_S('Username').": {$username}\n".
                     _S('IP').": {$_SERVER['REMOTE_ADDR']}\n".
                     _S('Time').": ".date('M j, Y, g:i a T')."\n\n".
                     _S('Attempts').": {$authsession['strikes']}";
-            $ost->logWarning(_S('Failed login attempt (user)'), $alert);
+            $ost->logWarning(_S('Failed login attempt (user)'), $alert, false);
         }
 
     }
@@ -1061,7 +1099,8 @@ class AuthTokenAuthentication extends UserAuthenticationBackend {
             if (($ticket = Ticket::lookupByNumber($_GET['t'], $_GET['e']))
                     // Using old ticket auth code algo - hardcoded here because it
                     // will be removed in ticket class in the upcoming rewrite
-                    && !strcasecmp($_GET['a'], md5($ticket->getId() .  strtolower($_GET['e']) . SECRET_SALT))
+                    && strcasecmp((string) $_GET['a'], md5($ticket->getId()
+                            .  strtolower($_GET['e']) . SECRET_SALT)) === 0
                     && ($owner = $ticket->getOwner()))
                 $user = new ClientSession($owner);
         }
@@ -1313,7 +1352,35 @@ abstract class PasswordPolicy {
     static function register($policy) {
         static::$registry[] = $policy;
     }
+
+    static function cleanSessions($model, $user=null) {
+        $criteria = array();
+
+        switch (true) {
+            case ($model instanceof Staff):
+                $criteria['user_id'] = $model->getId();
+
+                if ($user && ($model->getId() == $user->getId()))
+                    array_push($criteria,
+                        Q::not(array('session_id' => $user->session->session_id)));
+                break;
+            case ($model instanceof User):
+                $regexp = '_auth\|.*"user";[a-z]+:[0-9]+:{[a-z]+:[0-9]+:"id";[a-z]+:'.$model->getId();
+                $criteria['user_id'] = 0;
+                $criteria['session_data__regex'] = $regexp;
+
+                if ($user)
+                    array_push($criteria,
+                        Q::not(array('session_id' => $user->session->session_id)));
+                break;
+            default:
+                return false;
+        }
+
+        return SessionData::objects()->filter($criteria)->delete();
+    }
 }
+Signal::connect('auth.clean', array('PasswordPolicy', 'cleanSessions'));
 
 class osTicketPasswordPolicy
 extends PasswordPolicy {

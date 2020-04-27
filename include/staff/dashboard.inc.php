@@ -11,8 +11,10 @@ if ($staff->darkmode ==1 && !isset($_GET["r"])){?>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/exporting.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/export-data.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/pareto.js"></script>
-
-<script>
+<script
+$('#loading').show();
+            $.toggleOverlay(true);
+</script>
 	
 
 Highcharts.theme = {
@@ -875,7 +877,6 @@ $sitecolor = array(
                 max(case when Status = 'CLOSED' then VALUE else 0 end) as CLOSED,
                 max(case when Status = 'BACKLOG' then VALUE else '0' end) as BACKLOG
                 from ( 
-
                 Select * from(                        
                                 SELECT   COUNT(created) AS VALUE, 'OPEN' AS Status, FROM_DAYS(TO_DAYS(created) - MOD(TO_DAYS(created) 
                                                          - 2, 7)) AS CALENDARWEEK
@@ -1038,7 +1039,6 @@ $sitecolor = array(
                 max(case when Status = 'CLOSED' then VALUE else 0 end) as CLOSED,
                 max(case when Status = 'BACKLOG' then VALUE else '0' end) as BACKLOG
                 from ( 
-
                 Select * from(                        
                                 SELECT   COUNT(created) AS VALUE, 'OPEN' AS Status, FROM_DAYS(TO_DAYS(created) - MOD(TO_DAYS(created) 
                                                          - 2, 7)) AS CALENDARWEEK
@@ -1192,7 +1192,6 @@ $sitecolor = array(
         $sql1="select avg(daysopen) as DaysOpen,CALENDARWEEK from
 					( select datediff(ost_ticket.closed,created) as DaysOpen,  FROM_DAYS(TO_DAYS(closed) - MOD(TO_DAYS(closed)- 2, 7)) AS CALENDARWEEK FROM ost_ticket where closed > DATE_SUB(LAST_DAY(DATE_ADD(NOW(), INTERVAL 12-MONTH(NOW()) MONTH)), INTERVAL 1 YEAR) 
 					AND ost_ticket.topic_id <> 12 and topic_id <> 14 AND topic_id <> 94 and (status_id = 3 or status_id=12)) d
-
 					group by CALENDARWEEK";
         $tresults = db_query($sql1); 
     ?>    
@@ -1238,7 +1237,6 @@ select * from (select topic_id, topic from ost_help_topic where topic_pid = 0  a
 union
 select ht.topic_id,concat(htp.topic,' / ', ht.topic) as topic from ost_help_topic ht join (SELECT topic_id, topic FROM osticket_sup.ost_help_topic where isactive = 1)htp on ht.topic_pid = htp.topic_id )data
 ) topics
-
 on t.topic_id = topics.topic_id
 where t.status_id not in (3,4,5,12) and t.topic_id not in (12,14)
 group by t.topic_id  order by COUNT desc limit 10";
@@ -1307,7 +1305,6 @@ select * from (select topic_id, topic from ost_help_topic where topic_pid = 0  a
 union
 select ht.topic_id,concat(htp.topic,' / ', ht.topic) as topic from ost_help_topic ht join (SELECT topic_id, topic FROM osticket_sup.ost_help_topic where isactive = 1)htp on ht.topic_pid = htp.topic_id )data
 ) topics
-
 on t.topic_id = topics.topic_id
 where year(t.closed) = year(now()) and t.status_id in (2,3) and t.topic_id not in (12,14)
 group by t.topic_id  order by COUNT desc limit 10";
@@ -1377,7 +1374,6 @@ select * from (select topic_id, topic from ost_help_topic where topic_pid = 0  a
 union
 select ht.topic_id,concat(htp.topic,' / ', ht.topic) as topic from ost_help_topic ht join (SELECT topic_id, topic FROM osticket_sup.ost_help_topic where isactive = 1)htp on ht.topic_pid = htp.topic_id )data
 ) topics
-
 on t.topic_id = topics.topic_id
 where year(t.closed) = year(now())-1 and t.status_id in (2,3) and t.topic_id not in (12,14)
 group by t.topic_id  order by COUNT desc limit 10";
@@ -2051,7 +2047,6 @@ $(function() {
                             group by STATUS,LASTNAME
                 union all 
                 select b.count as COUNT, a.name as STATUS, b.OWNER_NAME  from (select 0 as count, name  from ost_ticket_status where id != 3 and id != 12 and id != 1 and id != 2 and id != 4 and id != 5) a join 
-
                 (select distinct CONCAT(ost_staff.lastname, ', ', ost_staff.firstname) as OWNER_NAME, 0 as count
                 FROM (ost_ticket LEFT JOIN ost_ticket_status ON ost_ticket.status_id = ost_ticket_status.id)
                  LEFT JOIN ost_staff ON ost_ticket.staff_id = ost_staff.staff_id WHERE ost_ticket.topic_id != 12 and 
@@ -2451,11 +2446,8 @@ $sql="select distinct LASTNAME,OWNER_NAME from
     concat(u.lastname, ', ', u.firstname) AS OWNER_NAME, s.name as STATUS FROM ost_ticket t 
 	left join ost_staff u on u.staff_id = t.staff_id 
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.status_id = 3 AND t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.closed >(CURDATE() - INTERVAL 11 MONTH)
 	) a
-
 	group by OWNER_NAME, CALENDARYEAR, CALENDARWEEK order by CALENDARYEAR,CALENDARWEEK
 )b";
 
@@ -2467,11 +2459,8 @@ $sql="select CALENDARWEEK,CALENDARYEAR, count(LASTNAME) as COUNT,OWNER_NAME, LAS
     concat(u.lastname, ', ', u.firstname) AS OWNER_NAME, s.name as STATUS FROM ost_ticket t 
 	left join ost_staff u on u.staff_id = t.staff_id 
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.status_id = 3 AND t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.closed >(CURDATE() - INTERVAL 11 MONTH)
 	) a
-
 	group by OWNER_NAME, CALENDARYEAR, CALENDARWEEK order by CALENDARYEAR,CALENDARWEEK
 ";
 
@@ -2483,11 +2472,8 @@ $sql="select distinct cat from (select concat(MONTHNAME(STR_TO_DATE(CALENDARWEEK
     concat(u.lastname, ', ', u.firstname) AS OWNER_NAME, s.name as STATUS FROM ost_ticket t 
 	left join ost_staff u on u.staff_id = t.staff_id 
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.status_id = 3 AND t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.closed >(CURDATE() - INTERVAL 11 MONTH)
 	) a
-
 	group by OWNER_NAME, CALENDARYEAR, CALENDARWEEK order by CALENDARYEAR,CALENDARWEEK)a";
     
  $periods = db_query($sql);   
@@ -2498,11 +2484,8 @@ $sql="select * from (select cat,sum(COUNT) as COUNT, OWNER_NAME,CALENDARWEEK,CAL
     concat(u.lastname, ', ', u.firstname) AS OWNER_NAME, s.name as STATUS FROM ost_ticket t 
 	left join ost_staff u on u.staff_id = t.staff_id 
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.status_id = 3 AND t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.closed >(CURDATE() - INTERVAL 11 MONTH)
 	) a
-
 	group by OWNER_NAME, CALENDARYEAR, CALENDARWEEK
     
     union all
@@ -2513,11 +2496,8 @@ $sql="select * from (select cat,sum(COUNT) as COUNT, OWNER_NAME,CALENDARWEEK,CAL
     concat(u.lastname, ', ', u.firstname) AS OWNER_NAME, s.name as STATUS FROM ost_ticket t 
 	left join ost_staff u on u.staff_id = t.staff_id 
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.status_id = 3 AND t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.closed >(CURDATE() - INTERVAL 11 MONTH)
 	) a
-
 	group by OWNER_NAME, CALENDARYEAR, CALENDARWEEK)a left join
     
     (SELECT distinct
@@ -2640,8 +2620,6 @@ $sql="select distinct LOCATION from
 	left join ost_user u on u.id = t.user_id 
 	left join ost_organization o on o.id = u.org_id
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and (t.created) > (CURDATE() - INTERVAL 11 MONTH)
 	) a
 	where LOCATION is not null
@@ -2660,7 +2638,6 @@ $sql="select * from (select cat,sum(COUNT) as COUNT, LOCATION,CALENDARWEEK,CALEN
 		left join ost_ticket_status s on s.id = t.status_id
 		where t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.created >(CURDATE() - INTERVAL 11 MONTH)
 	) a
-
 	group by LOCATION, CALENDARYEAR, CALENDARWEEK
     
     union all
@@ -2672,11 +2649,8 @@ $sql="select * from (select cat,sum(COUNT) as COUNT, LOCATION,CALENDARWEEK,CALEN
     left join ost_user u on u.id = t.user_id 
 	left join ost_organization o on o.id = u.org_id
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.created >(CURDATE() - INTERVAL 11 MONTH)
 	) a
-
 	group by LOCATION, CALENDARYEAR, CALENDARWEEK)a left join
     
     (SELECT distinct
@@ -2684,7 +2658,6 @@ $sql="select * from (select cat,sum(COUNT) as COUNT, LOCATION,CALENDARWEEK,CALEN
 	left join ost_user u on u.id = t.user_id 
 	left join ost_organization o on o.id = u.org_id
 	left join ost_ticket_status s on s.id = t.status_id
-
 	where t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.created >(CURDATE() - INTERVAL 11 MONTH))b on 1=1) dat
     
     group by  cat, LOCATION) datb  Where LOCATION IS NOT NULL order by CALENDARYEAR, CALENDARWEEK
@@ -2699,8 +2672,6 @@ $sql="select distinct concat(MONTHNAME(STR_TO_DATE(CALENDARWEEK, '%m')),' ',CALE
 	left join ost_user u on u.id = t.user_id 
 	left join ost_organization o on o.id = u.org_id
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and (t.created) > (CURDATE() - INTERVAL 11 MONTH)
 	) a
 	where LOCATION is not null
@@ -2808,8 +2779,6 @@ $sql="select distinct LOCATION from
 	left join ost_user u on u.id = t.user_id 
 	left join ost_organization o on o.id = u.org_id
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and (t.closed) > (CURDATE() - INTERVAL 11 MONTH)
 	) a
 	where LOCATION is not null
@@ -2828,7 +2797,6 @@ $sql="select * from (select cat,sum(COUNT) as COUNT, LOCATION,CALENDARWEEK,CALEN
 		left join ost_ticket_status s on s.id = t.status_id
 		where t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.closed >(CURDATE() - INTERVAL 11 MONTH)
 	) a
-
 	group by LOCATION, CALENDARYEAR, CALENDARWEEK
     
     union all
@@ -2840,11 +2808,8 @@ $sql="select * from (select cat,sum(COUNT) as COUNT, LOCATION,CALENDARWEEK,CALEN
     left join ost_user u on u.id = t.user_id 
 	left join ost_organization o on o.id = u.org_id
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.closed >(CURDATE() - INTERVAL 11 MONTH)
 	) a
-
 	group by LOCATION, CALENDARYEAR, CALENDARWEEK)a left join
     
     (SELECT distinct
@@ -2852,7 +2817,6 @@ $sql="select * from (select cat,sum(COUNT) as COUNT, LOCATION,CALENDARWEEK,CALEN
 	left join ost_user u on u.id = t.user_id 
 	left join ost_organization o on o.id = u.org_id
 	left join ost_ticket_status s on s.id = t.status_id
-
 	where t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and t.closed >(CURDATE() - INTERVAL 11 MONTH))b on 1=1) dat
     
     group by  cat, LOCATION) datb  Where LOCATION IS NOT NULL order by CALENDARYEAR, CALENDARWEEK
@@ -2867,8 +2831,6 @@ $sql="select distinct concat(MONTHNAME(STR_TO_DATE(CALENDARWEEK, '%m')),' ',CALE
 	left join ost_user u on u.id = t.user_id 
 	left join ost_organization o on o.id = u.org_id
 	left join ost_ticket_status s on s.id = t.status_id
-
-
 	where t.topic_id <> 14 AND t.topic_id <> 12 AND t.topic_id <> 94 and (t.closed) > (CURDATE() - INTERVAL 11 MONTH)
 	) a
 	where LOCATION is not null
@@ -2966,8 +2928,6 @@ $(function () {
 });  
        
     
-      
+$('#loading').hide();
+            $.toggleOverlay(false);      
 </script>
-
-
-

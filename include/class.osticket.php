@@ -121,7 +121,7 @@ class osTicket {
             return true;
 
         $msg=sprintf(__('Invalid CSRF token [%1$s] on %2$s'),
-                ($_POST[$name].''.$_SERVER['HTTP_X_CSRFTOKEN']), THISPAGE);
+                (Format::htmlchars($_POST[$name]).''.$_SERVER['HTTP_X_CSRFTOKEN']), THISPAGE);
         $this->logWarning(__('Invalid CSRF Token').' '.$name, $msg, false);
 
         return false;
@@ -436,7 +436,7 @@ class osTicket {
             switch ($info['v']) {
             case '1':
                 if ($major && $info['m'] && $info['m'] != $major)
-                    continue;
+                    continue 2;
                 if ($product == 'core' && GIT_VERSION == '$git')
                     return $info['c'];
                 return $info['V'];
@@ -609,6 +609,17 @@ class osTicket {
         // Check if SSL was terminated by a loadbalancer
         return (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
                 && !strcasecmp($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https'));
+    }
+
+    /**
+     * Returns TRUE if the current browser is IE and FALSE otherwise
+     */
+    function is_ie() {
+        if (preg_match('/MSIE|Internet Explorer|Trident\/[\d]{1}\.[\d]{1,2}/',
+                $_SERVER['HTTP_USER_AGENT']))
+            return true;
+
+        return false;
     }
 
     /* returns true if script is being executed via commandline */

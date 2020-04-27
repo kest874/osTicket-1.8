@@ -1,26 +1,38 @@
 <?php
 /*********************************************************************
     class.mailer.php
+
     osTicket mailer
+
     It's mainly PEAR MAIL wrapper for now (more improvements planned).
+
     Peter Rotich <peter@osticket.com>
     Copyright (c)  2006-2013 osTicket
     http://www.osticket.com
+
     Released under the GNU General Public License WITHOUT ANY WARRANTY.
     See LICENSE.TXT for details.
+
     vim: expandtab sw=4 ts=4 sts=4:
 **********************************************************************/
+
 include_once(INCLUDE_DIR.'class.email.php');
 require_once(INCLUDE_DIR.'html2text.php');
+
 class Mailer {
+
     var $email;
+
     var $ht = array();
     var $attachments = array();
     var $options = array();
+
     var $smtp = array();
     var $eol="\n";
+
     function __construct($email=null, array $options=array()) {
         global $cfg;
+
         if(is_object($email) && $email->isSMTPEnabled() && ($info=$email->getSMTPInfo())) { //is SMTP enabled for the current email?
             $this->smtp = $info;
         } elseif($cfg && ($e=$cfg->getDefaultSMTPEmail()) && $e->isSMTPEnabled()) { //What about global SMTP setting?
@@ -32,16 +44,20 @@ class Mailer {
                 $this->smtp = $info;
             $email = $e;
         }
+
         $this->email = $email;
         $this->attachments = array();
         $this->options = $options;
     }
+
     function getEOL() {
         return $this->eol;
     }
+
     function getEmail() {
         return $this->email;
     }
+
     function getSMTPInfo() {
         return $this->smtp;
     }
@@ -49,37 +65,51 @@ class Mailer {
     function setFromAddress($from) {
         $this->ht['from'] = $from;
     }
+
     function getFromAddress($options=array()) {
+
         if (!$this->ht['from'] && ($email=$this->getEmail())) {
             if (($name = $options['from_name'] ?: $email->getName()))
                 $this->ht['from'] =sprintf('"%s" <%s>', $name, $email->getEmail());
             else
                 $this->ht['from'] =sprintf('<%s>', $email->getEmail());
         }
+
         return $this->ht['from'];
     }
+
     /* attachments */
     function getAttachments() {
         return $this->attachments;
     }
+
     function addAttachment(Attachment $attachment) {
         // XXX: This looks too assuming; however, the attachment processor
         // in the ::send() method seems hard coded to expect this format
-        $this->attachments[$attachment->file_id] = $attachment;
+        $this->attachments[] = $attachment;
     }
-    function addFile(AttachmentFile $file) {
+
+    function addAttachmentFile(AttachmentFile $file) {
         // XXX: This looks too assuming; however, the attachment processor
         // in the ::send() method seems hard coded to expect this format
-        $this->attachments[$file->file_id] = $file;
+        $this->attachments[] = $file;
     }
+
+    function addFileObject(FileObject $file) {
+        $this->attachments[] = $file;
+    }
+
     function addAttachments($attachments) {
         foreach ($attachments as $a) {
             if ($a instanceof Attachment)
                 $this->addAttachment($a);
             elseif ($a instanceof AttachmentFile)
-                $this->addFile($a);
+                $this->addAttachmentFile($a);
+            elseif ($a instanceof FileObject)
+                $this->addFileObject($a);
         }
     }
+
     /**
      * getMessageId
      *
@@ -105,7 +135,7 @@ class Mailer {
      * VA-B-C, with dash separators and A-C explained below:
      *
      * V: Version code of the generated Message-Id
-     * A: Predictable random code — used for loop detection (sysid)
+     * A: Predictable random code — used for loop detection (sysid)
      * B: Random data for unique identifier (rand)
      * C: TAG: Base64(Pack(userid, entryId, threadId, type, Signature)),
      *    '=' chars discarded
@@ -130,6 +160,7 @@ class Mailer {
         $thread = $entry ? $entry->getThread()
             : (isset($options['thread']) && $options['thread'] instanceof Thread
                 ? $options['thread'] : false);
+
         switch (true) {
         case $recipient instanceof Staff:
             $utype = 'S';
@@ -140,9 +171,14 @@ class Mailer {
         case $recipient instanceof Collaborator:
             $utype = 'C';
             break;
+        case  $recipient instanceof MailingList:
+            $utype = 'M';
+            break;
         default:
-            $utype = $options['utype'] ?: '?';
+            $utype = $options['utype'] ?: is_array($recipient) ? 'M' : '?';
         }
+
+
         $tag = pack('VVVa',
             $recipient instanceof EmailContact ? $recipient->getUserId() : 0,
             $entry ? $entry->getId() : 0,
@@ -155,6 +191,7 @@ class Mailer {
         return sprintf('B%s-%s-%s-%s',
             $sysid, $rand, $tag, $sig);
     }
+
     /**
      * decodeMessageId
      *
@@ -181,6 +218,7 @@ class Mailer {
      *          'U' - TicketOwner
      *          'S' - Staff
      *          'C' - Collborator
+     *          'M' - Multiple
      *          '?' - Something else
      */
     static function decodeMessageId($mid) {
@@ -190,11 +228,14 @@ class Mailer {
         list($lhs, $sig) = explode('@', $mid, 2);
         // LHS should be tokenized by '-'
         $parts = explode('-', $lhs);
+
         $rv = array('loopback' => false, 'version' => false);
+
         // There should be at least two tokens if the message was sent by
         // this system. Otherwise, there's nothing to be detected
         if (count($parts) < 2)
             return $rv;
+
         $self = get_called_class();
         $decoders = array(
         'A' => function($id, $tag) use ($sig) {
@@ -224,92 +265,96 @@ class Mailer {
             return false;
         },
         );
+
         // Detect the MessageId version, which should be the first char
         $rv['version'] = @$parts[0][0];
         if (!isset($decoders[$rv['version']]))
             // invalid version code
             return null;
+
         // Drop the leading version code
         list($rv['code'], $rv['id'], $tag) = $parts;
         $rv['code'] = substr($rv['code'], 1);
+
         // Verify tag signature and unpack the tag
         $info = $decoders[$rv['version']]($rv['id'], $tag);
         if ($info === false)
             return $rv;
+
         $rv += $info;
+
         // Attempt to make the user-id more specific
         $classes = array(
             'S' => 'staffId', 'U' => 'userId', 'C' => 'userId',
         );
         if (isset($classes[$rv['userClass']]))
             $rv[$classes[$rv['userClass']]] = $rv['uid'];
+
         // Round-trip detection - the first section is the local
         // system's message-id code
         $rv['loopback'] = (0 === strcmp($rv['code'],
             static::getSystemMessageIdCode()));
+
         return $rv;
     }
+
     static function getSystemMessageIdCode() {
         return substr(str_replace('+', '=',
             base64_encode(md5('mail'.SECRET_SALT, true))),
             0, 6);
     }
-    function send($recipient, $subject, $message, $options=null) {
+
+    function send($recipients, $subject, $message, $options=null) {
         global $ost, $cfg;
+
         //Get the goodies
         require_once (PEAR_DIR.'Mail.php'); // PEAR Mail package
         require_once (PEAR_DIR.'Mail/mime.php'); // PEAR Mail_Mime packge
-        $messageId = $this->getMessageId($recipient, $options);
-        if (is_object($recipient) && is_callable(array($recipient, 'getEmail'))) {
-            // Add personal name if available
-            if (is_callable(array($recipient, 'getName'))) {
-                $to = sprintf('"%s" <%s>',
-                    $recipient->getName()->getOriginal(), $recipient->getEmail()
-                );
-            }
-            else {
-                $to = $recipient->getEmail();
-            }
-        } else {
-            $to = $recipient;
-        }
-        //do some cleanup
-        $to = preg_replace("/(\r\n|\r|\n)/s",'', trim($to));
+
+        $messageId = $this->getMessageId($recipients, $options);
         $subject = preg_replace("/(\r\n|\r|\n)/s",'', trim($subject));
         $headers = array (
             'From' => $this->getFromAddress($options),
-            'To' => $to,
             'Subject' => $subject,
             'Date'=> date('D, d M Y H:i:s O'),
             'Message-ID' => "<{$messageId}>",
             'X-Mailer' =>'osTicket Mailer',
         );
+
         // Add in the options passed to the constructor
         $options = ($options ?: array()) + $this->options;
+
         // Message Id Token
         $mid_token = '';
         // Check if the email is threadable
         if (isset($options['thread'])
             && $options['thread'] instanceof ThreadEntry
             && ($thread = $options['thread']->getThread())) {
+
             // Add email in-reply-to references if not set
             if (!isset($options['inreplyto'])) {
+
                 $entry = null;
                 switch (true) {
-                case $recipient instanceof TicketOwner:
-                case $recipient instanceof Collaborator:
-                    $entry = $thread->getLastEmailMessage(array(
-                                'user_id' => $recipient->getUserId()));
+                case $recipients instanceof MailingList:
+                    $entry = $thread->getLastEmailMessage();
                     break;
-                case $recipient instanceof Staff:
+                case $recipients instanceof TicketOwner:
+                case $recipients instanceof Collaborator:
+                    $entry = $thread->getLastEmailMessage(array(
+                                'user_id' => $recipients->getUserId()));
+                    break;
+                case $recipients instanceof Staff:
                     //XXX: is it necessary ??
                     break;
                 }
+
                 if ($entry && ($mid=$entry->getEmailMessageId())) {
                     $options['inreplyto'] = $mid;
                     $options['references'] = $entry->getEmailReferences();
                 }
             }
+
             // Embedded message id token
             $mid_token = $messageId;
             // Set Reply-Tag
@@ -322,14 +367,17 @@ class Mailer {
                 $options['reply-tag'] = '';
             }
         }
+
         // Return-Path
         if (isset($options['nobounce']) && $options['nobounce'])
             $headers['Return-Path'] = '<>';
         elseif ($this->getEmail() instanceof Email)
             $headers['Return-Path'] = $this->getEmail()->getEmail();
+
         // Bulk.
         if (isset($options['bulk']) && $options['bulk'])
             $headers+= array('Precedence' => 'bulk');
+
         // Auto-reply - mark as autoreply and supress all auto-replies
         if (isset($options['autoreply']) && $options['autoreply']) {
             $headers+= array(
@@ -338,6 +386,7 @@ class Mailer {
                     'X-Auto-Response-Suppress' => 'DR, RN, OOF, AutoReply',
                     'Auto-Submitted' => 'auto-replied');
         }
+
         // Notice (sort of automated - but we don't want auto-replies back
         if (isset($options['notice']) && $options['notice'])
             $headers+= array(
@@ -346,6 +395,7 @@ class Mailer {
         // In-Reply-To
         if (isset($options['inreplyto']) && $options['inreplyto'])
             $headers += array('In-Reply-To' => $options['inreplyto']);
+
         // References
         if (isset($options['references']) && $options['references']) {
             if (is_array($options['references']))
@@ -354,23 +404,67 @@ class Mailer {
             else
                 $headers += array('References' => $options['references']);
         }
+
         // Use general failsafe default initially
         $eol = "\n";
         // MAIL_EOL setting can be defined in `ost-config.php`
-        if (defined('MAIL_EOL') && is_string(MAIL_EOL)) {
+        if (defined('MAIL_EOL') && is_string(MAIL_EOL))
             $eol = MAIL_EOL;
-        }
         $mime = new Mail_mime($eol);
-        // Add in extra attachments, if any from template variables
-        if ($message instanceof TextWithExtras
-            && ($files = $message->getFiles())
-        ) {
-            foreach ($files as $F) {
-                $file = $F->getFile();
-                $mime->addAttachment($file->getData(),
-                    $file->getType(), $file->getName(), false);
+        // Add recipients
+        if (!is_array($recipients) && (!$recipients instanceof MailingList))
+            $recipients =  array($recipients);
+        foreach ($recipients as $recipient) {
+            if ($recipient instanceof ClientSession)
+                $recipient = $recipient->getSessionUser();
+            switch (true) {
+                case $recipient instanceof EmailRecipient:
+                    $addr = sprintf('"%s" <%s>',
+                            $recipient->getName(),
+                            $recipient->getEmail());
+                    switch ($recipient->getType()) {
+                        case 'to':
+                            $mime->addTo($addr);
+                            break;
+                        case 'cc':
+                            $mime->addCc($addr);
+                            break;
+                        case 'bcc':
+                            $mime->addBcc($addr);
+                            break;
+                    }
+                    break;
+                case $recipient instanceof TicketOwner:
+                case $recipient instanceof Staff:
+                    $mime->addTo(sprintf('"%s" <%s>',
+                                $recipient->getName(),
+                                $recipient->getEmail()));
+                    break;
+                case $recipient instanceof Collaborator:
+                    $mime->addCc(sprintf('"%s" <%s>',
+                                $recipient->getName(),
+                                $recipient->getEmail()));
+                    break;
+                case $recipient instanceof EmailAddress:
+                    $mime->addTo($recipient->getAddress());
+                    break;
+                default:
+                    // Assuming email address.
+                    $mime->addTo($recipient);
             }
         }
+
+        // Add in extra attachments, if any from template variables
+        if ($message instanceof TextWithExtras
+            && ($attachments = $message->getAttachments())
+        ) {
+            foreach ($attachments as $a) {
+                $file = $a->getFile();
+                $mime->addAttachment($file->getData(),
+                    $file->getMimeType(), $file->getName(), false);
+            }
+        }
+
         // If the message is not explicitly declared to be a text message,
         // then assume that it needs html processing to create a valid text
         // body
@@ -385,6 +479,7 @@ class Mailer {
                         $options['reply-tag'],
                         $message);
             }
+
             $txtbody = rtrim(Format::html2text($message, 90, false))
                 . ($messageId ? "\nRef-Mid: $messageId\n" : '');
             $mime->setTXTBody($txtbody);
@@ -393,6 +488,7 @@ class Mailer {
             $mime->setTXTBody($message);
             $isHtml = false;
         }
+
         if ($isHtml && $cfg && $cfg->isRichTextEnabled()) {
             // Pick a domain compatible with pear Mail_Mime
             $matches = array();
@@ -421,7 +517,7 @@ class Mailer {
                     if (!$file)
                         return $match[0];
                     $mime->addHTMLImage($file->getData(),
-                        $file->getType(), $file->getName(), false,
+                        $file->getMimeType(), $file->getName(), false,
                         $match[1].$domain);
                     // Don't re-attach the image below
                     unset($self->attachments[$file->getId()]);
@@ -432,19 +528,23 @@ class Mailer {
         }
         //XXX: Attachments
         if(($attachments=$this->getAttachments())) {
-            foreach($attachments as $id=>$file) {
+            foreach($attachments as $file) {
                 // Read the filename from the Attachment if possible
                 if ($file instanceof Attachment) {
                     $filename = $file->getFilename();
                     $file = $file->getFile();
-                }
-                else {
+                } elseif ($file instanceof AttachmentFile) {
                     $filename = $file->getName();
-                }
+                }  elseif ($file instanceof FileObject) {
+                    $filename = $file->getFilename();
+                } else
+                    continue;
+
                 $mime->addAttachment($file->getData(),
-                    $file->getType(), $filename, false);
+                    $file->getMimeType(), $filename, false);
             }
         }
+
         //Desired encodings...
         $encodings=array(
                 'head_encoding' => 'quoted-printable',
@@ -458,6 +558,8 @@ class Mailer {
         $body = $mime->get($encodings);
         //encode the headers.
         $headers = $mime->headers($headers, true);
+        $to = implode(',', array_filter(array($headers['To'], $headers['Cc'],
+                    $headers['Bcc'])));
         // Cache smtp connections made during this request
         static $smtp_connections = array();
         if(($smtp=$this->getSMTPInfo())) { //Send via SMTP
@@ -481,44 +583,53 @@ class Mailer {
                 // Use persistent connection
                 $mail = $smtp_connections[$key];
             }
+
             $result = $mail->send($to, $headers, $body);
             if(!PEAR::isError($result))
                 return $messageId;
+
             // Force reconnect on next ->send()
             unset($smtp_connections[$key]);
+
             $alert=_S("Unable to email via SMTP")
                     .sprintf(":%1\$s:%2\$d [%3\$s]\n\n%4\$s\n",
                     $smtp['host'], $smtp['port'], $smtp['username'], $result->getMessage());
             $this->logError($alert);
         }
+
         //No SMTP or it failed....use php's native mail function.
         $args = array();
-        if ($this->getEmail())
+        if (isset($options['from_address']))
+            $args[] = '-f '.$options['from_address'];
+        elseif ($this->getEmail())
             $args = array('-f '.$this->getEmail()->getEmail());
         $mail = mail::factory('mail', $args);
-        // Ensure the To: header is properly encoded.
         $to = $headers['To'];
         $result = $mail->send($to, $headers, $body);
         if(!PEAR::isError($result))
             return $messageId;
+
         $alert=_S("Unable to email via php mail function")
                 .sprintf(":%1\$s\n\n%2\$s\n",
                 $to, $result->getMessage());
         $this->logError($alert);
         return false;
     }
+
     function logError($error) {
         global $ost;
         //NOTE: Admin alert override - don't email when having email trouble!
         $ost->logError(_S('Mailer Error'), $error, false);
     }
+
     /******* Static functions ************/
+
     //Emails using native php mail function - if DB connection doesn't exist.
     //Don't use this function if you can help it.
-    function sendmail($to, $subject, $message, $from) {
+    function sendmail($to, $subject, $message, $from, $options=null) {
         $mailer = new Mailer(null, array('notice'=>true, 'nobounce'=>true));
         $mailer->setFromAddress($from);
-        return $mailer->send($to, $subject, $message);
+        return $mailer->send($to, $subject, $message, $options);
     }
 }
 ?>

@@ -155,6 +155,17 @@ input.close.btn-primary.focus, input.close.btn-primary:focus, input.close.btn-pr
   opacity: 100;
 }
 
+.hasDatepicker {
+  border: 1px solid #cfcfcf !important;
+  box-shadow: none !important;
+  color: rgba(0, 0, 0, 0.6) !important;
+  border-radius: 2px !important;
+}
+
+.ui-datepicker-trigger {
+	display:none !important;
+}
+	
 .queuecrumb {
     margin-left: 15px;
     font-size: 18px;   
@@ -535,9 +546,8 @@ input.rlc-search {
     display:block;
     height:30px;
     position:absolute;
-    z-index:2;
-    margin-top: -70px;
-}
+    z-index:7;
+    }
 
 .tip_arrow {
     display:block;
@@ -580,8 +590,8 @@ input.rlc-search {
     position:absolute;
     top:0;
     left:-1px;
-    min-width:400px;
-    max-width:455px;
+    min-width:620px;
+    /*max-width:600px;*/
     line-height: 1.45rem;
 }
 
@@ -773,7 +783,7 @@ h2 > i.help-tip {
 select {
     height:24px;
     line-height:24px;
-    max-width:350px;
+    /*max-width:350px;*/
     border:1px solid #bbb;
     display:inline-block;
     padding:0 4px;
@@ -867,7 +877,7 @@ a.attachment {
   padding-right: 1em;
   padding-bottom: 1em;
   padding-left: 1em;
-  max-width: 500px;
+  max-width: 650px;
   height: auto;
   background-color: #f8f8f8;
   background-image: none;
@@ -896,7 +906,7 @@ a.attachment {
   border-image-outset: 0 0 0 0;
   border-image-repeat: stretch stretch;
   display: none;
-  z-index: 10;
+  /*-index: 10;*/
   box-shadow: #000011;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
@@ -1152,7 +1162,7 @@ div.thread-entry.message > div.header > a > time.relative{
   position: relative;
 }
 
-#ticket-tasks{
+#tasks_content{
 
     padding-top: 15px;
     margin-left: 15px;
@@ -1382,6 +1392,29 @@ div.ticketbuttonbar {
     display:none;
 }
 
+
+ul.tabs {
+  width: 500px !important;  
+ }
+
+ul.tabs li.active {
+    color: #495057;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd #ddd #fff;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+    border-bottom: none;
+    text-align: center;
+    border-top: 2px solid #049cfd;
+    border-top: 2px solid #049cfd;
+    border-bottom: 0;
+    box-shadow: 4px -1px 6px -3px rgba(0,0,0,0.2);
+}
+
+
+
+
+
 /* Response/Note tabs */
 .ClientReponseTabs {
     margin-top: 10px !important;
@@ -1478,6 +1511,82 @@ div.ticketbuttonbar {
   font-size: 10px
 }
 
+.sortable-rows tr td:hover {
+    cursor: move;
+}
+
+.sortable {
+    cursor: move;
+}
+.row-item {
+    border: 1px solid #cfcfcf;
+    padding-left: 5px;
+    position: relative;
+}
+.sortable:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+.sortable:active {
+    background: rgba(0, 0, 0, 0.3);
+}
+.row-item:first-child {
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+}
+.row-item:last-child {
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+.row-item + .row-item {
+    margin-top: -1px;
+}
+
+.row-item .delete {
+    border-left: 1px solid #cfcfcf;
+    border-top-right-radius: inherit;
+    border-bottom-right-radius: inherit;
+    width: 35px;
+    
+}
+.row-item .delete:empty {
+    visibility: hidden;
+}
+
+.row-item .button-group {
+    font-size: 105%;
+    position: absolute;
+    right: 0;
+    display: inline-block;
+  
+}
+
+.row-item .button-group div {
+    display: inline-block;
+}
+.row-item .button-group div a {
+    padding: 9px 12px 8px;
+}
+.row-item .management {
+    margin-top: 10px;
+    border-top: 1px dashed black;
+}
+
+.row-item:first-child .delete {
+    border-top-right-radius: 5px;
+   
+}
+.row-item:last-child .delete {
+    border-bottom-right-radius: 5px;
+  
+}
+.row-item .delete:hover {
+    background: #fc9f41; /* Old browsers */
+    color: rgba(255,255,255,0.8) !important;
+}
+#sequences .manage-buttons {
+    display: inline-block;
+    margin-right: 60px;
+}
 
 /* Line 3629 */
 .pull-right
@@ -1584,13 +1693,13 @@ fieldset {
 .dialog {
     position:fixed;
     padding:1em;
-    max-width:500px;
-    max-height:250px;
+    /*max-width:500px;
+    max-height:250px;*/
     height:auto !important;
     background:#f8f8f8;
     border:2px solid #2a67ac;
     display:none;
-    z-index:6;
+    z-index:7;
     box-shadow: 0 5px 60px #001;
     border-radius: 5px;
     max-height: 72%;
@@ -1601,7 +1710,7 @@ fieldset {
     background-color:#f8f8f8!IMPORTANT;
 }
 .dialog#popup {
-    width:650px;
+    /*width:650px;*/
     min-width:345px;
     margin-left:auto;
     margin-right:auto;
@@ -1652,27 +1761,21 @@ html > body > div#popup.dialog.draggable.ui-draggable.size-normal > div.body > p
 
 
 /*B4 dropdown
-
 .dropdown-menu {
   font-size: 0.9rem;
-
   @media(min-width: 992px) {
     display: block;
     opacity: 0;
     visibility: hidden;
     z-index: 1;
-
     @include transform(translateY(8px));
     @include transition(all .3s);
   }
-
   &.dropdown-menu-inverse {
     background: #282f37 !important;
     border-color: #242a31 !important;
-
     .dropdown-item {
       color: #dadada !important;
-
       &:hover,
       &:active,
       &:focus {
@@ -1680,30 +1783,23 @@ html > body > div#popup.dialog.draggable.ui-draggable.size-normal > div.body > p
         background: #31353e !important;
       }
     }
-
     .dropdown-divider {
       background: #191e23;
     }
   }
 }
-
 .show>.dropdown-menu {
   @media(min-width: 992px) {
     opacity: 1;
     visibility: visible;
     z-index: 1000;
-
     @include transform(none);
   }
 }
-
 .navbar .dropdown-toggle::after {
   display: none;
 }
-
-
 // .dropdown-submenu new class for submenus
-
 .dropdown-submenu {
   .dropdown-toggle {
     i {
@@ -1714,17 +1810,14 @@ html > body > div#popup.dialog.draggable.ui-draggable.size-normal > div.body > p
       color: #a3a7bd;
     }
   }
-
   @media(max-width: 991px) {
     .dropdown-menu {
       border-color: #e8e8e8;
-
       .dropdown-item {
         padding-left: 2rem;
       }
     }
   }
-
   @media(min-width: 992px) {
     .dropdown-menu {
       left: 98%;
@@ -1733,31 +1826,23 @@ html > body > div#popup.dialog.draggable.ui-draggable.size-normal > div.body > p
     }
   }
 }
-
-
 // .dropdown-extend new class for bigger menus
-
 .dropdown-extend {
   position: initial;
 }
-
 .dropdown-extend-menu {
   width: 100%;
-
   @media(min-width: 768px) {
     padding: 20px 30px;
   }
-
   .dropdown-item {
     @media(min-width: 768px) {
       margin: 5px 0;
     }
-
     i {
       margin-right: 3px;
       font-size: 14px;
       color: #6b7386;
-
       @media(max-width: 767px) {
         display: none;
       }
@@ -1886,7 +1971,8 @@ html > body > div#popup.dialog.draggable.ui-draggable.size-normal > div.body > p
     max-height:350px;
     overflow-x:auto;
     margin:5px 0px;
-}
+    max-width: 580px;
+    }
 .thread-preview-entry {
     margin-bottom:5px;
 }

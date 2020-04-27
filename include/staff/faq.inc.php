@@ -4,7 +4,7 @@ if (!defined('OSTSCPINC') || !$thisstaff
     die('Access Denied');
 
 $info = $qs = array();
-if($faq){
+if($faq && $faq->getId()){
     $title=__('Update FAQ').': '.$faq->getQuestion();
     $action='update';
     $submit_text=__('Save Changes');
@@ -88,7 +88,7 @@ $qstr = Http::build_query($qs);
         <option value="<?php echo $C->getId(); ?>" <?php
             if ($C->getId() == $info['category_id']) echo 'selected="selected"';
             ?>><?php echo sprintf('%s (%s)',
-                $C->getName(),
+                Category::getNameById($C->getId()),
                 $C->isPublic() ? __('Public') : __('Private')
             ); ?></option>
 <?php } ?>

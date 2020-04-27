@@ -398,7 +398,6 @@ class DynamicList extends VerySimpleModel implements CustomList {
     }
 
     function update($vars, &$errors) {
-
         $required = array();
         if ($this->isEditable())
             $required = array('name');
@@ -406,8 +405,14 @@ class DynamicList extends VerySimpleModel implements CustomList {
         foreach (static::$fields as $f) {
             if (in_array($f, $required) && !$vars[$f])
                 $errors[$f] = sprintf(__('%s is required'), mb_convert_case($f, MB_CASE_TITLE));
-            elseif (isset($vars[$f]))
-                $this->set($f, $vars[$f]);
+            elseif (isset($vars[$f])) {
+                if ($vars[$f] != $this->get($f)) {
+                    $type = array('type' => 'edited', 'key' => $f);
+                    Signal::send('object.edited', $this, $type);
+                    $this->set($f, $vars[$f]);
+                }
+            }
+
         }
 
         if ($errors)
@@ -435,6 +440,9 @@ class DynamicList extends VerySimpleModel implements CustomList {
 
         if (!parent::delete())
             return false;
+
+            $type = array('type' => 'deleted');
+            Signal::send('object.deleted', $this, $type);
 
         if (($form = $this->getForm(false))) {
             $form->delete(false);
@@ -522,7 +530,7 @@ class DynamicList extends VerySimpleModel implements CustomList {
         foreach (DynamicList::objects() as $list) {
             $selections['list-'.$list->id] =
                 array($list->getPluralName(),
-                    SelectionField, $list->get('id'));
+                    'SelectionField', $list->get('id'));
         }
         return $selections;
     }
@@ -785,7 +793,11 @@ class DynamicListItem extends VerySimpleModel implements CustomListItem {
     }
 
     function display() {
-        return sprintf('<a class="preview" href="#" data-preview="#list/%d/items/%d/preview">%s</a>',
+
+        return $this->getValue();
+        //TODO: Allow for display mode (edit, preview or both)
+        return sprintf('<a class="preview" href="#"
+                data-preview="#list/%d/items/%d/preview">%s</a>',
                 $this->getListId(),
                 $this->getId(),
                 $this->getValue()
@@ -803,7 +815,10 @@ class DynamicListItem extends VerySimpleModel implements CustomListItem {
                     'sort' => 'sort',
                     'value' => 'value',
                     'abbrev' => 'extra') as $k => $v) {
-            if (isset($vars[$k]))
+            if ($k == 'abbrev' && empty($vars[$k])) {
+                $vars[$k] = NULL;
+                $this->set($v, $vars[$k]);
+            } elseif (isset($vars[$k]))
                 $this->set($v, $vars[$k]);
         }
 
@@ -1448,7 +1463,7 @@ implements CustomListItem, TemplateVariable, Searchable {
             break;
         }
         
-        return sprintf('<a class="preview" href="#" data-preview="#list/%d/items/%d/preview"><span class="%s">%s</span></a>',
+        return sprintf('<a class="" href="#" data-preview="#list/%d/items/%d/preview"><span class="%s">%s</span></a>',
                 $this->getListId(),
                 $this->getId(),
                 $badge,

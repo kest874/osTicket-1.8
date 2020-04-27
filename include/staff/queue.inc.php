@@ -359,7 +359,7 @@ if ($queue->getConditions()) {
     <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #bbb">
       <i class="icon-plus-sign"></i>
       <select class="add-condition">
-        <option value="0">— <?php echo __("Add a condition"); ?> —</option>
+        <option value="0">— <?php echo __("Add a condition"); ?> —</option>
 <?php
       foreach (CustomQueue::getSearchableFields('Ticket') as $path=>$f) {
           list($label) = $f;

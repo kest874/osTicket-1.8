@@ -22,6 +22,7 @@ class PageNate {
     var $total;
     var $page;
     var $pages;
+    var $approx=false;
 
 
     function __construct($total,$page,$limit=20,$url='') {
@@ -32,16 +33,18 @@ class PageNate {
         $this->setTotal($total);
     }
 
-    function setTotal($total) {
-        $this->total = intval($total);
-        $this->pages = ceil( $this->total / $this->limit );
+    function setTotal($total, $approx=false) {
+        $this->total = is_string($total) ? '-' : intval($total);
+        $total = is_string($total) ? 500 : $total;
+        $this->pages = ceil( $total / $this->limit );
 
-        if (($this->limit > $this->total) || ($this->page>ceil($this->total/$this->limit))) {
+        if (($this->limit > $total) || ($this->page>ceil($total/$this->limit))) {
             $this->start = 0;
         }
-        if (($this->limit-1)*$this->start > $this->total) {
+        if (($this->limit-1)*$this->start > $total) {
             $this->start -= $this->start % $this->limit;
         }
+        $this->approx = $approx;
     }
 
     function setURL($url='',$vars='') {
@@ -89,16 +92,24 @@ class PageNate {
     function showing() {
         $html = '';
         $start = $this->getStart() + 1;
-        $end = min($start + $this->limit + $this->slack - 1, $this->total);
+        $end = min($start + $this->limit + $this->slack - 1,
+            is_string($this->total) ? 500 : $this->total);
         if ($end < $this->total) {
             $to= $end;
         } else {
             $to= $this->total;
         }
         $html=__('Showing')."&nbsp;";
-        if ($this->total > 0) {
-            $html .= sprintf(__('%1$d - %2$d of %3$d' /* Used in pagination output */),
-               $start, $end, $this->total);
+        if (is_string($this->total))
+            $html .= sprintf(__('%1$d - %2$d' /* Used in pagination output */),
+               $start, $end);
+        elseif ($this->total > 0) {
+            if ($this->approx)
+                $html .= sprintf(__('%1$d - %2$d of about %3$d' /* Used in pagination output */),
+                   $start, $end, $this->total);
+            else
+                $html .= sprintf(__('%1$d - %2$d of %3$d' /* Used in pagination output */),
+                   $start, $end, $this->total);
         }else{
             $html .= " 0 ";
         }
@@ -106,6 +117,7 @@ class PageNate {
     }
 
     function getPageLinks($hash=false, $pjax=false) {
+        $this->total = is_string($this->total) ? 500 : $this->total; //placeholder if no total
         $html                 = '';
         $file                =$this->url;
         $displayed_span     = 2;

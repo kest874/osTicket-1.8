@@ -25,7 +25,7 @@ if ($info['error']) {
 <form method="post" class="org" action="<?php echo $info['action'] ?: '#tasks/add'; ?>">
     <?php
         $form = $form ?: TaskForm::getInstance();
-        echo $form->getForm()->asTable(' ',
+        echo $form->getForm($vars)->asTable(' ',
                 array('draft-namespace' => $namespace)
                 );
 
@@ -35,12 +35,12 @@ if ($info['error']) {
     <hr>
     <p class="full-width">
         <span class="buttons pull-left">
-            <input type="reset" value="<?php echo __('Reset'); ?>">
-            <input type="button" name="cancel" class="close"
+            <input type="reset" class="btn btn-sm btn-warning" value="<?php echo __('Reset'); ?>">
+            <input type="button" class="btn btn-sm btn-primary close" name="cancel"
                 value="<?php echo __('Cancel'); ?>">
         </span>
         <span class="buttons pull-right">
-            <input type="submit" value="<?php echo __('Create Task'); ?>">
+            <input type="submit" class="btn btn-sm btn-success" value="<?php echo __('Create Task'); ?>">
         </span>
      </p>
 </form>

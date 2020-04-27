@@ -1,4 +1,4 @@
- <div class="btn-group btn-group-sm pull-right" role="group" aria-label="Button group with nested dropdown">
+<div class="btn-group btn-group-sm pull-right" role="group" aria-label="Button group with nested dropdown">
  <?php
 // Tasks' mass actions based on logged in agent
 

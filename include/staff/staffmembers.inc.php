@@ -129,7 +129,23 @@ $agents->limit($pageNav->getLimit())->offset($pageNav->getStart());
                       
                             <a class="dialog-first" data-action="department" href="#staff/change-department">
                                 <i class="icon-truck icon-fixed-width"></i>
-                                <?php echo __( 'Change Team'); ?>
+                                <?php echo __( 'Change Department'); ?>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="no-pjax" href="staff.php?a=export">
+                                <i class="icon-download-alt icon-fixed-width"></i>
+                                <?php echo __( 'Export Agents'); ?>
+                            </a>
+                        </li>
+                        <!-- TODO: Implement "Reset Access" mass action
+                    <li><a class="dialog-first" href="#staff/reset-access">
+                    <i class="icon-puzzle-piece icon-fixed-width"></i>
+                        <?php echo __('Reset Access'); ?></a></li>
+                    -->
+                        <li class="danger">
+                            <a class="confirm" data-form-id="mass-actions" data-name="delete" href="staff.php?a=delete">
+                                <i class="icon-trash icon-fixed-width"></i>
                             </a>
                       
                              

@@ -111,8 +111,8 @@ $pageNav->paginate($categories);
                   <input type="checkbox" name="ids[]" value="<?php echo $C->getId(); ?>" class="ckb"
                             <?php echo $sel?'checked="checked"':''; ?>>
                 </td>
-                <td><a class="truncate" href="categories.php?id=<?php echo $C->getId(); ?>"><?php
-                    echo $C->getLocalName(); ?></a></td>
+                <td><a class="truncate" style="width:500px" href="categories.php?id=<?php echo $C->getId(); ?>"><?php
+                    echo Category::getNamebyId($C->getId()); ?></a></td>
                 <td><?php echo $C->getVisibilityDescription(); ?></td>
                 <td><?php echo $faqs; ?></td>
                 <td>&nbsp;<?php echo Format::datetime($C->updated); ?></td>

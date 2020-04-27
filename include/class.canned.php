@@ -112,7 +112,7 @@ extends VerySimpleModel {
                     $resp = $cb($resp);
                 $resp['files'] = array();
                 foreach ($this->getAttachedFiles(!$html) as $file) {
-                    $_SESSION[':cannedFiles'][$file->id] = 1;
+                    $_SESSION[':cannedFiles'][$file->id] = $file->name;
                     $resp['files'][] = array(
                         'id' => $file->id,
                         'name' => $file->name,
@@ -167,6 +167,10 @@ extends VerySimpleModel {
             return false;
         if (!parent::delete())
             return false;
+
+        $type = array('type' => 'deleted');
+        Signal::send('object.deleted', $this, $type);
+
         $this->attachments->deleteAll();
         return true;
     }

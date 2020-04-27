@@ -3,12 +3,14 @@
 require(INCLUDE_DIR.'class.dashboard.php');
 //require_once('staff.inc.php');
 $staff=Staff::lookup($thisstaff->getId());
-
 header("Content-Type: text/html; charset=UTF-8");
+header("Content-Security-Policy: frame-ancestors ".$cfg->getAllowIframes().";");
+
 $title = ($ost && ($title=$ost->getPageTitle()))
     ? $title : ('osTicket :: '.__('Staff Control Panel'));
-if (!isset($_SERVER['HTTP_X_PJAX'])) { ?>
 
+if (!isset($_SERVER['HTTP_X_PJAX'])) { ?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html<?php
 if (($lang = Internationalization::getCurrentLanguage())
         && ($info = Internationalization::getLanguageInfo($lang))
@@ -17,6 +19,10 @@ if (($lang = Internationalization::getCurrentLanguage())
 if ($lang) {
     echo ' lang="' . Internationalization::rfc1766($lang) . '"';
 }
+
+// Dropped IE Support Warning
+if (osTicket::is_ie())
+    $ost->setWarning(__('osTicket no longer supports Internet Explorer.'));
 ?>>
 
 
@@ -39,7 +45,7 @@ if ($lang) {
     <![endif]-->
     
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/bootstrap.min.css" media="all">
-    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-1.11.2.min.js"></script>
+   <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-3.4.0.min.js"></script>
     
     <script src="<?php echo ROOT_PATH; ?>scp/js/tether.min.js"></script>
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/modernizr.min.js"></script>
@@ -58,33 +64,47 @@ if ($lang) {
   		<link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/scp.css" media="all">  	
   	<?php } ?>
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/notify-metro.css" media="all">
+    
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>css/thread.css" media="all">
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/bootstrap-datepicker.min.css" media="all">
     <link rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/redactor.css" media="screen">
     
     <link type="text/css" href="<?php echo ROOT_PATH; ?>css/ui-lightness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" media="screen" />
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/typeahead.css" media="screen">
+    <link type="text/css" href="<?php echo ROOT_PATH; ?>css/ui-lightness/jquery-ui-1.10.3.custom.min.css"
+         rel="stylesheet" media="screen" />
+    <link rel="stylesheet" href="<?php echo ROOT_PATH ?>css/jquery-ui-timepicker-addon.css" media="all">
+    
+    <!--[if IE 7]>
+    <link rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/font-awesome-ie7.min.css">
+    <![endif]-->
+
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/dropdown.css">
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/loadingbar.css"/>
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/flags.css">
     
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/rtl.css"/>
+
     <?php if ($staff->darkmode ==1){?>
     	<link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/helptopic_dark.css"/>
     <?php } else { ?>
     	<link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/helptopic.css"/>
     <?php } ?>	
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>scp/css/loadingoverlay.min.css"/>
+    
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery.easyui.min.js"></script>
-    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/loadingoverlay.min.js"></script>
+   <-- <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/loadingoverlay.min.js"></script>-->
     <link type="text/css" rel="stylesheet" href="./css/translatable.css"/>
-    <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/accordian.css" media="all">
+    
     <?php if ($staff->darkmode ==1){?>
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/typeahead_dark.css" media="screen">
   <?php } else { ?>	
     	<link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/typeahead.css" media="screen">
     <?php } 
         
+
     if($ost && ($headers=$ost->getExtraHeaders())) {
         echo "\n\t".implode("\n\t", $headers)."\n";
     }
@@ -94,23 +114,6 @@ if ($lang) {
 
 
  
-    <div id="pjax-container" class="<?php if ($_POST) echo 'no-pjax'; ?>">
-<?php } else {
-    header('X-PJAX-Version: ' . GIT_VERSION);
-    if ($pjax = $ost->getExtraPjax()) { ?>
-    <script type="text/javascript">
-    <?php foreach (array_filter($pjax) as $s) echo $s.";"; ?>
-    </script>
-    <?php }
-    foreach ($ost->getExtraHeaders() as $h) {
-        if (strpos($h, '<script ') !== false)
-            echo $h;
-    } ?>
-    <title><?php echo ($ost && ($title=$ost->getPageTitle()))?$title:'osTicket :: '.__('Staff Control Panel'); ?></title>
-    
-    <?php
-} # endif X_PJAX 
-?>
 
  <?php
     if($ost->getError())
@@ -608,6 +611,26 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                 <div class="content">
                     <div class="container">
 					
+					
+					
+    <div id="pjax-container" class="<?php if ($_POST) echo 'no-pjax'; ?>">
+<?php } else {
+    header('X-PJAX-Version: ' . GIT_VERSION);
+    if ($pjax = $ost->getExtraPjax()) { ?>
+    <script type="text/javascript">
+    <?php foreach (array_filter($pjax) as $s) echo $s.";"; ?>
+    </script>
+    <?php }
+    foreach ($ost->getExtraHeaders() as $h) {
+        if (strpos($h, '<script ') !== false)
+            echo $h;
+    } ?>
+
+    <title><?php echo ($ost && ($title=$ost->getPageTitle()))?$title:'osTicket :: '.__('Staff Control Panel'); ?></title>
+    
+    <?php
+} # endif X_PJAX 
+?>
 					<?php if ($UnassignedTickets > 0 ) { ?>
 					
 				     <div class="alert alert-secondary m-b-15 m-t--15" role="alert">
@@ -666,12 +689,3 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
 					<?php } ?>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/moment.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/footable.js"></script>
-<script>
-    $.busyLoadFull("show",  { 
-    text: "LOADING ...",
-    textColor: "#c82333",
-    color: "#c82333",
-    background: "rgba(0, 0, 0, 0.3)"
-});
- </script>
-               

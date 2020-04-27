@@ -71,7 +71,7 @@ array_unshift($categories, new Category(array('id' => 0, 'name' => __('All Categ
             <a class="dropdown-item no-pjax" href="kb.php?a=search&cid=<?php echo $C->getId(); ?>&topicId=<?php echo $_GET['topicId'];?>">
                 <i class="fa fa-filter"></i>
                 <?php echo sprintf('%s (%d)',
-                    Format::htmlchars($C->getLocalName()),
+                    Format::htmlchars($C->getFullName()),
                     $C->faq_count); ?></a>
          <?php
 } ?>
@@ -172,7 +172,9 @@ if($_REQUEST['q'] || $_REQUEST['cid'] || $_REQUEST['topicId']) { //Search.
     }
 } else { //Category Listing.
     $categories = Category::objects()
-        ->annotate(array('faq_count'=>SqlAggregate::COUNT('faqs')));
+        ->annotate(array('faq_count'=>SqlAggregate::COUNT('faqs')))
+        ->filter(array('category_pid__isnull' => true));
+
 
     if (count($categories)) {
         $categories->sort(function($a) { return $a->getLocalName(); });
@@ -182,11 +184,25 @@ if($_REQUEST['q'] || $_REQUEST['cid'] || $_REQUEST['topicId']) { //Search.
             echo sprintf('
                 <li>
                     <h4><a class="truncate" style="max-width:600px" href="kb.php?cid=%d">%s (%d)</a> - <span>%s</span></h4>
-                    %s
-                </li>',$C->getId(),$C->getLocalName(),$C->faq_count,
+                    %s ',
+                $C->getId(),$C->getLocalName(),$C->getNumFAQs(),
                 $C->getVisibilityDescription(),
                 Format::safe_html($C->getLocalDescriptionWithImages())
-            );
+                );
+                if ($C->children) {
+                    echo '<p/><div>';
+                    foreach ($C->children as $c) {
+                        echo sprintf('<div><i class="icon-folder-open-alt"></i>
+                                <a href="kb.php?cid=%d">%s (%d)</a> - <span>%s</span></div>',
+                                $c->getId(),
+                                $c->getLocalName(),
+                                $c->getNumFAQs(),
+                                $c->getVisibilityDescription()
+                                );
+                    }
+                    echo '</div>';
+                }
+            echo '</li>';
         }
         echo '</ul>';
     } else {

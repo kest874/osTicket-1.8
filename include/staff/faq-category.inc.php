@@ -6,6 +6,7 @@ $view = $category->isPublic()?__('Public'):__('Internal');
 ?>
 <div class="subnav">
 
+<<<<<<< HEAD
     <div class="float-left subnavtitle">
                           
     <?php echo __('Frequently Asked Questions') .' / <strong>'. $category->getName().'</strong> ('.$view.') - '.__('Last Updated').' '. Format::datetime($category->getUpdateDate());; ?>                      
@@ -52,6 +53,32 @@ $view = $category->isPublic()?__('Public'):__('Internal');
 
 <h4 class="m-t-0 header-title"><?php echo Format::display($category->getDescription()); ?></h4>
 
+=======
+</div>
+<div class="faq-category">
+    <div style="margin-bottom:10px;">
+        <div class="faq-title pull-left"><?php echo $category->getFullName() ?></div>
+        <div class="faq-status inline">(<?php echo $category->isPublic()?__('Public'):__('Internal'); ?>)</div>
+        <div class="clear"><time class="faq"> <?php echo __('Last Updated').' '. Format::daydatetime($category->getUpdateDate()); ?></time></div>
+    </div>
+    <div class="cat-desc has_bottom_border">
+    <?php echo Format::display($category->getDescription());
+    if ($category->children) {
+        echo '<p/><div>';
+        foreach ($category->children as $c) {
+            echo sprintf('<div><i class="icon-folder-open-alt"></i>
+                    <a href="kb.php?cid=%d">%s (%d)</a> - <span>%s</span></div>',
+                    $c->getId(),
+                    $c->getLocalName(),
+                    $c->getNumFAQs(),
+                    $c->getVisibilityDescription()
+                    );
+        }
+        echo '</div>';
+    }
+    ?>
+    </div>
+>>>>>>> 5461f80c778f7915826f2385a848fde692c9d4c2
 <?php
 
 
@@ -70,7 +97,7 @@ if ($faqs->exists(true)) {
     }
     echo '  </ol>
          </div>';
-}else {
+} elseif (!$category->children) {
     echo '<strong>'.__('Category does not have FAQs').'</strong>';
 }
 ?>

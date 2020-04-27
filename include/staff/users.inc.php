@@ -10,12 +10,15 @@ $users = User::objects()
 
 if ($_REQUEST['query']) {
     $search = $_REQUEST['query'];
-    $users->filter(Q::any(array(
+    $filter = Q::any(array(
         'emails__address__contains' => $search,
         'name__contains' => $search,
         'org__name__contains' => $search,
-        // TODO: Add search for cdata
-    )));
+    ));
+    if (UserForm::getInstance()->getField('phone'))
+        $filter->add(array('cdata__phone__contains' => $search));
+
+    $users->filter($filter);
     $qs += array('query' => $_REQUEST['query']);
 }
 
@@ -353,8 +356,9 @@ $(function() {
             $.dialog('ajax.php/orgs/lookup/form', 201, function(xhr, json) {
               var $form = $('form#users-list');
               try {
-                  var json = $.parseJSON(json),
-                      org_id = $form.find('#org_id');
+                  if ($.type(json) == 'string')
+                    var json = $.parseJSON(json);
+                  var org_id = $form.find('#org_id');
                   if (json.id) {
                       org_id.val(json.id);
                       goBaby('setorg', true);
@@ -365,7 +369,11 @@ $(function() {
             return;
           }
           if (!confirmed)
-              $.confirm(__('You sure?'), undefined, options).then(submit);
+              $.confirm(__('You sure?'), undefined, options).then(function(promise) {
+                if (promise === false)
+                  return false;
+                submit();
+              });
           else
               submit();
         }
@@ -379,6 +387,10 @@ $(function() {
         goBaby($(this).attr('href').substr(1));
         return false;
     });
+
+    // Remove CSRF Token From GET Request
+    document.querySelector("form[action='users.php']").onsubmit = function() {
+        document.getElementsByName("__CSRFToken__")[0].remove();
+    };
 });
 </script>
-

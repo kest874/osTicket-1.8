@@ -9,19 +9,19 @@
 $colid = $column->getId();
 $data_form = $data_form ?: $column->getDataConfigForm($_POST);
 ?>
-<ul class="nav nav-tabs">
-  <li class="nav-item"><a href="#data" class="nav-link active" data-toggle="tab"><?php echo __('Data'); ?></a></li>
-  <li class="nav-item"><a href="#annotations" class="nav-link" data-toggle="tab"><?php echo __('Annotations'); ?></a></li>
-  <li class="nav-item"><a href="#conditions" class="nav-link" data-toggle="tab"><?php echo __('Conditions'); ?></a></li>
+<ul class="tabs">
+  <li class="active"><a href="#data"><?php echo __('Data'); ?></a></li>
+  <li><a href="#annotations"><?php echo __('Annotations'); ?></a></li>
+  <li><a href="#conditions"><?php echo __('Conditions'); ?></a></li>
 </ul>
-<div class="tab-content">
-<div class="tab-pane fade show active" id="data">
+
+<div class="tab_content" id="data">
 <?php
   print $data_form->asTable();
 ?>
 </div>
 
-<div class="tab-pane fade" style="margin: 0 20px"
+<div class="hidden tab_content" style="margin: 0 20px"
   data-col-id="<?php echo $colid; ?>"
   id="annotations" style="max-width: 400px">
   <div class="empty placeholder" style="margin-left: 20px">
@@ -49,14 +49,14 @@ $data_form = $data_form ?: $column->getDataConfigForm($_POST);
             annotation.remove();
             if (tab.find('.annotation:not(.template)').length === 0)
                 tab.find('.empty.placeholder').show()
-            return false;"><i class="fa fa-trash"></i></a>
+            return false;"><i class="icon-trash"></i></a>
       </div>
     </div>
 
     <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #bbb">
       <i class="icon-plus-sign"></i>
       <select class="add-annotation">
-        <option>— <?php echo __("Add a annotation"); ?> —</option>
+        <option>— <?php echo __("Add a annotation"); ?> —</option>
 <?php
 $annotations = array();
 foreach (QueueColumnAnnotation::getAnnotations('Ticket') as $class)
@@ -72,7 +72,8 @@ foreach (Internationalization::sortKeyedList($annotations) as $class=>$desc) {
       $(function() {
         var addAnnotation = function(type, desc, icon, pos) {
           var template = $('.annotation.template', '#annotations'),
-              clone = template.clone().show().removeClass('template').insertBefore(template),
+              clone = template.clone().removeClass('hidden')
+                  .removeClass('template').insertBefore(template),
               input = clone.find('[data-field=input]'),
               colid = clone.closest('.tab_content').data('colId'),
               column = clone.find('[data-field=column]'),
@@ -112,7 +113,7 @@ foreach (Internationalization::sortKeyedList($annotations) as $class=>$desc) {
   </div>
 </div>
 
-<div class="tab-pane fade" id="conditions" style="margin: 0 20px">
+<div class="hidden tab_content" id="conditions" style="margin: 0 20px">
   <div style="margin-bottom: 15px"><?php echo __("Conditions are used to change the view of the data in a row based on some conditions of the data. For instance, a column might be shown bold if some condition is met.");
   ?></div>
   <div class="conditions">
@@ -132,7 +133,7 @@ if ($column->getConditions(false)) {
     <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #bbb">
       <i class="icon-plus-sign"></i>
       <select class="add-condition">
-        <option>— <?php echo __("Add a condition"); ?> —</option>
+        <option>— <?php echo __("Add a condition"); ?> —</option>
 <?php
       foreach (CustomQueue::getSearchableFields('Ticket') as $path=>$f) {
           list($label) = $f;
@@ -162,5 +163,4 @@ if ($column->getConditions(false)) {
       </script>
     </div>
   </div>
-</div>
 </div>

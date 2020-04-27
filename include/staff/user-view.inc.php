@@ -3,8 +3,7 @@ if(!defined('OSTSCPINC') || !$thisstaff || !is_object($user)) die('Invalid path'
 
 $account = $user->getAccount();
 $org = $user->getOrganization();
-
-
+$extras = new ArrayObject();
 ?>
 
 <div class="subnav">
@@ -171,10 +170,6 @@ $org = $user->getOrganization();
 
 
 </div>
-      
-
-
-     
      
 <ul class="nav nav-tabs" role="tablist" style="margin-top:10px;">
   <li class="nav-item">
@@ -183,6 +178,7 @@ $org = $user->getOrganization();
   <li class="nav-item">
     <a class="nav-link" href="#note" role="tab" data-toggle="tab"><i class="icon-pushpin"></i>&nbsp;<?php echo __('Notes'); ?></a>
   </li>
+
 </ul>
 
 <!-- Tab panes -->
@@ -200,9 +196,8 @@ $org = $user->getOrganization();
     ?>
   </div>
 
-</div>
-     
-
+</div>     
+    <?php Signal::send('user.audit', $user, $extras); ?>
 </div>
 <div class="hidden dialog" id="confirm-action">
     <h3><?php echo __('Please Confirm'); ?></h3>

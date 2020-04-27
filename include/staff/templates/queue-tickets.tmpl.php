@@ -4,7 +4,7 @@
 //      render the full page
 
 // For searches, some staff members may be able to see everything
-$view_all_tickets = $queue->ignoreVisibilityConstraints();
+//$view_all_tickets = $queue->ignoreVisibilityConstraints();
 
 // Impose visibility constraints
 // ------------------------------------------------------------
@@ -257,7 +257,7 @@ TicketForm::ensureDynamicDataView();
 // Identify columns of output
 $columns = $queue->getColumns();
 
-// Figure out REFRESH url — which might not be accurate after posting a
+// Figure out REFRESH url — which might not be accurate after posting a
 // response
 list($path,) = explode('?', $_SERVER['REQUEST_URI'], 2);
 $args = array();
@@ -442,17 +442,18 @@ $pageNav->setURL('tickets.php', $args);
                                 return false;">
                 <input type="hidden" name="a" value="search">
                 <input type="hidden" name="search-type" value=""/>
-                 <div class="input-group input-group-sm">
+                <div class="input-group input-group-sm">
+                 <div class="input-group-append">
                  <input type="text" class="form-control form-control-sm rlc-search basic-search" data-url="ajax.php/tickets/lookup" name="query"
                      value="<?php echo Format::htmlchars($_REQUEST['query'], true); ?>"
                    autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search Tickets" >
                 <!-- <td>&nbsp;&nbsp;<a href="" id="advanced-user-search">[advanced]</a></td> -->
-                    <button type="submit"  class="input-group-addon" ><i class="fa fa-search"></i>
+                    <button type="submit"  class="input-group-text" ><i class="fa fa-search"></i>
                     </button>
-                    <button type="submit"  class="input-group-addon advsearch" href="#" onclick="javascript:
+                    <button type="submit"  class="input-group-text advsearch" href="#" onclick="javascript:
                                     $.dialog('ajax.php/tickets/search', 201);"><i class=" fa fa-search-plus help-tip" href="#advanced" ></i>
                     </button>
-                </div>
+                </div></div>
             </form>
         </div>
 
@@ -695,13 +696,12 @@ if (!$stselected) {$stselected = 'Assigned To';}
     foreach ($tickets as $T) {
         echo '<tr>';
         if ($canManageTickets) { ?>
-            <td>
-            	<label class="custom-control custom-checkbox">
-            	<input type="checkbox" class="custom-control-input ckb" name="tids[]"
-                value="<?php echo $T['ticket_id']; ?>" />
-              <span class="custom-control-indicator"></span>
-							<span class="custom-control-description"></span>
-							</label>       
+							 <td>
+            	 <div class="custom-control custom-checkbox">
+                   <input type="checkbox" class="custom-control-input ckb" id="c<?php echo $T['ticket_id']; ?>" name="tids[]" value="<?php echo $T['ticket_id']; ?>">
+                   <label class="custom-control-label" for="c<?php echo $T['ticket_id']; ?>"></label>
+               </div>
+												  
                 
                 </td>
     <?php
@@ -815,7 +815,9 @@ if (!$stselected) {$stselected = 'Assigned To';}
 <script>
 
 jQuery(function($){
-	$('#ticketqueue').footable();
+	
+	//$('#ticketqueue').footable();
+	
 });
         
 </script>

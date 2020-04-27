@@ -13,8 +13,6 @@ if ($agent->canManageTickets())
     echo TicketStatus::status_options();
 
 
-
-
 // Mass Priority Change
 if ($agent->hasPerm(Ticket::PERM_EDIT, false)) { ?>
 
@@ -73,6 +71,24 @@ if ($agent->hasPerm(Ticket::PERM_ASSIGN, false)) {?>
 <?php
 }
 
+//Mass Merge
+if ($agent->hasPerm(Ticket::PERM_MERGE, false)) {?>
+
+ <a class="btn btn-light tickets-action" id="tickets-merge" data-placement="bottom"
+    data-toggle="tooltip" title="<?php echo __('Merge'); ?>"
+    href="#tickets/mass/merge"><i class="icon-code-fork"></i></a>
+
+<?php
+}
+
+//Mass Link
+if ($agent->hasPerm(Ticket::PERM_LINK, false)) {?>
+ <a class="btn btn-light tickets-action" id="tickets-link" data-placement="bottom"
+    data-toggle="tooltip" title="<?php echo __('Link'); ?>"
+    href="#tickets/mass/link"><i class="icon-link"></i></a>
+<?php
+}
+
 // Mass Transfer
 if ($agent->hasPerm(Ticket::PERM_TRANSFER, false)) {?>
 
@@ -113,7 +129,6 @@ $(function() {
             +'?count='+count
             +'&tids='+tids.join(',')
             +'&_uid='+new Date().getTime();
-            console.log(tids);
             $.dialog(url, [201], function (xhr) {
                 //$.pjax.reload('#pjax-container');
                 location.reload();

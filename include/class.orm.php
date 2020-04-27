@@ -333,6 +333,11 @@ class VerySimpleModel {
         return static::getMeta()->newInstance($row);
     }
 
+    function __wakeup() {
+        // If a model is stashed in a session, refresh the model from the database
+        $this->refetch();
+    }
+
     function get($field, $default=false) {
         if (array_key_exists($field, $this->ht))
             return $this->ht[$field];
@@ -677,6 +682,12 @@ class VerySimpleModel {
         else {
             $data = array('dirty' => $this->dirty);
             Signal::send('model.updated', $this, $data);
+            foreach ($this->dirty as $key => $value) {
+                if ($key != 'value' && $key != 'updated') {
+                    $type = array('type' => 'edited', 'key' => $key, 'orm_audit' => true);
+                    Signal::send('object.edited', $this, $type);
+                }
+            }
         }
         # Refetch row from database
         if ($refetch) {
@@ -712,9 +723,11 @@ class VerySimpleModel {
     }
 
     private function refetch() {
-        $this->ht =
-            static::objects()->filter($this->getPk())->values()->one()
-            + $this->ht;
+        try {
+            $this->ht =
+                static::objects()->filter($this->getPk())->values()->one()
+                + $this->ht;
+        } catch (DoesNotExist $ex) {}
     }
 
     private function getPk() {
@@ -1143,6 +1156,8 @@ class QuerySet implements IteratorAggregate, ArrayAccess, Serializable, Countabl
     const OPT_NOCACHE   = 'nocache';
     const OPT_MYSQL_FOUND_ROWS = 'found_rows';
 
+    const OPT_INDEX_HINT = 'indexhint';
+
     const ITER_MODELS   = 1;
     const ITER_HASH     = 2;
     const ITER_ROW      = 3;
@@ -1279,6 +1294,10 @@ class QuerySet implements IteratorAggregate, ArrayAccess, Serializable, Countabl
             $this->extra[$section] = array_merge($this->extra[$section] ?: array(), $info);
         }
         return $this;
+    }
+
+    function addExtraJoin(array $join) {
+       return $this->extra(array('joins' => array($join)));
     }
 
     function distinct() {
@@ -1443,7 +1462,7 @@ class QuerySet implements IteratorAggregate, ArrayAccess, Serializable, Countabl
         if (!is_array($annotations))
             $annotations = func_get_args();
         foreach ($annotations as $name=>$A) {
-            if ($A instanceof SqlAggregate) {
+            if ($A instanceof SqlFunction) {
                 if (is_int($name))
                     $name = $A->getFieldName();
                 $A->setAlias($name);
@@ -1475,6 +1494,18 @@ class QuerySet implements IteratorAggregate, ArrayAccess, Serializable, Countabl
 
     function hasOption($option) {
         return isset($this->options[$option]);
+    }
+
+    function getOption($option) {
+        return @$this->options[$option] ?: false;
+    }
+
+    function setOption($option, $value) {
+        $this->options[$option] = $value;
+    }
+
+    function clearOption($option) {
+        unset($this->options[$option]);
     }
 
     function countSelectFields() {
@@ -1715,7 +1746,7 @@ implements ArrayAccess {
         throw new Exception(__('QuerySet is read-only'));
     }
 
-    function count() {
+    function count($mode=COUNT_NORMAL) {
         $this->asArray();
         return count($this->storage);
     }
@@ -1737,7 +1768,8 @@ implements ArrayAccess {
     function sort($key=false, $reverse=false) {
         // Fetch all records into the cache
         $this->asArray();
-        return parent::sort($key, $reverse);
+        parent::sort($key, $reverse);
+        return $this;
     }
 
     /**
@@ -1800,15 +1832,22 @@ extends CachedResultSet {
 
 class ModelInstanceManager
 implements IteratorAggregate {
-    var $queryset;
     var $model;
     var $map;
+    var $resource;
+    var $annnotations;
+    var $defer;
 
     static $objectCache = array();
 
     function __construct(QuerySet $queryset) {
-        $this->queryset = $queryset;
         $this->model = $queryset->model;
+        $this->resource = $queryset->getQuery();
+        $cache = !$queryset->hasOption(QuerySet::OPT_NOCACHE);
+        $this->resource->setBuffered($cache);
+        $this->map = $this->resource->getMap();
+        $this->annotations = $queryset->annotations;
+        $this->defer = $queryset->defer;
     }
 
     function cache($model) {
@@ -1863,7 +1902,7 @@ implements IteratorAggregate {
                 return null;
             }
         }
-        $annotations = $this->queryset->annotations;
+        $annotations = $this->annotations;
         $extras = array();
         // For annotations, drop them from the $fields list and add them to
         // an $extras list. The fields passed to the root model should only
@@ -1882,7 +1921,7 @@ implements IteratorAggregate {
             // Construct and cache the object
             $m = $modelClass::__hydrate($fields);
             // XXX: defer may refer to fields not in this model
-            $m->__deferred__ = $this->queryset->defer;
+            $m->__deferred__ = $this->defer;
             $m->__onload();
             if ($cache)
                 $this->cache($m);
@@ -1952,10 +1991,6 @@ implements IteratorAggregate {
     }
 
     function getIterator() {
-        $this->resource = $this->queryset->getQuery();
-        $this->map = $this->resource->getMap();
-        $cache = !$this->queryset->hasOption(QuerySet::OPT_NOCACHE);
-        $this->resource->setBuffered($cache);
         $func = ($this->map) ? 'getRow' : 'getArray';
         $func = array($this->resource, $func);
 
@@ -2106,6 +2141,14 @@ extends ModelResultSet {
 
         return $object;
     }
+
+    function merge(InstrumentedList $list, $save=false) {
+       foreach ($list as $object)
+         $this->add($object, $save);
+
+       return $this;
+    }
+
     function remove($object, $delete=true) {
         if ($delete)
             $object->delete();
@@ -2220,10 +2263,11 @@ class SqlCompiler {
     );
 
     function __construct($options=false) {
-        if ($options)
+        if (is_array($options)) {
             $this->options = array_merge($this->options, $options);
-        if ($options['subquery'])
-            $this->alias_num += 150;
+            if (isset($options['subquery']))
+                $this->alias_num += 150;
+        }
     }
 
     function getParent() {
@@ -2279,6 +2323,7 @@ class SqlCompiler {
             'lt' => function($a, $b) { return $a < $b; },
             'lte' => function($a, $b) { return $a <= $b; },
             'ne' => function($a, $b) { return $a != $b; },
+            'in' => function($a, $b) { return in_array($a, is_array($b) ? $b : array($b)); },
             'contains' => function($a, $b) { return stripos($a, $b) !== false; },
             'startswith' => function($a, $b) { return stripos($a, $b) === 0; },
             'endswith' => function($a, $b) { return iEndsWith($a, $b); },
@@ -2526,8 +2571,10 @@ class SqlCompiler {
                         $criteria["{$field}__{$f}"] = $v;
                     }
                 }
-                $filter[] = $this->compileQ(new Q($criteria), $model,
-                    $Q->ored || $Q->negated);
+                // New criteria here is joined with AND, so if the outer
+                // criteria is joined with OR, then parentheses are
+                // necessary
+                $filter[] = $this->compileQ(new Q($criteria), $model, $Q->ored);
             }
             // Handle simple field = <value> constraints
             else {
@@ -2550,6 +2597,7 @@ class SqlCompiler {
             }
         }
         $glue = $Q->ored ? ' OR ' : ' AND ';
+        $filter = array_filter($filter);
         $clause = implode($glue, $filter);
         if (($Q->negated || $parens) && count($filter) > 1)
             $clause = '(' . $clause . ')';
@@ -2562,14 +2610,11 @@ class SqlCompiler {
         $constraints = array();
         $prev = $parens = false;
         foreach ($where as $Q) {
-            if ($prev && !$prev->isCompatibleWith($Q)) {
-                $parens = true;
-                break;
-            }
-            $prev = $Q;
-        }
-        foreach ($where as $Q) {
-            $constraints[] = $this->compileQ($Q, $model, $parens);
+
+            // Constraints are joined by AND operators, so if they have
+            // internal OR operators, then they need to be parenthesized
+            $constraints[] = $this->compileQ($Q, $model, $Q->ored);
+
         }
         return $constraints;
     }
@@ -2599,13 +2644,22 @@ class SqlCompiler {
             foreach ($queryset->extra['tables'] as $S) {
                 $join = ' JOIN ';
                 // Left joins require an ON () clause
-                if ($lastparen = strrpos($S, '(')) {
-                    if (preg_match('/\bon\b/i', substr($S, $lastparen - 4, 4)))
-                        $join = ' LEFT' . $join;
-                }
+                // TODO: Have a way to indicate a LEFT JOIN
                 $sql .= $join.$S;
             }
         }
+
+        // Add extra joins from QuerySet
+        if (isset($queryset->extra['joins'])) {
+            foreach ($queryset->extra['joins'] as $J) {
+                list($base, $constraints, $alias) = $J;
+                $join = $constraints ? ' LEFT JOIN ' : ' JOIN ';
+                $sql .= "{$join}{$base} $alias";
+                if ($constraints instanceof Q)
+                    $sql .= ' ON ('.$this->compileQ($constraints, $queryset->model).')';
+            }
+        }
+
         return $sql;
     }
 
@@ -2757,8 +2811,10 @@ class MySqlCompiler extends SqlCompiler {
     }
 
     function __range($a, $b) {
-        // XXX: Crash if $b is not array of two items
-        return sprintf('%s BETWEEN %s AND %s', $a, $this->input($b[0]), $this->input($b[1]));
+      return sprintf('%s BETWEEN %s AND %s',
+        $a,
+        $b[2] ? $b[0] : $this->input($b[0]),
+        $b[2] ? $b[1] : $this->input($b[1]));
     }
 
     //conveet field to year
@@ -2860,7 +2916,7 @@ class MySqlCompiler extends SqlCompiler {
     }
 
     function quote($what) {
-        return "`$what`";
+        return sprintf("`%s`", str_replace("`", "``", $what));
     }
 
     function supportsOption($option) {
@@ -2964,6 +3020,7 @@ class MySqlCompiler extends SqlCompiler {
         $meta = $model::getMeta();
         $table = $this->quote($meta['table']).' '.$rootAlias;
         // Handle related tables
+        $need_group_by = false;
         if ($queryset->related) {
             $count = 0;
             $fieldMap = $theseFields = array();
@@ -3009,13 +3066,18 @@ class MySqlCompiler extends SqlCompiler {
         }
         // Support retrieving only a list of values rather than a model
         elseif ($queryset->values) {
+            $additional_group_by = array();
             foreach ($queryset->values as $alias=>$v) {
                 list($f) = $this->getField($v, $model);
                 $unaliased = $f;
                 if ($f instanceof SqlFunction) {
                     $fields[$f->toSql($this, $model, $alias)] = true;
                     if ($f instanceof SqlAggregate) {
-                        // Don't group_by aggregate expressions
+
+                        // Don't group_by aggregate expressions, but if there is an
+                        // aggergate expression, then we need a GROUP BY clause.
+                        $need_group_by = true;
+
                         continue;
                     }
                 }
@@ -3027,8 +3089,10 @@ class MySqlCompiler extends SqlCompiler {
                 // If there are annotations, add in these fields to the
                 // GROUP BY clause
                 if ($queryset->annotations && !$queryset->distinct)
-                    $group_by[] = $unaliased;
+                    $additional_group_by[] = $unaliased;
             }
+            if ($need_group_by && $additional_group_by)
+                $group_by = array_merge($group_by, $additional_group_by);
         }
         // Simple selection from one table
         elseif (!$queryset->aggregated) {
@@ -3049,6 +3113,8 @@ class MySqlCompiler extends SqlCompiler {
             foreach ($queryset->annotations as $alias=>$A) {
                 // The root model will receive the annotations, add in the
                 // annotation after the root model's fields
+                if ($A instanceof SqlAggregate)
+                    $need_group_by = true;
                 $T = $A->toSql($this, $model, $alias);
                 if ($fieldMap) {
                     array_splice($fields, count($fieldMap[0][0]), 0, array($T));
@@ -3060,7 +3126,7 @@ class MySqlCompiler extends SqlCompiler {
                 }
             }
             // If no group by has been set yet, use the root model pk
-            if (!$group_by && !$queryset->aggregated && !$queryset->distinct) {
+            if (!$group_by && !$queryset->aggregated && !$queryset->distinct && $need_group_by) {
                 foreach ($meta['pk'] as $pk)
                     $group_by[] = $rootAlias .'.'. $pk;
             }
@@ -3082,12 +3148,16 @@ class MySqlCompiler extends SqlCompiler {
         $group_by = $group_by ? ' GROUP BY '.implode(', ', $group_by) : '';
 
         $joins = $this->getJoins($queryset);
+        if ($hint = $queryset->getOption(QuerySet::OPT_INDEX_HINT)) {
+            $hint = " USE INDEX ({$hint})";
+        }
 
         $sql = 'SELECT ';
         if ($queryset->hasOption(QuerySet::OPT_MYSQL_FOUND_ROWS))
             $sql .= 'SQL_CALC_FOUND_ROWS ';
         $sql .= implode(', ', $fields).' FROM '
-            .$table.$joins.$where.$group_by.$having.$sort;
+            .$table.$hint.$joins.$where.$group_by.$having.$sort;
+
         // UNIONS
         if ($queryset->chain) {
             // If the main query is sorted, it will need parentheses

@@ -81,6 +81,12 @@ if(!($maxfileuploads=ini_get('max_file_uploads')))
                 <i class="help-tip icon-question-sign" href="#sequence_id"></i>
             </td>
         </tr>
+        <tr><td width="220"><?php echo __('Top-Level Ticket Counts'); ?>:</td>
+            <td>
+                <input type="checkbox" name="queue_bucket_counts" <?php echo $config['queue_bucket_counts']?'checked="checked"':''; ?>>
+                <?php echo __('Enable'); ?>&nbsp;<i class="help-tip icon-question-sign" href="#queue_bucket_counts"></i>
+            </td>
+        </tr>
         <tr>
             <td width="180" class="required">
                 <?php echo __('Default Status'); ?>:
@@ -215,12 +221,32 @@ if(!($maxfileuploads=ini_get('max_file_uploads')))
             </td>
         </tr>
         <tr>
-            <td><?php echo __('Maximum <b>Open</b> Tickets');?>:</td>
+            <td><?php echo __('Collaborator Tickets Visibility'); ?>:</td>
             <td>
-                <input type="text" name="max_open_tickets" size=4 value="<?php echo $config['max_open_tickets']; ?>">
-                <?php echo __('per end user'); ?>
-                <span class="error">*&nbsp;<?php echo $errors['max_open_tickets']; ?></span>
-                <i class="help-tip icon-question-sign" href="#maximum_open_tickets"></i>
+                <input type="checkbox" name="collaborator_ticket_visibility" <?php echo $config['collaborator_ticket_visibility']?'checked="checked"':''; ?>>
+                <?php echo __('Enable'); ?>&nbsp;<i class="help-tip icon-question-sign" href="#collaborator_ticket_visibility"></i>
+            </td>
+        </tr>
+        <tr>
+            <td><?php echo __('Claim on Response'); ?>:</td>
+            <td>
+                <input type="checkbox" name="auto_claim_tickets" <?php echo $config['auto_claim_tickets']?'checked="checked"':''; ?>>
+                <?php echo __('Enable'); ?>&nbsp;<i class="help-tip icon-question-sign" href="#claim_tickets"></i>
+            </td>
+        </tr>
+        <tr>
+            <td><?php echo __('Auto-refer on Close'); ?>:</td>
+            <td>
+                <input type="checkbox" name="auto_refer_closed" <?php echo $config['auto_refer_closed']?'checked="checked"':''; ?>>
+                <?php echo __('Enable'); ?>&nbsp;<i class="help-tip
+                icon-question-sign" href="#auto_refer"></i>
+            </td>
+        </tr>
+        <tr>
+            <td><?php echo __('Require Help Topic to Close'); ?>:</td>
+            <td>
+                <input type="checkbox" name="require_topic_to_close" <?php echo $config['require_topic_to_close']?'checked="checked"':''; ?>>
+                <?php echo __('Enable'); ?>&nbsp;<i class="help-tip icon-question-sign" href="#require_topic_to_close"></i>
             </td>
         </tr>
         <tr>
@@ -275,10 +301,10 @@ if(!($maxfileuploads=ini_get('max_file_uploads')))
     <?php include STAFFINC_DIR . 'settings-alerts.inc.php'; ?>
 </div>
 
-<div class="tab-pane fade" id="queues">
+<div class="hidden tab_content" id="queues">
     <?php include STAFFINC_DIR . 'queues-ticket.inc.php'; ?>
 </div>
-</div>
+
 <p style="text-align:center;">
     <input class="button" type="submit" name="submit" value="<?php echo __('Save Changes');?>">
     <input class="button" type="reset" name="reset" value="<?php echo __('Reset Changes');?>">

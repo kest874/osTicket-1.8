@@ -1,4 +1,6 @@
-                    </div> <!-- end container -->
+                   </div><!-- /pjax-container -->
+                   
+                     </div> <!-- end container -->
                 </div><!-- end content -->
             </div>
             <!-- ============================================================== -->
@@ -45,7 +47,7 @@
 
         </div> <!-- /Wrapper -->
         
-    </div><!-- /pjax-container -->
+   
 <?php if (!isset($_SERVER['HTTP_X_PJAX'])) { ?>
     <div id="footer" style="display: none;">
         Copyright &copy; 2006-<?php echo date('Y'); ?>&nbsp;<?php echo (string) $ost->company ?: 'osTicket.com'; ?>&nbsp;All Rights Reserved.
@@ -87,11 +89,14 @@ if(is_object($thisstaff) && $thisstaff->isStaff()) { ?>
     <div class="clear"></div>
 
 <script src="<?php echo ROOT_PATH; ?>scp/js/popper.min.js"></script>
-<script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/scp.js"></script>
+
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery.pjax.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/bootstrap-typeahead.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/bootstrap-datetimejs.js"></script>
-<script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-ui-1.12.1.custom.min.js"></script>
+<script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-ui-timepicker-addon.js"></script>
+<script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-ui-sliderAccess.js"></script>
+<script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/scp.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/filedrop.field.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/select2.min.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/tips.js"></script>
@@ -99,12 +104,12 @@ if(is_object($thisstaff) && $thisstaff->isStaff()) { ?>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/redactor-osticket.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/redactor-plugins.js"></script>
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/jquery.translatable.js"></script>
-<!--<script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/jquery.dropdown.js"></script>-->
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/fabric.min.js"></script>
+<script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/bootstrap-tooltip.js"></script>
+<script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/jb.overflow.menu.js"></script>
 <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>scp/css/tooltip.css">
 <script src="<?php echo ROOT_PATH; ?>scp/js/bootstrap.min.js"></script>
 
-<script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/bootstrap-tooltip.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/detect.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/fastclick.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.slimscroll.js"></script>
@@ -153,6 +158,4 @@ if ($thisstaff
 </body>
 </html>
 <?php } # endif X_PJAX ?>
-<script>
-$.busyLoadFull("hide", {});
-</script>
+

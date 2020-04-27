@@ -3,8 +3,91 @@ if(!defined('OSTSTAFFINC') || !$faq || !$thisstaff) die('Access Denied');
 
 $category=$faq->getCategory();
 
-$view = $category->isPublic()?__('Public'):__('Internal');
-?> 
+?><div class="has_bottom_border" style="padding-top:5px;">
+<div class="pull-left"><h2><?php echo __('Frequently Asked Questions');?></h2></div>
+<div class="pull-right flush-right">
+<?php
+$query = array();
+parse_str($_SERVER['QUERY_STRING'], $query);
+$query['a'] = 'print';
+$query['id'] = $faq->getId();
+$query = http_build_query($query); ?>
+    <a href="faq.php?<?php echo $query; ?>" class="no-pjax action-button">
+    <i class="icon-print"></i>
+        <?php echo __('Print'); ?>
+    </a>
+<?php
+if ($thisstaff->hasPerm(FAQ::PERM_MANAGE)) { ?>
+    <a href="faq.php?id=<?php echo $faq->getId(); ?>&a=edit" class="action-button">
+    <i class="icon-edit"></i>
+        <?php echo __('Edit FAQ'); ?>
+    </a>
+<?php } ?>
+</div><div class="clear"></div>
+
+</div>
+
+<div id="breadcrumbs">
+    <a href="kb.php"><?php echo __('All Categories');?></a>
+    &raquo; <a href="kb.php?cid=<?php echo $category->getId(); ?>"><?php
+    echo $category->getFullName(); ?></a>
+    <span class="faded">(<?php echo $category->isPublic()?__('Public'):__('Internal'); ?>)</span>
+</div>
+
+<div class="pull-right sidebar faq-meta">
+<?php if ($attachments = $faq->getLocalAttachments()->all()) { ?>
+<section>
+    <header><?php echo __('Attachments');?>:</header>
+<?php foreach ($attachments as $att) { ?>
+<div>
+    <i class="icon-paperclip pull-left"></i>
+    <a target="_blank" href="<?php echo $att->file->getDownloadUrl(['id' =>
+    $att->getId()]); ?>"
+        class="attachment no-pjax">
+        <?php echo Format::htmlchars($att->getFilename()); ?>
+    </a>
+</div>
+<?php } ?>
+</section>
+<?php } ?>
+
+<?php if ($faq->getHelpTopics()->count()) { ?>
+<section>
+    <header><?php echo __('Help Topics'); ?></header>
+<?php foreach ($faq->getHelpTopics() as $T) { ?>
+    <div><?php echo $T->topic->getFullName(); ?></div>
+<?php } ?>
+</section>
+<?php } ?>
+
+<?php
+$displayLang = $faq->getDisplayLang();
+$otherLangs = array();
+if ($cfg->getPrimaryLanguage() != $displayLang)
+    $otherLangs[] = $cfg->getPrimaryLanguage();
+foreach ($faq->getAllTranslations() as $T) {
+    if ($T->lang != $displayLang)
+        $otherLangs[] = $T->lang;
+}
+if ($otherLangs) { ?>
+<section>
+    <div><strong><?php echo __('Other Languages'); ?></strong></div>
+<?php
+    foreach ($otherLangs as $lang) { ?>
+    <div><a href="faq.php?kblang=<?php echo $lang; ?>&id=<?php echo $faq->getId(); ?>">
+        <?php echo Internationalization::getLanguageDescription($lang); ?>
+    </a></div>
+    <?php } ?>
+</section>
+<?php } ?>
+
+<section>
+<div>
+    <strong><?php echo $faq->isPublished()?__('Published'):__('Internal'); ?></strong>
+</div>
+<a data-dialog="ajax.php/kb/faq/<?php echo $faq->getId(); ?>/access" href="#"><?php echo __('Manage Access'); ?></a>
+</section>
+
 
 <div class="subnav">
 

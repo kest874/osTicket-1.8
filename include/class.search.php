@@ -1,24 +1,18 @@
 <?php
 /*********************************************************************
     module.search.php
-
     Search Engine for osTicket
-
     This module defines the pieces for a search engine for osTicket.
     Searching can be performed by various search engine backends which can
     make use of the features of various search providers.
-
     A reference search engine backend is provided which uses MySQL MyISAM
     tables. This default backend should not be used on Galera clusters.
-
     Jared Hancock <jared@osticket.com>
     Peter Rotich <peter@osticket.com>
     Copyright (c)  2006-2013 osTicket
     http://www.osticket.com
-
     Released under the GNU General Public License WITHOUT ANY WARRANTY.
     See LICENSE.TXT for details.
-
     vim: expandtab sw=4 ts=4 sts=4:
 **********************************************************************/
 require_once INCLUDE_DIR . 'class.role.php';
@@ -384,9 +378,11 @@ class MysqlSearchBackend extends SearchBackend {
             $criteria->extra(array(
                 'tables' => array(
                     str_replace(array(':', '{}'), array(TABLE_PREFIX, $search),
-                    "(SELECT COALESCE(Z3.`object_id`, Z5.`ticket_id`, Z8.`ticket_id`) as `ticket_id`, SUM({}) AS `relevance` FROM `:_search` Z1 LEFT JOIN `:thread_entry` Z2 ON (Z1.`object_type` = 'H' AND Z1.`object_id` = Z2.`id`) LEFT JOIN `:thread` Z3 ON (Z2.`thread_id` = Z3.`id` AND Z3.`object_type` = 'T') LEFT JOIN `:ticket` Z5 ON (Z1.`object_type` = 'T' AND Z1.`object_id` = Z5.`ticket_id`) LEFT JOIN `:user` Z6 ON (Z6.`id` = Z1.`object_id` and Z1.`object_type` = 'U') LEFT JOIN `:organization` Z7 ON (Z7.`id` = Z1.`object_id` AND Z7.`id` = Z6.`org_id` AND Z1.`object_type` = 'O') LEFT JOIN :ticket Z8 ON (Z8.`user_id` = Z6.`id`) WHERE {} GROUP BY `ticket_id`) Z1"),
-                )
+                    "(SELECT COALESCE(Z3.`object_id`, Z5.`ticket_id`, Z8.`ticket_id`) as `ticket_id`, Z1.relevance FROM (SELECT Z1.`object_id`, Z1.`object_type`, {} AS `relevance` FROM `:_search` Z1 WHERE {} ORDER BY relevance DESC) Z1 LEFT JOIN `:thread_entry` Z2 ON (Z1.`object_type` = 'H' AND Z1.`object_id` = Z2.`id`) LEFT JOIN `:thread` Z3 ON (Z2.`thread_id` = Z3.`id` AND (Z3.`object_type` = 'T' OR Z3.`object_type` = 'C')) LEFT JOIN `:ticket` Z5 ON (Z1.`object_type` = 'T' AND Z1.`object_id` = Z5.`ticket_id`) LEFT JOIN `:user` Z6 ON (Z6.`id` = Z1.`object_id` and Z1.`object_type` = 'U') LEFT JOIN `:organization` Z7 ON (Z7.`id` = Z1.`object_id` AND Z7.`id` = Z6.`org_id` AND Z1.`object_type` = 'O') LEFT JOIN `:ticket` Z8 ON (Z8.`user_id` = Z6.`id`)) Z1"),
+                ),
             ));
+            $criteria->extra(array('order_by' => array(array(new SqlCode('Z1.relevance', 'DESC')))));
+
             $criteria->filter(array('ticket_id'=>new SqlCode('Z1.`ticket_id`')));
             break;
 
@@ -480,7 +476,7 @@ class MysqlSearchBackend extends SearchBackend {
         $sql = "SELECT A1.`id`, A1.`title`, A1.`body`, A1.`format` FROM `".THREAD_ENTRY_TABLE."` A1
             LEFT JOIN `".TABLE_PREFIX."_search` A2 ON (A1.`id` = A2.`object_id` AND A2.`object_type`='H')
             WHERE A2.`object_id` IS NULL AND (A1.poster <> 'SYSTEM')
-            AND (LENGTH(A1.`title`) + LENGTH(A1.`body`) > 0)
+            AND (IFNULL(LENGTH(A1.`title`), 0) + IFNULL(LENGTH(A1.`body`), 0) > 0)
             ORDER BY A1.`id` DESC LIMIT 500";
         if (!($res = db_query_unbuffered($sql, $auto_create)))
             return false;
@@ -524,8 +520,7 @@ class MysqlSearchBackend extends SearchBackend {
 
         $sql = "SELECT A1.`id` FROM `".USER_TABLE."` A1
             LEFT JOIN `".TABLE_PREFIX."_search` A2 ON (A1.`id` = A2.`object_id` AND A2.`object_type`='U')
-            WHERE A2.`object_id` IS NULL
-            ORDER BY A1.`id` DESC";
+            WHERE A2.`object_id` IS NULL";
         if (!($res = db_query_unbuffered($sql, $auto_create)))
             return false;
 
@@ -550,8 +545,7 @@ class MysqlSearchBackend extends SearchBackend {
 
         $sql = "SELECT A1.`id` FROM `".ORGANIZATION_TABLE."` A1
             LEFT JOIN `".TABLE_PREFIX."_search` A2 ON (A1.`id` = A2.`object_id` AND A2.`object_type`='O')
-            WHERE A2.`object_id` IS NULL
-            ORDER BY A1.`id` DESC";
+            WHERE A2.`object_id` IS NULL";
         if (!($res = db_query_unbuffered($sql, $auto_create)))
             return false;
 
@@ -575,8 +569,7 @@ class MysqlSearchBackend extends SearchBackend {
         require_once INCLUDE_DIR . 'class.faq.php';
         $sql = "SELECT A1.`faq_id` FROM `".FAQ_TABLE."` A1
             LEFT JOIN `".TABLE_PREFIX."_search` A2 ON (A1.`faq_id` = A2.`object_id` AND A2.`object_type`='K')
-            WHERE A2.`object_id` IS NULL
-            ORDER BY A1.`faq_id` DESC";
+            WHERE A2.`object_id` IS NULL";
         if (!($res = db_query_unbuffered($sql, $auto_create)))
             return false;
 
@@ -646,11 +639,30 @@ MysqlSearchBackend::register();
 // Saved search system
 
 /**
- * A special case of the custom queues used to represent an advanced search.
+ * Custom Queue truly represent a saved advanced search.
  */
-class SavedSearch extends CustomQueue {
+class SavedQueue extends CustomQueue {
     // Override the ORM relationship to force no children
     private $children = false;
+    private $_config;
+    private $_criteria;
+    private $_columns;
+    private $_settings;
+    private $_form;
+    private $_sorts;
+
+
+    function __onload() {
+        global $thisstaff;
+
+        // Load custom settings for this staff
+        if ($thisstaff) {
+            $this->_config = QueueConfig::lookup(array(
+                         'queue_id' => $this->getId(),
+                         'staff_id' => $thisstaff->getId())
+                    );
+        }
+    }
 
     static function forStaff(Staff $agent) {
         return static::objects()->filter(Q::any(array(
@@ -660,14 +672,384 @@ class SavedSearch extends CustomQueue {
         ->exclude(array('flags__hasbit'=>self::FLAG_QUEUE));
     }
 
-    function update($vars, &$errors=array()) {
-        if (!parent::update($vars, $errors))
+    private function getSettings() {
+        if (!isset($this->_settings)) {
+            $this->_settings = array();
+            if ($this->_config)
+                $this->_settings = $this->_config->getSettings();
+        }
+
+        return  $this->_settings;
+    }
+
+    private function getCustomColumns() {
+
+        if (!isset($this->_columns)) {
+            $this->_columns = array();
+            if ($this->_config
+                    && $this->_config->columns->count())
+                $this->_columns = $this->_config->columns;
+        }
+
+        return $this->_columns;
+    }
+
+    static function getHierarchicalQueues(Staff $staff, $pid = 0, $primary = true) {
+        return CustomQueue::getHierarchicalQueues($staff, 0, false);
+    }
+
+
+    /*
+     * Determine if sort is inherited
+     */
+    function isDefaultSortInherited() {
+        if ($this->parent
+                && $this->getSettings()
+                && @$this->_settings['inherit-sort'])
+            return true;
+
+        return parent::isDefaultSortInherited();
+    }
+
+    function getSortOptions() {
+
+        if (!isset($this->_sorts)) {
+            // See if the queue has sort options
+            if (($sorts=parent::getSortOptions()) && $sorts->count())
+                $this->_sorts = $sorts;
+            // otherwise return all sorts
+            else
+                 $this->_sorts = QueueSort::objects();
+        }
+
+        return $this->_sorts;
+    }
+
+    function getDefaultSort() {
+        if ($this->getSettings()
+                && $this->_settings['sort_id']
+                && ($sort = QueueSort::lookup($this->_settings['sort_id'])))
+            return $sort;
+
+        return parent::getDefaultSort();
+    }
+
+    /**
+     * Fetch an AdvancedSearchForm instance for use in displaying or
+     * configuring this search in the user interface.
+     *
+     */
+    function getForm($source=null, $searchable=array()) {
+        $searchable = null;
+        if ($this->isAQueue())
+            // Only allow supplemental matches.
+            $searchable = array_intersect_key($this->getCurrentSearchFields($source),
+                    $this->getSupplementalMatches());
+
+        return parent::getForm($source, $searchable);
+    }
+
+   /**
+     * Get get supplemental matches for public queues.
+     *
+     */
+    function getSupplementalMatches() {
+        // Target flags
+        $flags = array('isoverdue', 'isassigned', 'isreopened', 'isanswered');
+        $current = array();
+        // Check for closed state - whih disables above flags
+        foreach (parent::getCriteria() as $c) {
+            if (!strcasecmp($c[0], 'status__state')
+                    && isset($c[2]['closed']))
+                return array();
+
+            $current[] = $c[0];
+        }
+
+        // Filter out fields already in criteria
+        $matches = array_intersect_key($this->getSupportedMatches(),
+                array_flip(array_diff($flags, $current)));
+
+        return $matches;
+    }
+
+    function criteriaRequired() {
+        return !$this->isAQueue();
+    }
+
+    function describeCriteria($criteria=false){
+        $criteria = $criteria ?: parent::getCriteria();
+        return parent::describeCriteria($criteria);
+    }
+
+    function getCriteria($include_parent=true) {
+
+        if (!isset($this->_criteria)) {
+            $this->getSettings();
+            $this->_criteria = $this->_settings['criteria'] ?: array();
+        }
+
+        $criteria = $this->_criteria;
+        if ($include_parent)
+            $criteria = array_merge($criteria,
+                    parent::getCriteria($include_parent));
+
+
+        return $criteria;
+    }
+
+    function getSupplementalCriteria() {
+        return $this->getCriteria(false);
+    }
+
+    function useStandardColumns() {
+
+        $this->getSettings();
+        if ($this->getCustomColumns()
+                && isset($this->_settings['inherit-columns']))
+            return $this->_settings['inherit-columns'];
+
+        // owner?? edit away.
+        if ($this->_config
+                && $this->_config->staff_id == $this->staff_id)
             return false;
 
-        // Personal queues _always_ inherit from their parent
-        $this->setFlag(self::FLAG_INHERIT_CRITERIA, $this->parent_id > 0);
+        return parent::useStandardColumns();
+    }
 
-        return count($errors) === 0;
+    function inheritColumns() {
+        if ($this->getSettings() && isset($this->_settings['inherit-columns']))
+            return $this->_settings['inherit-columns'];
+
+        return parent::inheritColumns();
+    }
+
+    function getStandardColumns() {
+        return parent::getColumns(is_null($this->parent));
+    }
+
+    function getColumns($use_template=false) {
+
+        if (!$this->useStandardColumns() && ($columns=$this->getCustomColumns()))
+            return $columns;
+
+        return parent::getColumns($use_template);
+    }
+
+    function update($vars, &$errors=array()) {
+        global $thisstaff;
+
+        if (!$this->checkAccess($thisstaff))
+            return false;
+
+        if ($this->checkOwnership($thisstaff)) {
+            // Owner of the queue - can update everything
+            if (!parent::update($vars, $errors))
+                return false;
+
+            // Personal queues _always_ inherit from their parent
+            $this->setFlag(self::FLAG_INHERIT_CRITERIA, $this->parent_id >
+                    0);
+
+            return true;
+        }
+
+        // Agent's config for public queue.
+        if (!$this->_config)
+            $this->_config = QueueConfig::create(array(
+                        'queue_id' => $this->getId(),
+                        'staff_id' => $thisstaff->getId()));
+
+        //  Validate & isolate supplemental criteria (if any)
+        $vars['criteria'] = array();
+        if (isset($vars['fields'])) {
+           $form = $this->getForm($vars, $thisstaff);
+            if ($form->isValid()) {
+                $criteria = self::isolateCriteria($form->getClean(),
+                        $this->getRoot());
+                $allowed = $this->getSupplementalMatches();
+                foreach ($criteria as $k => $c)
+                    if (!isset($allowed[$c[0]]))
+                        unset($criteria[$k]);
+
+                $vars['criteria'] = $criteria ?: array();
+            } else {
+                $errors['criteria'] = __('Validation errors exist on supplimental criteria');
+            }
+        }
+
+        if (!$errors && $this->_config->update($vars, $errors)) {
+            // reset settings
+            $this->_settings = $this->_criteria = null;
+            // Reset chached queue options
+            unset($_SESSION['sort'][$this->getId()]);
+
+        }
+
+        return (!$errors);
+    }
+
+    function getTotal($agent=null) {
+        $query = $this->getQuery();
+        if ($agent)
+            $query = $agent->applyVisibility($query);
+        $query->limit(false)->offset(false)->order_by(false);
+        try {
+            return $query->count();
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    function getCount($agent, $cached=true) {
+        $count = null;
+        if ($cached && ($counts = self::counts($agent, $cached)))
+            $count = $counts["q{$this->getId()}"];
+
+        if ($count == null)
+            $count = $this->getTotal($agent);
+
+        return $count;
+    }
+
+    // Get ticket counts for queues the agent has acces to.
+    static function counts($agent, $cached=true, $criteria=array()) {
+
+        if (!$agent instanceof Staff)
+            return null;
+
+        // Cache TLS in seconds
+        $ttl = 5*60;
+        // Cache key based on agent and salt of the installation
+        $key = "counts.queues.{$agent->getId()}.".SECRET_SALT;
+        if ($criteria && is_array($criteria)) // Consider additional criteria.
+            $key .= '.'.md5(serialize($criteria));
+
+        // only consider cache if requesed
+        if ($cached && ($counts=self::getCounts($key, $ttl)))
+            return $counts;
+
+        $queues = static::objects()
+            ->filter(Q::any(array(
+                'flags__hasbit' => CustomQueue::FLAG_QUEUE,
+                'staff_id' => $agent->getId(),
+            )));
+
+        if ($criteria && is_array($criteria))
+            $queues->filter($criteria);
+
+       $counts = array();
+        $query = Ticket::objects();
+        // Apply tickets visibility for the agent
+        $query = $agent->applyVisibility($query, true);
+        // Aggregate constraints
+        foreach ($queues as $queue) {
+            $Q = $queue->getBasicQuery();
+
+            // only get counts for regular tickets (not children tickets) unless
+            // queue is a saved search
+            if ($queue->isAQueue() || $queue->isASubQueue()) {
+                $reg = Q::any(array('thread__object_type' => 'T'));
+                $Q->constraints[] = $reg;
+            }
+
+            if ($Q->constraints) {
+                $empty = false;
+                if (count($Q->constraints) > 1) {
+                    foreach ($Q->constraints as $value) {
+                        if (!$value->constraints)
+                            $empty = true;
+                    }
+                }
+            }
+
+            // Add extra tables joins  (if any)
+            if ($Q->extra && isset($Q->extra['tables'])) {
+               // skip counting keyword searches. Display them as '-'
+               $counts['q'.$queue->getId()] = '-';
+               continue;
+               $contraints = array();
+               if ($Q->constraints)
+                    $constraints = new Q($Q->constraints);
+               foreach ($Q->extra['tables'] as $T)
+                   $query->addExtraJoin(array($T, $constraints, ''));
+            }
+
+            if ($Q->constraints && !$empty) {
+                $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), new SqlField('ticket_id'));
+                $query->aggregate(array(
+                    "q{$queue->id}" => SqlAggregate::COUNT($expr, true)
+                ));
+            } else //display skipped counts as '-'
+                $counts['q'.$queue->getId()] = '-';
+        }
+
+        try {
+            $counts = array_merge($counts, $query->values()->one());
+        }  catch (Exception $ex) {
+            foreach ($queues as $q)
+                $counts['q'.$q->getId()] = $q->getTotal();
+        }
+
+        // Always cache the results
+        self::storeCounts($key, $counts, $ttl);
+
+        return $counts;
+    }
+
+    static function getCounts($key, $ttl) {
+
+        if (!$key) {
+            return array();
+        } elseif (function_exists('apcu_store')) {
+            $found = false;
+            $counts = apcu_fetch($key, $found);
+            if ($found === true)
+                return $counts;
+        } elseif (isset($_SESSION['qcounts'][$key])
+                && (time() - $_SESSION['qcounts'][$key]['time']) < $ttl) {
+            return $_SESSION['qcounts'][$key]['counts'];
+        } else {
+            // Auto clear missed session cache (if any)
+            unset($_SESSION['qcounts'][$key]);
+        }
+    }
+
+    static function storeCounts($key, $counts, $ttl) {
+        if (function_exists('apcu_store')) {
+            apcu_store($key, $counts, $ttl);
+        } else {
+            // Poor man's cache
+            $_SESSION['qcounts'][$key]['counts'] = $counts;
+            $_SESSION['qcounts'][$key]['time'] = time();
+        }
+    }
+
+    static function clearCounts() {
+        if (function_exists('apcu_store')) {
+            if (class_exists('APCUIterator')) {
+                $regex = '/^counts.queues.\d+.' . preg_quote(SECRET_SALT, '/') . '$/';
+                foreach (new APCUIterator($regex, APC_ITER_KEY) as $key) {
+                    apcu_delete($key);
+                }
+            }
+            // Also clear rough counts
+            apcu_delete("rough.counts.".SECRET_SALT);
+        }
+    }
+
+    static function lookup($criteria) {
+        $queue = parent::lookup($criteria);
+        // Annoted cusom settings (if any)
+        if (($c=$queue->_config)) {
+            $queue->_settings = $c->getSettings() ?: array();
+            $queue = AnnotatedModel::wrap($queue,
+                        array_intersect_key($queue->_settings,
+                            array_flip(array('sort_id', 'filter'))));
+            $queue->_config = $c;
+        }
+
+        return $queue;
     }
 
     static function create($vars=false) {
@@ -677,33 +1059,155 @@ class SavedSearch extends CustomQueue {
     }
 }
 
-class AdhocSearch
-extends SavedSearch {
-    function getName() {
-        return $this->describeCriteria();
+class SavedSearch extends SavedQueue {
+
+    function isSaved() {
+        return (!$this->__new__);
+    }
+
+    function getCount($agent, $cached=true) {
+        return 500;
     }
 }
 
+class AdhocSearch
+extends SavedSearch {
+
+    function isSaved() {
+        return false;
+    }
+
+    function isOwner(Staff $staff) {
+        return $this->ht['staff_id'] == $staff->getId();
+    }
+
+    function checkAccess(Staff $staff) {
+        return true;
+    }
+
+    function getName() {
+        return $this->title ?: $this->describeCriteria();
+    }
+
+    function load($key) {
+        global $thisstaff;
+
+        if (strpos($key, 'adhoc') === 0)
+            list(, $key) = explode(',', $key, 2);
+
+        if (!$key
+                || !isset($_SESSION['advsearch'])
+                || !($config=$_SESSION['advsearch'][$key]))
+            return null;
+
+       $queue = new AdhocSearch(array(
+                   'id' => "adhoc,$key",
+                   'root' => 'T',
+                   'staff_id' => $thisstaff->getId(),
+                   'title' => __('Advanced Search'),
+                ));
+       $queue->config = $config;
+
+       return $queue;
+    }
+}
+
+// AdvacedSearchForm
 class AdvancedSearchForm extends SimpleForm {
     static $id = 1337;
+
+    function getNumFieldsSelected() {
+        $selected = 0;
+        foreach ($this->getFields() as $F) {
+            if (substr($F->get('name'), -7) == '+search'
+                    && $F->getClean())
+                $selected += 1;
+            // Consider keyword searches
+            elseif ($F->get('name') == ':keywords'
+                    && $F->getClean())
+                $selected += 1;
+        }
+        return $selected;
+    }
 }
 
 // Advanced search special fields
 
-class HelpTopicChoiceField extends ChoiceField {
+class AdvancedSearchSelectionField extends ChoiceField {
+
+    function hasIdValue() {
+        return false;
+    }
+
+    function getSearchQ($method, $value, $name=false) {
+        switch ($method) {
+            case 'includes':
+            case '!includes':
+                $Q = new Q();
+                if (count($value) > 1)
+                    $Q->add(array("{$name}__in" => array_keys($value)));
+                else
+                    $Q->add(array($name => key($value)));
+
+                if ($method == '!includes')
+                    $Q->negate();
+                return $Q;
+                break;
+            // osTicket commonly uses `0` to represent an unset state, so
+            // the set and unset checks need to check for both not null and
+            // nonzero
+            case 'nset':
+                return new Q([$name => 0]);
+            case 'set':
+                return Q::not([$name => 0]);
+            default:
+                return parent::getSearchQ($method, $value, $name);
+        }
+
+    }
+
+}
+
+class HelpTopicChoiceField extends AdvancedSearchSelectionField {
+    static $_topics;
+
     function hasIdValue() {
         return true;
     }
 
     function getChoices($verbose=false) {
-        return Topic::getHelpTopics(false, Topic::DISPLAY_DISABLED);
+        if (!isset($this->_topics))
+            $this->_topics = Topic::getHelpTopics(false, Topic::DISPLAY_DISABLED);
+
+        return $this->_topics;
     }
 }
 
 require_once INCLUDE_DIR . 'class.dept.php';
-class DepartmentChoiceField extends ChoiceField {
+class DepartmentChoiceField extends AdvancedSearchSelectionField {
+    static $_depts;
+    var $_choices;
+
     function getChoices($verbose=false) {
-        return Dept::getDepartments();
+        if (!isset($this->_depts))
+            $this->_depts = Dept::getDepartments();
+
+        return $this->_depts;
+    }
+
+    function getQuickFilterChoices() {
+       global $thisstaff;
+
+       if (!isset($this->_choices)) {
+         $this->_choices = array();
+         $depts = $thisstaff ? $thisstaff->getDepts() : array();
+         foreach ($this->getChoices() as $id => $name) {
+           if (!$depts || in_array($id, $depts))
+               $this->_choices[$id] = $name;
+         }
+       }
+
+       return $this->_choices;
     }
 
     function getSearchMethods() {
@@ -712,26 +1216,50 @@ class DepartmentChoiceField extends ChoiceField {
             '!includes' =>  __('is not'),
         );
     }
+
+    function addToQuery($query, $name=false) {
+        return $query->values('dept_id', 'dept__name');
+    }
+
+    function applyOrderBy($query, $reverse=false, $name=false) {
+        $reverse = $reverse ? '-' : '';
+        return $query->order_by("{$reverse}dept__name");
+    }
 }
 
+
 class AssigneeChoiceField extends ChoiceField {
+
+    protected $_items;
+
+
     function getChoices($verbose=false) {
         global $thisstaff;
 
-        $items = array(
-            'M' => __('Me'),
-            'T' => __('One of my teams'),
-        );
-        foreach (Staff::getStaffMembers() as $id=>$name) {
-            // Don't include $thisstaff (since that's 'Me')
-            if ($thisstaff && $thisstaff->getId() == $id)
-                continue;
-            $items['s' . $id] = $name;
+        if (!isset($this->_items)) {
+            $items = array(
+                'M' => __('Me'),
+                'T' => __('One of my teams'),
+            );
+            foreach (Staff::getStaffMembers() as $id=>$name) {
+                // Don't include $thisstaff (since that's 'Me')
+                if ($thisstaff && $thisstaff->getId() == $id)
+                    continue;
+                $items['s' . $id] = $name;
+            }
+            foreach (Team::getTeams() as $id=>$name) {
+                $items['t' . $id] = $name;
+            }
+
+            $this->_items = $items;
         }
-        foreach (Team::getTeams() as $id=>$name) {
-            $items['t' . $id] = $name;
-        }
-        return $items;
+
+        return $this->_items;
+    }
+
+    function getChoice($k) {
+        $choices = $this->getChoices();
+        return $choices[$k] ?: null;
     }
 
     function getSearchMethods() {
@@ -773,6 +1301,7 @@ class AssigneeChoiceField extends ChoiceField {
             $Q->negate();
         case 'includes':
             $teams = $agents = array();
+            $matches = count($value);
             foreach ($value as $id => $ST) {
                 switch ($id[0]) {
                 case 'M':
@@ -782,7 +1311,10 @@ class AssigneeChoiceField extends ChoiceField {
                     $agents[] = (int) substr($id, 1);
                     break;
                 case 'T':
-                    $teams = array_merge($thisstaff->getTeams());
+                    if ($thisstaff && ($staffTeams = $thisstaff->getTeams()))
+                         $teams = array_merge($staffTeams);
+                    elseif ($matches == 1)
+                        return Q::any(['team_id' => null]);
                     break;
                 case 't':
                     $teams[] = (int) substr($id, 1);
@@ -811,6 +1343,14 @@ class AssigneeChoiceField extends ChoiceField {
     }
 
     function addToQuery($query, $name=false) {
+
+        $fields = array();
+        foreach(Staff::getsortby('staff__') as $key)
+             $fields[] = new SqlField($key);
+        $fields[] =  new SqlField('team__name');
+        $fields[] = 'zzz';
+        $expr = call_user_func_array(array('SqlFunction', 'COALESCE'), $fields);
+        $query->annotate(array($name ?: 'assignee' => $expr));
         return $query->values('staff__firstname', 'staff__lastname', 'team__name', 'team_id');
     }
 
@@ -819,17 +1359,141 @@ class AssigneeChoiceField extends ChoiceField {
             return new AgentsName(array('first' => $row['staff__firstname'], 'last' => $row['staff__lastname']));
         if ($row['team_id'])
             return Team::getLocalById($row['team_id'], 'name', $row['team__name']);
+
     }
 
     function display($value) {
         return (string) $value;
     }
 
-    function applyOrderBy($query, $reverse=false, $name=false) {
-        $reverse = $reverse ? '-' : '';
-        return $query->order_by("{$reverse}staff__firstname",
-            "{$reverse}staff__lastname", "{$reverse}team__name");
+    function toString($value) {
+        if (!is_array($value))
+             $value = array($value => $value);
+        $selection = array();
+        foreach ($value as $k => $v)
+            $selection[] = $this->getChoice($k) ?: (string) $v;
+        return implode(', ', $selection);
     }
+}
+
+class AssignedField extends AssigneeChoiceField {
+
+    function getChoices($verbose=false) {
+        return array(
+            'assigned' =>   __('Assigned'),
+            '!assigned' =>  __('Unassigned'),
+        );
+    }
+
+    function getSearchMethods() {
+        return array(
+            'assigned' =>   __('assigned'),
+            '!assigned' =>  __('unassigned'),
+        );
+    }
+
+    function addToQuery($query, $name=false) {
+        return $query->values('staff_id', 'team_id');
+    }
+
+    function from_query($row, $name=false) {
+        return ($row['staff_id'] || $row['staff_id'])
+            ? __('Yes') : __('No');
+    }
+
+}
+
+class MergedField extends FormField {
+    function getSearchMethods() {
+        return array(
+            'set' =>        __('checked'),
+            'nset' =>    __('unchecked'),
+        );
+    }
+
+    function addToQuery($query, $name=false) {
+        $query->annotate(array(
+                'merged' => new SqlExpr(new Q(array(
+                    Q::any(array(
+                        'flags__hasbit' => Ticket::FLAG_SEPARATE_THREADS,
+                        'flags__hasbit' => Ticket::FLAG_COMBINE_THREADS,
+                )))
+            ))));
+
+        return $query->values('merged');
+    }
+
+    function getSearchQ($method, $value, $name=false) {
+        global $thisstaff;
+
+        $Q = new Q();
+        switch ($method) {
+        case 'set':
+            $visibility = Q::any(array(
+                'flags__hasbit' => Ticket::FLAG_SEPARATE_THREADS,
+            ));
+            $visibility->add(Q::any(array(
+                'flags__hasbit' => Ticket::FLAG_COMBINE_THREADS
+            )));
+            $visibility->ored = true;
+            return $visibility;
+        case 'nset':
+            $visibility = Q::all(array());
+            $visibility->add(Q::not(array(
+                'flags__hasbit' => Ticket::FLAG_SEPARATE_THREADS,
+            )));
+            $visibility->add(Q::not(array(
+                'flags__hasbit' => (Ticket::FLAG_COMBINE_THREADS)
+            )));
+            return $visibility;
+            break;
+        }
+    }
+
+    function from_query($row, $name=false) {
+        $flags = $row['flags'];
+        $combine = ($flags & Ticket::FLAG_COMBINE_THREADS) != 0;
+        $separate = ($flags & Ticket::FLAG_SEPARATE_THREADS) != 0;
+        return ($combine || $separate)
+            ? __('Yes') : __('No');
+    }
+}
+
+class LinkedField extends FormField {
+    function getSearchMethods() {
+        return array(
+            'set' =>        __('checked'),
+            'nset' =>    __('unchecked'),
+        );
+    }
+
+    function addToQuery($query, $name=false) {
+        return $query->values('ticket_pid', 'flags');
+    }
+
+    function getSearchQ($method, $value, $name=false) {
+        global $thisstaff;
+
+        $Q = new Q();
+        switch ($method) {
+        case 'set':
+            return Q::any(array(
+                'flags__hasbit' => Ticket::FLAG_LINKED,
+            ));
+        case 'nset':
+            return Q::not(array(
+                'flags__hasbit' => Ticket::FLAG_LINKED,));
+            break;
+        }
+    }
+
+    function from_query($row, $name=false) {
+        $flags = $row['flags'];
+        $linked = ($flags & Ticket::FLAG_LINKED) != 0;
+        return ($linked)
+            ? __('Yes') : __('No');
+    }
+
 }
 
 /**
@@ -851,9 +1515,10 @@ trait ZeroMeansUnset {
         return parent::getSearchQ($method, $value, $name);
     }
 }
+
 class DaysOpenField extends ChoiceField {
         function getChoices($verbose=false) {
-        
+
         return $items;
     }
 
@@ -879,7 +1544,7 @@ class DaysOpenField extends ChoiceField {
         );
     }
 
-        
+
     function describeSearchMethod($method) {
         switch ($method) {
         case 'assigned':
@@ -897,18 +1562,18 @@ class DaysOpenField extends ChoiceField {
     }
 
     function from_query($row, $name=false) {
-    
+
     $ClosedDate = Ticket::objects()
         ->filter(array('ticket_id' => $row['ticket_id'])); 
-    
+
     foreach ($ClosedDate as $cClosedDate) {
          $closeddate = $cClosedDate->closed;
        }
-       
+
     $opened = new DateTime($row['created']);
     $closed = new DateTime($closeddate);
     $current = new DateTime(date("D M d, Y G:i", time()));
-    
+
     if ($row['status__id'] == 3 || $row['status__id'] == 12){
         $whichdate = $closed;
     } else {
@@ -916,16 +1581,16 @@ class DaysOpenField extends ChoiceField {
     }
 
     $interval = $opened->diff($whichdate);
-        
+
     $days = $interval->format('%r%a'); 
-    
+
     if ($days ==0) $days = '-';
 
            return  $days;
     }
 
     function display($value) {
-        
+
             $styles = array(
                 'badge' =>'badge-danger'
             );
@@ -939,47 +1604,125 @@ class DaysOpenField extends ChoiceField {
     }
 }
 
-class AgentSelectionField extends ChoiceField {
+class AgentSelectionField extends AdvancedSearchSelectionField {
     use ZeroMeansUnset;
 
+    static $_agents;
+
     function getChoices($verbose=false) {
-        return Staff::getStaffMembers();
+        if (!isset($this->_agents)) {
+            $this->_agents = array('M' => __('Me')) +
+                Staff::getStaffMembers();
+        }
+        return $this->_agents;
+    }
+
+    function toString($value) {
+
+        $choices =  $this->getChoices();
+        $selection = array();
+        if (!is_array($value))
+            $value = array($value => $value);
+
+        foreach ($value as $k => $v)
+            if (isset($choices[$k]))
+                $selection[] = $choices[$k];
+
+        return $selection ?  implode(',', $selection) :
+            parent::toString($value);
+    }
+
+    function getSearchQ($method, $value, $name=false) {
+        global $thisstaff;
+        // unpack me
+        if (isset($value['M']) && $thisstaff) {
+            $value[$thisstaff->getId()] = $thisstaff->getName();
+            unset($value['M']);
+        }
+
+        return parent::getSearchQ($method, $value, $name);
+    }
+
+    function getSortKeys($path='') {
+        return Staff::getsortby('staff__');
     }
 
     function applyOrderBy($query, $reverse=false, $name=false) {
-        global $cfg;
-
         $reverse = $reverse ? '-' : '';
-        switch ($cfg->getAgentNameFormat()) {
-        case 'last':
-        case 'lastfirst':
-        case 'legal':
-            $query->order_by("{$reverse}staff__lastname",
-                "{$reverse}staff__firstname");
-            break;
-
-        default:
-            $query->order_by("{$reverse}staff__firstname",
-                "{$reverse}staff__lastname");
-        }
-        return $query;
+        return Staff::nsort($query, "{$reverse}staff__");
     }
 }
 
-class TeamSelectionField extends ChoiceField {
-    use ZeroMeansUnset;
+class DepartmentManagerSelectionField extends AgentSelectionField {
+    static $_members;
 
     function getChoices($verbose=false) {
-        return Team::getTeams();
+        if (!isset($this->_members)) {
+            $managers = array();
+            $staff = Staff::objects()->filter(array('dept__manager_id__gt' => 0));
+            foreach ($staff as $s) {
+                $managers['s'.$s->getId()] = $s->getName()->name;
+            }
+            $this->_members = $managers;
+        }
+
+        return $this->_members;
+    }
+
+    function getSearchQ($method, $value, $name=false) {
+        return parent::getSearchQ($method, $value, 'dept__manager_id');
+    }
+}
+
+class TeamSelectionField extends AdvancedSearchSelectionField {
+    static $_teams;
+
+    function getChoices($verbose=false) {
+        if (!isset($this->_teams) && $teams = Team::getTeams())
+            $this->_teams = array('T' => __('One of my teams')) +
+                $teams;
+
+        return $this->_teams;
+    }
+
+    function getSearchQ($method, $value, $name=false) {
+        global $thisstaff;
+
+        // Unpack my teams
+        if (isset($value['T'])) {
+             if (!$thisstaff || !($teams = $thisstaff->getTeams()))
+                return Q::any(['team_id' => null]);
+
+            unset($value['T']);
+            $value = $value + array_flip($teams);
+        }
+        return parent::getSearchQ($method, $value, $name);
+    }
+
+    function getSortKeys($path) {
+        return array('team__name');
     }
 
     function applyOrderBy($query, $reverse=false, $name=false) {
         $reverse = $reverse ? '-' : '';
         return $query->order_by("{$reverse}team__name");
     }
+
+    function toString($value) {
+        $choices =  $this->getChoices();
+        $selection = array();
+        if (!is_array($value))
+            $value = array($value => $value);
+        foreach ($value as $k => $v)
+            if (isset($choices[$k]))
+                $selection[] = $choices[$k];
+        return $selection ?  implode(',', $selection) :
+            parent::toString($value);
+    }
+
 }
 
-class TicketStateChoiceField extends ChoiceField {
+class TicketStateChoiceField extends AdvancedSearchSelectionField {
     function getChoices($verbose=false) {
         return array(
             'open' => __('Open'),
@@ -1057,6 +1800,7 @@ class OpenClosedTicketStatusList extends TicketStatusList {
         return $rv;
     }
 }
+
 class TicketStatusChoiceField extends SelectionField {
     static $widget = 'ChoicesWidget';
 
@@ -1086,6 +1830,66 @@ class TicketStatusChoiceField extends SelectionField {
         default:
             return parent::getSearchQ($method, $value, $name);
         }
+    }
+
+    function applyOrderBy($query, $reverse=false, $name=false) {
+        $reverse = $reverse ? '-' : '';
+        return $query->order_by("{$reverse}status__name");
+    }
+}
+
+class TicketThreadCountField extends NumericField {
+
+    function addToQuery($query, $name=false) {
+        return TicketThreadCount::addToQuery($query, $name);
+    }
+
+    function from_query($row, $name=false) {
+         return TicketThreadCount::from_query($row, $name);
+    }
+}
+
+class TicketReopenCountField extends NumericField {
+
+    function addToQuery($query, $name=false) {
+        return TicketReopenCount::addToQuery($query, $name);
+    }
+
+    function from_query($row, $name=false) {
+         return TicketReopenCount::from_query($row, $name);
+    }
+}
+
+class ThreadAttachmentCountField extends NumericField {
+
+    function addToQuery($query, $name=false) {
+        return ThreadAttachmentCount::addToQuery($query, $name);
+    }
+
+    function from_query($row, $name=false) {
+         return ThreadAttachmentCount::from_query($row, $name);
+    }
+}
+
+class ThreadCollaboratorCountField extends NumericField {
+
+    function addToQuery($query, $name=false) {
+        return ThreadCollaboratorCount::addToQuery($query, $name);
+    }
+
+    function from_query($row, $name=false) {
+         return ThreadCollaboratorCount::from_query($row, $name);
+    }
+}
+
+class TicketTasksCountField extends NumericField {
+
+    function addToQuery($query, $name=false) {
+        return TicketTasksCount::addToQuery($query, $name);
+    }
+
+    function from_query($row, $name=false) {
+         return TicketTasksCount::from_query($row, $name);
     }
 }
 

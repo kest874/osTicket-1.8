@@ -33,7 +33,7 @@ if ($_POST)
 
     <div class="float-left subnavtitle">
                           
-   <?php echo __('Open a New Ticket');?>                       
+   <?php echo __('Open a New Ticket');?>                      
     
     </div>
     <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
@@ -57,71 +57,69 @@ if ($_POST)
     
 
         <div class="form-group">
-                <em><strong><?php echo __('User Information'); ?></strong>: </em>
+                <em><strong><?php echo __('User and Collaborators:'); ?></strong>: </em>
                 <div class="error"><?php echo $errors['user']; ?></div>
             
         </div>
-        <?php
-        if ($user) { ?>
-        <div class="form-group">
-        <label><?php echo __('User'); ?>:</label>
-            <div id="user-info">
-                <input type="hidden" name="uid" id="uid" value="<?php echo $user->getId(); ?>" />
-            <a href="#" onclick="javascript:
-                $.userLookup('ajax.php/users/<?php echo $user->getId(); ?>/edit',
-                        function (user) {
-                            $('#user-name').text(user.name);
-                            $('#user-email').text(user.email);
-                        });
-                return false;
-                "><i class="icon-user"></i>
-                <span id="user-name"><?php echo Format::htmlchars($user->getName()); ?></span>
-                &lt;<span id="user-email"><?php echo $user->getEmail(); ?></span>&gt;
-                </a>
-                <a class="inline btn btn-warning btn-sm" style="overflow:inherit" href="#"
-                    onclick="javascript:
-                        $.userLookup('ajax.php/users/select/'+$('input#uid').val(),
-                            function(user) {
-                                $('input#uid').val(user.id);
-                                $('#user-name').text(user.name);
-                                $('#user-email').text('<'+user.email+'>');
-                        });
-                        return false;
-                    "><i class="icon-retweet"></i> <?php echo __('Change'); ?></a>
-            </div>
-            
-        </div>
-        <?php
-        } else { //Fallback: Just ask for email and name
-            ?>
-            
-         
-
-<form class="form-inline">
-  
-  <label for="inlineFormInputGroup"><?php echo __('Email Address'); ?>: </label>
-  <div class="input-group input-group-sm  mb-2 mr-sm-2 mb-sm-0">
-    
-    <input type="text"  size=45 name="email" id="user-email" class="form-control form-control-sm requiredfield" id="inlineFormInputGroup" autocomplete="off" autocorrect="off" value="<?php echo $info['email']; ?>">
-    <div class="input-group-addon"><a href="?a=open&amp;uid={id}" data-dialog="ajax.php/users/lookup/form"><i class="fa fa-search"></i></a></div>
-  </div>
-
- 
-</form>         
-            
-            
-       
-        <div class="form-group">
-            <label> <?php echo __('Full Name'); ?>: </label>
-           
-                
-                    <input type="text" size=45 name="name" id="user-name" class="form-control form-control-sm requiredfield" value="<?php echo $info['name']; ?>" /> 
-                
-                <div class="error"><?php echo $errors['name']; ?></div>
+<div class="form-group">	
+	 					<label>
+                <?php echo __('User');?>:
+            </label>
+	
+        <div class="input-group select2open"> 
           
-        </div>
+                  <select class="custom-select custom-select-sm userSelection hidden" name="name" id="user-name"
+                    data-placeholder="<?php echo __('Select User'); ?>">
+                  </select>
+              
+						<div class="input-group">
+                <button class="btn btn-sm btn-outline-secondary" href="#"
+                onclick="javascript:
+                $.userLookup('ajax.php/users/lookup/form', function (user) {
+                  var newUser = new Option(user.email + ' - ' + user.name, user.id, true, true);
+                  return $(&quot;#user-name&quot;).append(newUser).trigger('change');
+                });
+                return false;
+                "><i class="icon-plus"></i> <?php echo __('Add New'); ?></a>
+						
+                <span class="error">*</span>
+                <span class="error"><?php echo $errors['name']; ?></span>
+                </div>
+				</div>
+              <div>
+                <input type="hidden" size=45 name="email" id="user-email" class="attached"
+                placeholder="<?php echo __('User Email'); ?>"
+                autocomplete="off" autocorrect="off" value="<?php echo $info['email']; ?>" />
+              </div>
+</div>    
+<div class="form-group">	
+	 					<label>
+                <?php echo __('Cc');?>:
+            </label>
+	
+        <div class="input-group">      
+                  <select class="custom-select custom-select-sm collabSelections hidden" name="ccs[]" id="cc_users_open" multiple="multiple"
+                ref="tags" data-placeholder="<?php echo __('Select Contacts'); ?>">
+                  </select>
+              
+						<div class="input-group">
+                <button class="btn btn-sm btn-outline-secondary" href="#"
+                onclick="javascript:
+                 $.userLookup('ajax.php/users/lookup/form', function (user) {
+              var newUser = new Option(user.name, user.id, true, true);
+              return $(&quot;#cc_users_open&quot;).append(newUser).trigger('change');
+            });
+            return false;
+                "><i class="icon-plus"></i> <?php echo __('Add New'); ?></a>
+						
+                    <span class="error"><?php echo $errors['ccs']; ?></span>
+                </div>
+				</div>
+              
+</div>            
+ 
         <?php
-        } ?>
+         ?>
 
         <?php
         if($cfg->notifyONNewStaffTicket()) {  ?>
@@ -129,9 +127,12 @@ if ($_POST)
             <label><?php echo __('Ticket Notice'); ?>:</label>
          <div class="form-check">    
             <label class="form-check-label">
-      <input class="form-check-input" type="checkbox" name="alertuser" <?php echo (!$errors || $info['alertuser'])? 'checked="checked"': ''; ?>>
-      <?php
-                echo __('Send alert to user.'); ?>
+      <select class="form-control form-control-sm" id="reply-to" name="reply-to">
+              <option value="all"><?php echo __('Alert All'); ?></option>
+              <option value="user"><?php echo __('Alert to User'); ?></option>
+              <option value="none">&mdash; <?php echo __('Do Not Send Alert'); ?> &mdash;</option>
+            </select>
+      
     </label>
             
         </div>    
@@ -206,7 +207,7 @@ if ($_POST)
        </div>
        <div class='col-sm-4'>
        
-         <div class="form-group"  style="display:none;">
+         <div class="form-group">
             <label>
                 <?php echo __('SLA Plan');?>:
             </label>
@@ -225,22 +226,18 @@ if ($_POST)
                 &nbsp;<font class="error">&nbsp;<?php echo $errors['slaId']; ?></font>
             
          </div>
-
-                 <div class="form-group">
-            
-                &nbsp;
-           
-        </div>
-        
           
           <div  class="form-group">
              <label><?php echo __('Due Date');?>:</label>
             
-            <div class='input-group date' id="datepicker1" >
-                    <input type='text' id="duedate" name="duedate" class="form-control form-control-sm"  />
-                    <span class="input-group-addon" style="display: inline">
-                        <span class="fa fa-calendar"></span>
-                    </span>
+            <div class='input-group date'>
+                                    <?php
+                $duedateField = Ticket::duedateField('duedate', $info['duedate']);
+                $duedateField->render();
+                ?>
+                &nbsp;<font class="error">&nbsp;<?php echo $errors['duedate']; ?> &nbsp; <?php echo $errors['time']; ?></font>
+                <em><?php echo __('Time is based on your time
+                        zone');?>&nbsp;(<?php echo $cfg->getTimezone($thisstaff); ?>)</em>
                 </div>
                 
                         
@@ -340,9 +337,90 @@ $(function() {
     }
 });
 
+$(function() {
+    $('a#editorg').click( function(e) {
+        e.preventDefault();
+        $('div#org-profile').hide();
+        $('div#org-form').fadeIn();
+        return false;
+     });
+
+    $(document).on('click', 'form.org input.cancel', function (e) {
+        e.preventDefault();
+        $('div#org-form').hide();
+        $('div#org-profile').fadeIn();
+        return false;
+    });
+
+    $('.userSelection').select2({
+      width: '450px',
+      minimumInputLength: 3,
+      ajax: {
+        url: "ajax.php/users/local",
+        dataType: 'json',
+        data: function (params) {
+          return {
+            q: params.term,
+          };
+        },
+        processResults: function (data) {
+          return {
+            results: $.map(data, function (item) {
+              return {
+                text: item.email + ' - ' + item.name,
+                slug: item.slug,
+                email: item.email,
+                id: item.id
+              }
+            })
+          };
+          $('#user-email').val(item.name);
+        }
+      }
+    });
+
+    $('.userSelection').on('select2:select', function (e) {
+      var data = e.params.data;
+      $('#user-email').val(data.email);
+    });
+
+    $('.userSelection').on("change", function (e) {
+      var data = $('.userSelection').select2('data');
+      var data = data[0].text;
+      var email = data.substr(0,data.indexOf(' '));
+      $('#user-email').val(data.substr(0,data.indexOf(' ')));
+     });
+
+    $('.collabSelections').select2({
+      width: '450px',
+      minimumInputLength: 3,
+      ajax: {
+        url: "ajax.php/users/local",
+        dataType: 'json',
+        data: function (params) {
+          return {
+            q: params.term,
+          };
+        },
+        processResults: function (data) {
+          return {
+            results: $.map(data, function (item) {
+              return {
+                text: item.name,
+                slug: item.slug,
+                id: item.id
+              }
+            })
+          };
+        }
+      }
+    });
+
+  });
+  
 $(document).ready(function(){
     var val = <?php echo Topic::getHelpTopicsTree();?> ;
-    
+
     $('#cc').combotree({ 
         onChange: function (r) { 
             var c = $('#cc');
@@ -431,7 +509,7 @@ $(document).ready(function(){
               return getParentArry(tree,parent,nodeLevel,parentArry);
             }
         }
-    $('#cc').combotree('setText', '— <?php echo __('Select Type'); ?> —');
+    $('#cc').combotree('setText', '\u2014 <?php echo __('Select Type'); ?> \u2014');
     
     $('#datepicker1').datetimepicker({
                    useCurrent: false,
@@ -441,17 +519,6 @@ $(document).ready(function(){
                    
                });   
 });
-   <?php
-    // Popup user lookup on the initial page load (not post) if we don't have a
-    // user selected
-    if (!$_POST && !$user) {?>
-    setTimeout(function() {
-      $.userLookup('ajax.php/users/lookup/form', function (user) {
-        window.location.href = window.location.href+'&uid='+user.id;
-      });
-    }, 100);
-    <?php
-    } ?>
+   
 });
 </script>
-

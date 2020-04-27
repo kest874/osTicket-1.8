@@ -14,17 +14,12 @@ if (isset($user) && $user instanceof ClientCreateRequest) {
 $info = Format::htmlchars(($errors && $_POST)?$_POST:$info);
 
 ?>
-<div class="card-box">
-<div class="row">
-	<div class="page-title">  
-	<h1><?php echo __('Account Registration'); ?></h1>
-	<p><?php echo __(
-	'Use the forms below to create or update the information we have on file for your account'
-	); ?>
-	</p>
-	</div>
-</div>
-<form class="form-group" action="account.php" method="post">
+<h1><?php echo __('Account Registration'); ?></h1>
+<p><?php echo __(
+'Use the forms below to create or update the information we have on file for your account'
+); ?>
+</p>
+<form action="account.php" method="post">
   <?php csrf_token(); ?>
   <input type="hidden" name="do" value="<?php echo Format::htmlchars($_REQUEST['do']
     ?: ($info['backend'] ? 'import' :'create')); ?>" />
@@ -32,17 +27,17 @@ $info = Format::htmlchars(($errors && $_POST)?$_POST:$info);
 <tbody>
 <?php
     $cf = $user_form ?: UserForm::getInstance();
-    $cf->render(false, false, array('mode' => 'create'));
+    $cf->render(array('staff' => false, 'mode' => 'create'));
 ?>
 <tr>
     <td colspan="2">
-        <div><h3><?php echo __('Preferences'); ?></h3>
+        <div><hr><h3><?php echo __('Preferences'); ?></h3>
         </div>
     </td>
 </tr>
     <tr>
         <td width="180">
-           <label> <?php echo __('Time Zone');?>:</label>
+            <?php echo __('Time Zone');?>:
         </td>
         <td>
             <?php
@@ -54,7 +49,7 @@ $info = Format::htmlchars(($errors && $_POST)?$_POST:$info);
     </tr>
 <tr>
     <td colspan=2">
-        <div><h3><?php echo __('Access Credentials'); ?></h3></div>
+        <div><hr><h3><?php echo __('Access Credentials'); ?></h3></div>
     </td>
 </tr>
 <?php if ($info['backend']) { ?>
@@ -74,34 +69,34 @@ $info = Format::htmlchars(($errors && $_POST)?$_POST:$info);
     </td>
 </tr>
 <?php } else { ?>
+<tr>
+    <td width="180">
+        <?php echo __('Create a Password'); ?>:
+    </td>
+    <td>
+        <input type="password" size="18" name="passwd1" value="<?php echo $info['passwd1']; ?>">
+        &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd1']; ?></span>
+    </td>
+</tr>
+<tr>
+    <td width="180">
+        <?php echo __('Confirm New Password'); ?>:
+    </td>
+    <td>
+        <input type="password" size="18" name="passwd2" value="<?php echo $info['passwd2']; ?>">
+        &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd2']; ?></span>
+    </td>
+</tr>
+<?php } ?>
 </tbody>
 </table>
-<div class="row">
-	<div class="col-md-4">
-         <label> <?php echo __('Create a Password'); ?>:</label>
-
-        <input class="form-control" type="password" size="18" name="passwd1" value="<?php echo $info['passwd1']; ?>">
-        &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd1']; ?></span>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-4"> 
-        <label><?php echo __('Confirm New Password'); ?>:</label>
-   
-        <input class="form-control" type="password" size="18" name="passwd2" value="<?php echo $info['passwd2']; ?>">
-        &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd2']; ?></span>
-	</div>
-	
-</div>
-<?php } ?>
-
-<p>
-    <input class="btn btn-success" type="submit" value="Register"/>
-    <input class="btn btn-warning" type="button" value="Cancel" onclick="javascript:
+<hr>
+<p style="text-align: center;">
+    <input type="submit" value="<?php echo __('Register'); ?>"/>
+    <input type="button" value="<?php echo __('Cancel'); ?>" onclick="javascript:
         window.location.href='index.php';"/>
 </p>
 </form>
-</div>
 <?php if (!isset($info['timezone'])) { ?>
 <!-- Auto detect client's timezone where possible -->
 <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jstz.min.js"></script>

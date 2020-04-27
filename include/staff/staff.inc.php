@@ -31,6 +31,8 @@ else {
     $info['id'] = $staff->getId();
     $qs += array('id' => $staff->getId());
 }
+
+$extras = new ArrayObject();
 ?>
 <div class="subnav">
 
@@ -69,6 +71,7 @@ else {
     <li class="nav-item">
     <a class="nav-link" href="#teams" role="tab" data-toggle="tab"><i class="icon-group"></i>&nbsp;<?php echo __('Teams'); ?></a>
   </li>
+   <?php Signal::send('agenttab.audit', $staff, $extras); ?>
 </ul>
 <div class="tab-content">
 <div role="tabpanel" class="tab-pane active" id="account">
@@ -245,15 +248,25 @@ if (count($bks) > 1) {
             <select name="dept_id" id="dept_id" data-quick-add="department">
               <option value="0">&mdash; <?php echo __('Select Department');?> &mdash;</option>
               <?php
-              foreach (Dept::getDepartments() as $id=>$name) {
-                $sel=($staff->dept_id==$id)?'selected="selected"':'';
-                echo sprintf('<option value="%d" %s>%s</option>',$id,$sel,$name);
+              if($depts = Dept::getPublicDepartments()) {
+                if($staff->dept_id && !array_key_exists($staff->dept_id, $depts))
+                {
+                  $depts[$staff->dept_id] = $staff->dept;
+                  $warn = sprintf(__('%s selected must be active'), __('Department'));
+                }
+                  foreach($depts as $id =>$name) {
+                    $sel=($staff->dept_id==$id)?'selected="selected"':'';
+                      echo sprintf('<option value="%d" %s>%s</option>',$id,$sel,$name);
+                  }
               }
               ?>
               <option value="0" data-quick-add>&mdash; <?php echo __('Add New');?> &mdash;</option>
             </select>
             <i class="offset help-tip icon-question-sign" href="#primary_department"></i>
-            <div class="error"><?php echo $errors['dept_id']; ?></div>
+            <?php
+            if($warn) { ?>
+                &nbsp;<span class="error">*&nbsp;<?php echo $warn; ?></span>
+            <?php } ?>
           </td>
           <td style="vertical-align:top">
             <select name="role_id" data-quick-add="role">
@@ -451,7 +464,10 @@ foreach ($staff->teams as $TM) {
     </table>
   </div>
  </div>
- <div><br>
+ <div><br> 
+ 	  <!-- ============== Audits =================== -->
+<?php Signal::send('agent.audit', $staff, $extras); ?>
+
       <input type="submit" name="submit" value="<?php echo $submit_text; ?>" class="btn btn-sm btn-primary">
       <input type="reset"  name="reset"  value="<?php echo __('Reset');?>" class="btn btn-sm btn-warning">
       <input type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick="window.history.go(-1);" class="btn btn-sm btn-danger">
@@ -539,6 +555,7 @@ foreach ($staff->dept_access as $dept_access) {
   );
 }
 foreach ($staff->teams as $member) {
+  if (!$member->team) continue;
   echo sprintf('joinTeam(%d, %s, %d, %s);', $member->team_id,
     JsonDataEncoder::encode($member->team->getName()),
     $member->isAlertsEnabled(),

@@ -101,10 +101,8 @@ if(!defined('OSTSTAFFINC') || !$staff || !$thisstaff) die('Access Denied');
       <!-- ================================================ -->
      <div class="form-group">
      
-       
           <label><?php echo __('Username'); ?>:</label>
-    
-          
+             
             <input type="text" size="40" style="width:300px"
               class="form-control form-control-sm staff-username typeahead"
               name="username" disabled value="<?php echo Format::htmlchars($staff->username); ?>" />
@@ -123,26 +121,12 @@ if(!defined('OSTSTAFFINC') || !$staff || !$thisstaff) die('Access Denied');
 <div class="col-md-3">
       <!-- ================================================ -->
       
-      <label class="custom-control custom-checkbox">
-<input type="checkbox" class="custom-control-input" name="show_assigned_tickets"
-              <?php echo $cfg->showAssignedTickets() ? 'disabled="disabled" ' : ''; ?>
-              <?php echo $staff->show_assigned_tickets ? 'checked="checked"' : ''; ?>>
-<span class="custom-control-indicator"></span>
-<span class="custom-control-description"><?php echo __('Show assigned tickets on open queue.'); ?>
-            <i class="help-tip icon-question-sign" href="#show_assigned_tickets"></i></span>
-</label>
-      
-<label class="custom-control custom-checkbox">
-<input type="checkbox" class="custom-control-input"  name="onvacation"
-              <?php echo ($staff->onvacation) ? 'checked="checked"' : ''; ?>>
-<span class="custom-control-indicator"></span>
-<span class="custom-control-description"><?php echo __('Vacation Mode'); ?>
- </span>
-</label>     
-      
-
-  </div>
-  </div>
+	<div class="custom-control custom-checkbox">
+  	<input type="checkbox" class="custom-control-input" id="onvacation" name="onvacation" <?php echo ($staff->onvacation) ? 'checked="checked"' : ''; ?>>
+  	<label class="custom-control-label" for="onvacation"><?php echo __('Vacation Mode'); ?></label>
+  </div>      
+</div>
+</div>
 </div>
   <!-- =================== PREFERENCES ======================== -->
 
@@ -183,6 +167,30 @@ if(!defined('OSTSTAFFINC') || !$staff || !$thisstaff) die('Access Denied');
                 <span class="faded"><?php echo __('Tickets page refresh rate in minutes.'); ?></span>
             
         </div>
+        
+                <div class="form-group">
+            <label>
+                <?php echo __('Default Ticket Queue'); ?>:
+            </label>
+            
+                <select name="default_ticket_queue_id" class="form-control form-control-sm">
+                 <option value="0">&mdash; <?php echo __('system default');?> &mdash;</option>
+                 <?php
+                 $queues = CustomQueue::queues()
+                    ->filter(Q::any(array(
+                        'flags__hasbit' => CustomQueue::FLAG_PUBLIC,
+                        'staff_id' => $thisstaff->getId(),
+                    )))
+                    ->all();
+                 foreach ($queues as $q) { ?>
+                  <option value="<?php echo $q->id; ?>" <?php
+                    if ($q->getId() == $staff->default_ticket_queue_id) echo 'selected="selected"'; ?> >
+                   <?php echo $q->getFullName(); ?></option>
+                 <?php
+                 } ?>
+                </select>
+            
+        </div>
 
         <div class="form-group">
             <label><?php echo __('Default From Name');?>:</label>
@@ -209,6 +217,23 @@ if(!defined('OSTSTAFFINC') || !$staff || !$thisstaff) die('Access Denied');
                 <div class="error"><?php echo $errors['default_from_name']; ?></div>
             
         </div>
+        <div class="form-group">
+            <label><?php echo __('Reply Redirect'); ?>:
+                <div class="faded"><?php echo __('Redirect URL used after replying to a ticket.');?></div>
+            </label>
+            
+                <select name="reply_redirect" class="form-control form-control-sm">
+                  <?php
+                  $options=array('Queue'=>__('Queue'),'Ticket'=>__('Ticket'));
+                  foreach($options as $key=>$opt) {
+                      echo sprintf('<option value="%s" %s>%s</option>',
+                                $key,($staff->reply_redirect==$key)?'selected="selected"':'',$opt);
+                  }
+                  ?>
+                </select>
+                <div class="error"><?php echo $errors['reply_redirect']; ?></div>
+            
+        </div>
     </div>
   <div class="col-md-3">
         <div class="form-group">
@@ -232,6 +257,7 @@ if(!defined('OSTSTAFFINC') || !$staff || !$thisstaff) die('Access Denied');
                 </select><div class="faded"><?php echo __('The order of thread entries');?></div>
                 <div class="error"><?php echo $errors['thread_view_order']; ?></div>
            </div>
+            
            <div class="form-group">
             <label><?php echo __('Default Signature');?>:</label>
              <select name="default_signature_type" class="form-control form-control-sm">
@@ -247,7 +273,46 @@ if(!defined('OSTSTAFFINC') || !$staff || !$thisstaff) die('Access Denied');
                 </select> <div class="faded"><?php echo __('This can be selected when replying to a thread');?></div>
                 <div class="error"><?php echo $errors['default_signature_type']; ?></div>
             </div>
-            <div class="form-group">
+  	<div class="form-group">
+       <label><?php echo __('Image Attachment View'); ?>:
+           <div class="faded"><?php echo __('Open image attachments in new tab or directly download. (CTRL + Right Click)');?></div>
+       </label>
+       
+           <select name="img_att_view"class="form-control form-control-sm">
+             <?php
+             $options=array('download'=>__('Download'),'inline'=>__('Inline'));
+             foreach($options as $key=>$opt) {
+                 echo sprintf('<option value="%s" %s>%s</option>',
+                           $key,($staff->img_att_view==$key)?'selected="selected"':'',$opt);
+             }
+             ?>
+           </select>
+           <div class="error"><?php echo $errors['img_att_view']; ?></div>
+            
+    </div>
+       <div class="form-group">
+            <label><?php echo __('Editor Spacing'); ?>:
+                <div class="faded"><?php echo __('Set the editor spacing to Single or Double when pressing Enter.');?></div>
+            </label>
+            
+                <select name="editor_spacing" class="form-control form-control-sm">
+                  <?php
+                  $options=array('double'=>__('Double'),'single'=>__('Single'));
+                  $spacing = $staff->editor_spacing;
+                  foreach($options as $key=>$opt) {
+                      echo sprintf('<option value="%s" %s>%s</option>',
+                                $key,($spacing==$key)?'selected="selected"':'',$opt);
+                  }
+                  ?>
+                </select>
+                <div class="error"><?php echo $errors['editor_spacing']; ?></div>
+       </div>          
+            
+    </div>
+    
+<div class="col-md-3">
+	     
+      <div class="form-group">
             <label><?php echo __('Default Paper Size');?>:</label>
                 <select name="default_paper_size" class="form-control form-control-sm">
                   <option value="none" selected="selected">&mdash; <?php echo __('None');?> &mdash;</option>
@@ -261,12 +326,7 @@ if(!defined('OSTSTAFFINC') || !$staff || !$thisstaff) die('Access Denied');
                 </select>
                 <div class="faded"><?php echo __('Paper size used when printing tickets to PDF');?></div>
                 <div class="error"><?php echo $errors['default_paper_size']; ?></div>
-            </div>
-            
-    </div>
-    
-<div class="col-md-3">
-      
+       </div>
         <div class="form-group">
             <label><?php echo __('Time Zone');?>:</label>
             
@@ -319,15 +379,13 @@ if(!defined('OSTSTAFFINC') || !$staff || !$thisstaff) die('Access Denied');
 <?php if (extension_loaded('intl')) { ?>
         
 <div class="form-group">
-        <label class="custom-control custom-checkbox">
-					<input type="checkbox" class="custom-control-input"  name="darkmode"
-					              <?php echo ($staff->darkmode) ? 'checked="checked"' : ''; ?>>
-					<span class="custom-control-indicator"></span>
-					<span class="custom-control-description"><?php echo __('Dark Mode'); ?>
-					 </span>
-					</label>     
-            
-        </div>          
+
+	<div class="custom-control custom-checkbox">
+  	<input type="checkbox" class="custom-control-input ckb" id="darkmode" name="darkmode" <?php echo ($staff->darkmode) ? 'checked="checked"' : ''; ?>>
+  	<label class="custom-control-label" for="darkmode"><?php echo __('Dark Mode'); ?></label>
+  </div>       
+                 
+</div>          
       
 <?php } ?>
     
