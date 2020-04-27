@@ -1036,7 +1036,14 @@ implements RestrictedAccess, Threadable, Searchable {
                 break;
             case 'all':
                 $list->addTo($this->getOwner());
-                // Fall-trough
+                if (($collabs = $active ?  $this->getActiveCollaborators() :
+                    $this->getCollaborators())) {
+                    foreach ($collabs as $c)
+                        if (!$whitelist || in_array($c->getUserId(),
+                                    $whitelist))
+                            $list->addCc($c);
+                }
+                break;
             case 'collabs':
                 if (($collabs = $active ?  $this->getActiveCollaborators() :
                     $this->getCollaborators())) {
@@ -3424,7 +3431,8 @@ implements RestrictedAccess, Threadable, Searchable {
         // Add new collaborators (if any).
         if (isset($vars['ccs']) && count($vars['ccs']))
             $this->addCollaborators($vars['ccs'], array(), $errors);
-
+       
+        if ($vars['ccs'])
         if ($collabs = $this->getCollaborators()) {
             foreach ($collabs as $collaborator) {
                 $cid = $collaborator->getUserId();
@@ -3442,7 +3450,7 @@ implements RestrictedAccess, Threadable, Searchable {
         $this->getThread()->_collaborators = null;
 
         // Get active recipients of the response
-        $recipients = $this->getRecipients($vars['reply-to'], $vars['ccs']);
+        $recipients = $this->getRecipients('all');
         if ($recipients instanceof MailingList)
             $vars['thread_entry_recipients'] = $recipients->getEmailAddresses();
 
