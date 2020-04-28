@@ -714,7 +714,7 @@ class CustomQueue extends VerySimpleModel {
                 "width" => 250,
                 "bits" => QueueColumn::FLAG_SORTABLE,
                 "filter" => "link:ticket",
-                "annotations" => '[{"c":"TicketThreadCount","p":">"},{"c":"ThreadAttachmentCount","p":"a"},{"c":"OverdueFlagDecoration","p":"<"}]',
+                "annotations" => '[{"c":"TicketThreadCount","p":">"},{"c":"ThreadAttachmentCount","p":"a"},{"c":"OverdueFlagDecoration","p":"<"},{"c":"TicketUnreadDecoration","p":"<"}]',
                 "conditions" => '[{"crit":["isanswered","nset",null],"prop":{"font-weight":"bold"}}]',
                 "truncate" => 'ellipsis',
             )),
@@ -1838,6 +1838,31 @@ extends QueueColumnAnnotation {
 
     function isVisible($row) {
         return $row['ticket_pid'];
+    }
+}
+
+class TicketUnreadDecoration
+extends QueueColumnAnnotation {
+    static $icon = 'plus-sign';
+    static $desc = 'Unread message icon';
+
+    function annotate($query, $name=false) {
+        global $thisstaff;
+
+        $query->values('updated');
+        return $query
+            ->annotate(array(
+                '_lastVisit' => TicketStaffLastVisit::objects()
+                    ->filter(array(
+                        'ticket_id' => new SqlField('ticket_id', 1),
+                        'staff_id' => $thisstaff->getId())) 
+                    ->values('lastvisit_date')        
+                    ));
+    }
+
+    function getDecoration($row, $text) {
+        if(strtotime($row['_lastVisit']) < strtotime($row['updated']))
+            return sprintf('<i class="fa fa-envelope-o" aria-hidden="true"></i>&nbsp;');
     }
 }
 

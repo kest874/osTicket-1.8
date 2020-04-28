@@ -1537,6 +1537,39 @@ implements RestrictedAccess, Threadable, Searchable {
         return $this->save();
     }
 
+    //mark as read for given staff
+    function setStaffLastVisitNow($staff) {
+        $stafflastvisit = TicketStaffLastVisit::lookup(array(
+            'ticket_id'=>$this->ticket_id,
+            'staff_id'=>$staff->getId()
+        ));        
+        if(!isset($stafflastvisit)) {
+            $stafflastvisit = new TicketStaffLastVisit(array(
+                'ticket_id' => $this->ticket_id,
+                'staff_id' => $staff->getId(),
+                'lastvisit_date' => SqlFunction::NOW()
+            ));
+        }
+        $stafflastvisit->lastvisit_date = SqlFunction::NOW();
+        $stafflastvisit->save();        
+    }
+    
+    
+    function setStaffLastVisitNowById ($id) {
+        $stafflastvisit = TicketStaffLastVisit::lookup(array(
+            'ticket_id'=>$this->ticket_id,
+            'staff_id'=>$id
+        ));        
+        if(!isset($stafflastvisit)) {
+            $stafflastvisit = new TicketStaffLastVisit(array(
+                'ticket_id' => $this->ticket_id,
+                'staff_id' => $id,
+                'lastvisit_date' => SqlFunction::NOW()
+            ));
+        }
+        $stafflastvisit->lastvisit_date = SqlFunction::NOW();
+        $stafflastvisit->save();        
+    }
     // Ticket Status helper.
     function setStatus($status, $comments='', &$errors=array(), $set_closing_agent=true, $force_close=false) {
         global $cfg, $thisstaff;
@@ -2064,6 +2097,7 @@ implements RestrictedAccess, Threadable, Searchable {
 
             // Staff doing the activity
             $staffId = $vars['threadentry']->getStaffId() ?: $staffId;
+           
         }
 
         $msg = $this->replaceVars($msg->asArray(),
@@ -2087,6 +2121,8 @@ implements RestrictedAccess, Threadable, Searchable {
             ) {
                 continue;
             }
+            
+           
             $alert = $this->replaceVars($msg, array('recipient' => $staff));
             $email->sendAlert($staff, $alert['subj'], $alert['body'], null, $options);
             $sentlist[$staff->getEmail()] = 1;
@@ -3476,8 +3512,8 @@ implements RestrictedAccess, Threadable, Searchable {
 				if ($this->getStatusId() !== 10 && $this->getStatusId() !== 9 
 						&& $this->getStatusId() !== 3  && $this->getTopicId() !==12)
 					$this->setStatusId(6);			
-				}
-
+				}	
+				$this->setStaffLastVisitNowById($this->getStaffId()); //reset last visit time		
         $this->lastrespondent = $response->staff;
 
     	  /* -------------------- OpsGenie ------------------------ */
@@ -3518,7 +3554,7 @@ implements RestrictedAccess, Threadable, Searchable {
 		
         $this->onResponse($response, array('assignee' => $assignee)); //do house cleaning..
 
-        $type = array('type' => 'message');
+		    $type = array('type' => 'message');
         Signal::send('object.created', $this, $type);
 
         /* email the user??  - if disabled - then bail out */
@@ -3561,7 +3597,7 @@ implements RestrictedAccess, Threadable, Searchable {
             'staff' => $thisstaff,
             'poster' => $thisstaff
         );
-    
+        
  				if ($email
                 && $recipients
                 && ($tpl = $dept->getTemplate())
@@ -5008,3 +5044,19 @@ class TicketCData extends VerySimpleModel {
     );
 }
 TicketCData::$meta['table'] = TABLE_PREFIX . 'ticket__cdata';
+
+class TicketStaffLastVisit extends VerySimpleModel {
+    static $meta = array(
+        'pk' => array('ticket_id', 'staff_id'),
+        'select_related' => array('staff'),
+        'joins' => array(
+            'ticket' => array(
+                'constraint' => array('ticket_id' => 'Ticket.ticket_id'),
+            ),
+            'staff' => array(
+                'constraint' => array('staff_id' => 'Staff.staff_id')
+            ),
+        ),
+    );
+}
+TicketStaffLastVisit::$meta['table'] = TABLE_PREFIX . 'ticket_stafflastvisit';
