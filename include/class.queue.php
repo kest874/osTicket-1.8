@@ -1642,7 +1642,7 @@ extends QueueColumnAnnotation {
         $threadcount = $row[static::$qname];
         if ($threadcount > 1) {
             return sprintf(
-                '&nbsp;<small class="faded-more"><i class="icon-comments-alt"></i> %s </small>',
+                '<small class="faded-more"><i class="icon-comments-alt"></i> %s </small>&nbsp;',
                 $threadcount
             );
         }
@@ -1673,7 +1673,7 @@ extends QueueColumnAnnotation {
         $reopencount = $row[static::$qname];
         if ($reopencount) {
             return sprintf(
-                '&nbsp;<small class="faded-more"><i class="icon-%s"></i> %s </small>',
+                '<small class="faded-more"><i class="icon-%s"></i> %s </small>&nbsp;',
                 static::$icon,
                 $reopencount > 1 ? $reopencount : ''
             );
@@ -1706,7 +1706,7 @@ extends QueueColumnAnnotation {
         $count = $row[static::$qname];
         if ($count) {
             return sprintf(
-                '&nbsp;<i class="small icon-paperclip icon-flip-horizontal" data-toggle="tooltip" title="%s"></i>',
+                '<i class="small icon-paperclip icon-flip-horizontal" data-toggle="tooltip" title="%s"></i>&nbsp;',
                 $count);
         }
     }
@@ -1764,7 +1764,7 @@ extends QueueColumnAnnotation {
         $count = $row[static::$qname];
         if ($count) {
             return sprintf(
-                '<span class="pull-right faded-more" data-toggle="tooltip" title="%d">&nbsp;<i class="icon-group"> </i></span>',
+                '<span class="faded-more" data-toggle="tooltip" title="%d"><i class="icon-group"> </i>&nbsp;</span>',
                 $count);
         }
     }
@@ -1809,10 +1809,10 @@ extends QueueColumnAnnotation {
         $linked = ($flags & Ticket::FLAG_LINKED) != 0;
 
         if ($combine || $separate) {
-            return sprintf('<a data-placement="bottom" data-toggle="tooltip" title="%s" <i class="icon-code-fork"></i></a>',
+            return sprintf('<a data-placement="bottom" data-toggle="tooltip" title="%s" <i class="icon-code-fork"></i></a>&nbsp',
                            $combine ? __('Combine') : __('Separate'));
         } elseif ($linked)
-            return '<i class="icon-link"></i>';
+            return '<i class="icon-link"></i>&nbsp';
     }
 
     function isVisible($row) {
@@ -1833,7 +1833,7 @@ extends QueueColumnAnnotation {
         $flags = $row['flags'];
         $linked = ($flags & Ticket::FLAG_LINKED) != 0;
         if ($linked && $_REQUEST['a'] == 'search')
-            return '<i class="icon-link"></i>';
+            return '<i class="icon-link"></i>&nbsp';
     }
 
     function isVisible($row) {
@@ -1851,7 +1851,7 @@ extends QueueColumnAnnotation {
     }
 
     function getDecoration($row, $text) {
-        return sprintf('<span class="Icon %sTicket"></span>',
+        return sprintf('<span class="Icon %sTicket"></span>&nbsp',
             strtolower($row['source']));
     }
 }
@@ -1875,7 +1875,7 @@ extends QueueColumnAnnotation {
 
     function getDecoration($row, $text) {
         if ($row['_locked'])
-            return sprintf('<span class="Icon lockedTicket"></span>');
+            return sprintf('<span class="Icon lockedTicket"></span>&nbsp');
     }
 
     function isVisible($row) {
