@@ -240,6 +240,15 @@ class TicketsAjaxAPI extends AjaxController {
 
         include STAFFINC_DIR . 'templates/ticket-preview.tmpl.php';
     }
+    
+    function lastvisitTicket ($tid) {
+        global $thisstaff;
+
+        if(!$thisstaff || !($ticket=Ticket::lookup($tid))                )
+            Http::response(404, __('No such ticket'));
+
+        $ticket->setStaffLastVisitNow($thisstaff); //reset last visit time
+    }
 
     function viewUser($tid) {
         global $thisstaff;

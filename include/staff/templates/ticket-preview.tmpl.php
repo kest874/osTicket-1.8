@@ -42,7 +42,7 @@ echo sprintf('
             faded"></i>&nbsp;'.__('Collaborators <span class="badge badge-primary badge-pill">%d</span>').'</a></li>',
             $thread->getNumCollaborators());
 //}
-echo sprintf('<li class="nav-item"><a class="nav-link" id="thread_tab" href="#threadPreview"
+echo sprintf('<li class="nav-item"><a class="nav-link threadPreviewPane" id="thread_tab" href="#threadPreview"
              data-toggle="tab" ><i class="icon-fixed-width icon-list
             faded"></i>&nbsp;'.__('Thread <span class="badge badge-primary badge-pill">%d</span>').'</a></li>',
              $thread->getNumThreads());
@@ -261,5 +261,11 @@ echo '</div>';
         }
     });
     
+     $('.threadPreviewPane').on('click', function(){
+        $.ajax({
+          url: "ajax.php/tickets/<?php echo $tid;?>/lastvisit",
+          type: "GET"
+        });
+    });
     
  </script>
