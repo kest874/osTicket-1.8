@@ -1447,25 +1447,7 @@ ul.tabs li.active {
 /* Thread headers */
 .label-bare
 {
-  /*background-color: rgba(235, 232, 232, 0.07);
-  border-top-width: 1px;
-  border-right-width: 1px;
-  border-bottom-width: 1px;
-  border-left-width: 1px;
-  border-top-style: solid;
-  border-right-style: solid;
-  border-bottom-style: solid;
-  border-left-style: solid;
-  border-top-color: #999999;
-  border-right-color: #999999;
-  border-bottom-color: #999999;
-  border-left-color: #999999;
-  border-image-source: none;
-  border-image-slice: 100% 100% 100% 100%;
-  border-image-width: 1 1 1 1;
-  border-image-outset: 0 0 0 0;
-  border-image-repeat: stretch stretch;*/
-  color: #999999;
+  color: #000000ad;
   text-shadow: none;
   font-size: smaller;
   padding: 4px;

@@ -298,14 +298,10 @@ if ($_POST)
 <div class="hidden" id="submitrow">
     <input class="btn btn-primary btn-sm" type="submit" name="submit" class="save pending" value="<?php echo _P('action-button', 'Submit');?>">
     <input class="btn btn-warning btn-sm" type="reset"  name="reset"  value="<?php echo __('Reset');?>">
-    <input class="btn btn-warning btn-danger btn-sm" type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick="javascript:
-        $('.richtext').each(function() {
-            var redactor = $(this).data('redactor');
-            if (redactor && redactor.opts.draftDelete)
-                redactor.draft.deleteDraft();
-        });
-        window.location.href='tickets.php';
-    ">
+     <input class="btn btn-danger btn-sm" type="button" name="cancel" value="<?php echo __('Cancel');?>" onclick="javascript:
+        $(this.form).find('textarea.richtext')
+          .redactor('plugin.draft.deleteDraft');
+        window.location.href='tickets.php'; " />
 </div>
 </form>
 </div>
