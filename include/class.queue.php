@@ -1862,7 +1862,7 @@ extends QueueColumnAnnotation {
 
     function getDecoration($row, $text) {
         if(strtotime($row['_lastVisit']) < strtotime($row['updated']))
-            return sprintf('<i class="fa fa-envelope-o" aria-hidden="true"></i>&nbsp;');
+            return sprintf('<i class="fa fa-envelope" aria-hidden="true"></i>&nbsp;');
     }
 }
 
