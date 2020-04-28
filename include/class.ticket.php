@@ -2762,6 +2762,23 @@ implements RestrictedAccess, Threadable, Searchable {
         strtolower($this->getSource()), $this->getId(), $this->getId(), $this->getNumber(), $this->getSubject(),
             $this->getDeptName(), $this->getAssignee(), Format::datetime($this->getCreateDate()));
     }
+    
+     function getRelatedTicketsPreview() {
+        return sprintf('<tr>
+            <td width="8px">&nbsp;</td>
+            <td>
+                <a class="Icon strtolower(%s) Ticket"
+                   data-preview="#tickets/%d/preview"
+                   href="tickets.php?id=%d">%s</a>
+            </td>
+            <td>%s</td>
+            <td>%s</td>
+            <td>%s</td>
+            <td>%s</td>
+        </tr>',
+        strtolower($this->getSource()), $this->getId(), $this->getId(), $this->getNumber(), $this->getSubject(),
+            $this->getDeptName(), $this->getAssignee(), Format::datetime($this->getCreateDate()));
+    }
 
     function hasReferral($object, $type) {
         if (($referral=$this->thread->getReferral($object->getId(), $type)))

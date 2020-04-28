@@ -9,6 +9,7 @@ $lock=$ticket->getLock();
 $role=$ticket->getRole($thisstaff);
 $error=$msg=$warn=null;
 $thread = $ticket->getThread();
+$ticketchildren = Ticket::getChildTickets($ticket->getId());
 
 if($lock && $lock->getStaffId()==$thisstaff->getId())
     $warn.='&nbsp;<span class="Icon lockedTicket">'
@@ -42,6 +43,24 @@ echo sprintf('
             faded"></i>&nbsp;'.__('Collaborators <span class="badge badge-primary badge-pill">%d</span>').'</a></li>',
             $thread->getNumCollaborators());
 //}
+
+if ((count($ticketchildren) != 0 || $ticket->isChild())) { ?>
+    	<li class="nav-item"><a class="nav-link" id="related_tab" href="#relatedPreview"
+             data-toggle="tab" ><i class="icon-fixed-width icon-list
+            faded"></i>Related 
+        <?php    
+        if (count($ticketchildren))
+            echo sprintf('&nbsp;<span class="badge badge-primary badge-pill" id="ticket-relations-count">%d</span>', count($ticketchildren));
+        elseif ($ticket->isChild())
+            echo sprintf('&nbsp;<span class="badge badge-primary badge-pill" id="ticket-relations-count">%d</span>', 1);
+        ?></a></li>
+    <?php
+    }
+    ?>
+           
+<?php
+
+
 echo sprintf('<li class="nav-item"><a class="nav-link threadPreviewPane" id="thread_tab" href="#threadPreview"
              data-toggle="tab" ><i class="icon-fixed-width icon-list
             faded"></i>&nbsp;'.__('Thread <span class="badge badge-primary badge-pill">%d</span>').'</a></li>',
@@ -198,6 +217,17 @@ echo '</ul>';
 				                                ? __('Manage Collaborators') : __('Add Collaborator')
 				                                );
 				    ?>
+				</div>
+				
+				
+				<div class="tab-pane" id="relatedPreview">
+						<div id="" class="">
+				        <div id="related-tickets">
+				        <?php
+				        include STAFFINC_DIR.'templates/ticket-relations-preview.tmpl.php';
+				        ?>
+				        </div>
+				    </div>
 				</div>
 				
 				<div class="tab-pane" id="threadPreview">
