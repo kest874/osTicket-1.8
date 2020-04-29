@@ -767,7 +767,7 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         $this->default_signature_type = $vars['default_signature_type'];
         $this->default_paper_size = $vars['default_paper_size'];
         $this->lang = $vars['lang'];
-        $this->onvacation = isset($vars['onvacation']) ? 1 : 0;
+        $this->onvacation = $vars['onvacation'];
         $this->darkmode = isset($vars['darkmode']) ? 1 : 0;
 
         if (isset($vars['avatar_code']))

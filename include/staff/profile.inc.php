@@ -120,14 +120,21 @@ if(!defined('OSTSTAFFINC') || !$staff || !$thisstaff) die('Access Denied');
 </div>
 <div class="col-md-3">
       <!-- ================================================ -->
-      
+
+<div class="form-group">
+
 	<div class="custom-control custom-checkbox">
   	<input type="checkbox" class="custom-control-input" id="onvacation" name="onvacation" <?php echo ($staff->onvacation) ? 'checked="checked"' : ''; ?>>
-  	<label class="custom-control-label" for="onvacation"><?php echo __('Vacation Mode'); ?></label>
-  </div>      
+  	<label class="custom-control-label" for="onvacation"><?php echo __('Vacation'); ?></label>
+  </div>       
+                 
+</div>  
+
 </div>
 </div>
 </div>
+
+   
   <!-- =================== PREFERENCES ======================== -->
 
   <div class="tab-pane" id="preferences">
