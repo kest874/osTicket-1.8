@@ -508,14 +508,7 @@ implements Searchable {
         $body = $mailinfo['message'];
 		
 		// Email commands #claim #close #note #assign:username
-		// Close if #close in subject
-		if($vars['subject'] && preg_match ('/#close/i', $vars['subject'])) {
-			$object->assignToStaff($vars['staffId'],null,$alert=false, false);
-			$vars['uid'] = $vars['staffId'];
-			$vars['reply_status_id'] = 3;
-			$vars['thread-type'] = 'R';
-		}
-		 
+		
 		// Assignment based on email command #assign 
 		if($vars['subject'] && preg_match ('/#assign:/i', $vars['subject'])) {
 
