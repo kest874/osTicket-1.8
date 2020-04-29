@@ -388,7 +388,7 @@ if(!defined('OSTSTAFFINC') || !$staff || !$thisstaff) die('Access Denied');
 <div class="form-group">
 
 	<div class="custom-control custom-checkbox">
-  	<input type="checkbox" class="custom-control-input ckb" id="darkmode" name="darkmode" <?php echo ($staff->darkmode) ? 'checked="checked"' : ''; ?>>
+  	<input type="checkbox" class="custom-control-input ckb hidden" id="darkmode" name="darkmode" <?php echo ($staff->darkmode) ? 'checked="checked"' : ''; ?>>
   	<label class="custom-control-label" for="darkmode"><?php echo __('Dark Mode'); ?></label>
   </div>       
                  
