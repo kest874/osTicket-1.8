@@ -2447,6 +2447,9 @@ implements RestrictedAccess, Threadable, Searchable {
                     'fromdb' => true, 'time' => true,
                     'format' => 'y-MM-dd HH:mm:ss'),
             )),
+            'daysopen' => new DaysOpenField(array(
+                'label' => __('Days Open')
+            )),
             'closed' => new DatetimeField(array(
                 'label' => __('Close Date'),
                 'configuration' => array(
