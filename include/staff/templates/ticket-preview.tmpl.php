@@ -36,14 +36,15 @@ echo '<ul class="nav nav-tabs" id="ticket-preview">';
 echo '
         <li class="nav-item"><a class="nav-link active" id="preview_tab" href="#preview"
              data-toggle="tab" ><i class="icon-list-alt"></i>&nbsp;'.__('Ticket Summary').'</a></li>';
-//if ($thread && $thread->getNumCollaborators()) {
-echo sprintf('
-        <li class="nav-item"><a class="nav-link" id="collab_tab" href="#collab"
-             data-toggle="tab"><i class="icon-fixed-width icon-group
-            faded"></i>&nbsp;'.__('Collaborators <span class="badge badge-primary badge-pill">%d</span>').'</a></li>',
-            $thread->getNumCollaborators());
-//}
 
+$collabcount = $thread->getNumCollaborators();
+?>
+        <li class="nav-item"><a class="nav-link <?php if ($collabcount == 0){echo ' hidden';}?>" id="collab_tab" href="#collab"
+             data-toggle="tab"><i class="icon-fixed-width icon-group
+            faded"></i>&nbsp;Collaborators <span class="badge badge-primary badge-pill"><?php echo $collabcount; ?></span></a></li>
+            
+
+<?php
 if ((count($ticketchildren) != 0 || $ticket->isChild())) { ?>
     	<li class="nav-item"><a class="nav-link" id="related_tab" href="#relatedPreview"
              data-toggle="tab" ><i class="icon-fixed-width icon-list
@@ -66,17 +67,18 @@ echo sprintf('<li class="nav-item"><a class="nav-link threadPreviewPane" id="thr
             faded"></i>&nbsp;'.__('Thread <span class="badge badge-primary badge-pill">%d</span>').'</a></li>',
              $thread->getNumThreads());
 
+$notescount = $thread->getNumEntries()- $thread->getNumThreads(); ?>
 
-echo sprintf('<li class="nav-item"><a class="nav-link" id="note_tab" href="#notePreview"
+<li class="nav-item"><a class="nav-link notePreviewPane <?php if ($notescount == 0){echo ' hidden';}?>" id="note_tab" href="#notePreview"
              data-toggle="tab" ><i class="icon-fixed-width icon-list
-            faded"></i>&nbsp;'.__('Notes <span class="badge badge-primary badge-pill">%d</span>').'</a></li>',
-            $thread->getNumEntries()- $thread->getNumThreads());
+            faded"></i>&nbsp;Notes <span class="badge badge-primary badge-pill"><?php echo $notescount; ?> </span></a></li>
+           
 
 
 
-echo '</ul>';
+</ul>
 
-?>
+
 <div class="tab-content clearfix">
 				<div class="tab-pane active" id="preview">
 								<table border="0" cellspacing="" cellpadding="1" width="100%" class="ticket_info">
@@ -209,14 +211,7 @@ echo '</ul>';
 				        }?>
 				    </table>
 				    <br>
-				    <?php
-				    echo sprintf('<span><a class="collaborators"
-				                            href="#thread/%d/collaborators/1">%s</a></span>',
-				                            $thread->getId(),
-				                            $thread && $thread->getNumCollaborators()
-				                                ? __('Manage Collaborators') : __('Add Collaborator')
-				                                );
-				    ?>
+				    
 				</div>
 				
 				
@@ -253,23 +248,33 @@ echo '</ul>';
 <?php
 $options = array();
 
-if($ticket->isOpen())
-    $options[]=array('action'=>__('Reply'),'url'=>"tickets.php?id=$tid#reply");
-		
-		$options[]=array('action'=>__('Post Note'),'url'=>"tickets.php?id=$tid#note");
 
+if($ticket->isOpen())
+    $options[]=array('action'=>__('Reply'),'class'=>'','url'=>"tickets.php?id=$tid#reply");
+		
+		$options[]=array('action'=>__('Post Note'),'class'=>'','url'=>"tickets.php?id=$tid#note");
+		
 if ($role->hasPerm(Ticket::PERM_ASSIGN))
-    $options[]=array('action'=>($ticket->isAssigned()?__('Reassign'):__('Assign')),'url'=>"tickets.php?id=$tid#assign");
+    //$options[]=array('action'=>($ticket->isAssigned()?__('Reassign'):__('Assign')),'class'=>'ticket-action','url'=>"tickets.php?id=$tid#tickets/$tid/assign/agents");
 
 if($options) {
     echo '<ul class="tip_menu">';
     foreach($options as $option)
-        echo sprintf('<li><a href="%s">%s</a></li>',$option['url'],$option['action']);
-    echo '</ul>';
+        echo sprintf('<li><a class="%s" href="%s">%s</a></li>',$option['class'],$option['url'],$option['action']);
+   
 }
-
-echo '</div>';
 ?>
+    <?php
+				    echo sprintf('<li><a class="collaborators" href="#thread/%d/collaborators/1">%s</a>',
+				                            $thread->getId(),
+				                            $thread && $thread->getNumCollaborators()
+				                                ? __('Manage Collaborators') : __('Add Collaborator')
+				                                );
+				    ?>
+
+</ul>
+</div>
+
 <script type="text/javascript">
     $('.thread-preview-entry').on('click', function(){
         if($(this).hasClass('collapsed')) {
@@ -297,5 +302,13 @@ echo '</div>';
           type: "GET"
         });
     });
+    
+    $('.notePreviewPane').on('click', function(){
+        $.ajax({
+          url: "ajax.php/tickets/<?php echo $tid;?>/lastvisit",
+          type: "GET"
+        });
+    });
+    
     
  </script>
