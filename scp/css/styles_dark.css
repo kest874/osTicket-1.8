@@ -1582,7 +1582,8 @@ m-r--5 {
   font-weight: 600;
   padding: 3px 5px;
   font-size: 12px;
-  margin-top: 1px; }
+  margin-top: 1px; 
+  color: #ffffff !important;}
 
 .badge-xs {
   font-size: 9px; }
@@ -2089,7 +2090,8 @@ m-r--5 {
 
 .nav-tabs > li > a, .nav-pills > li > a {
   color: rgb(232, 234, 237);;
-  font-weight: 600; }
+  font-weight: 600;
+   }
 
 .nav-pills .nav-item.show .nav-link, .nav-pills .nav-link.active {
   background-color: #039cfd; }
@@ -3205,8 +3207,9 @@ div#requiredfield.has-danger > input {
    Tables
  =============*/
 .table {
-  margin-bottom: 10px; }
-
+  margin-bottom: 10px; 
+  color: #8a929a !important;}
+  
 .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
   border-top: 1px solid #f3f3f3; }
 
@@ -3217,8 +3220,22 @@ div#requiredfield.has-danger > input {
   border-bottom: 2px solid #f3f3f3; }
 
 .table-hover tbody tr:hover {
-  background-color: rgba(0, 0, 0, 0.04); }
+  background-color: rgba(0, 0, 0, 0.84) !important;
+  color: #8a929a !important; 
+  }
+  
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.27);
+}
 
+th {
+    color: #8a929a !important;
+  }
+  
+tr td {
+  	color: #8a929a !important;
+ }
+  
 .table > tbody > tr.success > td, .table > tbody > tr.success > th,
 .table > tbody > tr > td.success, .table > tbody > tr > th.success,
 .table > tfoot > tr.success > td, .table > tfoot > tr.success > th,
