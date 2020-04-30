@@ -208,7 +208,6 @@ var scp_prep = function() {
         }
      });
 
-    $('form select#cannedResp').select2({width: '350px'});
     $('form select#cannedResp').on('select2:opening', function (e) {
         var redactor = $('.richtext', $(this).closest('form')).data('redactor');
         if (redactor)

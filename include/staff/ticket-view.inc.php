@@ -997,7 +997,7 @@ if ($errors['err'] && isset($_POST['a'])) {
 							             </tr>
 							             <tr>
 							                <td width="120">
-							                    <label><?php echo __('Reply To'); ?>:</label>
+							                    <label><strong><?php echo __('Reply To'); ?>:</strong></label>
 							                </td>
 							                <td>
 							                    <?php
@@ -1028,10 +1028,8 @@ if ($errors['err'] && isset($_POST['a'])) {
 							                    <i class="help-tip icon-question-sign" href="#reply_types"></i>
 							                </td>
 							             </tr>
-							            </tbody>
-							            <tbody id="resp_sec">
-							            <tr><td colspan="2">&nbsp;</td></tr>
-							            <tr>
+							           
+							             <tr>
 							                <td width="120" style="vertical-align:top">
 							                    <label><strong><?php echo __('Response');?>:</strong></label>
 							                </td>
@@ -1041,35 +1039,35 @@ if ($errors['err'] && isset($_POST['a'])) {
 							                    echo sprintf('<div class="error">%s</div>',
 							                            $errors['response']);
 
-							                if ($cfg->isCannedResponseEnabled()) { ?>
-							                  <div class="form-group">
-							                    <select id="cannedResp" name="cannedResp">
-							                        <option value="0" selected="selected"><?php echo __('Select a canned response');?></option>
-							                        <option value='original'><?php echo __('Original Message'); ?></option>
-							                        <option value='lastmessage'><?php echo __('Last Message'); ?></option>
-							                        <?php
-							                        if(($cannedResponses=Canned::responsesByDeptId($ticket->getDeptId()))) {
-							                            echo '<option value="0" disabled="disabled">
-							                                ------------- '.__('Premade Replies').' ------------- </option>';
-							                            foreach($cannedResponses as $id =>$title)
-							                                echo sprintf('<option value="%d">%s</option>',$id,$title);
-							                        }
-							                        ?>
-							                    </select>
-							                    </div>
-							                    </td></tr>
-							                    <tr><td colspan="2">
-							                <?php } # endif (canned-resonse-enabled)
-							                    $signature = '';
-							                    switch ($thisstaff->getDefaultSignatureType()) {
-							                    case 'dept':
-							                        if ($dept && $dept->canAppendSignature())
-							                           $signature = $dept->getSignature();
-							                       break;
-							                    case 'mine':
-							                        $signature = $thisstaff->getSignature();
-							                        break;
-							                    } ?>
+							                if ($cfg->isCannedResponseEnabled()) { ?>           
+						                  <div>
+						                    <select id="cannedResp" name="cannedResp">
+						                        <option value="0" selected="selected"><?php echo __('Select a canned response');?></option>
+						                        <option value='original'><?php echo __('Original Message'); ?></option>
+						                        <option value='lastmessage'><?php echo __('Last Message'); ?></option>
+						                        <?php
+						                        if(($cannedResponses=Canned::responsesByDeptId($ticket->getDeptId()))) {
+						                            echo '<option value="0" disabled="disabled">
+						                                ------------- '.__('Premade Replies').' ------------- </option>';
+						                            foreach($cannedResponses as $id =>$title)
+						                                echo sprintf('<option value="%d">%s</option>',$id,$title);
+						                        }
+						                        ?>
+						                    </select>
+						                    </div>
+						                    </td></tr>
+						                    <tr><td colspan="2">
+						                <?php } # endif (canned-resonse-enabled)
+						                    $signature = '';
+						                    switch ($thisstaff->getDefaultSignatureType()) {
+						                    case 'dept':
+						                        if ($dept && $dept->canAppendSignature())
+						                           $signature = $dept->getSignature();
+						                       break;
+						                    case 'mine':
+						                        $signature = $thisstaff->getSignature();
+						                        break;
+						                    } ?>
 							                    <input type="hidden" name="draft_id" value=""/>
 							                    <textarea name="response" id="response" cols="50"
 							                        data-signature-field="signature" data-dept-id="<?php echo $dept->getId(); ?>"
@@ -1575,6 +1573,8 @@ function saveDraft() {
     if (redactor.opts.draftId)
         $('#response').redactor('plugin.draft.saveDraft');
 }
+
+
 
 // START - Ticket Time Timer
 <?php if ($cfg->isThreadTimer()) { ?>
