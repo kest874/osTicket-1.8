@@ -245,10 +245,10 @@ implements RestrictedAccess, Threadable, Searchable {
     }
 
     function getChildren() {
-        if (!isset($this->_children))
+        if (!isset($this->_children) && $this->isParent())
             $this->_children = self::getChildTickets($this->getId());
 
-        return $this->_children;
+        return $this->_children ?: array();
     }
 
     function getMergeTypeByFlag($flag) {
@@ -1330,6 +1330,9 @@ implements RestrictedAccess, Threadable, Searchable {
                 continue;
             if ($collabs->findFirst(array('user_id' => $user->getId())))
                 continue;
+            if ($user->getId() == $this->getOwnerId())
+                continue;
+
             if ($c=$this->addCollaborator($user, $vars, $errors, $event))
                 $new[] = $c;
         }
@@ -2606,7 +2609,8 @@ implements RestrictedAccess, Threadable, Searchable {
         $pid = $this->isChild() ? $this->getPid() : $this->getId();
         $parent = $this->isParent() ? $this : (Ticket::lookup($pid));
         $child = $this->isChild() ? $this : '';
-        $children = $this->isParent() ? (Ticket::getChildTickets($pid)) : '';
+        $children = $this->getChildren();
+
         if ($children) {
             foreach ($children as $child) {
                 $child = Ticket::lookup($child[0]);
@@ -2615,7 +2619,7 @@ implements RestrictedAccess, Threadable, Searchable {
         } elseif ($child)
             $child->unlinkChild($parent);
 
-        if (count(Ticket::getChildTickets($pid)) == 0) {
+        if (count($children) == 0) {
             $parent->setFlag(Ticket::FLAG_LINKED, false);
             $parent->setFlag(Ticket::FLAG_PARENT, false);
             $parent->save();
@@ -2707,10 +2711,15 @@ implements RestrictedAccess, Threadable, Searchable {
             $errors = array();
             foreach ($children as $child) {
                 if ($options['participants'] == 'all' && $collabs = $child->getCollaborators()) {
-                    foreach ($collabs as $collab)
-                        $parent->addCollaborator($collab->getUser(), array(), $errors);
+                    foreach ($collabs as $collab) {
+                        $collab = $collab->getUser();
+                        if ($collab->getId() != $parent->getOwnerId())
+                            $parent->addCollaborator($collab, array(), $errors);
+                    }
                 }
-                $parent->addCollaborator($child->getUser(), array(), $errors);
+                $cUser = $child->getUser();
+                if ($cUser->getId() != $parent->getOwnerId())
+                    $parent->addCollaborator($cUser, array(), $errors);
                 $parentThread = $parent->getThread();
 
                 $deletedChild = Thread::objects()
@@ -3206,7 +3215,37 @@ implements RestrictedAccess, Threadable, Searchable {
 
         return true;
     }
+		function topic(MassTopicForm $form, &$errors, $alert=true) {
+		        global $thisstaff, $cfg;
 
+		        $ctopic = $this->getTopic(); // Current department
+		        $ptopic = $this->getTopicId(); // Current department Id
+		        $topic = $form->getTopic(); // Target Topic
+		        
+		        $this->topic_id = $topic; 
+		        
+		        // Post internal note if any
+		        $note = null;
+		        $comments = $form->getField('comments')->getClean();
+		        if ($comments) {
+		            $title = sprintf(__('%1$s changed from %2$s to %3$s'),
+		                    __('Help Topic'),
+		                   $ctopic->getName(),
+		                   Topic::getLocalNameById($topic));
+
+		            $_errors = array();
+		            $note = $this->postNote(
+		                    array('note' => $comments, 'title' => $title),
+		                    $_errors, $thisstaff, false);
+		        }
+		        $change = '{"topic_id":['.$ptopic.','.$form->getTopic().']}';
+		        $this->logEvent('edited',$change);
+		        
+		        if ($errors || !$this->save(true))
+		            return false;
+		     
+		         return true;
+		    }
     // Insert message from client
     function postMessage($vars, $origin='', $alerts=true) {
         global $cfg;
@@ -3485,24 +3524,6 @@ implements RestrictedAccess, Threadable, Searchable {
         if (!$vars['ip_address'] && $_SERVER['REMOTE_ADDR'])
             $vars['ip_address'] = $_SERVER['REMOTE_ADDR'];
 
-        // Add new collaborators (if any).
-        if (isset($vars['ccs']) && count($vars['ccs']))
-            $this->addCollaborators($vars['ccs'], array(), $errors);
-       
-        if ($vars['ccs'])
-        if ($collabs = $this->getCollaborators()) {
-            foreach ($collabs as $collaborator) {
-                $cid = $collaborator->getUserId();
-                // Enable collaborators if they were reselected
-                if (!$collaborator->isActive() && ($vars['ccs'] && in_array($cid, $vars['ccs'])))
-                    $collaborator->setFlag(Collaborator::FLAG_ACTIVE, true);
-                // Disable collaborators if they were unchecked
-                elseif ($collaborator->isActive() && (!$vars['ccs'] || !in_array($cid, $vars['ccs'])))
-                    $collaborator->setFlag(Collaborator::FLAG_ACTIVE, false);
-
-                $collaborator->save();
-            }
-        }
         // clear db cache
         $this->getThread()->_collaborators = null;
 
@@ -3795,9 +3816,11 @@ implements RestrictedAccess, Threadable, Searchable {
             return false;
 
         //deleting parent ticket
-        if ($children = Ticket::getChildTickets($this->getId())) {
+        if ($children = $this->getChildren()) {
             foreach ($children as $childId) {
-                $child = Ticket::lookup($childId[0]);
+                if (!($child = Ticket::lookup($childId[0])))
+                    continue;
+
                 $child->setPid(NULL);
                 $child->setMergeType(3);
                 $child->save();
@@ -3923,7 +3946,7 @@ implements RestrictedAccess, Threadable, Searchable {
         $this->sla_id = $vars['slaId'];
         $this->source = $vars['source'];
         $this->duedate = $vars['duedate']
-            ? date('Y-m-d G:i',Misc::dbtime($vars['duedate']))
+            ? date('Y-m-d H:i:s',Misc::dbtime($vars['duedate']))
             : null;
 
         if ($vars['user_id'])
@@ -4576,8 +4599,9 @@ implements RestrictedAccess, Threadable, Searchable {
             $settings = array('isactive' => true);
             $collabs = array();
             foreach ($org->allMembers() as $u) {
+                $_errors = array();
                 if ($members || ($pris && $u->isPrimaryContact())) {
-                    if ($c = $ticket->addCollaborator($u, $settings, $errors)) {
+                    if ($c = $ticket->addCollaborator($u, $settings, $_errors)) {
                         $collabs[] = (string) $c;
                     }
                 }

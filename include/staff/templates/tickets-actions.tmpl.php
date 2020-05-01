@@ -83,6 +83,7 @@ if ($agent->hasPerm(Ticket::PERM_MERGE, false)) {?>
 
 //Mass Link
 if ($agent->hasPerm(Ticket::PERM_LINK, false)) {?>
+
  <a class="btn btn-light tickets-action" id="tickets-link" data-placement="bottom"
     data-toggle="tooltip" title="<?php echo __('Link'); ?>"
     href="#tickets/mass/link"><i class="icon-link"></i></a>
