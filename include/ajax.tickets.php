@@ -60,6 +60,7 @@ class TicketsAjaxAPI extends AjaxController {
             return $this->lookup();
         }
 
+        // TODO: Why not aggregate based on relationship?
         foreach ($hits as $T) {
             $email = $T['user__default_email__address'];
             $count = $T['tickets'];
@@ -1793,7 +1794,7 @@ class TicketsAjaxAPI extends AjaxController {
         $info['comments'] = Format::htmlchars($_REQUEST['comments']);
 
         // Has Children?
-        $info['children'] = ($ticket->getChildren()->count());
+        $info['children'] = count($ticket->getChildren());
 
         return self::_changeStatus($state, $info, $errors);
     }
@@ -2007,6 +2008,9 @@ class TicketsAjaxAPI extends AjaxController {
             $queue = SavedSearch::lookup($id);
         else
             $queue = AdhocSearch::load($id);
+
+       if (!$queue)
+           Http::response(404, 'Unknown Queue');
 
         return $this->queueExport($queue);
     }

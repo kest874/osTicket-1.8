@@ -83,7 +83,8 @@ if (!$ticket) {
         $wc = mb_str_wc($_GET['query']);
         if ($wc < 4) {
             $key = substr(md5($_GET['query']), -10);
-            if ($_GET['search-type'] == 'typeahead') {
+            $isEmail = Validator::is_email($_GET['query']);
+            if ($_GET['search-type'] == 'typeahead' || $isEmail) {
                 // Use a faster index
                 $criteria = ['user__emails__address', 'equal', $_GET['query']];
             } else {
@@ -186,6 +187,25 @@ if($_POST && !$errors):
             }
 
             $alert =  strcasecmp('none', $_POST['reply-to']);
+            if (!$errors) {
+                // Add new collaborators (if any)
+                $_errors = array();
+                if (isset($vars['ccs']) && count($vars['ccs']))
+                    $ticket->addCollaborators($vars['ccs'], array(), $_errors);
+                // set status of collaborators
+                if ($collabs = $ticket->getCollaborators()) {
+                    foreach ($collabs as $collaborator) {
+                        $cid = $collaborator->getUserId();
+                        // Enable collaborators if they were reselected
+                        if (!$collaborator->isActive() && ($vars['ccs'] && in_array($cid, $vars['ccs'])))
+                            $collaborator->setFlag(Collaborator::FLAG_ACTIVE, true);
+                        // Disable collaborators if they were unchecked
+                        elseif ($collaborator->isActive() && (!$vars['ccs'] || !in_array($cid, $vars['ccs'])))
+                            $collaborator->setFlag(Collaborator::FLAG_ACTIVE, false);
+                        $collaborator->save();
+                    }
+                }
+            }
             if (!$errors && ($response=$ticket->postReply($vars, $errors,
                             $alert))) {
                 $msg = sprintf(__('%s: Reply posted successfully'),
