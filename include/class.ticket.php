@@ -1835,8 +1835,6 @@ implements RestrictedAccess, Threadable, Searchable {
                         continue;
                     }
                     $alert = $this->replaceVars($msg, array('recipient' => $staff));
-                    // Add the poster name to the outbound mail
-										$options += array('from_name' =>  $vars['poster']);
                     $email->sendAlert($staff, $alert['subj'], $alert['body'], null, $options);
                     $sentlist[] = $staff->getEmail();
                 }
@@ -3633,10 +3631,7 @@ implements RestrictedAccess, Threadable, Searchable {
             if ($from_name)
                 $options += array('from_name' => $from_name);
         }
-				
-				//Override.... Use the poster name.
-				$options += array('from_name' =>  $vars['poster']);
-        
+
         $variables = array(
             'response' => $response,
             'signature' => $signature,
