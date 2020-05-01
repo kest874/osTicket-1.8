@@ -3548,12 +3548,12 @@ implements RestrictedAccess, Threadable, Searchable {
                 && !$dept->disableAutoClaim());
         if ($claim && $thisstaff && $this->isOpen() && !$this->getStaffId()) {
             $this->setStaffId($thisstaff->getId()); //direct assignment;
-         } else {
+         } 
 			
 				if ($this->getStatusId() !== 10 && $this->getStatusId() !== 9 
 						&& $this->getStatusId() !== 3  && $this->getTopicId() !==12)
 					$this->setStatusId(6);			
-				}	
+				
 				$this->setStaffLastVisitNowById($this->getStaffId()); //reset last visit time		
         $this->lastrespondent = $response->staff;
 
