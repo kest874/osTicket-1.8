@@ -450,8 +450,8 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                             <div class="dropdown-menu dropdown-menu-right dropdown-arrow dropdown-menu-xlg" aria-labelledby="Preview">
                                
                                <!-- item-->
-                                <div class="dropdown-item noti-title"  onclick="location.href='tickets.php?queue=30&p=1&l=0&s=0';">
-                                    <h5 class="font-16"><a href="tickets.php?queue=3&p=1&l=0&t=0&s=1&st=0"><span class="badge badge-primary float-right"><?php echo $UnassignedTickets; ?></span></a>Unassigned</h5>
+                                <div class="dropdown-item noti-title"  onclick="location.href='tickets.php?queue=3&p=1&l=0&s=1&st=0';">
+                                    <h5 class="font-16"><a href="tickets.php?queue=3&p=1&l=0&s=1&st=0"><span class="badge badge-primary float-right"><?php echo $UnassignedTickets; ?></span></a>Unassigned</h5>
                                 </div>
 
                             <?php
