@@ -3335,7 +3335,7 @@ implements TemplateVariable {
 			$info['userId'] = Staff::getStaffUserId($vars['staffId']);
 			$info['role'] = 'N';
 			$info['noerrors'] = 'N';
-			Collaborator::add($info, $errors);	
+			Collaborator::add($info);	
 		}		
 		
        return NoteThreadEntry::add($vars, $errors);
