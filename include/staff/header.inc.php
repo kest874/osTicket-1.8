@@ -229,7 +229,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                             </a>
                             <div class="dropdown-menu dropdown-menu-right dropdown-arrow dropdown-menu-lg" aria-labelledby="Preview">
                                 <!-- item-->
-                                <div class="dropdown-item noti-title" onclick="location.href='tickets.php?queue=245&p=1&l=0&s=0';">
+                                <div class="dropdown-item noti-title" onclick="location.href='tickets.php?queue=245&p=1&l=0&t=0&s=0&st=0';">
                                     <h5 class="font-16"><a href="tickets.php?queue=245&p=1&l=0&s=0"><span class="badge badge-danger float-right"><?php echo $BacklogITTotal; ?></span></a> IT Backlog</h5>
                                 </div>
 								<?php if ($BacklogITCAN <> '0'){ ?>
@@ -339,7 +339,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                             <div class="dropdown-menu dropdown-menu-right dropdown-arrow dropdown-menu-lg" aria-labelledby="Preview">
                                 <!-- item-->
                                 <div class="dropdown-item noti-title"  onclick="location.href='tickets.php?queue=246&p=1&l=0&s=0';">
-                                    <h5 class="font-16"><a href="tickets.php?queue=246&p=1&l=0&s=0"><span class="badge badge-danger float-right"><?php echo $BacklogSETotal; ?></span></a> SE Backlog</h5>
+                                    <h5 class="font-16"><a href="tickets.php?queue=246&p=1&l=0&t=0&s=0&st=0"><span class="badge badge-danger float-right"><?php echo $BacklogSETotal; ?></span></a> SE Backlog</h5>
                                 </div>
 								<?php if ($BacklogSECAN <> '0'){ ?>
                                 <a href="/scp/tickets.php?queue=246&p=1&l=2&s=0" class="dropdown-item notify-item">
@@ -451,7 +451,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                                
                                <!-- item-->
                                 <div class="dropdown-item noti-title"  onclick="location.href='tickets.php?queue=30&p=1&l=0&s=0';">
-                                    <h5 class="font-16"><a href="tickets.php?queue=3&l=0&t=0&s=1&st=0"><span class="badge badge-primary float-right"><?php echo $UnassignedTickets; ?></span></a>Unassigned</h5>
+                                    <h5 class="font-16"><a href="tickets.php?queue=3&p=1&l=0&t=0&s=1&st=0"><span class="badge badge-primary float-right"><?php echo $UnassignedTickets; ?></span></a>Unassigned</h5>
                                 </div>
 
                             <?php
