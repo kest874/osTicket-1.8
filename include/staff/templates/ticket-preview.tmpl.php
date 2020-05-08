@@ -249,11 +249,11 @@ $notescount = $thread->getNumEntries()- $thread->getNumThreads(); ?>
 $options = array();
 
 
-if($ticket->isOpen())
-
-		$options[]=array('action'=>__('View'),'class'=>'','url'=>"tickets.php?id=$tid");	
-
-    $options[]=array('action'=>__('Reply'),'class'=>'','url'=>"tickets.php?id=$tid#reply");
+		$options[]=array('action'=>__('View'),'class'=>'','url'=>"tickets.php?id=$tid");
+		
+		if($ticket->isOpen())
+	
+   		$options[]=array('action'=>__('Reply'),'class'=>'','url'=>"tickets.php?id=$tid#reply");
 		
 		$options[]=array('action'=>__('Post Note'),'class'=>'','url'=>"tickets.php?id=$tid#note");
 		
