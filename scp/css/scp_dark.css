@@ -6,7 +6,7 @@
 body {
         background-color: #000000 !important;
         top:0 !important;
-        color: #8a929a !important;
+        color: #d3d3d3 !important;
 }
 iframe.goog-te-banner-frame{ display: none !important;}**/
 
@@ -31,7 +31,7 @@ input {
     color: rgb(215, 218, 220) !important;
     min-height: 30px line-height:24px;
     max-width: 350px;
-    border: 1px solid rgb(71, 71, 72) !important
+    border: 1px solid rgb(71, 71, 72) !important;
     display: inline-block;
     padding: 0 4px;
     font-size: 13px;
@@ -40,6 +40,38 @@ input {
     -moz-border-radius: 4px;
 }
 
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	 background-color: rgb(26, 26, 27) !important;
+   
+	
+}
+
+.select2-dropdown {
+    background-color: rgb(26, 26, 27); !important;
+    
+}
+  
+.select2-container--default .select2-selection--single {
+   background-color: rgb(26, 26, 27); !important;  	
+   border: 1px solid rgb(71, 71, 72) !important; 
+}
+.select2-container .select2-selection--single {
+	min-height: 30px !important;
+}
+
+.select2-container--open .select2-dropdown--below {
+  border: 1px solid rgb(71, 71, 72) !important; 
+  background: #2e2e2e;
+}   
+
+.select2-container--default .select2-selection--multiple {
+    background-color: rgb(26, 26, 27); !important; 
+    border: 1px solid rgb(71, 71, 72) !important; 
+}         
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    color: #0009 !important;
+}    
 .action-button,
 .button {
     cursor: pointer;
@@ -295,7 +327,8 @@ div#ticket-navbar-collapse.collapse.navbar-collapse > form.form-inline{
 }
 
 .subnavtitle {
-color: #8a929a !important;
+color: #d3d3d3 !important;
+
 }
 
 .truncate {
@@ -458,7 +491,13 @@ div#ReponseTabs > div.tab-content.clearfix > div#reply.tab-pane.active > form.ta
 .banner { margin: 0; padding: 5px 5px 11px; margin-bottom: 10px; color: #444; border: 1px solid #444;  background-color: #ddd; border-radius: 4px; }
 
 #msg_info,
-.info-banner { margin: 0; padding: 5px; margin-bottom: 10px; color: #3a87ad; border: 1px solid #bce8f1;  background-color: #d9edf7; }
+.info-banner {
+    margin: 0;
+    padding: 5px;
+    margin-bottom: 10px;
+    color: #3a87ad;
+    border: 1px solid #bce8f1;
+    background-color: #d9edf7;}
 
 #msg_notice,
 .success-banner,
@@ -550,6 +589,10 @@ input.rlc-search {
     border-top-left-radius: 0.2rem !important;
     border-bottom-left-radius: 0.2rem !important; 
 }
+.input-group-text {
+	background-color: rgb(39, 39, 41) !important;
+	border-color: #343a40 !important;
+}
 
 
 /** Popup Tool Tips and Content **/
@@ -591,7 +634,7 @@ input.rlc-search {
     min-height:20px;
     padding:10px;
     border:1px solid #666;
-    background:#fff;
+    background:#232323;
     -moz-border-radius:5px;
     -webkit-border-radius:5px;
     border-radius:2px;
@@ -807,9 +850,6 @@ select {
     -moz-border-radius: 4px;
 }
 
-.select2-dropdown{
-	margin-top: -76px;
-}
 div#datepicker1.input-group.date > span.input-group-addon{    
     display: inline;
     padding-top: 4px;
@@ -1031,6 +1071,7 @@ div.redactor-editor, div.redactor-box, .redactor-box textarea {
 
 .requiredfield {
 	background-color: #ffffcc !important;	
+	color: #000000 !important;
   
 }
 #requiredfield input[type="text"], input[type="password"],input[type="email"]{
@@ -1043,11 +1084,17 @@ td#requiredfield .redactor-editor, .redactor-box, .redactor-box textarea
   background-color: #ffffcc;
  
 }
-td#requiredfield .redactor-placeholder{
-width: 100%;
 
+.redactor-placeholder:before {
+  position: absolute;
+  content: attr(placeholder);
+  color: rgba(232, 234, 237, 0.41) !important;;
+  font-weight: normal;
+  cursor: text; }
+
+.redactor-styles {
+	color: #d3d3d3 !important;
 }
-
 /* Line 582 */
 .thread-entry .header
 {
@@ -1531,8 +1578,8 @@ ul.tabs li.active {
     color: 000;
     border: 1px solid rgb(71, 71, 72);
     padding: 15px 15px;
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 2px;
+    border-bottom-left-radius: 2px;
 }
 #ReponseTabs {
     margin-left: -20px;
@@ -1606,7 +1653,7 @@ ul.tabs li.active {
     cursor: move;
 }
 .row-item {
-    border: 1px solid #cfcfcf;
+    border: 1px solid rgb(71, 71, 72);
     padding-left: 5px;
     position: relative;
 }
@@ -1617,19 +1664,19 @@ ul.tabs li.active {
     background: rgba(0, 0, 0, 0.3);
 }
 .row-item:first-child {
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px;
 }
 .row-item:last-child {
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 2px;
+    border-bottom-left-radius: 2px;
 }
 .row-item + .row-item {
     margin-top: -1px;
 }
 
 .row-item .delete {
-    border-left: 1px solid #cfcfcf;
+    border-left: 1px solid rgb(71, 71, 72);
     border-top-right-radius: inherit;
     border-bottom-right-radius: inherit;
     width: 35px;
@@ -1659,11 +1706,11 @@ ul.tabs li.active {
 }
 
 .row-item:first-child .delete {
-    border-top-right-radius: 5px;
+    border-top-right-radius: 2px;
    
 }
 .row-item:last-child .delete {
-    border-bottom-right-radius: 5px;
+    border-bottom-right-radius: 2px;
   
 }
 .row-item .delete:hover {
@@ -1788,7 +1835,7 @@ fieldset {
     display:none;
     z-index:7;
     box-shadow: 0 5px 60px #001;
-    border-radius: 5px;
+    border-radius: 2px;
     max-height: 72%;
     min-height: 50px;
     overflow-y: auto;

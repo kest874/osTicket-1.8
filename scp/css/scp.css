@@ -1423,8 +1423,8 @@ ul.tabs li.active {
   color : 000;
   background-color: #ddd;
   padding : 15px 15px;
-  border-bottom-right-radius: 5px;
-  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 2px;
+  border-bottom-left-radius: 2px;
 }
 #ReponseTabs {
     margin-left: -20px;
@@ -1509,12 +1509,12 @@ ul.tabs li.active {
     background: rgba(0, 0, 0, 0.3);
 }
 .row-item:first-child {
-    border-top-right-radius: 5px;
-    border-top-left-radius: 5px;
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px;
 }
 .row-item:last-child {
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 2px;
+    border-bottom-left-radius: 2px;
 }
 .row-item + .row-item {
     margin-top: -1px;
@@ -1551,11 +1551,11 @@ ul.tabs li.active {
 }
 
 .row-item:first-child .delete {
-    border-top-right-radius: 5px;
+    border-top-right-radius: 2px;
    
 }
 .row-item:last-child .delete {
-    border-bottom-right-radius: 5px;
+    border-bottom-right-radius: 2px;
   
 }
 .row-item .delete:hover {
@@ -1680,7 +1680,7 @@ fieldset {
     display:none;
     z-index:7;
     box-shadow: 0 5px 60px #001;
-    border-radius: 5px;
+    border-radius: 2px;
     max-height: 72%;
     min-height: 50px;
     overflow-y: auto;

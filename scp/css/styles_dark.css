@@ -194,7 +194,7 @@ body.fixed-left .side-menu.left {
 
 .content-page > .content {
   margin-bottom: 60px;
-  margin-top: 76px;
+  margin-top: 50px;
   padding: 20px 5px 15px 5px; }
 
 .button-menu-mobile {
@@ -669,7 +669,7 @@ html {
   background: #000; }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #505458;
+  color: #d3d3d3;
   margin: 10px 0; }
 
 h1 {
@@ -756,7 +756,7 @@ a:focus {
   -moz-border-radius: 5px;
   background-clip: padding-box;
   margin-bottom: 10px;
-  background-color: rgb(26, 26, 27);
+  background-color:rgb(26, 26, 27);
   /*margin-left:-10px;
   margin-right:-10px;*/}
   
@@ -771,8 +771,8 @@ a:focus {
     border-radius: 5px;
     
     background-clip: padding-box;
-    background-color:  rgb(26, 26, 27);
-    
+    background-color:rgb(26, 26, 27);
+    color: #d3d3d3 !important
     opacity: 100;
     position: -webkit-sticky !important;
     position: -moz-sticky !important;
@@ -1595,7 +1595,7 @@ m-r--5 {
   transform: translate(0, -2px); }
 
 .badge-primary {
-  background-color: #039cfd; }
+  background-color: #037cc9; }
 
 .badge-success {
   background-color: #52bb56; }
@@ -2089,7 +2089,7 @@ m-r--5 {
   padding: 20px 0 0 0; }
 
 .nav-tabs > li > a, .nav-pills > li > a {
-  color: rgb(232, 234, 237);;
+  color: #fff;
   font-weight: 600;
    }
 
@@ -3208,7 +3208,7 @@ div#requiredfield.has-danger > input {
  =============*/
 .table {
   margin-bottom: 10px; 
-  color: #8a929a !important;}
+  color: #d3d3d3 !important;}
   
 .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
   border-top: 1px solid #f3f3f3; }
@@ -3219,21 +3219,21 @@ div#requiredfield.has-danger > input {
 .table > thead > tr > th {
   border-bottom: 2px solid #f3f3f3; }
 
-.table-hover tbody tr:hover {
-  background-color: rgba(0, 0, 0, 0.84) !important;
-  color: #8a929a !important; 
-  }
-  
+
 .table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, 0.27);
-}
+  background-color: rgba(0, 0, 0, 0.05); }
+
+.table-hover tbody tr:hover {
+  color: #d3d3d3;
+  background-color: rgba(0, 0, 0, 0.075); }
+
 
 th {
     color: #8a929a !important;
   }
   
 tr td {
-  	color: #8a929a !important;
+  	color: #d3d3d3 !important;
  }
   
 .table > tbody > tr.success > td, .table > tbody > tr.success > th,
@@ -4574,3 +4574,6 @@ File: Responsive
 
 .switchery{background-color:#fff;border:1px solid #dfdfdf;border-radius:20px;cursor:pointer;display:inline-block;height:30px;position:relative;vertical-align:middle;width:50px;-moz-user-select:none;-khtml-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;box-sizing:content-box;background-clip:content-box}.switchery>small{background:#fff;border-radius:100%;box-shadow:0 1px 3px rgba(0,0,0,0.4);height:30px;position:absolute;top:0;width:30px}.switchery-small{border-radius:20px;height:20px;width:33px}.switchery-small>small{height:20px;width:20px}.switchery-large{border-radius:40px;height:40px;width:66px}.switchery-large>small{height:40px;width:40px}
 
+.slimScrollBar{
+	background: #000 !important;
+}

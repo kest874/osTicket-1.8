@@ -301,7 +301,14 @@ if($ticket->isOverdue()) { ?>
       <strong>Overdue!</strong> Ticket is maked overdue..
 </div>
  <?php }
- ?>
+
+if ($errors['err'] && isset($_POST['a'])) {
+    // Reflect errors back to the tab.
+    $errors[$_POST['a']] = $errors['err'];
+} elseif($warn) { ?>
+    <div class="alert alert-warning" id="msg_warning"><?php echo $warn; ?></div>
+<?php
+} ?>
 <div id="msg_notice" class="alert alert-success" style="display: none;"><i class="fa fa-check-square" aria-hidden="true"></i> <span id="msg-txt"><?php echo $msg ?: ''; ?></span></div>
  
 <div class="card-box"> <!--ticketinfo-->
@@ -818,19 +825,6 @@ $tcount = $ticket->getThreadEntries($types) ? $ticket->getThreadEntries($types)-
                 );
 ?>
 <div class="clear"></div>
-<?php
-if ($errors['err'] && isset($_POST['a'])) {
-    // Reflect errors back to the tab.
-    $errors[$_POST['a']] = $errors['err'];
-} elseif($warn) { ?>
-    <div id="msg_warning"><?php echo $warn; ?></div>
-<?php
-} ?>
-
-
-
-
-
 
 <div id="UpdateArea"  <?php if (!$topicset) { echo ' class="hidden"';} ?>>
 <div class="sticky bar stop actions " id="response_options">
