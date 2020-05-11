@@ -1132,7 +1132,7 @@ $(document).on('pjax:send', function(event) {
 
     // right
     $('#loadingbar').stop(false, true).width((50 + Math.random() * 30) + "%");
-    $('#overlay').css('background-color','white');
+    $('#overlay').css('background-color','');
     $.toggleOverlay(true);
 });
 

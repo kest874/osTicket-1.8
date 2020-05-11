@@ -107,7 +107,7 @@ input.close{
     display: inline-block;
     padding: 0.25rem 0.5rem;
     margin-bottom: 0;
-    margin-top: 1px;
+    /*margin-top: 1px;*/
     margin-left: 5px;
     font-size:  0.875rem;
     font-weight: normal;
@@ -352,14 +352,14 @@ color: #d3d3d3 !important;
 
 #msg_warning,
 .warning-banner { 
-margin-left: auto; 
-margin-right: auto; 
-padding: 5px 10px 5px 36px; 
-margin-bottom: 10px; 
-border-top: 1px solid #f26522;
-border-bottom: 1px solid #f26522;
-background: url('../images/icons/alert.png') 10px 50% no-repeat #ffeb3b;
-
+		margin-left: auto; 
+		margin-right: auto; 
+		padding: 5px 10px 5px 36px; 
+		margin-bottom: 10px; 
+		border-top: 1px solid #f26522;
+		border-bottom: 1px solid #f26522;
+		background: url('../images/icons/alert.png') 10px 50% no-repeat #ffeb3b;
+    color: #1a1a1b;
 }
 
 
@@ -798,7 +798,7 @@ h2 > i.help-tip {
     background: #000;
     z-index: 6;
     -webkit-transform: translate3d(0,0,0);
-    opacity: 0.5;
+    opacity: 0.4; !important;
 }
 
 #loading, #upgrading {
@@ -1551,26 +1551,21 @@ div.ticketbuttonbar {
 
 
 ul.tabs {
-  width: 500px !important;  
+  max-width: 350px !important;  
  }
 
 ul.tabs li.active {
     color: #495057;
-    background-color: #039cfd;
-    border: 1px solid #039cfd #039cfd #fff;
-    border-top-left-radius: .25rem;
-    border-top-right-radius: .25rem;
+    background-color: #375a7f !important;
+		border-radius: 4px 4px 0 0;
     border-bottom: none;
     text-align: center;
-    border-top: 2px solid #049cfd;
-    border-top: 2px solid #049cfd;
     border-bottom: 0;
-    box-shadow: 4px -1px 6px -3px rgba(0,0,0,0.2);
 }
 
-
-
-
+.nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
+    border:  1px solid transparent;
+}    
 
 /* Response/Note tabs */
 .ClientReponseTabs {

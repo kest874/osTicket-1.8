@@ -1395,26 +1395,31 @@ div.ticketbuttonbar {
 
 
 ul.tabs {
-  width: 500px !important;  
+  max-width: 350px !important;  
  }
 
 ul.tabs li.active {
-    color: #495057;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd #ddd #fff;
-    border-top-left-radius: .25rem;
-    border-top-right-radius: .25rem;
+    color: #fff !important;
+    background-color: #039cfd;
+    border-radius: 4px 4px 0 0;
     border-bottom: none;
     text-align: center;
-    border-top: 2px solid #049cfd;
-    border-top: 2px solid #049cfd;
     border-bottom: 0;
-    box-shadow: 4px -1px 6px -3px rgba(0,0,0,0.2);
+    
 }
 
+.nav-tabs .nav-link:focus, .nav-tabs .nav-link:hover {
+    border:  1px solid transparent;
+} 
 
+ul.tabs li.active a {
+    color: #fff !important;
+}
 
-
+ul.tabs li.active span.badge.badge-primary.badge-pill{
+	  color: #222 !important;
+    background-color: #adb5bd !important;
+}
 
 /* Response/Note tabs */
 .ClientReponseTabs {
