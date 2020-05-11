@@ -560,6 +560,11 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         return $this->darkmode;
     }
     
+    function SetDarkMode($vars) {
+        $this->darkmode = $vars['darkmode'];
+        $this->save();
+    }
+    
     function isAvailable() {
         return ($this->isActive() && !$this->onVacation());
     }

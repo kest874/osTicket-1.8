@@ -381,6 +381,11 @@ background: url('../images/icons/alert.png') 10px 50% no-repeat #ffeb3b;
     position: absolute;
     top: 17px;
     right: 0px;
+    fill: orange;
+}
+
+.sun {
+    background: url('../images/icons/sun.svg') 2px no-repeat;
 }
 
 .task-warning-banner-empty {

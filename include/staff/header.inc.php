@@ -9,6 +9,9 @@ header("Content-Security-Policy: frame-ancestors ".$cfg->getAllowIframes().";");
 $title = ($ost && ($title=$ost->getPageTitle()))
     ? $title : ('osTicket :: '.__('Staff Control Panel'));
 
+$_SESSION['dm'] = $staff->darkmode;
+$dm = $_SESSION['dm'];
+
 if (!isset($_SERVER['HTTP_X_PJAX'])) { ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html<?php
@@ -54,12 +57,12 @@ if (osTicket::is_ie())
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/icons.css" media="all">
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/select2.min.css">
     <link rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/redactor.css" media="screen">
-    <?php if ($staff->darkmode ==1){?>
+    <?php if ($dm ==1){?>
     	<link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/styles_dark.css" media="all">
   	<?php } else { ?>
   		<link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/styles.css" media="all">
  		 <?php } 
- 		 if ($staff->darkmode ==1){?>
+ 		 if ($dm ==1){?>
     	<link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/scp_dark.css" media="all">
   	<?php } else { ?>
   		<link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/scp.css" media="all">  	
@@ -88,7 +91,7 @@ if (osTicket::is_ie())
     
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/rtl.css"/>
 
-    <?php if ($staff->darkmode ==1){?>
+    <?php if ($dm ==1){?>
     	<link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/helptopic_dark.css"/>
     <?php } else { ?>
     	<link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/helptopic.css"/>
@@ -99,7 +102,7 @@ if (osTicket::is_ie())
    <-- <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/loadingoverlay.min.js"></script>-->
     <link type="text/css" rel="stylesheet" href="./css/translatable.css"/>
     
-    <?php if ($staff->darkmode ==1){?>
+    <?php if ($dm ==1){?>
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/typeahead_dark.css" media="screen">
   <?php } else { ?>	
     	<link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/typeahead.css" media="screen">
@@ -166,6 +169,33 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                                 <i class="mdi mdi-crop-free noti-icon"></i>
                             </a>
                         </li>
+                        
+                        <li class="list-inline-item notification-list mr-0">
+                            <a class="nav-link waves-light waves-effect darkmode" href="#" id="btn-darkscreen">
+                                <?php if ($dm == 1) { ?>
+                                	
+                                	<i class="sun noti-icon"></i>
+                                
+                                <?php
+                                } else { ?>
+                                	
+                                	<i class="moon noti-icon"></i> 
+                            
+                            		<?php } ?>
+                            
+                            </a>
+                        </li>
+                        
+                        <script>
+                        	
+                        	 $('.darkmode').on('click', function(){
+											        $.ajax({
+											          url: "ajax.php/staff/<?php echo $thisstaff->getId();?>/darkmode",
+											          type: "GET"
+											        });
+											        location.reload(true);
+											    });
+                        </script>
 
                         <li class="list-inline-item notification-list mr-0 hidden">
                         

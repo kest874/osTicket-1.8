@@ -335,6 +335,10 @@ background: url('../images/icons/alert.png') 10px 50% no-repeat #ffeb3b;
     right: 0px;
 }
 
+.moon {
+    background: url('../images/icons/moon.svg') 2px no-repeat;
+}
+
 .task-warning-banner-empty {
    /* margin-top: 51px;*/
 }

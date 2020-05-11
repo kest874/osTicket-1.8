@@ -232,4 +232,13 @@ class StaffAjaxAPI extends AjaxController {
             'code' => $code,
           ));
     }
+    function setDarkmode($dm) {
+    	global $thisstaff;
+    	$dm = $_SESSION['dm'];
+    	if ($dm == 0) {$dm=1;}else{$dm=0;} 
+    	$_SESSION['dm'] = $dm;
+    	$vars = array('darkmode'=>$dm);
+    	$thisstaff->SetDarkMode($vars);
+    	return var_dump($vars);
+    }
 }
