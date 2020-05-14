@@ -306,7 +306,7 @@ if ($errors['err'] && isset($_POST['a'])) {
     // Reflect errors back to the tab.
     $errors[$_POST['a']] = $errors['err'];
 } elseif($warn) { ?>
-    <div class="alert alert-warning" id="msg_warning"><?php echo $warn; ?></div>
+    <div class="alert alert-warning"><i class="fa fa-exclamation-circle" aria-hidden="true"></i> <?php echo $warn; ?></div>
 <?php
 } ?>
 <div id="msg_notice" class="alert alert-success" style="display: none;"><i class="fa fa-check-square" aria-hidden="true"></i> <span id="msg-txt"><?php echo $msg ?: ''; ?></span></div>
