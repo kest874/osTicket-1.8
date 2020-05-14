@@ -1150,7 +1150,7 @@ td#requiredfield .redactor-editor, .redactor-box, .redactor-box textarea
 
 /* Line 621 */
 .thread-entry.message .header {
-    background-color: #224665;
+    background-color: #4787be;
     background-image: none;
     background-repeat: repeat;
     background-attachment: scroll;
@@ -1162,10 +1162,13 @@ td#requiredfield .redactor-editor, .redactor-box, .redactor-box textarea
     color: #ffffff;
 }
 
+.thread-entry.message .faded {
+	    color: rgb(198, 193, 193) !important;
+}
 
 /* Line 613 */
 .thread-entry.response .header {
-    background-color: #345035;
+    background-color: #dddddd;
     background-image: none;
     background-repeat: repeat;
     background-attachment: scroll;
@@ -1174,6 +1177,7 @@ td#requiredfield .redactor-editor, .redactor-box, .redactor-box textarea
     background-position-x: 0%;
     background-position-y: 0%;
     background-size: auto auto;
+    color: #000;
 }
 
 div.thread-entry.message > div.header > a > time.relative{
@@ -1182,7 +1186,7 @@ div.thread-entry.message > div.header > a > time.relative{
 }
 
 .thread-entry.note .header {
-    background-color: #6d2121;
+    background-color: #ffffcc;
     color: #000;
     background-image: none;
     background-repeat: repeat;
@@ -1192,7 +1196,7 @@ div.thread-entry.message > div.header > a > time.relative{
     background-position-x: 0%;
     background-position-y: 0%;
     background-size: auto auto;
-    color: #ffffff;
+    color: #000;
 }
 
 .thread-entry .thread-body
@@ -1230,7 +1234,7 @@ div.thread-entry.message > div.header > a > time.relative{
     color: rgb(215, 218, 220) !important;
 }
 .thread-entry span {
-    color: rgb(215, 218, 220) !important;
+    rgb(57, 57, 58) !important;
 }    
 
 .thread-body {
