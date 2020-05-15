@@ -1360,7 +1360,12 @@ $(document).on('click.inline-edit', 'a.inline-edit', function(e) {
         $.dialog(url, [201], function (xhr) {
             var obj = $.parseJSON(xhr.responseText);
             if (obj.id && obj.value) {
-                $('#field_'+obj.id).html(obj.value);
+                $('#field_'+obj.id).html(obj.value); 
+                
+                if (obj.id == 20){
+                	$('#subject').html(obj.value); 
+                }
+                                
                 if (obj.value.includes('Empty'))
                     $('#field_'+obj.id).addClass('faded');
                 else

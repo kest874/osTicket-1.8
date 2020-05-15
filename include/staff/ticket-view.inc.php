@@ -81,8 +81,10 @@ $unbannable=($emailBanned) ? BanList::includes($ticket->getEmail()) : false;
                 <span  class=""> - <span style="color: <?php echo $ticket->isOpen() ? '#51c351;' : '#f00;'; ?>">
                 <?php echo sprintf(__('%s'), $ticket->getStatus()); ?></span></span>
                 
-                - <?php $subject_field = TicketForm::getInstance()->getField('subject');
-                echo $subject_field->display($ticket->getSubject()); ?> 
+                - <?php $subject_field = TicketForm::getInstance()->getField('subject'); ?>
+               <span id="subject">
+	                        <?php echo Format::htmlchars( $subject_field->display($ticket->getSubject()));
+	                        ?></span> 
 
     </div>
 
@@ -312,11 +314,24 @@ if ($errors['err'] && isset($_POST['a'])) {
 <div id="msg_notice" class="alert alert-success" style="display: none;"><i class="fa fa-check-square" aria-hidden="true"></i> <span id="msg-txt"><?php echo $msg ?: ''; ?></span></div>
  
 <div class="card-box"> <!--ticketinfo-->
-	<table class=" " cellspacing="0" cellpadding="0" width="100%" border="0">
+	<table class="" cellspacing="0" cellpadding="0" width="100%" border="0">
 	    <tr>
 	        <td width="50%">
 	            <table border="0" cellspacing="" cellpadding="4" width="100%">
 	                <tr>
+	                	<th width="100"><?php echo __('Subject');?>:</th>
+								     <td>             
+						                
+							       	 <a class="inline-edit" data-placement="bottom" data-toggle="tooltip" title="<?php echo __('Update'); ?>"
+	                        href="#tickets/<?php echo $ticket->getId(); ?>/field/20/edit">
+	                        <span id="field_20">
+	                        <?php echo Format::htmlchars( $subject_field->display($ticket->getSubject()));
+	                        ?></span>
+	                    </a>         
+
+								     </td>
+	     						</tr>
+	     						<tr></tr>
 	                    <th width="100"><?php echo __('Status');?>:</th>
 	     <td>             
 												<?php	                   
