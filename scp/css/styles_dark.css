@@ -1586,6 +1586,10 @@ m-r--5 {
  	 filter: brightness(0.5);
  }
  
+ .manage-collaborators .badge:hover {
+ 	 filter: brightness(0.5);
+ }
+ 
 .badge {
   font-weight: 600;
   padding: 3px 5px;

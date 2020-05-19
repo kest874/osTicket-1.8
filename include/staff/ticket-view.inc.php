@@ -630,9 +630,8 @@ if ($errors['err'] && isset($_POST['a'])) {
 	               } else
 	                 $recipients = 0;
 
-	            echo sprintf('<span><a class="manage-collaborators preview"
-	                   href="#thread/%d/collaborators/1"><span id="t%d-recipients"><i class="icon-group"></i> <span class="badge badge-warning">%s</span></span></a></span>',
-	                   $ticket->getThreadId(),
+	            echo sprintf('<a class="manage-collaborators collaborators preview noclick"
+	                   href="#thread/%d/collaborators/1"><i class="icon-group"></i> <span class="badge label-table badge-warning">%s</span></a>',
 	                   $ticket->getThreadId(),
 	                   $recipients);
 	            }?>
