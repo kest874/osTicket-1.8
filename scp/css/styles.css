@@ -1584,6 +1584,11 @@ m-r--5 {
 /* ===========
    Badge
  =============*/
+ 
+button > a > span:hover {
+ 	 filter: brightness(0.7);
+ }
+ 
 .badge {
   font-weight: 600;
   padding: 3px 5px;
