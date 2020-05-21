@@ -48,7 +48,7 @@ if (osTicket::is_ie())
     <![endif]-->
     
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/bootstrap.min.css" media="all">
-   <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-3.4.0.min.js"></script>
+    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-3.4.0.min.js"></script>
     
     <script src="<?php echo ROOT_PATH; ?>scp/js/tether.min.js"></script>
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/modernizr.min.js"></script>
@@ -523,8 +523,8 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                             </div>
                         </li>
                         <li class="list-inline-item notification-list mr-0 translation-link">
-                            <a href="/" class="nav-link waves-light waves-effect english" id="english" data-lang="English" style="display:none;"><span class="flag flag-us" title="English" alt="English" class="notranslate" ></span></a>
-                            <a href="/" class="nav-link waves-light waves-effect spanish" id="spanish" data-lang="Spanish"><span class="flag flag-mx" title="Spanish" alt="Spanish" class="notranslate" ></span></a>
+                            <a href="" class="nav-link waves-light waves-effect english" id="english" data-lang="English" style="display:none;"><span class="flag flag-us" title="English" alt="English" class="notranslate" ></span></a>
+                            <a href="" class="nav-link waves-light waves-effect spanish" id="spanish" data-lang="Spanish"><span class="flag flag-mx" title="Spanish" alt="Spanish" class="notranslate" ></span></a>
                             <div id="google_translate_element"  style="display: none"></div>
                         </li>
                         
@@ -556,7 +556,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
 </ul>
 <script type="text/javascript">
   function googleTranslateElementInit() {
-  new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'en,es', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false, multilanguagePage: true}, 'google_translate_element'); }
+  new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'en,es', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: true, multilanguagePage: true}, 'google_translate_element'); }
 </script>
 <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script><!-- Flag click handler -->
 <script type="text/javascript">
@@ -587,7 +587,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
       
   
     });
-</script>                   
+</script>                      
                     <ul class="list-inline menu-left mb-0">
                                              <li class="float-left">
                             
