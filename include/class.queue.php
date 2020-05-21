@@ -3141,7 +3141,7 @@ extends TicketLinkFilter {
 
     function filter($text, $row) {
         $link = $this->getLink($row);
-        return sprintf('<a style="display: inline" class="preview" data-preview="#tickets/%d/preview" href="%s">%s</a>',
+        return sprintf('<a style="display: inline" class="preview notranslate" data-preview="#tickets/%d/preview" href="%s">%s</a>',
             $row['ticket_id'], $link, $text);
     }
 }
