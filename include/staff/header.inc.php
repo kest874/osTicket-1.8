@@ -522,7 +522,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                                  <?php } ?> 
                             </div>
                         </li>
-                        <li class="list-inline-item notification-list mr-0 translation-link">
+                        <li class="list-inline-item notification-list mr-0 translation-link hidden">
                             <a href="" class="nav-link waves-light waves-effect english" id="english" data-lang="English" style="display:none;"><span class="flag flag-us" title="English" alt="English" class="notranslate" ></span></a>
                             <a href="" class="nav-link waves-light waves-effect spanish" id="spanish" data-lang="Spanish"><span class="flag flag-mx" title="Spanish" alt="Spanish" class="notranslate" ></span></a>
                             <div id="google_translate_element"  style="display: none"></div>
