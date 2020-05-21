@@ -1255,6 +1255,14 @@ div.thread-entry.message > div.header > a > time.relative{
     border: 1px solid rgb(71, 71, 72) !important;
     color: rgb(215, 218, 220) !important;
 }
+.thread-body div{
+    color: rgb(215, 218, 220) !important;
+}
+
+.thread-body span{
+    color: rgb(215, 218, 220) !important;
+}
+
 
 #thread-items::before {
   /*border-left: 2px dotted #ddd;
