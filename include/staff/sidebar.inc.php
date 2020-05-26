@@ -1,7 +1,7 @@
  <?php
 if(!defined('ADMINPAGE')) { ?>
                                 
-    <li ><a class="waves-effect waves-primary" href="/scp/dashboard.php" ><i class=" ti-dashboard"></i> Dashboard </a> </li>
+    <li ><a class="no-pjax waves-effect waves-primary" href="/scp/dashboard.php" ><i class=" ti-dashboard"></i> Dashboard </a> </li>
     <li class=" has_sub ">
         <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class="ti-user"></i>  <span class="menu-arrow"></span> Users </a> 
         <ul class="list-unstyled">
