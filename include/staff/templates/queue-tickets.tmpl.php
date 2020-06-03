@@ -466,13 +466,13 @@ $pageNav->setURL('tickets.php', $args);
 ?>
 
     <div class="btn-group btn-group-sm <?php if ($filters == 0){ echo 'hidden';}?>" role="group">
-        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" 
+        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle notranslate" 
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
          title="<?php echo __('Filter Location'); ?>"><i class="fa fa-filter"></i> <?php echo $lselected;?>
         </button>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
               
-              <a href="tickets.php?l=0&s=<?php echo $_SESSION['sta']?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
+              <a href="tickets.php?l=0&s=<?php echo $_SESSION['sta']?>"class="dropdown-item no-pjax notranslate"><i class="fa fa-filter"></i> All</a>
               
               <?php
 
@@ -483,7 +483,7 @@ $pageNav->setURL('tickets.php', $args);
                      foreach ($Organization as $cOrganization) { 
                      if ($lfiltercount[$cOrganization->getId()]['__count'] > 0) {?>
                 
-                   <a href="tickets.php?l=<?php echo $cOrganization->id ?>&s=<?php echo $_SESSION['loc']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cOrganization->name?>
+                   <a href="tickets.php?l=<?php echo $cOrganization->id ?>&s=<?php echo $_SESSION['loc']?>" class="dropdown-item no-pjax notranslate"><i class="fa fa-filter"></i> <?php echo $cOrganization->name?>
                      <span class="badge badge-pill badge-default  pull-right"><?php echo $lfiltercount[$cOrganization->getId()]['__count'] ?></span> </a>
                      <?php }}      
         ?>
@@ -731,7 +731,7 @@ if (!$stselected) {$stselected = 'Assigned To';}
                $badgecolor = preg_replace('/\s+/', '', $badgecolor);
                }
                               
-               $badge='badge label-table '.$badgecolor;
+               $badge='badge label-table notranslate '.$badgecolor;
                     
                $styles = str_replace('rem','',str_replace(strtok(substr($styles, strpos($styles, "rem:") + 3), ';'),'',str_replace('badge','rem',$styles)));
               

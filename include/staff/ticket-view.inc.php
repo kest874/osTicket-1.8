@@ -644,55 +644,55 @@ if ($errors['err'] && isset($_POST['a'])) {
 			
 			<?php   if ($user->getOrganization()) { ?>
 				<div>
-				    <label><?php echo __('Organization'); ?>:</label>
+				    <label><?php echo __('Location'); ?>:</label>
 				    
 				    <?php 
 				    switch($user->getOrganization()->getName()){
 				    	
 				    case 'CAN':
-							$badge = 'bg-warning';
+							$badge = 'notranslate bg-warning';
 						break;
 						case 'EXT':
-							$badge = 'bg-flatBrown';
+							$badge = 'notranslate bg-flatBrown';
 						break;
 						case 'IND':
-							$badge = 'bg-primary';
+							$badge = 'notranslate bg-primary';
 						break;
 						case 'MEX':
-							$badge = 'bg-purple';
+							$badge = 'notranslate bg-purple';
 						break;
 						case 'NTC':
-							$badge = 'bg-flatOrange';
+							$badge = 'notranslate bg-flatOrange';
 						break;
 						case 'OH':
-							$badge = 'bg-flatpurple';
+							$badge = 'notranslate bg-flatpurple';
 						break;
 						case 'SS':
-							$badge = 'bg-flatgrey';
+							$badge = 'notranslate bg-flatgrey';
 						break;
 						case 'TNN1':
-							$badge = 'bg-flatbrown';
+							$badge = 'notranslate bg-flatbrown';
 						break;
 						case 'TNN2':
-							$badge = 'bg-flatred';
+							$badge = 'notranslate bg-flatred';
 						break;
 						case 'TNS':
-							$badge = 'bg-flatgreen';
+							$badge = 'notranslate bg-flatgreen';
 						break;
 						case 'VIP':
-							$badge = 'bg-vipred';
+							$badge = 'notranslate bg-vipred';
 						break;
 						case 'RVC':
-							$badge = 'bg-flatbluealt1';
+							$badge = 'notranslate bg-flatbluealt1';
 						break;
 						case 'RTA':
-							$badge = 'bg-flatorangealt1';
+							$badge = 'notranslate bg-flatorangealt1';
 						break;
 						case 'PAU':
-							$badge = 'bg-flatpurplealt1';
+							$badge = 'notranslate bg-flatpurplealt1';
 						break;
 						case 'BRY':
-							$badge = 'bg-flatgreenalt3';
+							$badge = 'notranslate bg-flatgreenalt3';
 				    break;	
 				    	
 				    }
