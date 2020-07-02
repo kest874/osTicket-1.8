@@ -63,7 +63,7 @@ if(($users=$thread->getCollaborators())) {?>
     <p class="full-width">
         <span class="buttons pull-left">
             <input type="reset" value="<?php echo __('Reset'); ?>" class="btn btn-sm btn-warning">
-            <input type="button" value="<?php echo __('Cancel'); ?>" class="close btn-danger">
+            <input type="button" value="<?php echo __('Close'); ?>" class="close btn-danger">
         </span>
         <span class="buttons pull-right">
         <input type="submit" value="<?php echo __('Save Changes'); ?>" class="btn btn-sm btn-success">
