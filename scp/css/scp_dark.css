@@ -1094,6 +1094,7 @@ div.redactor-editor, div.redactor-box, .redactor-box textarea {
 }
 #requiredfield input[type="text"], input[type="password"],input[type="email"]{
 	background-color: #ffffcc !important;	
+	color: #000 !important
     /*border: 1px solid;
     border-color: #999;*/
 }
