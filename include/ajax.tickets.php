@@ -1591,14 +1591,15 @@ class TicketsAjaxAPI extends AjaxController {
 
                 if (($ticket=Ticket::lookup($tid))
                         && $ticket->getStatusId() != $status->getId()
-                        && $ticket->checkStaffPerm($thisstaff)
+                        && $ticket->getHelpTopicId() 
+ 												&& $ticket->checkStaffPerm($thisstaff)
                         && $ticket->setStatus($status, $comments, $errors))
                     $i++;
             }
 
             if (!$i) {
                 $errors['err'] = $errors['err']
-                    ?: sprintf(__('Unable to change status for %s'),
+                    ?: sprintf(__('Unable to change status for %s.  The status is the same or the type has not been set'),
                         _N('selected ticket', 'selected tickets', $count));
             }
             else {
