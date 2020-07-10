@@ -236,6 +236,7 @@ class OsticketConfig extends Config {
         'max_open_tickets' => 0,
         'files_req_auth' => 1,
         'force_https' => '',
+        'knowledgelink' => '',
     );
 
     function __construct($section=null) {
@@ -693,6 +694,11 @@ class OsticketConfig extends Config {
     function forceHttps() {
         return $this->get('force_https') == 'on';
     }
+
+		function knowledgelink() {
+        return $this->get('knowledgelink');
+    }
+
 
     function setTopicSortMode($mode) {
         $modes = static::allTopicSortModes();
