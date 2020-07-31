@@ -3720,9 +3720,25 @@ where t.status_id != 3 and topic_id  in (12)";
  
   $SETotal = db_query($sql); 
   
-$sql="SELECT count(t.ticket_id) as COUNT, d.name as Location FROM ost_ticket t join ost_department d on t.dept_id = d.id
-where t.status_id != 3 and topic_id in (12)
-group by d.name";
+$sql="select sum(count) as count, location from 
+		(
+		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+		d.name as location, 
+		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+		from ost_form_entry fe 
+		join ost_form_entry_values fev on fe.id = fev.entry_id 
+		join ost_ticket t on fe.object_id = t.ticket_id 
+		join ost_department d on t.dept_id = d.id
+		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+		)data
+
+		where result = 'Pending'
+		group by casedate, location, result";
  
   $SElocsdata = db_query($sql); 
  
@@ -3755,7 +3771,7 @@ var getColor = {
             }
         },
         title: {
-            text: 'Open Covid Cases by Location (<?php
+            text: 'Pending Covid Tests by Location (<?php
         foreach ($SETotal as $SETotal) { 
 			echo $SETotal["COUNT"];  } ?>)',
             style: {
@@ -3785,7 +3801,7 @@ var getColor = {
             data: [
 			     <?php
         foreach ($SElocsdata as $SEloc) { ?>
-			{name:'<?php echo $SEloc["Location"]?>', y:<?php echo $SEloc["COUNT"] ?>,color: getColor['<?php echo $SEloc["Location"]?>']},
+			{name:'<?php echo $SEloc["location"]?>', y:<?php echo $SEloc["count"] ?>,color: getColor['<?php echo $SEloc["location"]?>']},
         <?php } ?>
            ]
         }]
