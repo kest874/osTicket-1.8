@@ -5,6 +5,10 @@
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/pareto.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/modules/no-data-to-display.js"></script>
 
+<?php 
+$WhichDashboard = $_GET['a'];
+?>
+
 <?php TicketForm::ensureDynamicDataView(); 
 ?>
 
@@ -60,6 +64,7 @@
    <div class="clearfix"></div> 
 </div> 
 
+<?php if ($WhichDashboard == 1) { ?>
 <div class="row">
   <div class="col-lg-12">		
 		<div class="portlet" >
@@ -290,12 +295,12 @@ $sitecolor = array(
 "TNS"=>"#eeff41",
 "YTD"=>"#c30000");
 $sql="SELECT count(t.ticket_id) as COUNT FROM ost_ticket t 
-where t.status_id != 3";
+where t.status_id != 3 and topic_id not in (12)";
  
   $SETotal = db_query($sql); 
   
 $sql="SELECT count(t.ticket_id) as COUNT, d.name as Location FROM ost_ticket t join ost_department d on t.dept_id = d.id
-where t.status_id != 3
+where t.status_id != 3 and topic_id not in (12)
 group by d.name";
  
   $SElocsdata = db_query($sql); 
@@ -3116,3 +3121,602 @@ Highcharts.chart('associatetrend', {
  });
 }); 
 </script>
+
+<?php }
+
+	if ($WhichDashboard == 2) { ?>
+
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="portlet" id="opencovidpie" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="portlet" id="PositivebyLocation" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+	       
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="portlet" id=""" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+	    <div class="col-lg-6">
+        <div class="portlet" id="NegativebyLocation" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+    
+</div>
+
+
+		
+<script>		
+		
+<?php
+
+$sql="select distinct casedate as period from
+(
+	select sum(count) as count, casedate, location, result from 
+	(
+		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+        d.name as location, 
+		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+		from ost_form_entry fe 
+		join ost_form_entry_values fev on fe.id = fev.entry_id 
+		join ost_ticket t on fe.object_id = t.ticket_id 
+		join ost_department d on t.dept_id = d.id
+		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+		)data
+
+	where result = 'Positive'
+	group by casedate, location, result 
+	order by monthnum
+)p";
+$periods = db_query($sql);
+
+$sql="SELECT name as location FROM ost_department order by name;";
+$locs = db_query($sql);
+
+
+
+ $sql="select sum(count) as count, casedate, location, result from
+(
+		select sum(count) as count, casedate, location, result from 
+		(
+		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+		d.name as location, 
+		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+		from ost_form_entry fe 
+		join ost_form_entry_values fev on fe.id = fev.entry_id 
+		join ost_ticket t on fe.object_id = t.ticket_id 
+		join ost_department d on t.dept_id = d.id
+		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+		)data
+
+		where result = 'Positive'
+		group by casedate, location, result
+
+		union all
+
+		SELECT 0 as count, casedate, name as location, 'Positive' as result FROM ost_department 
+		join
+
+		(select distinct casedate from
+		(
+			select sum(count) as count, casedate, location, result from 
+			(
+				select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+				DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+				d.name as location, 
+				left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+				from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+				where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+				and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+				)data
+
+			where result = 'Positive'
+			group by casedate, location, result 
+			order by monthnum
+		)p)j
+		on 1=1
+)data    
+
+group by casedate, location, result    
+
+order by location, month(str_to_date(left(casedate,3),'%b'));
+";		
+$locsdata = db_query($sql);	
+
+
+$sql = "select sum(count) as count, casedate from 
+(
+select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+d.name as location, 
+left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+from ost_form_entry fe 
+join ost_form_entry_values fev on fe.id = fev.entry_id 
+join ost_ticket t on fe.object_id = t.ticket_id 
+join ost_department d on t.dept_id = d.id
+join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+)data
+
+where result = 'Positive'
+group by casedate
+order by monthnum";
+
+$monthtotals = db_query($sql);	
+
+		?>
+		
+		$(function () {
+    Highcharts.chart('PositivebyLocation', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Positive Results by location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+        },
+        credits: false,
+        xAxis: {
+            categories: [<?php
+      foreach ($periods as $period) {
+                 
+                 echo "'".preg_replace('/\s+/', ' ', $period["period"])."',";
+       }   
+       ?>]
+        },
+        yAxis: [{
+            min: 0,
+            title: {
+                    text: 'Number of Positives YTD'
+                },
+                 opposite: true,
+            stackLabels: {
+            enabled: true,
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+        },{ // Secondary yAxis
+        title: {
+            text: 'Number of Positives',
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        },
+        labels: {
+            style: {
+                 color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        },
+       
+    }],
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            x: 0,
+            y: 0,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+           
+            shadow: false
+        },
+        tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+            dataLabels: {
+                enabled: true,
+                formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+                }
+            }
+        },
+        
+        series: [
+        
+         <?php
+        foreach ($locs as $loc) { 
+        
+        $key = $loc["location"];
+        $color = $sitecolor[$key];
+        ?>
+        
+        {
+            name: '<?php echo $loc["location"]?>',
+            yAxis: 1,
+            color: '<?php echo $color; ?>',
+            data: [<?php foreach ($locsdata as $locdata) {
+                if ($locdata["location"] == $loc["location"]) echo $locdata["count"].',';
+            }?>]
+        }, 
+        
+        <?php } ?>
+        
+        {
+            name: 'YTD',
+            type: 'spline',
+            color: 'red',           
+            data: [
+             <?php
+        $p=0;
+        foreach ($monthtotals as $monthtotal) { 
+            $c = $monthtotal["count"];
+            $cu= $p+$c;
+            echo $cu.',';
+            $p = $cu;
+        } ?>]
+            
+        }
+        ]
+    });
+});
+
+<?php
+
+$sql="select distinct casedate as period from
+(
+	select sum(count) as count, casedate, location, result from 
+	(
+		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+        d.name as location, 
+		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+		from ost_form_entry fe 
+		join ost_form_entry_values fev on fe.id = fev.entry_id 
+		join ost_ticket t on fe.object_id = t.ticket_id 
+		join ost_department d on t.dept_id = d.id
+		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+		)data
+
+	where result = 'Negative'
+	group by casedate, location, result 
+	order by monthnum
+)p";
+$periods = db_query($sql);
+
+$sql="SELECT name as location FROM ost_department order by name;";
+$locs = db_query($sql);
+
+
+
+ $sql="select sum(count) as count, casedate, location, result from
+(
+		select sum(count) as count, casedate, location, result from 
+		(
+		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+		d.name as location, 
+		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+		from ost_form_entry fe 
+		join ost_form_entry_values fev on fe.id = fev.entry_id 
+		join ost_ticket t on fe.object_id = t.ticket_id 
+		join ost_department d on t.dept_id = d.id
+		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+		)data
+
+		where result = 'Negative'
+		group by casedate, location, result
+
+		union all
+
+		SELECT 0 as count, casedate, name as location, 'Negative' as result FROM ost_department 
+		join
+
+		(select distinct casedate from
+		(
+			select sum(count) as count, casedate, location, result from 
+			(
+				select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+				DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+				d.name as location, 
+				left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+				from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+				where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+				and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+				)data
+
+			where result = 'Negative'
+			group by casedate, location, result 
+			order by monthnum
+		)p)j
+		on 1=1
+)data    
+
+group by casedate, location, result    
+
+order by location, month(str_to_date(left(casedate,3),'%b'));
+";		
+$locsdata = db_query($sql);	
+
+
+$sql = "select sum(count) as count, casedate from 
+(
+select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+d.name as location, 
+left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+from ost_form_entry fe 
+join ost_form_entry_values fev on fe.id = fev.entry_id 
+join ost_ticket t on fe.object_id = t.ticket_id 
+join ost_department d on t.dept_id = d.id
+join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+)data
+
+where result = 'Negative'
+group by casedate
+order by monthnum";
+
+$monthtotals = db_query($sql);	
+
+		?>
+		
+		$(function () {
+    Highcharts.chart('NegativebyLocation', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Negative Results by location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+        },
+        credits: false,
+        xAxis: {
+            categories: [<?php
+      foreach ($periods as $period) {
+                 
+                 echo "'".preg_replace('/\s+/', ' ', $period["period"])."',";
+       }   
+       ?>]
+        },
+        yAxis: [{
+            min: 0,
+            title: {
+                    text: 'Number of Negatives YTD'
+                },
+                 opposite: true,
+            stackLabels: {
+            enabled: true,
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        }
+        },{ // Secondary yAxis
+        title: {
+            text: 'Number of Negatives',
+            style: {
+                fontWeight: 'bold',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        },
+        labels: {
+            style: {
+                 color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+            }
+        },
+       
+    }],
+        legend: {
+            align: 'center',
+            verticalAlign: 'bottom',
+            x: 0,
+            y: 0,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+           
+            shadow: false
+        },
+        tooltip: {
+            headerFormat: '<b>{point.x}</b><br/>',
+            pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+            dataLabels: {
+                enabled: true,
+                formatter: function(){
+                    console.log(this);
+                    var val = this.y;
+                    if (val < 2) {
+                        return '';
+                    }
+                    return val;
+                },
+                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+                }
+            }
+        },
+        
+        series: [
+        
+         <?php
+        foreach ($locs as $loc) { 
+        
+        $key = $loc["location"];
+        $color = $sitecolor[$key];
+        ?>
+        
+        {
+            name: '<?php echo $loc["location"]?>',
+            yAxis: 1,
+            color: '<?php echo $color; ?>',
+            data: [<?php foreach ($locsdata as $locdata) {
+                if ($locdata["location"] == $loc["location"]) echo $locdata["count"].',';
+            }?>]
+        }, 
+        
+        <?php } ?>
+        
+        {
+            name: 'YTD',
+            type: 'spline',
+            color: 'red',           
+            data: [
+             <?php
+        $p=0;
+        foreach ($monthtotals as $monthtotal) { 
+            $c = $monthtotal["count"];
+            $cu= $p+$c;
+            echo $cu.',';
+            $p = $cu;
+        } ?>]
+            
+        }
+        ]
+    });
+});
+
+
+<?php
+
+$sql="SELECT count(t.ticket_id) as COUNT FROM ost_ticket t 
+where t.status_id != 3 and topic_id  in (12)";
+ 
+  $SETotal = db_query($sql); 
+  
+$sql="SELECT count(t.ticket_id) as COUNT, d.name as Location FROM ost_ticket t join ost_department d on t.dept_id = d.id
+where t.status_id != 3 and topic_id in (12)
+group by d.name";
+ 
+  $SElocsdata = db_query($sql); 
+ 
+ ?>
+   
+ 
+$(function() {
+var getColor = {
+'AST':'	#52e462',
+'BRY':'#ff5252',
+'CAN':'rgb(241, 92, 128)',
+'IND':'#e040fb',
+'MEX':'#7c4dff',
+'NTC':'rgb(43, 144, 143)',
+'OH':'rgb(67, 67, 72)',
+'PAU':'#cddc39',
+'RTA':'#18ffff',
+'RVC':'rgb(247, 163, 92)',
+'TNN1':'#69f0ae',
+'TNN2':'rgb(124, 181, 236)',
+'TNS':'#eeff41',
+'YTD':'#c30000'};
+    Highcharts.chart('opencovidpie', {
+        chart: {
+            type: 'pie',
+            options3d: {
+                enabled: true,
+                alpha: 45,
+                beta: 0
+            }
+        },
+        title: {
+            text: 'Open Covid Cases by Location (<?php
+        foreach ($SETotal as $SETotal) { 
+			echo $SETotal["COUNT"];  } ?>)',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+        },
+        credits: false,
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> <b> ({point.y})</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                depth: 35,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}'
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Incidents',
+            data: [
+			     <?php
+        foreach ($SElocsdata as $SEloc) { ?>
+			{name:'<?php echo $SEloc["Location"]?>', y:<?php echo $SEloc["COUNT"] ?>,color: getColor['<?php echo $SEloc["Location"]?>']},
+        <?php } ?>
+           ]
+        }]
+    });
+});		
+	
+
+</script>  
+
+
+
+
+<?php } ?>		

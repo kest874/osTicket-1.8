@@ -315,9 +315,12 @@ implements TemplateVariable, Searchable {
     static function getHelpTopicsTree($publicOnly=false, $disabled=false) {
         global $cfg;
         static $topics, $names = array();
+        
+        if ($_SESSION['scv19'] == 0) $sfilter= ' where topic_id <> 12 ';
+        	
         if (!$names) {
             $sql = 'SELECT topic_id, topic_pid, ispublic, isactive, topic FROM '.TOPIC_TABLE
-                . ' ORDER BY `sort`';
+                . $sfilter .' ORDER BY `sort`';
             $res = db_query($sql);
             // Fetch information for all topics, in declared sort order
             $topics = array();

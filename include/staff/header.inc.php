@@ -241,7 +241,11 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
 
 
             <!-- ========== Left Sidebar Start ========== -->
-
+<?php  
+ 		$_SESSION['scv19'] = 0;    
+ 		
+ 		if ($thisstaff->staff_id == 0 || $thisstaff->staff_id == 1 || $thisstaff->staff_id == 69) $_SESSION['scv19'] = 1; 
+?>
             <div class="left side-menu">
                 <div class="sidebar-inner slimscrollleft">
                     <!--- Divider -->

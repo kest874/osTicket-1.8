@@ -178,9 +178,17 @@ if ($_POST)
                         <option value="" selected >&mdash; <?php echo __('Select Incident Type'); ?> &mdash;</option>
                     <?php    }
                         foreach($topics as $id =>$name) {
+                        	
+                        	 if ($name != 'Covid-19 Case') {
                             echo sprintf('<option value="%d" %s %s>%s</option>',
                                 $id, ($info['topicId']==$id)?'selected="selected"':'',
                                 $selected, $name);
+                         }     
+                         if ($name == 'Covid-19 Case' && $_SESSION['scv19'] == 1) {
+                            echo sprintf('<option value="%d" %s %s>%s</option>',
+                                $id, ($info['topicId']==$id)?'selected="selected"':'',
+                                $selected, $name);
+                         }     
                         }
                         if (count($topics) == 1 && !$forms) {
                             if (($T = Topic::lookup($id)))

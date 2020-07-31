@@ -3124,8 +3124,9 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
         // this is necessary to avoid possible loop (especially on new ticket)
         if ($alertstaff && $message instanceof ThreadEntry && $message->isBounce())
             $alertstaff = false; 
-        /***** See if we need to send some alerts ****/
-        $ticket->onNewTicket($message, $autorespond, $alertstaff);
+            
+     		/***** See if we need to send some alerts ****/
+        if ($ticket->getTopicId() <> 12)$ticket->onNewTicket($message, $autorespond, $alertstaff);
         /************ check if the user JUST reached the max. open tickets limit **********/
         if ($cfg->getMaxOpenTickets()>0
             && ($user=$ticket->getOwner())

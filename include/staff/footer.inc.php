@@ -100,7 +100,6 @@ if(is_object($thisstaff) && $thisstaff->isStaff()) { ?>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.blockUI.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.waypoints.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.counterup.min.js"></script>
-<script src="<?php echo ROOT_PATH; ?>scp/js/jquery.peity.min.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/waves.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/wow.min.js"></script>
 <script src="<?php echo ROOT_PATH; ?>scp/js/jquery.nicescroll.js"></script>

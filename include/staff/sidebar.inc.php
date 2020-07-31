@@ -6,9 +6,12 @@ if(!defined('ADMINPAGE')) {
 	
 	?>
                                 
-    <li  class="has_sub">
-    <a class="waves-effect waves-primary" href="dashboard.php?begindate=<?php echo $begindate?>&enddate=<?php echo $enddate?>" ><i class=" ti-dashboard"></i> </span> Dashboard </a> 
-       
+	 <li  class="has_sub">
+    <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class=" ti-dashboard"></i> <span class="menu-arrow"></span> Dashboard </a> 
+        <ul class="list-unstyled">
+            <li><a href="/scp/dashboard.php?begindate=<?php echo $begindate?>&enddate=<?php echo $enddate?>&a=1" title="" id="nav1">Incidents</a></li>
+            <li <?php if ($_SESSION['scv19'] == 0) echo 'class="hidden"';?>><a href="/scp/dashboard.php?a=2" title="" id="nav1">Covid-19</a></li>
+        </ul>
     </li>
 	
 	<li  class="has_sub">
@@ -33,14 +36,13 @@ if(!defined('ADMINPAGE')) {
 
     switch ($q->getName()){
         
-        case "All Teams":
-            $icon ='ti-light-bulb';
-            $badgecolor='badge-success';
+        case "Incidents":
+            $hide = 0;
             break;
                     
-        case "My Team(s)":
-        $icon ='ti-check-box';
-        $badgecolor='badge-pink';
+        case "Covid-19":
+        		$hide = 1;
+        		if ($_SESSION['scv19'] == 1) $hide = 0;
             break;
      } 
      
@@ -51,7 +53,7 @@ if(!defined('ADMINPAGE')) {
     <?php }
         
     if (!count($children)) { ?>
-            <li>
+            <li <?php if ($hide == 1) echo 'class="hidden"';?>>
     <?php } ?>
         <a href=
         <?php if (count($children)) {echo '"javascript:void(0);"';} else {
