@@ -767,6 +767,22 @@ if (!$sselected) {$sselected = 'Status';}
                $styles = str_replace('rem','',str_replace(strtok(substr($styles, strpos($styles, "rem:") + 3), ';'),'',str_replace('badge','rem',$styles)));
               
          }
+         
+         switch ($contents){
+               
+                case 'Negative':
+                    $badge = 'badge label-table bg-success';
+                    break;
+                case 'N/A':
+                    $badge = 'badge label-table bg-info';
+                    break;
+                case 'Positive':
+                   $badge = 'badge label-table bg-danger';
+                    break;
+                case 'Waiting':
+                    $badge = 'badge label-table bg-warning';
+                    break;
+          }          
            
             if ($style = $styles ? 'style="'.$styles.'"' : '') {
                 echo "<td $style><div $style><span class =\"$badge\" $badgoverride>$contents</span></div></td>";
