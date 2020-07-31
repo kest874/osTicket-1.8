@@ -7,6 +7,22 @@
 
 <?php 
 $WhichDashboard = $_GET['a'];
+
+$sitecolor = array(
+"AST"=>"#52e462",
+"BRY"=>"#ff5252",
+"CAN"=>"rgb(241, 92, 128)",
+"IND"=>"#e040fb",
+"MEX"=>"#7c4dff",
+"NTC"=>"rgb(43, 144, 143)",
+"OH"=>"rgb(67, 67, 72)",
+"PAU"=>"#cddc39",
+"RTA"=>"#18ffff",
+"RVC"=>"rgb(247, 163, 92)",
+"TNN1"=>"#69f0ae",
+"TNN2"=>"rgb(124, 181, 236)",
+"TNS"=>"#eeff41",
+"YTD"=>"#c30000");
 ?>
 
 <?php TicketForm::ensureDynamicDataView(); 
@@ -3186,7 +3202,33 @@ $sql="select distinct casedate as period from
 )p";
 $periods = db_query($sql);
 
-$sql="SELECT name as location FROM ost_department order by name;";
+$sql="select distinct location, result from
+(
+		select sum(count) as count, casedate, location, result from 
+		(
+		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+		d.name as location, 
+		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+		from ost_form_entry fe 
+		join ost_form_entry_values fev on fe.id = fev.entry_id 
+		join ost_ticket t on fe.object_id = t.ticket_id 
+		join ost_department d on t.dept_id = d.id
+		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+		)data
+
+		where result = 'Positive'
+		group by casedate, location, result
+
+		
+)data    
+
+group by casedate, location, result    
+";
 $locs = db_query($sql);
 
 
@@ -3300,10 +3342,11 @@ $monthtotals = db_query($sql);
         },
         yAxis: [{
             min: 0,
-            title: {
-                    text: 'Number of Positives YTD'
-                },
-                 opposite: true,
+             allowDecimals: false,
+                 title: {
+                 text: 'Number of Positives YTD'
+             },
+            opposite: true,
             stackLabels: {
             enabled: true,
             style: {
@@ -3312,6 +3355,7 @@ $monthtotals = db_query($sql);
             }
         }
         },{ // Secondary yAxis
+        allowDecimals: false,
         title: {
             text: 'Number of Positives',
             style: {
@@ -3423,7 +3467,34 @@ $sql="select distinct casedate as period from
 )p";
 $periods = db_query($sql);
 
-$sql="SELECT name as location FROM ost_department order by name;";
+$sql="select distinct location, result from
+(
+		select sum(count) as count, casedate, location, result from 
+		(
+		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+		d.name as location, 
+		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+		from ost_form_entry fe 
+		join ost_form_entry_values fev on fe.id = fev.entry_id 
+		join ost_ticket t on fe.object_id = t.ticket_id 
+		join ost_department d on t.dept_id = d.id
+		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+		)data
+
+		where result = 'Negative'
+		group by casedate, location, result
+
+		
+)data    
+
+group by casedate, location, result    
+
+";
 $locs = db_query($sql);
 
 
@@ -3519,7 +3590,7 @@ $monthtotals = db_query($sql);
             type: 'column'
         },
         title: {
-            text: 'Negative Results by location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
+            text: 'Negative Results by Location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
             style: {
             color: '#797979',
             fontSize: '14px',
@@ -3531,12 +3602,13 @@ $monthtotals = db_query($sql);
             categories: [<?php
       foreach ($periods as $period) {
                  
-                 echo "'".preg_replace('/\s+/', ' ', $period["period"])."',";
+                 echo "'".preg_replace('/\s+/', ' ', $period["cat"])."',";
        }   
        ?>]
         },
         yAxis: [{
             min: 0,
+            allowDecimals: false,
             title: {
                     text: 'Number of Negatives YTD'
                 },
@@ -3549,6 +3621,7 @@ $monthtotals = db_query($sql);
             }
         }
         },{ // Secondary yAxis
+        allowDecimals: false,
         title: {
             text: 'Number of Negatives',
             style: {
@@ -3606,6 +3679,7 @@ $monthtotals = db_query($sql);
         {
             name: '<?php echo $loc["location"]?>',
             yAxis: 1,
+            allowDecimals: false,
             color: '<?php echo $color; ?>',
             data: [<?php foreach ($locsdata as $locdata) {
                 if ($locdata["location"] == $loc["location"]) echo $locdata["count"].',';
@@ -3632,7 +3706,6 @@ $monthtotals = db_query($sql);
         ]
     });
 });
-
 
 <?php
 
@@ -3702,7 +3775,7 @@ var getColor = {
         },
         series: [{
             type: 'pie',
-            name: 'Incidents',
+            name: 'Open Cases',
             data: [
 			     <?php
         foreach ($SElocsdata as $SEloc) { ?>
@@ -3715,8 +3788,25 @@ var getColor = {
 	
 <?php
 
-$sql="SELECT count(t.ticket_id) as COUNT FROM ost_ticket t 
-where t.status_id != 3 and topic_id  in (12)";
+$sql="		select sum(count) as count from 
+		(
+		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+		d.name as location, 
+		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+
+		from ost_form_entry fe 
+		join ost_form_entry_values fev on fe.id = fev.entry_id 
+		join ost_ticket t on fe.object_id = t.ticket_id 
+		join ost_department d on t.dept_id = d.id
+		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+		)data
+
+		where result = 'Pending'
+		group by casedate,  result";
  
   $SETotal = db_query($sql); 
   
@@ -3773,7 +3863,7 @@ var getColor = {
         title: {
             text: 'Pending Covid Tests by Location (<?php
         foreach ($SETotal as $SETotal) { 
-			echo $SETotal["COUNT"];  } ?>)',
+			echo $SETotal["count"];  } ?>)',
             style: {
             color: '#797979',
             fontSize: '14px',
@@ -3797,7 +3887,7 @@ var getColor = {
         },
         series: [{
             type: 'pie',
-            name: 'Incidents',
+            name: 'Open Tests',
             data: [
 			     <?php
         foreach ($SElocsdata as $SEloc) { ?>
