@@ -779,7 +779,7 @@ if (!$sselected) {$sselected = 'Status';}
                 case 'Positive':
                    $badge = 'badge label-table bg-danger';
                     break;
-                case 'Waiting':
+                case 'Pending':
                     $badge = 'badge label-table bg-warning';
                     break;
           }          

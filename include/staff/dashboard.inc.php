@@ -3143,7 +3143,7 @@ Highcharts.chart('associatetrend', {
 
 <div class="row">
     <div class="col-lg-6">
-        <div class="portlet" id=""" ><!-- /primary heading -->
+        <div class="portlet" id="pendingcovidpie" ><!-- /primary heading -->
             
         </div>
     </div>
@@ -3667,6 +3667,85 @@ var getColor = {
 'TNS':'#eeff41',
 'YTD':'#c30000'};
     Highcharts.chart('opencovidpie', {
+        chart: {
+            type: 'pie',
+            options3d: {
+                enabled: true,
+                alpha: 45,
+                beta: 0
+            }
+        },
+        title: {
+            text: 'Open Covid Cases by Location (<?php
+        foreach ($SETotal as $SETotal) { 
+			echo $SETotal["COUNT"];  } ?>)',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+        },
+        credits: false,
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> <b> ({point.y})</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                depth: 35,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}'
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Incidents',
+            data: [
+			     <?php
+        foreach ($SElocsdata as $SEloc) { ?>
+			{name:'<?php echo $SEloc["Location"]?>', y:<?php echo $SEloc["COUNT"] ?>,color: getColor['<?php echo $SEloc["Location"]?>']},
+        <?php } ?>
+           ]
+        }]
+    });
+});		
+	
+<?php
+
+$sql="SELECT count(t.ticket_id) as COUNT FROM ost_ticket t 
+where t.status_id != 3 and topic_id  in (12)";
+ 
+  $SETotal = db_query($sql); 
+  
+$sql="SELECT count(t.ticket_id) as COUNT, d.name as Location FROM ost_ticket t join ost_department d on t.dept_id = d.id
+where t.status_id != 3 and topic_id in (12)
+group by d.name";
+ 
+  $SElocsdata = db_query($sql); 
+ 
+ ?>
+   
+ 
+$(function() {
+var getColor = {
+'AST':'	#52e462',
+'BRY':'#ff5252',
+'CAN':'rgb(241, 92, 128)',
+'IND':'#e040fb',
+'MEX':'#7c4dff',
+'NTC':'rgb(43, 144, 143)',
+'OH':'rgb(67, 67, 72)',
+'PAU':'#cddc39',
+'RTA':'#18ffff',
+'RVC':'rgb(247, 163, 92)',
+'TNN1':'#69f0ae',
+'TNN2':'rgb(124, 181, 236)',
+'TNS':'#eeff41',
+'YTD':'#c30000'};
+    Highcharts.chart('pendingcovidpie', {
         chart: {
             type: 'pie',
             options3d: {
