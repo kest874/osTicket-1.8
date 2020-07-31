@@ -774,7 +774,7 @@ if (!$sselected) {$sselected = 'Status';}
                     $badge = 'badge label-table bg-success';
                     break;
                 case 'N/A':
-                    $badge = 'badge label-table bg-info';
+                    $badge = 'hidden';
                     break;
                 case 'Positive':
                    $badge = 'badge label-table bg-danger';
