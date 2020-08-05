@@ -3762,6 +3762,7 @@ var getColor = {
         tooltip: {
             pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> <b> ({point.y})</b>'
         },
+
         plotOptions: {
             pie: {
                 allowPointSelect: true,
@@ -3769,7 +3770,7 @@ var getColor = {
                 depth: 35,
                 dataLabels: {
                     enabled: true,
-                    format: '{point.name}'
+                    format: '{point.name} ({point.y}) ({point.percentage:.1f}%)'
                 }
             }
         },
@@ -3881,7 +3882,7 @@ var getColor = {
                 depth: 35,
                 dataLabels: {
                     enabled: true,
-                    format: '{point.name}'
+                    format: '{point.name} ({point.y}) ({point.percentage:.1f}%)'
                 }
             }
         },
