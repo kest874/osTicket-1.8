@@ -3202,32 +3202,60 @@ $sql="select distinct casedate as period from
 )p";
 $periods = db_query($sql);
 
-$sql="select distinct location, result from
-(
-		select sum(count) as count, casedate, location, result from 
+$sql="select distinct location from (
+	select sum(count) as count, casedate, location, result from (
+		select count(result) as count, casedate, location, result from 
 		(
-		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
-		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
-		d.name as location, 
-		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+			select distinct object_id, casedate, monthnum, location, result from
+			(
+			select 
+				DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+				DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+				d.name as location, 
+				left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
+				object_id
 
-		from ost_form_entry fe 
-		join ost_form_entry_values fev on fe.id = fev.entry_id 
-		join ost_ticket t on fe.object_id = t.ticket_id 
-		join ost_department d on t.dept_id = d.id
-		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+							from ost_form_entry fe 
+							join ost_form_entry_values fev on fe.id = fev.entry_id 
+							join ost_ticket t on fe.object_id = t.ticket_id 
+							join ost_department d on t.dept_id = d.id
+							join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
 
-		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
-		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
-		)data
+							where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+							and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
+			)dis                
+		)dsum
+		group by casedate, location
+		union all
+		SELECT 0 as count, casedate, name as location, 'Positive' as result FROM ost_department 
+				join
 
-		where result = 'Positive'
-		group by casedate, location, result
+				(select distinct casedate from
+				(
+					select distinct object_id, casedate, monthnum, location, result from
+			(
+			select 
+				DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+				DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+				d.name as location, 
+				left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
+				object_id
 
-		
-)data    
+							from ost_form_entry fe 
+							join ost_form_entry_values fev on fe.id = fev.entry_id 
+							join ost_ticket t on fe.object_id = t.ticket_id 
+							join ost_department d on t.dept_id = d.id
+							join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
 
-group by casedate, location, result    
+							where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+							and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
+			)dis                
+				)p)j
+				on 1=1
+	)data
+	group by casedate, location, result
+	order by location, month(str_to_date(left(casedate,3),'%b')) 
+)l   
 ";
 $locs = db_query($sql);
 
@@ -3282,35 +3310,67 @@ $locs = db_query($sql);
 		)dis                
 			)p)j
 			on 1=1
-)data	
+)data
 group by casedate, location, result
-order by location, month(str_to_date(left(casedate,3),'%b'))";		
+";		
 $locsdata = db_query($sql);	
 
 
-$sql = "select count(result) as count, casedate, monthnum, result from 
-(
-	select distinct object_id, casedate, monthnum, location, result from
+$sql = "select sum(count) as count, casedate from (
+select sum(count) as count, casedate, location, result from (
+	select count(result) as count, casedate, location, result from 
 	(
-	select 
-		DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
-		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
-		d.name as location, 
-		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
-		object_id
+		select distinct object_id, casedate, monthnum, location, result from
+		(
+		select 
+			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+			d.name as location, 
+			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
+			object_id
 
-					from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+						from ost_form_entry fe 
+						join ost_form_entry_values fev on fe.id = fev.entry_id 
+						join ost_ticket t on fe.object_id = t.ticket_id 
+						join ost_department d on t.dept_id = d.id
+						join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
 
-					where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
-					and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
-	)dis                
-)dsum
-group by casedate, location
-order by monthnum";
+						where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
+		)dis                
+	)dsum
+	group by casedate, location
+	union all
+	SELECT 0 as count, casedate, name as location, 'Positive' as result FROM ost_department 
+			join
+
+			(select distinct casedate from
+			(
+				select distinct object_id, casedate, monthnum, location, result from
+		(
+		select 
+			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+			d.name as location, 
+			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
+			object_id
+
+						from ost_form_entry fe 
+						join ost_form_entry_values fev on fe.id = fev.entry_id 
+						join ost_ticket t on fe.object_id = t.ticket_id 
+						join ost_department d on t.dept_id = d.id
+						join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+						where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
+		)dis                
+			)p)j
+			on 1=1
+)data	
+group by casedate, location, result
+)dsum1
+ group by casedate
+";
 
 $monthtotals = db_query($sql);	
 
@@ -3547,33 +3607,65 @@ $locs = db_query($sql);
 			on 1=1
 )data	
 group by casedate, location, result
-order by location, month(str_to_date(left(casedate,3),'%b'))";		
+";		
 $locsdata = db_query($sql);	
 
 
-$sql = "select count(result) as count, casedate, monthnum, result from 
-(
-	select distinct object_id, casedate, monthnum, location, result from
+$sql = "select sum(count) as count, casedate from (
+select sum(count) as count, casedate, location, result from (
+	select count(result) as count, casedate, location, result from 
 	(
-	select 
-		DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
-		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
-		d.name as location, 
-		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
-		object_id
+		select distinct object_id, casedate, monthnum, location, result from
+		(
+		select 
+			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+			d.name as location, 
+			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
+			object_id
 
-					from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+						from ost_form_entry fe 
+						join ost_form_entry_values fev on fe.id = fev.entry_id 
+						join ost_ticket t on fe.object_id = t.ticket_id 
+						join ost_department d on t.dept_id = d.id
+						join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
 
-					where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
-					and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Negative'
-	)dis                
-)dsum
-group by casedate, location
-order by monthnum";
+						where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Negative'
+		)dis                
+	)dsum
+	group by casedate, location
+	union all
+	SELECT 0 as count, casedate, name as location, 'Positive' as result FROM ost_department 
+			join
+
+			(select distinct casedate from
+			(
+				select distinct object_id, casedate, monthnum, location, result from
+		(
+		select 
+			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+			d.name as location, 
+			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
+			object_id
+
+						from ost_form_entry fe 
+						join ost_form_entry_values fev on fe.id = fev.entry_id 
+						join ost_ticket t on fe.object_id = t.ticket_id 
+						join ost_department d on t.dept_id = d.id
+						join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+
+						where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Negative'
+		)dis                
+			)p)j
+			on 1=1
+)data	
+group by casedate, location, result
+)dsum1
+ group by casedate
+";
 $monthtotals = db_query($sql);	
 
 		?>
