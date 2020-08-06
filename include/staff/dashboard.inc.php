@@ -3261,8 +3261,9 @@ $locs = db_query($sql);
 
 
 
- $sql="select sum(count) as count, casedate, location, result from (
-	select count(result) as count, casedate, location, result from 
+ $sql="	select sum(count) as count, casedate, location, result from (
+    
+    select count(result) as count, casedate, monthnum, location, result from 
 	(
 		select distinct object_id, casedate, monthnum, location, result from
 		(
@@ -3284,11 +3285,13 @@ $locs = db_query($sql);
 		)dis                
 	)dsum
 	group by casedate, location
-	union all
-	SELECT 0 as count, casedate, name as location, 'Positive' as result FROM ost_department 
+    
+ union all 
+ 
+ 	SELECT 0 as count, casedate, monthnum, name as location, 'Positive' as result FROM ost_department 
 			join
 
-			(select distinct casedate from
+			(select distinct casedate, monthnum from
 			(
 				select distinct object_id, casedate, monthnum, location, result from
 		(
@@ -3311,14 +3314,16 @@ $locs = db_query($sql);
 			)p)j
 			on 1=1
 )data
-group by casedate, location, result
+group by casedate, location
+order by location, monthnum
 ";		
 $locsdata = db_query($sql);	
 
 
 $sql = "select sum(count) as count, casedate from (
-select sum(count) as count, casedate, location, result from (
-	select count(result) as count, casedate, location, result from 
+select sum(count) as count, casedate,monthnum, location, result from (
+    
+    select count(result) as count, casedate, monthnum, location, result from 
 	(
 		select distinct object_id, casedate, monthnum, location, result from
 		(
@@ -3340,11 +3345,13 @@ select sum(count) as count, casedate, location, result from (
 		)dis                
 	)dsum
 	group by casedate, location
-	union all
-	SELECT 0 as count, casedate, name as location, 'Positive' as result FROM ost_department 
+    
+ union all 
+ 
+ 	SELECT 0 as count, casedate, monthnum, name as location, 'Positive' as result FROM ost_department 
 			join
 
-			(select distinct casedate from
+			(select distinct casedate, monthnum from
 			(
 				select distinct object_id, casedate, monthnum, location, result from
 		(
@@ -3366,10 +3373,11 @@ select sum(count) as count, casedate, location, result from (
 		)dis                
 			)p)j
 			on 1=1
-)data	
-group by casedate, location, result
-)dsum1
- group by casedate
+)data
+group by casedate, location
+order by location, monthnum) data
+
+group by casedate order by monthnum
 ";
 
 $monthtotals = db_query($sql);	
@@ -3556,8 +3564,9 @@ $locs = db_query($sql);
 
 
 
- $sql="select sum(count) as count, casedate, location, result from (
-	select count(result) as count, casedate, location, result from 
+ $sql="	select sum(count) as count, casedate, location, result from (
+    
+    select count(result) as count, casedate, monthnum, location, result from 
 	(
 		select distinct object_id, casedate, monthnum, location, result from
 		(
@@ -3579,11 +3588,13 @@ $locs = db_query($sql);
 		)dis                
 	)dsum
 	group by casedate, location
-	union all
-	SELECT 0 as count, casedate, name as location, 'Negative' as result FROM ost_department 
+    
+ union all 
+ 
+ 	SELECT 0 as count, casedate, monthnum, name as location, 'Negative' as result FROM ost_department 
 			join
 
-			(select distinct casedate from
+			(select distinct casedate, monthnum from
 			(
 				select distinct object_id, casedate, monthnum, location, result from
 		(
@@ -3605,15 +3616,17 @@ $locs = db_query($sql);
 		)dis                
 			)p)j
 			on 1=1
-)data	
-group by casedate, location, result
+)data
+group by casedate, location
+order by location, monthnum
 ";		
 $locsdata = db_query($sql);	
 
 
 $sql = "select sum(count) as count, casedate from (
-select sum(count) as count, casedate, location, result from (
-	select count(result) as count, casedate, location, result from 
+select sum(count) as count, casedate,monthnum, location, result from (
+    
+    select count(result) as count, casedate, monthnum, location, result from 
 	(
 		select distinct object_id, casedate, monthnum, location, result from
 		(
@@ -3635,11 +3648,13 @@ select sum(count) as count, casedate, location, result from (
 		)dis                
 	)dsum
 	group by casedate, location
-	union all
-	SELECT 0 as count, casedate, name as location, 'Positive' as result FROM ost_department 
+    
+ union all 
+ 
+ 	SELECT 0 as count, casedate, monthnum, name as location, 'Negative' as result FROM ost_department 
 			join
 
-			(select distinct casedate from
+			(select distinct casedate, monthnum from
 			(
 				select distinct object_id, casedate, monthnum, location, result from
 		(
@@ -3661,10 +3676,11 @@ select sum(count) as count, casedate, location, result from (
 		)dis                
 			)p)j
 			on 1=1
-)data	
-group by casedate, location, result
-)dsum1
- group by casedate
+)data
+group by casedate, location
+order by location, monthnum) data
+
+group by casedate order by monthnum
 ";
 $monthtotals = db_query($sql);	
 
@@ -3874,7 +3890,7 @@ var getColor = {
 	
 <?php
 
-$sql="		select sum(count) as count from 
+$sql="select sum(count) as count from 
 		(
 		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
@@ -3892,7 +3908,7 @@ $sql="		select sum(count) as count from
 		)data
 
 		where result = 'Pending'
-		group by casedate,  result";
+		group by  result";
  
   $SETotal = db_query($sql); 
   
@@ -3914,7 +3930,7 @@ $sql="select sum(count) as count, location from
 		)data
 
 		where result = 'Pending'
-		group by casedate, location, result";
+		group by casedate,  result";
  
   $SElocsdata = db_query($sql); 
  
