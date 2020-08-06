@@ -316,7 +316,7 @@ implements TemplateVariable, Searchable {
         global $cfg;
         static $topics, $names = array();
         
-        if ($_SESSION['scv19'] == 0) $sfilter= ' where topic_id <> 12 ';
+        if ($_SESSION['scv19'] == 0) $sfilter= ' where topic_id not in (12,13) ';
         	
         if (!$names) {
             $sql = 'SELECT topic_id, topic_pid, ispublic, isactive, topic FROM '.TOPIC_TABLE

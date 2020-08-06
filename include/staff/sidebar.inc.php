@@ -40,7 +40,15 @@ if(!defined('ADMINPAGE')) {
             $hide = 0;
             break;
                     
+        case "Covid-19 Cases":
+        		$hide = 1;
+        		if ($_SESSION['scv19'] == 1) $hide = 0;
+            break;
         case "Covid-19":
+        		$hide = 1;
+        		if ($_SESSION['scv19'] == 1) $hide = 0;
+            break;
+        case "Covid-19 Temp Logs":
         		$hide = 1;
         		if ($_SESSION['scv19'] == 1) $hide = 0;
             break;
@@ -48,7 +56,7 @@ if(!defined('ADMINPAGE')) {
      
     if (count($children)) { ?> 
 
-    <li class="has_sub">
+    <li class="has_sub <?php if ($hide == 1) echo ' hidden';?>">
 
     <?php }
         

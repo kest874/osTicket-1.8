@@ -4714,7 +4714,7 @@ class DatetimePickerWidget extends Widget {
                     format: 'L',
                     });
                 });
-        <?php if ($_SESSION["alrt"] == 1) {?>        
+          
                 $(function() {
                 var savetrigger = false;
                         
@@ -4730,7 +4730,7 @@ class DatetimePickerWidget extends Widget {
                             $("i.fa.fa-pencil-square-o").css("color", "#eeeeee");
                             $("#updatearea").css("display", "none");
                             $("#detailschanged").css("display", "inherit");
-                            if (!savetrigger) {
+                            if (savetrigger == false) {
                             $.notify({
                                 text: 'Changes made please click the save <i class="fa fa-save"></i> or cancel <i //class="fa fa-ban"></i> button on the ribbon.',
                                 image: '<i class="fa fa-floppy-o"></i>'
@@ -4746,10 +4746,7 @@ class DatetimePickerWidget extends Widget {
                          }
                     });
              });       
-             <?php 
-			 $_SESSION["alrt"] == 2;
-			 } ?>
-        
+            
             </script>
         <?php
         if ($config['time']) {

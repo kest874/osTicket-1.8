@@ -3126,7 +3126,7 @@ $sql= "update ".FORM_ENTRY_TABLE." a join ".FORM_ANSWER_TABLE." b on a.id = b.en
             $alertstaff = false; 
             
      		/***** See if we need to send some alerts ****/
-        if ($ticket->getTopicId() <> 12)$ticket->onNewTicket($message, $autorespond, $alertstaff);
+        if ($ticket->getTopicId() < 12)$ticket->onNewTicket($message, $autorespond, $alertstaff);
         /************ check if the user JUST reached the max. open tickets limit **********/
         if ($cfg->getMaxOpenTickets()>0
             && ($user=$ticket->getOwner())
