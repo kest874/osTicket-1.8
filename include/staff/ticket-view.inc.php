@@ -97,10 +97,10 @@ background: "rgba(0, 0, 0, 0.2)"
             <?php If  ($topic) { ?>
                 
                                 
-                    <a class="btn btn-light waves-effect" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Add Note'); ?>">
+                    <a class="btn btn-light waves-effect <?php if ($topic == 12 ||$topic == 13) { echo ' hidden ';} ?>" href="#note" id="post-note" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Add Note'); ?>">
                     <i class="fa fa-sticky-note"></i></a>
                     
-                    <a class="btn btn-light waves-effect" href="#note" id="countermeasures" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Countermeasures'); ?>">
+                    <a class="btn btn-light waves-effect <?php if ($topic == 12 ||$topic == 13) { echo ' hidden ';} ?>" href="#note" id="countermeasures" class="post-response" data-placement="bottom" data-toggle="tooltip"title="<?php echo __('Countermeasures'); ?>">
                     <i class="fa fa-check-square-o"></i></a>
                 
             <?php	}
@@ -481,12 +481,13 @@ $tcount = $ticket->getThreadEntries($types)->count();
     <li class="nav-item "><a class="nav-link active" id="ticket-thread-tab" href="#ticket_thread"  data-toggle="tab"><?php
 
         echo sprintf(__('Incident Timeline <span class="badge badge-primary badge-pill">%d</span>'), $tcount); ?></a>
-
-    <li class="nav-item"><a class="nav-link" id="ticket-tasks-tab" href="#tasks" data-toggle="tab" ><?php
+ <?php if (!$topic == 12 ||!$topic == 13) {  ?>
+    <li class="nav-item"><a class="nav-link " id="ticket-tasks-tab" href="#tasks" data-toggle="tab" ><?php
         echo __('Countermeasures');
         if ($ticket->getNumTasks())
             echo sprintf('&nbsp; <span class="badge badge-primary badge-pill">%d</span>', $ticket->getNumTasks());
         ?></a></li>
+      <?php } ?>
 </ul>
 <div class="tab-content">
  <div id="tasks" class="tab-pane">
@@ -506,7 +507,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
                 )
             );
 ?>
-<div id="updatearea"  <?php if (!$topic) { echo ' class="hidden"';} ?>>
+<div id="updatearea"  <?php if ($topic == 12 ||$topic == 13) { echo ' class="hidden"';} ?>>
 <div class="sticky bar stop actions" id="response_options">
 <div id="ReponseTabs" >
     <ul  class="nav nav-pills"  id="ticket_tabs">

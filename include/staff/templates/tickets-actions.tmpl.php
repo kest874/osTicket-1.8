@@ -13,7 +13,7 @@ if ($agent->canManageTickets())
 if ($agent->hasPerm(Ticket::PERM_EDIT, false)) { ?>
 
 
-<div class="btn-group btn-group-sm" role="group">
+<div class="btn-group btn-group-sm hidden" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
          title="<?php echo __('Change Priority'); ?>"><i class="fa fa-exclamation"></i>
@@ -34,7 +34,7 @@ if ($agent->hasPerm(Ticket::PERM_EDIT, false)) { ?>
 // Mass Topic Change
 if ($agent->hasPerm(Ticket::PERM_EDIT, false)) {?>
 
-        <a class="btn btn-light tickets-action" id="tickets-helptopic" data-placement="bottom"
+        <a class="btn btn-light tickets-action hidden" id="tickets-helptopic" data-placement="bottom"
     data-toggle="tooltip" title="<?php echo __('Change Category'); ?>"
    href="#tickets/mass/topic"><i class="fa fa-bookmark"></i></a>
 
