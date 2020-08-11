@@ -511,7 +511,7 @@ class FormField {
     static $widget = false;
 
     var $ht = array(
-        'label' => false,
+        'label' => true,
         'required' => false,
         'default' => false,
         'configuration' => array(),
@@ -4890,7 +4890,7 @@ class TimePickerWidget extends Widget {
 
 class SectionBreakWidget extends Widget {
     function render($options=array()) {
-        ?><div class="section-break"><h3><?php
+        ?><div class="section-break hidden"><h3><?php
         echo Format::htmlchars($this->field->getLocal('label'));
         ?></h3><em><?php echo Format::htmlchars($this->field->getLocal('hint'));
         ?></em></div>

@@ -123,8 +123,9 @@ $states = array_merge($states, array('closed'));
            $tfiltercount[$cTopic->getId()] = $query->values()->one();
         }
     }    
-    
-   
+
+
+     
        
 $Statuses = array();
 foreach (TicketStatusList::getStatuses(
@@ -435,7 +436,7 @@ $pageNav->setURL('tickets.php', $args);
 ?>
 
 
- <div class="btn-group btn-group-sm" role="group">
+ <div class="btn-group btn-group-sm <?php if ($queue->getId() == 13 ||$queue->getId() == 12 ||$queue->getId() == 3)echo ' hidden'; ?>" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle"  <?php if ($filters == 0){ echo 'disabled';}?>
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
          title="<?php echo __('Filter Incident Type'); ?>"><i class="fa fa-filter"></i> <?php echo $tselected;?>
@@ -460,47 +461,51 @@ $pageNav->setURL('tickets.php', $args);
                      foreach ($Topic as $cTopic) { 
                      if ($tfiltercount[$cTopic->getId()]['__count'] > 0) {?>
                 
-                   <a href="tickets.php?t=<?php echo $cTopic->topic_id ?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s']?>&r=<?php echo $_GET['r']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cTopic->topic?>
+                   <a href="tickets.php?t=<?php echo $cTopic->topic_id ?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s']?>&r=<?php echo $_GET['r']?>" class="dropdown-item no-pjax
+                   "><i class="fa fa-filter"></i> <?php echo $cTopic->topic?>
                      <span class="badge badge-pill badge-default  pull-right"><?php echo $tfiltercount[$cTopic->getId()]['__count'] ?></span> </a>
                      <?php }}      
         ?>
             </div>
     </div>
-  
-    
-    <?php 
-    if (!$Statuses)
-    return;
-//var_dump($nextStatuses);
-if (!$sselected) {$sselected = 'Status';}
-?>
-<div class="btn-group btn-group-sm" role="group">
-        
-        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle"  <?php if ($filters == 0){ echo 'disabled';}?>
+ 
+  <?php
+          
+      switch ($rec){
+          case 0:
+            $rselected = 'Recordable (No)';
+            break;
+          case 1:
+          $rselected = 'Recordable (Yes)';
+            break;
+          case 2:
+          $rselected = 'Recordable';
+            break;
+          
+          }
+?> 
+    <div class="btn-group btn-group-sm <?php if ($queue->getId() == 13 ||$queue->getId() == 12 ||$queue->getId() == 3)echo ' hidden'; ?>" role="group">
+        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" <?php if ($filters == 0){ echo 'disabled';}?>
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Filter Status'); ?>"><i class="fa fa-filter"></i> <?php echo $sselected; ?>
+         title="<?php echo __('Filter Recordables'); ?>"><i class="fa fa-filter"></i> <?php echo $rselected;?>
         </button>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
               
-              <a class="dropdown-item no-pjax" href="tickets.php?l=<?php echo $_GET['l']?>&t=<?php echo $_GET['t']?>&s=0&r=<?php echo $_GET['r']?>"><i class="fa fa-filter"></i> All</a>
-           <?php foreach ($Statuses as $status) { 
-           
-           if ($sfiltercount[$status->getId()]['__count'] >0) {
-           
-           ?>
-           
-           
-       
-            <a class="dropdown-item no-pjax"
-                href="tickets.php?l=<?php echo $_GET['l']?>&t=<?php echo $_GET['t']?>&s=<?php echo $status->getId();?>&r=<?php echo $_GET['r']?>"><i class="fa fa-filter"></i> <?php
-                        echo __($status->name);?> <span class="queue-status-count badge badge-pill badge-default pull-right"
-              ><span class="faded-more"> <?php echo $sfiltercount[$status->getId()]['__count'];?></span></a>
-      
-    <?php
-           }} ?>
-        
+              <a href="tickets.php?r=2&t=<?php echo $_GET['t']?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s'];?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
+              
+                   <?php //if ($ryfiltercount[$cnRecordables->getId()]['__count'] > 0) {?>
+                   <a href="tickets.php?r=1&t=<?php echo $_GET['t'] ?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> Yes
+                     <span class="badge badge-pill badge-default  pull-right"><?php //echo $ryfiltercount[$cyRecordables->getId()]['__count'] ?></span> </a>
+                   <?php //}?>
+                   <?php //if ($rnfiltercount[$cnRecordables->getId()]['__count'] > 0) {?>
+                   <a href="tickets.php?r=0&t=<?php echo $_GET['t']?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> No
+                     <span class="badge badge-pill badge-default  pull-right"><?php  //echo $rnfiltercount[$cnRecordables->getId()]['__count'] ?></span> </a>     
+                   <?php// }?>
             </div>
-  </div> 
+    </div> 
+    
+
+
 <div class="btn-group btn-group-sm" role="group">
 <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light" 
         
