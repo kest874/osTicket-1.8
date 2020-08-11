@@ -242,8 +242,13 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
 
             <!-- ========== Left Sidebar Start ========== -->
 <?php  
+
+		$local = $_SESSION['loc'];
+		
+		if (!$local) {$_SESSION['loc']= $thisstaff->dept_id;}
+		
  		$_SESSION['scv19'] = 0;    
- 		
+
  		if ($thisstaff->staff_id == 1 || $thisstaff->staff_id == 6 || $thisstaff->staff_id == 29 || $thisstaff->staff_id == 4 
 		|| $thisstaff->staff_id == 61 || $thisstaff->staff_id == 10 || $thisstaff->staff_id == 22 || $thisstaff->staff_id == 51
 		|| $thisstaff->staff_id == 70 || $thisstaff->staff_id == 30 || $thisstaff->staff_id == 15 || $thisstaff->staff_id == 71
