@@ -124,75 +124,7 @@ $states = array_merge($states, array('closed'));
         }
     }    
     
-    $YRecordables = Ticket::objects()
-                ->order_by('ticket_id');
-   // var_dump($Recordables);           
-                     
-    foreach ($YRecordables as $cyRecordables) {
-        $query = Ticket::objects();   
-        
-        $rqfilter = Q::any(new Q($qfr));
-       
-        if ($sta  >0){
-         $query->filter($qfilter);
-         }     
-         
-         if ($loc  >0){
-         $query->filter($qfilter);
-         }   
-         if ($top  >0){
-         $query->filter($qfilter);
-         }   
-         if ($rec  <2){
-         $query->filter($qfilter);
-         }         
-        $Q = $queue->getBasicQuery();
-        $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
-              
-       $query->aggregate(array(
-            $queue->getId() => SqlAggregate::COUNT($expr)))
-            ->filter(array('isrecordable' => '1'));
-         
-        if ($filters == 1){ 
-           $ryfiltercount[$cyRecordables->getId()] = $query->values()->one();
-        }
-        
-    }    
    
-    $NRecordables = Ticket::objects()
-                ->order_by('ticket_id');
-   // var_dump($Recordables);           
-                     
-    foreach ($NRecordables as $cnRecordables) {
-        $query = Ticket::objects();   
-        
-        $rqfilter = Q::any(new Q($qfr));
-       
-        if ($sta  >0){
-         $query->filter($qfilter);
-         }     
-         
-         if ($loc  >0){
-         $query->filter($qfilter);
-         }   
-         if ($top  >0){
-         $query->filter($qfilter);
-         }   
-         if ($rec  <2){
-         $query->filter($qfilter);
-         }         
-        $Q = $queue->getBasicQuery();
-        $expr = SqlCase::N()->when(new SqlExpr(new Q($Q->constraints)), 1);
-              
-       $query->aggregate(array(
-            $queue->getId() => SqlAggregate::COUNT($expr)))
-            ->filter(array('isrecordable' => '0'));
-         
-        if ($filters == 1){ 
-           $rnfiltercount[$cnRecordables->getId()] = $query->values()->one();
-        }
-        
-    }    
        
 $Statuses = array();
 foreach (TicketStatusList::getStatuses(
@@ -534,40 +466,7 @@ $pageNav->setURL('tickets.php', $args);
         ?>
             </div>
     </div>
-   <?php
-          
-      switch ($rec){
-          case 0:
-            $rselected = 'Recordable (No)';
-            break;
-          case 1:
-          $rselected = 'Recordable (Yes)';
-            break;
-          case 2:
-          $rselected = 'Recordable';
-            break;
-          
-          }
-?> 
-    <div class="btn-group btn-group-sm" role="group">
-        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" <?php if ($filters == 0){ echo 'disabled';}?>
-        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Filter Recordables'); ?>"><i class="fa fa-filter"></i> <?php echo $rselected;?>
-        </button>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
-              
-              <a href="tickets.php?r=2&t=<?php echo $_GET['t']?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s'];?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
-              
-                   <?php if ($ryfiltercount[$cnRecordables->getId()]['__count'] > 0) {?>
-                   <a href="tickets.php?r=1&t=<?php echo $_GET['t'] ?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> Yes
-                     <span class="badge badge-pill badge-default  pull-right"><?php echo $ryfiltercount[$cyRecordables->getId()]['__count'] ?></span> </a>
-                   <?php }?>
-                   <?php if ($rnfiltercount[$cnRecordables->getId()]['__count'] > 0) {?>
-                   <a href="tickets.php?r=0&t=<?php echo $_GET['t']?>&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> No
-                     <span class="badge badge-pill badge-default  pull-right"><?php  echo $rnfiltercount[$cnRecordables->getId()]['__count'] ?></span> </a>     
-                   <?php }?>
-            </div>
-    </div>
+  
     
     <?php 
     if (!$Statuses)
