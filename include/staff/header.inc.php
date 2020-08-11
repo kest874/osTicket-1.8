@@ -249,7 +249,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
 		|| $thisstaff->staff_id == 70 || $thisstaff->staff_id == 30 || $thisstaff->staff_id == 15 || $thisstaff->staff_id == 71
 		|| $thisstaff->staff_id == 72 || $thisstaff->staff_id == 59 || $thisstaff->staff_id == 7 || $thisstaff->staff_id == 41
 		|| $thisstaff->staff_id == 8 || $thisstaff->staff_id == 73 || $thisstaff->staff_id == 68 || $thisstaff->staff_id == 58
-		|| $thisstaff->staff_id == 69|| $thisstaff->staff_id == 75
+		|| $thisstaff->staff_id == 69|| $thisstaff->staff_id == 75 || $thisstaff->staff_id == 76
 		) $_SESSION['scv19'] = 1; 
 ?>
             <div class="left side-menu">
