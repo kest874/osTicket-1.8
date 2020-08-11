@@ -509,7 +509,7 @@ $pageNav->setURL('tickets.php', $args);
 <div class="btn-group btn-group-sm" role="group">
 <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light" 
         
-         title="<?php echo __('Clear Filters'); ?>" onclick="location.href = '/scp/tickets.php?queue=1&p=1&l=0&t=0&s=0&r=2';"><span><i class="fa fa-filter"></i><i class="fa fa-ban filtercancel"></i></span> 
+         title="<?php echo __('Clear Filters'); ?>" onclick="location.href = '/scp/tickets.php?&p=1&l=0&t=0&s=0&r=2';"><span><i class="fa fa-filter"></i><i class="fa fa-ban filtercancel"></i></span> 
         </button
 </div>  
 
