@@ -466,13 +466,13 @@ $pageNav->setURL('tickets.php', $args);
 
 
  <div class="btn-group btn-group-sm" role="group">
-        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle"  <?php if ($filters == 0){ echo 'disabled';}?>
+        <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle notranslate"  <?php if ($filters == 0){ echo 'disabled';}?>
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
          title="<?php echo __('Filter Incident Location'); ?>"><i class="fa fa-filter"></i> <?php echo $lselected;?>
         </button>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="btnGroupDrop1">
               
-              <a href="tickets.php?t=<?php echo $_GET['t']?>&l=0&s=<?php echo $_GET['s'];?>&r=<?php echo $_GET['r']?>"class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
+              <a href="tickets.php?t=<?php echo $_GET['t']?>&l=0&s=<?php echo $_GET['s'];?>&r=<?php echo $_GET['r']?>"class="dropdown-item no-pjax notranslate"><i class="fa fa-filter"></i> All</a>
               
               <?php
     
@@ -489,7 +489,7 @@ $pageNav->setURL('tickets.php', $args);
                      foreach ($Location as $cLocation) { 
                      if ($lfiltercount[$cLocation->getId()]['__count'] > 0) {?>
                 
-                   <a href="tickets.php?t=<?php echo $_GET['t']?>&l=<?php echo $cLocation->id ?>&s=<?php echo $_GET['s']?>&r=<?php echo $_GET['r']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> <?php echo $cLocation->name?>
+                   <a href="tickets.php?t=<?php echo $_GET['t']?>&l=<?php echo $cLocation->id ?>&s=<?php echo $_GET['s']?>&r=<?php echo $_GET['r']?>" class="dropdown-item no-pjax notranslate"><i class="fa fa-filter"></i> <?php echo $cLocation->name?>
                      <span class="badge badge-pill badge-default  pull-right"><?php echo $lfiltercount[$cLocation->getId()]['__count'] ?></span> </a>
                      <?php }}      
         ?>
@@ -510,7 +510,7 @@ $pageNav->setURL('tickets.php', $args);
         </button>
             <div class="dropdown-menu  dropdown-menu-xlg  dropdown-menu-right" aria-labelledby="btnGroupDrop1">
               
-              <a href="tickets.php?t=0&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s'];?>&r=<?php echo $_GET['r']?>" class="dropdown-item no-pjax"><i class="fa fa-filter"></i> All</a>
+              <a href="tickets.php?t=0&l=<?php echo $_GET['l']?>&s=<?php echo $_GET['s'];?>&r=<?php echo $_GET['r']?>" class="dropdown-item no-pjax notranslate"><i class="fa fa-filter"></i> All</a>
               
               <?php
     

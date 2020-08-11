@@ -4168,7 +4168,7 @@ class ChoicesWidget extends Widget {
         if (!is_array($values))
             $values = $have_def ? array($def_key => $choices[$def_key]) : array();
         //if (isset($config['classes']))
-            $classes = 'class="form-control form-control-sm '.$config['classes'].'"';
+            $classes = 'class="form-control form-control-sm notranslate'.$config['classes'].'"';
         ?>
         <select <?php echo $disabled ?> name="<?php echo $this->name; ?>[]"
             <?php echo implode(' ', array_filter(array($classes))); ?>
