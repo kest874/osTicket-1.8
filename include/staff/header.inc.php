@@ -145,10 +145,18 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
                     <ul class="list-inline float-right mb-0 mr-2">
 
                         <li class="list-inline-item notification-list hide-phone  mr-0">
+                            <a class="nav-link right-bar-toggle waves-light waves-effect " id="tickets-helptopic" data-placement="bottom"
+												    data-toggle="tooltip" title="<?php echo __('New Incident'); ?>"
+												   	href="<?php echo ROOT_PATH ?>scp/tickets.php?a=open"><i class="fa fa-plus-square noti-icon"></i></a>
+                         </li>
+                        
+                         <li class="list-inline-item notification-list hide-phone  mr-0">
                             <a class="nav-link waves-light waves-effect" href="#" id="btn-fullscreen">
                                 <i class="mdi mdi-crop-free noti-icon"></i>
                             </a>
                         </li>
+                        
+                        
 
                         <li class="list-inline-item notification-list mr-0 hidden">
                         

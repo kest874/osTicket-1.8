@@ -248,7 +248,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
 				<input type="hidden" name="a" value="edit">
 				<input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
                 
-        <div> 
+        <div <?php if ($topic == 12 ||$topic == 13) { echo ' class="hidden"';} ?>> 
 				<label><?php echo __('Status');?>:</label>
 				
 				<?php	                   
@@ -354,7 +354,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
                 <?php echo Format::datetime($ticket->getCloseDate()); ?>
 		</div>
 		 <?php }?>
-		<div>
+		<div <?php if ($topic == 13) { echo ' class="hidden"';} ?>>
 		 <label><?php echo __('Days Open');?>:</label>
                <span class="badge badge-danger "><?php echo $ticket->getDaysOpen(); ?></span>
 		 </div>		 
@@ -362,7 +362,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
 <div class='col-sm-3'>    
                 <div class='form-group'>         
         <?php if($ticket->isOpen()) { ?>
-        <div> 
+        <div <?php if ($topic == 12 ||$topic == 13) { echo ' class="hidden"';} ?>> 
             <label label="180"><?php echo __('Assigned To');?>:</label>
                     
                 <?php
