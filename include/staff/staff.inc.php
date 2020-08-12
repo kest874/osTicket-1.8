@@ -194,7 +194,19 @@ if (count($bks) > 1) {
              <input type="checkbox" class="custom-control-input" id="isadmin" name="isadmin" value="1" <?php echo ($staff->isadmin) ? 'checked="checked"' : '';
                 ?>>
              <label class="custom-control-label" for="isadmin"><?php echo __('Administrator'); ?> </label>
-         </div>    
+      </div>    
+         
+      <div class="custom-control custom-switch">
+             <input type="checkbox" class="custom-control-input" id="cv19case" name="cv19case" value="1" <?php echo ($staff->cv19case) ? 'checked="checked"' : '';
+                ?>>
+             <label class="custom-control-label" for="cv19case"><?php echo __('Allow Covid Cases'); ?> </label>
+      </div>
+         
+      <div class="custom-control custom-switch">
+             <input type="checkbox" class="custom-control-input" id="cv19temp" name="cv19temp" value="1" <?php echo ($staff->cv19temp) ? 'checked="checked"' : '';
+                ?>>
+             <label class="custom-control-label" for="cv19temp"><?php echo __('Allow Covid Temp Logs'); ?> </label>
+      </div>      
         </tr>
       </tbody>
     </table>

@@ -179,17 +179,24 @@ if ($_POST)
                     <?php    }
                         foreach($topics as $id =>$name) {
                         	
-                        	 if ($name != 'Covid-19 Case') {
+                        	 if ($name != 'Covid-19 Case'&&$name != 'Covid-19 Temp Log') {
+                            echo sprintf('<option value="%d" %s %s>%s</option>',
+                                $id, ($info['topicId']==$id)?'selected="selected"':'',
+                                $selected, $name);
+                         }   
+                        	   
+                         if ($name == 'Covid-19 Case' && $_SESSION['cv19case'] == 1) {
                             echo sprintf('<option value="%d" %s %s>%s</option>',
                                 $id, ($info['topicId']==$id)?'selected="selected"':'',
                                 $selected, $name);
                          }     
-                         if ($name == 'Covid-19 Case' && $_SESSION['scv19'] == 1) {
+                         if ($name == 'Covid-19 Temp Log' && $_SESSION['cv19temp'] == 1) {
                             echo sprintf('<option value="%d" %s %s>%s</option>',
                                 $id, ($info['topicId']==$id)?'selected="selected"':'',
                                 $selected, $name);
-                         }     
+                         } 
                         }
+                       
                         if (count($topics) == 1 && !$forms) {
                             if (($T = Topic::lookup($id)))
                                 $forms =  $T->getForms();

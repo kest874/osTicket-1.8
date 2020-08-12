@@ -316,7 +316,10 @@ implements TemplateVariable, Searchable {
         global $cfg;
         static $topics, $names = array();
         
-        if ($_SESSION['scv19'] == 0) $sfilter= ' where topic_id not in (12,13) ';
+       if ($_SESSION['cv19case'] == 0) {$cv19case = 12;} else {$cv19case = 0;};
+       if ($_SESSION['cv19temp'] == 0) {$cv19temp = 13;} else {$cv19temp = 0;};
+       
+       $sfilter= ' where topic_id not in ('.$cv19case.','.$cv19temp .') ';
         	
         if (!$names) {
             $sql = 'SELECT topic_id, topic_pid, ispublic, isactive, topic FROM '.TOPIC_TABLE

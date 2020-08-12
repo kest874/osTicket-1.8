@@ -533,6 +533,17 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         return $this->isadmin;
     }
 
+
+    function cv19case() {
+        return $this->cv19case;
+    }
+
+    function cv19temp() {
+        return $this->cv19temp;
+    }
+
+
+
     function canAccessDept($deptId) {
         
         return ($deptId && in_array($deptId, $this->getDepts()) && !$this->isAccessLimited());
@@ -1054,6 +1065,8 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         $this->updatePerms($vars['perms'], $errors);
 
         $this->isadmin = $vars['isadmin'];
+        $this->cv19case = $vars['cv19case'];
+        $this->cv19temp = $vars['cv19temp'];
         $this->isactive = isset($vars['islocked']) ? 0 : 1;
         $this->isvisible = isset($vars['isvisible'])?1:0;
         $this->onvacation = isset($vars['onvacation'])?1:0;
@@ -1430,6 +1443,20 @@ extends AbstractForm {
                 'choices' =>
                     array(0 => __('Select Role'))
                     + Role::getRoles(),
+                'layout' => new GridFluidCell(6),
+            )),
+            'cv19case' => new BooleanField(array(
+                'label' => __('Covid Cases'),
+                'configuration' => array(
+                    'desc' => __('Agent has access to enter Covid Cases'),
+                ),
+                'layout' => new GridFluidCell(6),
+            )),
+            'cv19temp' => new BooleanField(array(
+                'label' => __('Covid Temp Logs'),
+                'configuration' => array(
+                    'desc' => __('Agent has access to enter Covid Temp Logs'),
+                ),
                 'layout' => new GridFluidCell(6),
             )),
             'isadmin' => new BooleanField(array(

@@ -39,18 +39,17 @@ if(!defined('ADMINPAGE')) {
         case "Incidents":
             $hide = 0;
             break;
-                    
-        case "Covid-19 Cases":
-        		$hide = 1;
-        		if ($_SESSION['scv19'] == 1) $hide = 0;
-            break;
         case "Covid-19":
-        		$hide = 1;
-        		if ($_SESSION['scv19'] == 1) $hide = 0;
+        		$hide = 0;
+        		if ($_SESSION['cv19case'] == 0&&$_SESSION['cv19temp'] == 0) $hide = 1;
+            break;            
+        case "Covid-19 Cases":
+        		$hide = 0;
+        		if ($_SESSION['cv19case'] == 0) $hide = 1;
             break;
         case "Covid-19 Temp Logs":
-        		$hide = 1;
-        		if ($_SESSION['scv19'] == 1) $hide = 0;
+        		$hide = 0;
+        		if ($_SESSION['cv19temp'] == 0) $hide = 1;
             break;
      } 
      

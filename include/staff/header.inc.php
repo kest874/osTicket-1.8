@@ -255,17 +255,8 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
 		$local = $_SESSION['loc'];
 		
 		if (!$local) {$_SESSION['loc']= $thisstaff->dept_id;}
-		
- 		$_SESSION['scv19'] = 0;    
-
- 		if ($thisstaff->staff_id == 1 || $thisstaff->staff_id == 6 || $thisstaff->staff_id == 29 || $thisstaff->staff_id == 4 
-		|| $thisstaff->staff_id == 61 || $thisstaff->staff_id == 10 || $thisstaff->staff_id == 22 || $thisstaff->staff_id == 51
-		|| $thisstaff->staff_id == 70 || $thisstaff->staff_id == 30 || $thisstaff->staff_id == 15 || $thisstaff->staff_id == 71
-		|| $thisstaff->staff_id == 72 || $thisstaff->staff_id == 59 || $thisstaff->staff_id == 7 || $thisstaff->staff_id == 41
-		|| $thisstaff->staff_id == 8  || $thisstaff->staff_id == 73 || $thisstaff->staff_id == 68 || $thisstaff->staff_id == 58
-		|| $thisstaff->staff_id == 69 || $thisstaff->staff_id == 75 || $thisstaff->staff_id == 76 || $thisstaff->staff_id == 77
-		|| $thisstaff->staff_id == 23 || $thisstaff->staff_id == 78 || $thisstaff->staff_id == 79 || $thisstaff->staff_id == 38
-		) $_SESSION['scv19'] = 1; 
+	  $_SESSION['cv19case'] = $thisstaff->cv19case; 
+	  $_SESSION['cv19temp'] = $thisstaff->cv19temp; 
 ?>
             <div class="left side-menu">
                 <div class="sidebar-inner slimscrollleft">
