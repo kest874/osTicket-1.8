@@ -243,32 +243,80 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
 				<input type="hidden" name="do" value="update">
 				<input type="hidden" name="a" value="edit">
 				<input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">	
-                    <div><?php csrf_token(); ?>
+        <?php csrf_token(); ?>
 				<input type="hidden" name="do" value="update">
 				<input type="hidden" name="a" value="edit">
 				<input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
                 
-                <label width="100"><?php echo __('Status');?>:</label> 
-               
-                    <?php 
-                    
-                    
-                    switch ($ticket->getStatusId()){
-               
-                case '3':
-                    $badgecolor = 'bg-success';
-                    break;
-                case '1':
-                    $badgecolor = 'bg-danger';
-                    break;
-                                 
-                default:
-                    }
-                    
-                    echo '<span class="badge label-table '.$badgecolor.'">'.$ticket->getStatus().'</span>'; ?>
-                    
-                </div>  
-				<div>
+        <div> 
+				<label><?php echo __('Status');?>:</label>
+				
+				<?php	                   
+				// Map states to actions
+				$actions= array(
+				        'closed' => array(
+				            'icon'  => 'icon-ok-circle',
+				            'action' => 'close',
+				            'href' => 'tickets.php'
+				            ),
+				        'open' => array(
+				            'icon'  => 'icon-undo',
+				            'action' => 'reopen'
+				            ),
+				        );
+
+				$states = array('open');
+				if (!$ticket || $ticket->isCloseable())
+				    $states[] = 'closed';
+
+				$statusId = $ticket ? $ticket->getStatusId() : 0;
+				$nextStatuses = array();
+				foreach (TicketStatusList::getStatuses(
+				            array('states' => $states)) as $status) {
+				    if (!isset($actions[$status->getState()])
+				            || $statusId == $status->getId())
+				        continue;
+				    $nextStatuses[] = $status;
+				}
+
+				if (!$nextStatuses)
+				    return;
+				?>
+
+				<div class="btn-group btn-group-sm" role="group">
+				<button id="btnGroupDrop1" type="button" class="btn m-l--10" style="top: -1px; box-shadow: 0 0 0 0;"
+				data-toggle="dropdown" data-placement="bottom" data-toggle="dropdown" 
+				 title="<?php echo __('Change Status'); ?>"><?php echo ($S = $ticket->getStatus()) ? $S->display() : ''; ?>
+				</button>
+				    <div class="dropdown-menu " aria-labelledby="btnGroupDrop1">
+				        
+				   <?php foreach ($nextStatuses as $status) { ?>
+				
+				    <a class="dropdown-item no-pjax <?php
+
+				        echo $ticket? 'ticket-action' : 'tickets-action'; ?>"
+				        href="<?php
+				            echo sprintf('#%s/status/%s/%d',
+				                    $ticket ? ('tickets/'.$ticket->getId()) : 'tickets',
+				                    $actions[$status->getState()]['action'],
+				                    $status->getId()); ?>"
+				        <?php
+				        if (isset($actions[$status->getState()]['href']))
+				            echo sprintf('data-redirect="%s"',
+				                    $actions[$status->getState()]['href']);
+				        ?>
+				        ><i class="<?php
+				                echo $actions[$status->getState()]['icon'] ?: 'icon-tag';
+				            ?>"></i> <?php
+				                echo __($status->getName()); ?></a>
+				
+				<?php
+				} ?>
+				    
+				    </div>
+				</div>
+		</div>	        
+				<div class="hidden">
                 <label><?php echo __('Priority');?>:</label>
                     <?php 
                     

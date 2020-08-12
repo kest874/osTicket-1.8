@@ -62,6 +62,7 @@ if ($lang) {
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>scp/js/loadingoverlay.min.js"></script>
     <link type="text/css" rel="stylesheet" href="./css/translatable.css"/>
     <link rel="stylesheet" href="<?php echo ROOT_PATH ?>scp/css/accordian.css" media="all">
+    <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/font-awesome.min.css">
     
     <?php
     

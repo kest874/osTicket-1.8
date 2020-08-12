@@ -1,22 +1,22 @@
 <?php
 global $thisstaff, $ticket;
+
 // Map states to actions
 $actions= array(
         'closed' => array(
-            'icon'  => 'fa fa-check-circle',
+            'icon'  => 'icon-ok-circle',
             'action' => 'close',
             'href' => 'tickets.php'
             ),
         'open' => array(
-            'icon'  => 'fa fa-undo',
+            'icon'  => 'icon-undo',
             'action' => 'reopen'
             ),
         );
 
 $states = array('open');
-if ($thisstaff->getRole($ticket ? $ticket->getDeptId() : null)->hasPerm(Ticket::PERM_CLOSE)
-        && (!$ticket || !$ticket->getMissingRequiredFields()))
-    $states = array_merge($states, array('closed'));
+if (!$ticket || $ticket->isCloseable())
+    $states[] = 'closed';
 
 $statusId = $ticket ? $ticket->getStatusId() : 0;
 $nextStatuses = array();
@@ -35,13 +35,14 @@ if (!$nextStatuses)
         <div class="btn-group btn-group-sm" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle" 
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
-         title="<?php echo __('Change Status'); ?>"><i class="fa fa-flag"></i>
+         title="<?php echo __('Change Status'); ?>"><i class="icon-flag"></i>
         </button>
             <div class="dropdown-menu " aria-labelledby="btnGroupDrop1">
                 
            <?php foreach ($nextStatuses as $status) { ?>
        
             <a class="dropdown-item no-pjax <?php
+
                 echo $ticket? 'ticket-action' : 'tickets-action'; ?>"
                 href="<?php
                     echo sprintf('#%s/status/%s/%d',
@@ -54,7 +55,7 @@ if (!$nextStatuses)
                             $actions[$status->getState()]['href']);
                 ?>
                 ><i class="<?php
-                        echo $actions[$status->getState()]['icon'] ?: 'fa fa-undo';
+                        echo $actions[$status->getState()]['icon'] ?: 'icon-tag';
                     ?>"></i> <?php
                         echo __($status->getName()); ?></a>
       
