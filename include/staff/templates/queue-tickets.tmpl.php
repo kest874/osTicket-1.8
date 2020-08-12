@@ -616,6 +616,8 @@ $pageNav->setURL('tickets.php', $args);
                 "IND"=>"#e040fb",
                 "MEX"=>"#7c4dff",
                 "NTC"=>"rgb(43, 144, 143)",
+                "NTA"=>"#058028",
+                "MI"=>"#944a03",
                 "OH"=>"rgb(67, 67, 72)",
                 "PAU"=>"#cddc39",
                 "RTA"=>"#18ffff",

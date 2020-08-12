@@ -15,6 +15,8 @@ $sitecolor = array(
 "IND"=>"#e040fb",
 "MEX"=>"#7c4dff",
 "NTC"=>"rgb(43, 144, 143)",
+"NTA"=>"#058028",
+"MI"=>"#944a03",
 "OH"=>"rgb(67, 67, 72)",
 "PAU"=>"#cddc39",
 "RTA"=>"#18ffff",
@@ -302,6 +304,8 @@ $sitecolor = array(
 "IND"=>"#e040fb",
 "MEX"=>"#7c4dff",
 "NTC"=>"rgb(43, 144, 143)",
+"NTA"=>"#058028",
+"MI"=>"#944a03",
 "OH"=>"rgb(67, 67, 72)",
 "PAU"=>"#cddc39",
 "RTA"=>"#18ffff",
@@ -332,7 +336,9 @@ var getColor = {
 'IND':'#e040fb',
 'MEX':'#7c4dff',
 'NTC':'rgb(43, 144, 143)',
+'NTA':'#058028',
 'OH':'rgb(67, 67, 72)',
+'MI':'#944a03',
 'PAU':'#cddc39',
 'RTA':'#18ffff',
 'RVC':'rgb(247, 163, 92)',
@@ -408,7 +414,9 @@ var getColor = {
 'IND':'#e040fb',
 'MEX':'#7c4dff',
 'NTC':'rgb(43, 144, 143)',
+'NTA':'#058028',
 'OH':'rgb(67, 67, 72)',
+'MI':'#944a03',
 'PAU':'#cddc39',
 'RTA':'#18ffff',
 'RVC':'rgb(247, 163, 92)',
@@ -2039,7 +2047,9 @@ when location = 'CAN' then 'rgb(241 92 128)'
 when location = 'IND' then '#e040fb'
 when location = 'MEX' then '#7c4dff'
 when location = 'NTC' then 'rgb(43 144 143)'
+when location = 'NTA' then '#058028'
 when location = 'OH' then 'rgb(67 67 72)'
+when location = 'MI' then '#944a03'
 when location = 'PAU' then '#cddc39'
 when location = 'RTA' then '#18ffff'
 when location = 'RVC' then 'rgb(247 163 92)'
@@ -2135,8 +2145,12 @@ $(function() {
            color: '#7c4dff'},{type: 'area',
            name: 'NTC',
            color: 'rgb(43, 144, 143)'},{type: 'area',
+           name: 'NTA',
+           color: '#058028'},{type: 'area',
            name: 'OH',
            color: 'rgb(67, 67, 72)'},{type: 'area',
+           name: 'MI',
+           color: '#944a03'},{type: 'area',
            name: 'PAU',
            color: '#cddc39'},{type: 'area',
            name: 'RTA',
@@ -2195,7 +2209,9 @@ when location = 'CAN' then 'rgb(241 92 128)'
 when location = 'IND' then '#e040fb'
 when location = 'MEX' then '#7c4dff'
 when location = 'NTC' then 'rgb(43 144 143)'
+when location = 'NTA' then '#058028'
 when location = 'OH' then 'rgb(67 67 72)'
+when location = 'MI' then '#944a03'
 when location = 'PAU' then '#cddc39'
 when location = 'RTA' then '#18ffff'
 when location = 'RVC' then 'rgb(247 163 92)'
@@ -2306,8 +2322,12 @@ $(function() {
            color: '#7c4dff'},{type: 'area',
            name: 'NTC',
            color: 'rgb(43, 144, 143)'},{type: 'area',
+           name: 'NTA',
+           color: '#058028'},{type: 'area',
            name: 'OH',
            color: 'rgb(67, 67, 72)'},{type: 'area',
+           name: 'MI',
+           color: '#944a03'},{type: 'area',
            name: 'PAU',
            color: '#cddc39'},{type: 'area',
            name: 'RTA',
@@ -3505,7 +3525,7 @@ $monthtotals = db_query($sql);
         ]
     });
 });
-
+		
 <?php
 
 $sql="select distinct casedate as period from
@@ -3533,32 +3553,60 @@ $sql="select distinct casedate as period from
 )p";
 $periods = db_query($sql);
 
-$sql="select distinct location, result from
-(
-		select sum(count) as count, casedate, location, result from 
+$sql="select distinct location from (
+	select sum(count) as count, casedate, location, result from (
+		select count(result) as count, casedate, location, result from 
 		(
-		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
-		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
-		d.name as location, 
-		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
+			select distinct object_id, casedate, monthnum, location, result from
+			(
+			select 
+				DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+				DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+				d.name as location, 
+				left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
+				object_id
 
-		from ost_form_entry fe 
-		join ost_form_entry_values fev on fe.id = fev.entry_id 
-		join ost_ticket t on fe.object_id = t.ticket_id 
-		join ost_department d on t.dept_id = d.id
-		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+							from ost_form_entry fe 
+							join ost_form_entry_values fev on fe.id = fev.entry_id 
+							join ost_ticket t on fe.object_id = t.ticket_id 
+							join ost_department d on t.dept_id = d.id
+							join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
 
-		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
-		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
-		)data
+							where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+							and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Negative'
+			)dis                
+		)dsum
+		group by casedate, location
+		union all
+		SELECT 0 as count, casedate, name as location, 'Negative' as result FROM ost_department 
+				join
 
-		where result = 'Negative'
-		group by casedate, location, result
+				(select distinct casedate from
+				(
+					select distinct object_id, casedate, monthnum, location, result from
+			(
+			select 
+				DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
+				DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+				d.name as location, 
+				left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
+				object_id
 
-		
-)data    
+							from ost_form_entry fe 
+							join ost_form_entry_values fev on fe.id = fev.entry_id 
+							join ost_ticket t on fe.object_id = t.ticket_id 
+							join ost_department d on t.dept_id = d.id
+							join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
 
-group by casedate, location, result    
+							where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+							and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Negative'
+			)dis                
+				)p)j
+				on 1=1
+	)data
+	group by casedate, location, result
+	order by location, month(str_to_date(left(casedate,3),'%b')) 
+)l   
 ";
 $locs = db_query($sql);
 
@@ -3682,6 +3730,7 @@ order by location, monthnum) data
 
 group by casedate order by monthnum
 ";
+
 $monthtotals = db_query($sql);	
 
 		?>
@@ -3712,7 +3761,7 @@ $monthtotals = db_query($sql);
             min: 0,
              allowDecimals: false,
                  title: {
-                 text: 'Number of Positives YTD'
+                 text: 'Number of Negatives YTD'
              },
             opposite: true,
             stackLabels: {
@@ -3725,7 +3774,7 @@ $monthtotals = db_query($sql);
         },{ // Secondary yAxis
         allowDecimals: false,
         title: {
-            text: 'Number of Positives',
+            text: 'Number of Negatives',
             style: {
                 fontWeight: 'bold',
                 color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
@@ -3806,7 +3855,7 @@ $monthtotals = db_query($sql);
         }
         ]
     });
-})
+});
 
 <?php
 
@@ -3832,7 +3881,9 @@ var getColor = {
 'IND':'#e040fb',
 'MEX':'#7c4dff',
 'NTC':'rgb(43, 144, 143)',
+'NTA':'#058028',
 'OH':'rgb(67, 67, 72)',
+'MI':'#944a03',
 'PAU':'#cddc39',
 'RTA':'#18ffff',
 'RVC':'rgb(247, 163, 92)',
@@ -3945,7 +3996,9 @@ var getColor = {
 'IND':'#e040fb',
 'MEX':'#7c4dff',
 'NTC':'rgb(43, 144, 143)',
+'NTA':'#058028',
 'OH':'rgb(67, 67, 72)',
+'MI':'#944a03',
 'PAU':'#cddc39',
 'RTA':'#18ffff',
 'RVC':'rgb(247, 163, 92)',
