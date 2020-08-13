@@ -3864,7 +3864,7 @@ where t.status_id != 3 and topic_id  in (12)";
  
   $SETotal = db_query($sql); 
   
-$sql="SELECT count(t.ticket_id) as COUNT, d.name as Location FROM ost_ticket t join ost_department d on t.dept_id = d.id
+$sql="SELECT count(t.ticket_id) as COUNT, d.name as Location, t.dept_id as locid FROM ost_ticket t join ost_department d on t.dept_id = d.id
 where t.status_id != 3 and topic_id in (12)
 group by d.name";
  
@@ -3924,6 +3924,16 @@ var getColor = {
                     enabled: true,
                     format: '{point.name} ({point.y}) ({point.percentage:.1f}%)'
                 }
+            },
+            series: {
+                cursor: 'pointer',
+                point: {
+                    events: {
+                        click: function() {
+                            location.href = this.options.url;
+                        }
+                    }
+                }
             }
         },
         series: [{
@@ -3932,7 +3942,7 @@ var getColor = {
             data: [
 			     <?php
         foreach ($SElocsdata as $SEloc) { ?>
-			{name:'<?php echo $SEloc["Location"]?>', y:<?php echo $SEloc["COUNT"] ?>,color: getColor['<?php echo $SEloc["Location"]?>']},
+			{name:'<?php echo $SEloc["Location"]?>', y:<?php echo $SEloc["COUNT"] ?>,color: getColor['<?php echo $SEloc["Location"]?>'],url:'tickets.php?queue=12&l=<?php echo $SEloc["locid"]?>&p=1&t=0&s=0&r=2'},
         <?php } ?>
            ]
         }]
