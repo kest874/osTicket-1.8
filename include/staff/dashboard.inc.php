@@ -3987,11 +3987,11 @@ $sql="select sum(count) as count, location from
 		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
 
 		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
-		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
+		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Pending'
 		)data
 
-		where result = 'Pending'
-		group by casedate,  result";
+	
+		group by casedate, location";
  
   $SElocsdata = db_query($sql); 
  
