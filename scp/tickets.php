@@ -361,6 +361,8 @@ if($_POST && !$errors):
                         $_REQUEST['a']=null;
                         if (!$ticket->checkStaffPerm($thisstaff) || $ticket->isClosed())
                             $ticket=null;
+                            
+                        if ($ticket->topic_id == 13)$ticket=null;
                         Draft::deleteForNamespace('ticket.staff%', $thisstaff->getId());
                         // Drop files from the response attachments widget
                         $response_form->setSource(array());
