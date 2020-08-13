@@ -248,7 +248,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
 				<input type="hidden" name="a" value="edit">
 				<input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
                 
-        <div <?php if ($topic == 12 ||$topic == 13) { echo ' class="hidden"';} ?>> 
+        <div <?php if ($topic == 13) { echo ' class="hidden"';} ?>> 
 				<label><?php echo __('Status');?>:</label>
 				
 				<?php	                   
