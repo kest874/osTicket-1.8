@@ -3991,7 +3991,7 @@ $sql="select sum(count) as count, location from
 		)data
 
 	
-		group by casedate, location";
+		group by location";
  
   $SElocsdata = db_query($sql); 
  
