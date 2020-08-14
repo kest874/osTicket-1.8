@@ -172,7 +172,7 @@
           .append($('<input type="hidden"/>').attr('name', this.options.name)
             .val(file.id))
       if (this.options.deletable) {
-        filenode.prepend($('<span><i class="far fa-trash-alt"></i></span>')
+        filenode.prepend($('<span><i class="fa fa-trash"></i></span>')
           .addClass('trash float-right')
           .click($.proxy(this.deleteNode, this, filenode))
         );
