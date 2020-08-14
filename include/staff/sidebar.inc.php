@@ -9,8 +9,8 @@ if(!defined('ADMINPAGE')) {
 	 <li  class="has_sub">
     <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class=" ti-dashboard"></i> <span class="menu-arrow"></span> Dashboard </a> 
         <ul class="list-unstyled">
-            <li><a href="/scp/dashboard.php?begindate=<?php echo $begindate?>&enddate=<?php echo $enddate?>&a=1" title="" id="nav1">Incidents</a></li>
             <li <?php if ($_SESSION['cv19case'] == 0) echo 'class="hidden"';?>><a href="/scp/dashboard.php?a=2" title="" id="nav1">Covid-19</a></li>
+            <li><a href="/scp/dashboard.php?begindate=<?php echo $begindate?>&enddate=<?php echo $enddate?>&a=1" title="" id="nav1">Incidents</a></li>
         </ul>
     </li>
 	
