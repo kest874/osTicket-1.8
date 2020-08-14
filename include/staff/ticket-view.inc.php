@@ -338,7 +338,7 @@ $class = ($_REQUEST['reponse']) ? 'queue-' : 'ticket-';
         </div>
 		<div>
             <label><?php echo __('Division');?>:</label>
-                   <span class="badge label-table bg-danger"> <?php echo Format::htmlchars($ticket->getdeptName()); ?></span>
+                   <span class="badge label-table bg-danger notranslate"> <?php echo Format::htmlchars($ticket->getdeptName()); ?></span>
 		</div>
                 </div>
             </div>
