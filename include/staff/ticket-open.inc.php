@@ -110,7 +110,7 @@ if ($_POST)
         <div  class="form-group">
             <label><?php echo __('Division');?>:</strong></label> 
             
-                <select id="deptId" name="deptId" class="form-control form-control-sm requiredfield">
+                <select id="deptId" name="deptId" class="form-control form-control-sm requiredfield notranslate">
                     <option value="0" selected="selected">&mdash; <?php echo __('Select a Division');?> &mdash;</option>
                     <?php
                     
