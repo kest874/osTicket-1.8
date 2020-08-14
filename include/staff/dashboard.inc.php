@@ -32,7 +32,7 @@ $sitecolor = array(
 
 <div class="subnav">
 
-    <div class="float-left subnavtitle">
+    <div class="float-left subnavtitle  <?php if ($WhichDashboard == 2) echo ' m-b-10'; ?>">
                           
     <?php echo __('Dashboard');  
 	$begindate = $_GET['begindate'];
@@ -50,7 +50,7 @@ $sitecolor = array(
 	?>                        
     
     </div>
-    <div class="btn-group btn-group-sm float-right m-b-10" role="group" aria-label="Button group with nested dropdown">
+    <div class="btn-group btn-group-sm float-right m-b-10  <?php if ($WhichDashboard == 2) echo ' hidden'; ?>" role="group" aria-label="Button group with nested dropdown">
 		
 			
 
@@ -76,9 +76,9 @@ $sitecolor = array(
     </div>
   
     &nbsp <button type="submit" class="btn btn-primary btn-sm">Refresh</button>
-</form>
+
 	  </div>
-	  
+	</form>  
    <div class="clearfix"></div> 
 </div> 
 
@@ -3178,8 +3178,13 @@ Highcharts.chart('associatetrend', {
 </div>
 
 <div class="row">
-    <div class="col-lg-6">
+    <div class="col-lg-3">
         <div class="portlet" id="pendingcovidpie" ><!-- /primary heading -->
+            
+        </div>
+    </div>
+		<div class="col-lg-3">
+        <div class="portlet" id="notestcovidpie" ><!-- /primary heading -->
             
         </div>
     </div>
@@ -3912,7 +3917,7 @@ var getColor = {
         },
         credits: false,
         tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> <b> ({point.y})</b>'
+            pointFormat: '{series.name}: <b> ({point.y})</b>'
         },
 
         plotOptions: {
@@ -3922,7 +3927,7 @@ var getColor = {
                 depth: 35,
                 dataLabels: {
                     enabled: true,
-                    format: '{point.name} ({point.y}) ({point.percentage:.1f}%)'
+                    format: '{point.name} ({point.y})'
                 }
             },
             series: {
@@ -4026,7 +4031,7 @@ var getColor = {
             }
         },
         title: {
-            text: 'Pending Covid Tests by Location (<?php
+            text: 'Tests Pending by Location (<?php
         foreach ($SETotal as $SETotal) { 
 			echo $SETotal["count"];  } ?>)',
             style: {
@@ -4037,7 +4042,7 @@ var getColor = {
         },
         credits: false,
         tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> <b> ({point.y})</b>'
+            pointFormat: '{series.name}: <b> ({point.y})</b>'
         },
         plotOptions: {
             pie: {
@@ -4046,13 +4051,13 @@ var getColor = {
                 depth: 35,
                 dataLabels: {
                     enabled: true,
-                    format: '{point.name} ({point.y}) ({point.percentage:.1f}%)'
+                    format: '{point.name} ({point.y})'
                 }
             }
         },
         series: [{
             type: 'pie',
-            name: 'Open Tests',
+            name: 'Tests Pending',
             data: [
 			     <?php
         foreach ($SElocsdata as $SEloc) { ?>
@@ -4062,7 +4067,367 @@ var getColor = {
         }]
     });
 });		
-	
+
+
+<?php
+
+$sql="select sum(count) as count, location from
+(
+	select * from 
+	 (
+	  SELECT 1 as count, a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valustring
+			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (414)
+			) a
+			JOIN (
+					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (416)
+				)b
+		ON a.object_id=b.object_id
+	)data
+	where value < 36 or isnull(value)
+    union all
+    select 1 as count, location, value, valuestring from 
+ ( 
+ SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
+			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (418)
+			) a
+			JOIN (
+					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (420)
+				)b
+		ON a.object_id=b.object_id)a
+        
+       join  
+        
+        (
+        select fe.object_id from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+                    
+                    where fe.form_id = 12 and fev.field_id in (416) 
+						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
+		)b 
+       ON a.object_id=b.object_id  
+       where isnull(value)
+       
+	union all
+     select 1 as count, location, value, valuestring from 
+ ( 
+ SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
+			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (422)
+			) a
+			JOIN (
+					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (424)
+				)b
+		ON a.object_id=b.object_id)a
+        
+       join  
+        
+        (
+        select fe.object_id from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+                    
+                    where fe.form_id = 12 and fev.field_id in (420) 
+						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
+		)b 
+       ON a.object_id=b.object_id  
+       where isnull(value)
+       
+       union all
+       
+        select 1 as count, location, value, valuestring from 
+ ( 
+ SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
+			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (436)
+			) a
+			JOIN (
+					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (438)
+				)b
+		ON a.object_id=b.object_id)a
+        
+       join  
+        
+        (
+        select fe.object_id from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+                    
+                    where fe.form_id = 12 and fev.field_id in (424) 
+						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
+		)b 
+       ON a.object_id=b.object_id  
+       where isnull(value)
+) res   
+
+group by count ";
+ 
+  $SETotal = db_query($sql); 
+  
+$sql="select sum(count) as count, location from
+(
+	select * from 
+	 (
+	  SELECT 1 as count, a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valustring
+			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (414)
+			) a
+			JOIN (
+					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (416)
+				)b
+		ON a.object_id=b.object_id
+	)data
+	where value < 36 or isnull(value)
+    union all
+    select 1 as count, location, value, valuestring from 
+ ( 
+ SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
+			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (418)
+			) a
+			JOIN (
+					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (420)
+				)b
+		ON a.object_id=b.object_id)a
+        
+       join  
+        
+        (
+        select fe.object_id from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+                    
+                    where fe.form_id = 12 and fev.field_id in (416) 
+						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
+		)b 
+       ON a.object_id=b.object_id  
+       where isnull(value)
+       
+	union all
+     select 1 as count, location, value, valuestring from 
+ ( 
+ SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
+			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (422)
+			) a
+			JOIN (
+					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (424)
+				)b
+		ON a.object_id=b.object_id)a
+        
+       join  
+        
+        (
+        select fe.object_id from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+                    
+                    where fe.form_id = 12 and fev.field_id in (420) 
+						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
+		)b 
+       ON a.object_id=b.object_id  
+       where isnull(value)
+       
+       union all
+       
+        select 1 as count, location, value, valuestring from 
+ ( 
+ SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
+			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (436)
+			) a
+			JOIN (
+					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+					
+					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (438)
+				)b
+		ON a.object_id=b.object_id)a
+        
+       join  
+        
+        (
+        select fe.object_id from ost_form_entry fe 
+					join ost_form_entry_values fev on fe.id = fev.entry_id 
+					join ost_ticket t on fe.object_id = t.ticket_id 
+					join ost_department d on t.dept_id = d.id
+					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+                    
+                    where fe.form_id = 12 and fev.field_id in (424) 
+						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
+		)b 
+       ON a.object_id=b.object_id  
+       where isnull(value)
+) res   
+
+group by location  ";
+ 
+  $SElocsdata = db_query($sql); 
+ 
+ ?>
+   
+ 
+$(function() {
+var getColor = {
+'AST':'	#52e462',
+'BRY':'#ff5252',
+'CAN':'rgb(241, 92, 128)',
+'IND':'#e040fb',
+'MEX':'#7c4dff',
+'NTC':'rgb(43, 144, 143)',
+'NTA':'#058028',
+'OH':'rgb(67, 67, 72)',
+'MI':'#944a03',
+'PAU':'#cddc39',
+'RTA':'#18ffff',
+'RVC':'rgb(247, 163, 92)',
+'TNN1':'#69f0ae',
+'TNN2':'rgb(124, 181, 236)',
+'TNS':'#eeff41',
+'YTD':'#c30000'};
+    Highcharts.chart('notestcovidpie', {
+        chart: {
+            type: 'pie',
+            options3d: {
+                enabled: true,
+                alpha: 45,
+                beta: 0
+            }
+        },
+        title: {
+            text: 'Tests Required by Location (<?php
+        foreach ($SETotal as $SETotal) { 
+			echo $SETotal["count"];  } ?>)',
+            style: {
+            color: '#797979',
+            fontSize: '14px',
+            fontWeight: '600',
+            }
+        },
+        credits: false,
+        tooltip: {
+            pointFormat: '{series.name}: <b> ({point.y})</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                depth: 35,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name} ({point.y})'
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Testing Required',
+            data: [
+			     <?php
+        foreach ($SElocsdata as $SEloc) { ?>
+			{name:'<?php echo $SEloc["location"]?>', y:<?php echo $SEloc["count"] ?>,color: getColor['<?php echo $SEloc["location"]?>']},
+        <?php } ?>
+           ]
+        }]
+    });
+});	
 
 </script>  
 
