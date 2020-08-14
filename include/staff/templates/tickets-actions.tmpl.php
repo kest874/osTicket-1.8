@@ -7,7 +7,7 @@
 <?php
 if (!$count) {
 // Status change
-if ($agent->canManageTickets())
+if ($agent->canManageTickets() &&  $_REQUEST['queue'] <> 3)
     echo TicketStatus::status_options();
 // Mass Priority Change
 if ($agent->hasPerm(Ticket::PERM_EDIT, false)) { ?>
