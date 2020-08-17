@@ -3906,9 +3906,9 @@ var getColor = {
             }
         },
         title: {
-            text: 'Open Covid Cases by Location (<?php
+            text: 'Open Covid Cases by Location (<span style="color:red; font-weight:bold;"><?php
         foreach ($SETotal as $SETotal) { 
-			echo $SETotal["COUNT"];  } ?>)',
+			echo $SETotal["COUNT"];  } ?></span>)',
             style: {
             color: '#797979',
             fontSize: '14px',
@@ -4031,9 +4031,9 @@ var getColor = {
             }
         },
         title: {
-            text: 'Tests Pending by Location (<?php
+            text: 'Tests Pending by Location (<span style="color:red; font-weight:bold;"><?php
         foreach ($SETotal as $SETotal) { 
-			echo $SETotal["count"];  } ?>)',
+			echo $SETotal["count"];  } ?></span>)',
             style: {
             color: '#797979',
             fontSize: '14px',
@@ -4392,9 +4392,9 @@ var getColor = {
             }
         },
         title: {
-            text: 'Tests Required by Location (<?php
+            text: 'Tests Required by Location (<span style="color:red; font-weight:bold;"><?php
         foreach ($SETotal as $SETotal) { 
-			echo $SETotal["count"];  } ?>)',
+			echo $SETotal["count"];  } ?></span>)',
             style: {
             color: '#797979',
             fontSize: '14px',
