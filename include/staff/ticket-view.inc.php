@@ -529,7 +529,7 @@ $tcount = $ticket->getThreadEntries($types)->count();
     <li class="nav-item "><a class="nav-link active" id="ticket-thread-tab" href="#ticket_thread"  data-toggle="tab"><?php
 
         echo sprintf(__('Incident Timeline <span class="badge badge-primary badge-pill">%d</span>'), $tcount); ?></a>
- <?php if (!$topic == 12 ||!$topic == 13) {  ?>
+ <?php if ($topic != 12 && $topic != 13) {  ?>
     <li class="nav-item"><a class="nav-link " id="ticket-tasks-tab" href="#tasks" data-toggle="tab" ><?php
         echo __('Countermeasures');
         if ($ticket->getNumTasks())
