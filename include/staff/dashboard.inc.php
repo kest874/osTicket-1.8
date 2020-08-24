@@ -8,6 +8,8 @@
 <?php 
 $WhichDashboard = $_GET['a'];
 
+If (!$WhichDashboard) $WhichDashboard = 1;
+
 $sitecolor = array(
 "AST"=>"#52e462",
 "BRY"=>"#ff5252",
@@ -315,12 +317,12 @@ $sitecolor = array(
 "TNS"=>"#eeff41",
 "YTD"=>"#c30000");
 $sql="SELECT count(t.ticket_id) as COUNT FROM ost_ticket t 
-where t.status_id != 3 and topic_id not in (12)";
+where t.status_id != 3 and topic_id not in (12,13)";
  
   $SETotal = db_query($sql); 
   
 $sql="SELECT count(t.ticket_id) as COUNT, d.name as Location FROM ost_ticket t join ost_department d on t.dept_id = d.id
-where t.status_id != 3 and topic_id not in (12)
+where t.status_id != 3 and topic_id not in (12,13)
 group by d.name";
  
   $SElocsdata = db_query($sql); 
