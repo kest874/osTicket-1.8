@@ -3197,8 +3197,31 @@ Highcharts.chart('associatetrend', {
     </div>
     
 </div>
+<div class="card-box">
 
+    
+                                        <h4 class="header-title">Daily Covid By Country</h4>
+    
+                                        <div class="mt-3 text-center">
 
+                                           <iframe  width="1280" height="650" src="https://app.powerbi.com/view?r=eyJrIjoiN2IxNTViY2EtZTllNy00MGFhLWIxNTEtYzVjNTQ4ZDA4M2U5IiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
+          
+    
+                                        </div>
+ </div>
+ 
+ <div class="card-box">
+
+    
+                                        <h4 class="header-title">Daily Covid By State</h4>
+    
+                                        <div class="mt-3 text-center">
+
+                                          <iframe  width="1280" height="650" src="https://app.powerbi.com/view?r=eyJrIjoiNmU4ZjI3MWQtNjM4OS00ZWI1LTgxYmItNzEyMjlhZTBhODRlIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
+           
+    
+                                        </div>
+ </div>
 		
 <script>		
 		
