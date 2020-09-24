@@ -482,7 +482,7 @@ var getColor = {
                                 SELECT   COUNT(dateofincident) AS VALUE, 'OPEN' AS Status, FROM_DAYS(TO_DAYS(dateofincident) - MOD(TO_DAYS(dateofincident) 
                                                          - 2, 7)) AS CALENDARWEEK
                                 FROM         ost_ticket join ost_ticket__cdata on ost_ticket.ticket_id = ost_ticket__cdata.ticket_id
-                                WHERE     date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."'
+                                WHERE     date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."' and topic_id not in (12,13)
                                                                GROUP BY FROM_DAYS(TO_DAYS(dateofincident) - MOD(TO_DAYS(dateofincident) - 2, 7)) 
                                 
                                 Union all
@@ -490,13 +490,13 @@ var getColor = {
                                 SELECT   COUNT(closed) AS VALUE, 'CLOSED' AS Status, FROM_DAYS(TO_DAYS(closed) - MOD(TO_DAYS(closed) 
                                                          - 2, 7)) AS CALENDARWEEK
                                 FROM         ost_ticket
-                                WHERE     date(closed) >= '".$sqlbegindate."' and date(closed) <= '".$sqlenddate."'
+                                WHERE     date(closed) >= '".$sqlbegindate."' and date(closed) <= '".$sqlenddate."'  and topic_id not in (12,13)
                                 GROUP BY FROM_DAYS(TO_DAYS(closed) - MOD(TO_DAYS(closed) - 2, 7))) data
                                 
                     )dt
                 group by CALENDARWEEK;";
         $results = db_query($sql); 
-        
+       
     ?> 
     
     
@@ -653,7 +653,7 @@ SELECT   dateofincident as open,
 		FROM_DAYS(TO_DAYS(IFNULL(closed,now())) - MOD(TO_DAYS(IFNULL(closed,now())) 
                                                          - 2, 7)) AS WEEK
 FROM         ost_ticket join ost_ticket__cdata on ost_ticket.ticket_id = ost_ticket__cdata.ticket_id
-WHERE     ost_ticket.status_id = 3 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')
+WHERE     ost_ticket.status_id = 3 and (date(dateofincident) >= '".$sqlbegindate."' and date(dateofincident) <= '".$sqlenddate."')  and topic_id not in (12,13)
 )data
 group by WEEK;";
         $results = db_query($sql); 
@@ -2619,6 +2619,9 @@ $(function() {
 						If ($total["CALENDARYEAR"] == 2019){
                          echo '3.59,';
 						}
+						If ($total["CALENDARYEAR"] == 2020){
+                         echo '3.59,';
+						}
                     }
             ?>]
 		
@@ -2633,6 +2636,9 @@ $(function() {
                          // echo '3.38,';
 						// }
 						If ($total["CALENDARYEAR"] == 2019){
+                         echo '5.20,';
+						}
+						If ($total["CALENDARYEAR"] == 2020){
                          echo '5.20,';
 						}
                     }
@@ -2651,6 +2657,9 @@ $(function() {
 						If ($total["CALENDARYEAR"] == 2019){
                          echo '5.30,';
 						}
+						If ($total["CALENDARYEAR"] == 2020){
+                         echo '5.30,';
+						}
                     }
             ?>]
 		
@@ -2666,6 +2675,9 @@ $(function() {
                           echo '4.20,';
 						 }
 						If ($total["CALENDARYEAR"] == 2019){
+                         echo '3.80,';
+						}
+						If ($total["CALENDARYEAR"] == 2020){
                          echo '3.80,';
 						}
                     }
@@ -2944,6 +2956,9 @@ $(function() {
 						If ($total["CALENDARYEAR"] == 2019){
                          echo '2.17,';
 						}
+						If ($total["CALENDARYEAR"] == 2020){
+                         echo '2.17,';
+						}
                     }
             ?>]
 		
@@ -2960,6 +2975,9 @@ $(function() {
 						If ($total["CALENDARYEAR"] == 2019){
                          echo '2.50,';
 						}
+						If ($total["CALENDARYEAR"] == 2020){
+                         echo '2.50,';
+						}
                     }
             ?>]
 		
@@ -2974,6 +2992,9 @@ $(function() {
                          echo '2.80,';
 						}
 						If ($total["CALENDARYEAR"] == 2019){
+                         echo '2.70,';
+						}
+						If ($total["CALENDARYEAR"] == 2020){
                          echo '2.70,';
 						}
                     }
