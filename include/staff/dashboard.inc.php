@@ -3225,7 +3225,7 @@ Highcharts.chart('associatetrend', {
     
                                         <div class="mt-3 text-center">
 
-                                           <iframe  width="1280" height="650" src="https://app.powerbi.com/view?r=eyJrIjoiN2IxNTViY2EtZTllNy00MGFhLWIxNTEtYzVjNTQ4ZDA4M2U5IiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
+                                           <iframe  width="1280" height="650" src="https://app.powerbi.com/view?r=eyJrIjoiN2Q0MzQ1MWYtY2U3Yi00MTg2LWE0OTItZGZjMjA2NWI0NGQzIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
           
     
                                         </div>
@@ -3238,9 +3238,8 @@ Highcharts.chart('associatetrend', {
     
                                         <div class="mt-3 text-center">
 
-                                          <iframe  width="1280" height="650" src="https://app.powerbi.com/view?r=eyJrIjoiNmU4ZjI3MWQtNjM4OS00ZWI1LTgxYmItNzEyMjlhZTBhODRlIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
+                                          <iframe  width="1280" height="650" src="https://app.powerbi.com/view?r=eyJrIjoiNWE0MGQwNDEtZDBlMC00NTYwLWI2NDctZGQzYjY3OGM3ZTJlIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
            
-    
                                         </div>
  </div>
 		
