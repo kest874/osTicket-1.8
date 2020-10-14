@@ -3249,7 +3249,7 @@ Highcharts.chart('associatetrend', {
 
 $sql="select distinct casedate as period from
 (
-	select sum(count) as count, casedate, location, result from 
+	select sum(count) as count, casedate, location, result, monthnum from 
 	(
 		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
@@ -3268,8 +3268,8 @@ $sql="select distinct casedate as period from
 
 	where result = 'Positive'
 	group by casedate, location, result 
-	order by monthnum
-)p";
+	
+)p order by CAST(monthnum AS UNSIGNED)";
 $periods = db_query($sql);
 
 $sql="select distinct location from (
@@ -3580,7 +3580,7 @@ $monthtotals = db_query($sql);
 
 $sql="select distinct casedate as period from
 (
-	select sum(count) as count, casedate, location, result from 
+	select sum(count) as count, casedate, location, result, monthnum from 
 	(
 		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
@@ -3599,8 +3599,8 @@ $sql="select distinct casedate as period from
 
 	where result = 'Negative'
 	group by casedate, location, result 
-	order by monthnum
-)p";
+	
+)p order by CAST(monthnum AS UNSIGNED)";
 $periods = db_query($sql);
 
 $sql="select distinct location from (
@@ -3724,7 +3724,7 @@ $locsdata = db_query($sql);
 $sql = "select sum(count) as count, casedate from (
 select sum(count) as count, casedate,monthnum, location, result from (
     
-    select count(result) as count, casedate, monthnum, location, result from 
+    select count(object_id) as count, casedate, monthnum, location, result from 
 	(
 		select distinct object_id, casedate, monthnum, location, result from
 		(
