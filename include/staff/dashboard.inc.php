@@ -3527,7 +3527,7 @@ $monthtotals = db_query($sql);
                 formatter: function(){
                     console.log(this);
                     var val = this.y;
-                    if (val < 2) {
+                    if (val < 1) {
                         return '';
                     }
                     return val;
@@ -3858,7 +3858,7 @@ $monthtotals = db_query($sql);
                 formatter: function(){
                     console.log(this);
                     var val = this.y;
-                    if (val < 2) {
+                    if (val < 1) {
                         return '';
                     }
                     return val;
