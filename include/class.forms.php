@@ -4716,8 +4716,7 @@ class DatetimePickerWidget extends Widget {
                 });
           
                 $(function() {
-                var savetrigger = false;
-                        
+                                       
                 $("#<?php echo $this->id; ?>").on("change.datetimepicker", function (e) {
                               
                     var charCode = e.which || e.keyCode; 
@@ -4744,6 +4743,23 @@ class DatetimePickerWidget extends Widget {
                                     
                             savetrigger = true;
                          }
+                         <?php if ($this->field->getId() == 414||$this->field->getId() == 418||$this->field->getId() == 422||$this->field->getId() == 436) {?>  
+                         	
+                           $("#<?php echo $this->id; ?>").notify({
+                                text: '<strong style="color:red;">Please ensure to choose a Test Result below: (Pending/Positive/Negative)</strong>',
+                                image: '<i class="fa fa-exclamation-circle" style="color:red;"></i>'
+                            }, {
+                                style: 'metro',
+																className: 'warning',
+																autoHide: false,
+																clickToHide: true,
+																position:'top'
+                            });
+                            
+                         <?php } ?>   
+                            
+                            
+                            
                     });
              });       
             
