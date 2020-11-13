@@ -2620,7 +2620,7 @@ $(function() {
                          echo '3.59,';
 						}
 						If ($total["CALENDARYEAR"] == 2020){
-                         echo '3.59,';
+                         echo '2.38,';
 						}
                     }
             ?>]
@@ -2646,7 +2646,7 @@ $(function() {
 		
         },
 		{
-            name: 'IR (2016: 336370)',
+            name: 'IR (2018: 336370)',
             type: 'line',
             data: [<?php foreach ($totals as $total){
            
@@ -2658,7 +2658,7 @@ $(function() {
                          echo '5.30,';
 						}
 						If ($total["CALENDARYEAR"] == 2020){
-                         echo '5.30,';
+                         echo '5.10,';
 						}
                     }
             ?>]
@@ -2666,7 +2666,7 @@ $(function() {
         },
 		
        {
-            name: 'IR (2016: 336360)',
+            name: 'IR (2018: 336360)',
             type: 'line',
             data: [<?php foreach ($totals as $total){
            
@@ -2678,7 +2678,7 @@ $(function() {
                          echo '3.80,';
 						}
 						If ($total["CALENDARYEAR"] == 2020){
-                         echo '3.80,';
+                         echo '3.50,';
 						}
                     }
             ?>]
@@ -2957,14 +2957,14 @@ $(function() {
                          echo '2.17,';
 						}
 						If ($total["CALENDARYEAR"] == 2020){
-                         echo '2.17,';
+                         echo '1.45,';
 						}
                     }
             ?>]
 		
         },
 		{
-            name: 'DR (2016: 336370)',
+            name: 'DR (2018: 336370)',
             type: 'line',
             data: [<?php foreach ($totals as $total){
            
@@ -2983,7 +2983,7 @@ $(function() {
 		
         },
 		{
-            name: 'DR (2016: 336360)',
+            name: 'DR (2018: 336360)',
             type: 'line',
             data: [<?php foreach ($totals as $total){
            
@@ -2995,7 +2995,7 @@ $(function() {
                          echo '2.70,';
 						}
 						If ($total["CALENDARYEAR"] == 2020){
-                         echo '2.70,';
+                         echo '2.40,';
 						}
                     }
             ?>]
