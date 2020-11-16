@@ -3385,7 +3385,7 @@ $locs = db_query($sql);
 			on 1=1
 )data
 group by casedate, location
-order by location, monthnum
+order by location, CAST(monthnum AS UNSIGNED)
 ";		
 $locsdata = db_query($sql);	
 
@@ -3447,7 +3447,7 @@ select sum(count) as count, casedate,monthnum, location, result from (
 group by casedate, location
 order by location, monthnum) data
 
-group by casedate order by monthnum
+group by casedate order by CAST(monthnum AS UNSIGNED)
 ";
 
 $monthtotals = db_query($sql);	
@@ -3716,7 +3716,7 @@ $locs = db_query($sql);
 			on 1=1
 )data
 group by casedate, location
-order by location, monthnum
+order by location, CAST(monthnum AS UNSIGNED)
 ";		
 $locsdata = db_query($sql);	
 
@@ -3778,7 +3778,7 @@ select sum(count) as count, casedate,monthnum, location, result from (
 group by casedate, location
 order by location, monthnum) data
 
-group by casedate order by monthnum
+group by casedate order by CAST(monthnum AS UNSIGNED)
 ";
 
 $monthtotals = db_query($sql);	
