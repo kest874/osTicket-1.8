@@ -4743,7 +4743,7 @@ class DatetimePickerWidget extends Widget {
                                     
                             savetrigger = true;
                          }
-                         <?php if ($this->field->getId() == 414||$this->field->getId() == 418||$this->field->getId() == 422||$this->field->getId() == 436) {?>  
+                         <?php if ($this->field->getId() == 414||$this->field->getId() == 418||$this->field->getId() == 422||$this->field->getId() == 436||$this->field->getId() == 499||$this->field->getId() == 502||$this->field->getId() == 515||$this->field->getId() == 518) {?>  
                          	
                            $("#<?php echo $this->id; ?>").notify({
                                 text: '<strong style="color:red;">Please ensure to choose a Test Result below: (Pending/Positive/Negative)</strong>',
