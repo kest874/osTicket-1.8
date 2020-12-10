@@ -4167,8 +4167,27 @@ class ChoicesWidget extends Widget {
         }
         if (!is_array($values))
             $values = $have_def ? array($def_key => $choices[$def_key]) : array();
+          
+        foreach ($choices as $key => $name) {
+        	$ut=$values[$key];
+        }    
+
+				
+        if ($this->value == 4) $bgcolor = ' bg-altwarning ';
+        if ($this->value == 3) $bgcolor = ' bg-altsuccess ';
+        if ($this->value == 2) $bgcolor = ' bg-altdanger ';
+       
+        if ($this->field->getId() == 416) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 420) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 424) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 438) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 501) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 504) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 517) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 520) {$sclass = $bgcolor;}
+        
         //if (isset($config['classes']))
-            $classes = 'class="form-control form-control-sm notranslate'.$config['classes'].'"';
+            $classes = 'class="form-control form-control-sm notranslate'.$sclass.$config['classes'].'"';
         ?>
         <select <?php echo $disabled ?> name="<?php echo $this->name; ?>[]"
             <?php echo implode(' ', array_filter(array($classes))); ?>
@@ -4698,10 +4717,23 @@ class DatetimePickerWidget extends Widget {
             $datetime = new DateTime('now');
             $datetime->setTimezone($timezone);
         }
+        
+        $bgcolor = ' bg-altgrey ';
+        
+        if ($this->field->getId() == 414 && $this->value) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 418 && $this->value) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 422 && $this->value) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 436 && $this->value) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 499 && $this->value) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 502 && $this->value) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 515 && $this->value) {$sclass = $bgcolor;}
+        if ($this->field->getId() == 518 && $this->value) {$sclass = $bgcolor;}
+        
         ?>
+        
          <div class="form-group">
                 <div class="input-group input-group-sm date" id="<?php echo $this->id; ?>" data-target-input="nearest">
-                    <input type="text" name="<?php echo $this->name; ?>" value="<?php echo $this->value; ?>" class="form-control form-control-sm datetimepicker-input" data-target="#<?php echo $this->id; ?>"/>
+                    <input type="text" name="<?php echo $this->name; ?>" value="<?php echo $this->value; ?>" class="form-control form-control-sm  datetimepicker-input <?php echo $sclass;?>" data-target="#<?php echo $this->id; ?>"/>
                     <div class="input-group-append" data-target="#<?php echo $this->id; ?>" data-toggle="datetimepicker">
                         <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                     </div>
