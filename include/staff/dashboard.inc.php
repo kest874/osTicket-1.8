@@ -4128,293 +4128,457 @@ var getColor = {
 
 <?php
 
-$sql="select sum(count) as count, location from
+$sql="select sum(count) as count from 
 (
-	select * from 
-	 (
-	  SELECT 1 as count, a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valustring
-			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (414)
-			) a
-			JOIN (
-					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (416)
-				)b
-		ON a.object_id=b.object_id
-	)data
-	where value < 36 or isnull(value)
-    union all
-    select 1 as count, location, value, valuestring from 
- ( 
- SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
-			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (418)
-			) a
-			JOIN (
-					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (420)
-				)b
-		ON a.object_id=b.object_id)a
-        
-       join  
-        
-        (
-        select fe.object_id from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-                    
-                    where fe.form_id = 12 and fev.field_id in (416) 
-						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
-		)b 
-       ON a.object_id=b.object_id  
-       where isnull(value)
-       
+	/*1st test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (416) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (418) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+	 
 	union all
-     select 1 as count, location, value, valuestring from 
- ( 
- SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
-			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (422)
-			) a
-			JOIN (
-					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (424)
-				)b
-		ON a.object_id=b.object_id)a
-        
-       join  
-        
-        (
-        select fe.object_id from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-                    
-                    where fe.form_id = 12 and fev.field_id in (420) 
-						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
-		)b 
-       ON a.object_id=b.object_id  
-       where isnull(value)
-       
-       union all
-       
-        select 1 as count, location, value, valuestring from 
- ( 
- SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
-			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (436)
-			) a
-			JOIN (
-					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (438)
-				)b
-		ON a.object_id=b.object_id)a
-        
-       join  
-        
-        (
-        select fe.object_id from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-                    
-                    where fe.form_id = 12 and fev.field_id in (424) 
-						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
-		)b 
-       ON a.object_id=b.object_id  
-       where isnull(value)
-) res   
+	 
+	/*2nd test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (420) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (422) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+						 
+	union all
+					  
+	/*3rd test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (424) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (436) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
 
-group by count ";
+	union all
+
+	/*4th test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (438) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (499) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+
+	union all
+
+	/*5th test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (501) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (502) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+
+	union all
+
+	/*6th test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (504) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (515) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+
+	union all
+
+	/*7th test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (517) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (518) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+    
+    union all
+    
+    /*8th test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (520) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			
+		)data 
+					
+)data
+group by count
+
+";
  
   $SETotal = db_query($sql); 
   
-$sql="select sum(count) as count, location from
+$sql="select sum(count) as count, location from 
 (
-	select * from 
-	 (
-	  SELECT 1 as count, a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valustring
-			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (414)
-			) a
-			JOIN (
-					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (416)
-				)b
-		ON a.object_id=b.object_id
-	)data
-	where value < 36 or isnull(value)
-    union all
-    select 1 as count, location, value, valuestring from 
- ( 
- SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
-			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (418)
-			) a
-			JOIN (
-					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (420)
-				)b
-		ON a.object_id=b.object_id)a
-        
-       join  
-        
-        (
-        select fe.object_id from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-                    
-                    where fe.form_id = 12 and fev.field_id in (416) 
-						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
-		)b 
-       ON a.object_id=b.object_id  
-       where isnull(value)
-       
+	/*1st test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (416) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (418) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+	 
 	union all
-     select 1 as count, location, value, valuestring from 
- ( 
- SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
-			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (422)
-			) a
-			JOIN (
-					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (424)
-				)b
-		ON a.object_id=b.object_id)a
-        
-       join  
-        
-        (
-        select fe.object_id from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-                    
-                    where fe.form_id = 12 and fev.field_id in (420) 
-						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
-		)b 
-       ON a.object_id=b.object_id  
-       where isnull(value)
-       
-       union all
-       
-        select 1 as count, location, value, valuestring from 
- ( 
- SELECT a.location, length(concat(a.value,b.value)) as value, concat(a.value,b.value) as valuestring, a.object_id
-			FROM (	select fe.object_id,d.name as location, fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (436)
-			) a
-			JOIN (
-					select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-					
-					where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (438)
-				)b
-		ON a.object_id=b.object_id)a
-        
-       join  
-        
-        (
-        select fe.object_id from ost_form_entry fe 
-					join ost_form_entry_values fev on fe.id = fev.entry_id 
-					join ost_ticket t on fe.object_id = t.ticket_id 
-					join ost_department d on t.dept_id = d.id
-					join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
-                    
-                    where fe.form_id = 12 and fev.field_id in (424) 
-						and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Positive'
-		)b 
-       ON a.object_id=b.object_id  
-       where isnull(value)
-) res   
+	 
+	/*2nd test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (420) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (422) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+						 
+	union all
+					  
+	/*3rd test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (424) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (436) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
 
-group by location  ";
+	union all
+
+	/*4th test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (438) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (499) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+
+	union all
+
+	/*5th test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (501) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (502) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+
+	union all
+
+	/*6th test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (504) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (515) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+
+	union all
+
+	/*7th test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (517) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			left join 
+			(
+				select fe.object_id as nt_object_id from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (518) and length(fev.value) > 5 /*next test date*/
+			)nt
+			ON ct.object_id=nt_object_id 
+		)data 
+						 
+	where isnull(nt_object_id)
+    
+    union all
+    
+    /*8th test*/
+	select 1 as count, location, object_id from (				
+		select * from
+			(
+				select fe.object_id,d.name as location,fev.value from ost_form_entry fe 
+				join ost_form_entry_values fev on fe.id = fev.entry_id 
+				join ost_ticket t on fe.object_id = t.ticket_id 
+				join ost_department d on t.dept_id = d.id
+				join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
+				
+				where t.status_id = 1 and fe.form_id = 12 and fev.field_id in (520) and (fev.value like '%Positive%' or fev.value like '%Negative%') /*current test result*/
+			)ct
+			
+		)data 
+					
+)data
+group by location
+
+";
  
   $SElocsdata = db_query($sql); 
  
