@@ -4026,7 +4026,7 @@ $sql="select sum(count) as count from
 		join ost_department d on t.dept_id = d.id
 		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
 
-		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+		where fe.form_id = 12 and fev.field_id in (416,420,424,438,501,504,517,520) 
 		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) <> 'N/A'
 		)data
 
@@ -4048,7 +4048,7 @@ $sql="select sum(count) as count, location from
 		join ost_department d on t.dept_id = d.id
 		join ost_form_entry_values fevd on fe.id = fevd.entry_id and  fevd.field_id in (334)
 
-		where fe.form_id = 12 and fev.field_id in (416,420,424,438) 
+		where fe.form_id = 12 and fev.field_id in (416,420,424,438,501,504,517,520) 
 		and left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) = 'Pending'
 		)data
 
