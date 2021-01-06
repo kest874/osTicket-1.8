@@ -3261,10 +3261,11 @@ Highcharts.chart('associatetrend', {
 
 $sql="select distinct casedate as period from
 (
-	select sum(count) as count, casedate, location, result, monthnum from 
+	select sum(count) as count, casedate, location, result, monthnum, caseyear from 
 	(
 		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+        DATE_FORMAT(left(fevd.value,10), '%Y') as caseyear,
         d.name as location, 
 		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
 
@@ -3281,7 +3282,7 @@ $sql="select distinct casedate as period from
 	where result = 'Positive'
 	group by casedate, location, result 
 	
-)p order by CAST(monthnum AS UNSIGNED)";
+)p order by CAST(caseyear AS UNSIGNED), CAST(monthnum AS UNSIGNED)";
 $periods = db_query($sql);
 
 $sql="select distinct location from (
@@ -3345,13 +3346,14 @@ $locs = db_query($sql);
 
  $sql="	select sum(count) as count, casedate, location, result from (
     
-    select count(result) as count, casedate, monthnum, location, result from 
+    select count(result) as count, casedate, monthnum, caseyear, location, result from 
 	(
-		select distinct object_id, casedate, monthnum, location, result from
+		select distinct object_id, casedate, monthnum, caseyear, location, result from
 		(
 		select 
 			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+            DATE_FORMAT(left(fevd.value,10), '%Y') as caseyear,
 			d.name as location, 
 			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
 			object_id
@@ -3370,16 +3372,17 @@ $locs = db_query($sql);
     
  union all 
  
- 	SELECT 0 as count, casedate, monthnum, name as location, 'Positive' as result FROM ost_department 
+ 	SELECT 0 as count, casedate, monthnum, caseyear, name as location, 'Positive' as result FROM ost_department 
 			join
 
-			(select distinct casedate, monthnum from
+			(select distinct casedate, monthnum, caseyear from
 			(
-				select distinct object_id, casedate, monthnum, location, result from
+				select distinct object_id, casedate, monthnum, caseyear, location, result from
 		(
 		select 
 			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+            DATE_FORMAT(left(fevd.value,10), '%Y') as caseyear,
 			d.name as location, 
 			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
 			object_id
@@ -3397,21 +3400,22 @@ $locs = db_query($sql);
 			on 1=1
 )data
 group by casedate, location
-order by location, CAST(monthnum AS UNSIGNED)
+order by location, CAST(caseyear AS UNSIGNED), CAST(monthnum AS UNSIGNED)
 ";		
 $locsdata = db_query($sql);	
 
 
 $sql = "select sum(count) as count, casedate from (
-select sum(count) as count, casedate,monthnum, location, result from (
+select sum(count) as count, casedate, monthnum, caseyear, location, result from (
     
-    select count(result) as count, casedate, monthnum, location, result from 
+    select count(result) as count, casedate, monthnum, caseyear, location, result from 
 	(
-		select distinct object_id, casedate, monthnum, location, result from
+		select distinct object_id, casedate, monthnum, caseyear, location, result from
 		(
 		select 
 			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+            DATE_FORMAT(left(fevd.value,10), '%Y') as caseyear,
 			d.name as location, 
 			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
 			object_id
@@ -3430,16 +3434,17 @@ select sum(count) as count, casedate,monthnum, location, result from (
     
  union all 
  
- 	SELECT 0 as count, casedate, monthnum, name as location, 'Positive' as result FROM ost_department 
+ 	SELECT 0 as count, casedate, monthnum, caseyear, name as location, 'Positive' as result FROM ost_department 
 			join
 
-			(select distinct casedate, monthnum from
+			(select distinct casedate, monthnum, caseyear from
 			(
-				select distinct object_id, casedate, monthnum, location, result from
+				select distinct object_id, casedate, monthnum, caseyear, location, result from
 		(
 		select 
 			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+            DATE_FORMAT(left(fevd.value,10), '%Y') as caseyear,
 			d.name as location, 
 			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
 			object_id
@@ -3457,9 +3462,9 @@ select sum(count) as count, casedate,monthnum, location, result from (
 			on 1=1
 )data
 group by casedate, location
-order by location, monthnum) data
+order by location, caseyear, monthnum) data
 
-group by casedate order by CAST(monthnum AS UNSIGNED)
+group by casedate order by CAST(caseyear AS UNSIGNED), CAST(monthnum AS UNSIGNED)
 ";
 
 $monthtotals = db_query($sql);	
@@ -3592,10 +3597,11 @@ $monthtotals = db_query($sql);
 
 $sql="select distinct casedate as period from
 (
-	select sum(count) as count, casedate, location, result, monthnum from 
+	select sum(count) as count, casedate, location, result, monthnum, caseyear from 
 	(
 		select 1 as count,DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 		DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+        DATE_FORMAT(left(fevd.value,10), '%Y') as caseyear,
         d.name as location, 
 		left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result 
 
@@ -3612,7 +3618,7 @@ $sql="select distinct casedate as period from
 	where result = 'Negative'
 	group by casedate, location, result 
 	
-)p order by CAST(monthnum AS UNSIGNED)";
+)p order by CAST(caseyear AS UNSIGNED), CAST(monthnum AS UNSIGNED)";
 $periods = db_query($sql);
 
 $sql="select distinct location from (
@@ -3676,13 +3682,14 @@ $locs = db_query($sql);
 
  $sql="	select sum(count) as count, casedate, location, result from (
     
-    select count(result) as count, casedate, monthnum, location, result from 
+    select count(result) as count, casedate, monthnum, caseyear, location, result from 
 	(
-		select distinct object_id, casedate, monthnum, location, result from
+		select distinct object_id, casedate, monthnum, caseyear, location, result from
 		(
 		select 
 			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+            DATE_FORMAT(left(fevd.value,10), '%Y') as caseyear,
 			d.name as location, 
 			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
 			object_id
@@ -3701,16 +3708,17 @@ $locs = db_query($sql);
     
  union all 
  
- 	SELECT 0 as count, casedate, monthnum, name as location, 'Negative' as result FROM ost_department 
+ 	SELECT 0 as count, casedate, monthnum, caseyear, name as location, 'Negative' as result FROM ost_department 
 			join
 
-			(select distinct casedate, monthnum from
+			(select distinct casedate, monthnum, caseyear from
 			(
-				select distinct object_id, casedate, monthnum, location, result from
+				select distinct object_id, casedate, monthnum, caseyear, location, result from
 		(
 		select 
 			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+            DATE_FORMAT(left(fevd.value,10), '%Y') as caseyear,
 			d.name as location, 
 			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
 			object_id
@@ -3728,21 +3736,22 @@ $locs = db_query($sql);
 			on 1=1
 )data
 group by casedate, location
-order by location, CAST(monthnum AS UNSIGNED)
+order by location, CAST(caseyear AS UNSIGNED), CAST(monthnum AS UNSIGNED)
 ";		
 $locsdata = db_query($sql);	
 
 
 $sql = "select sum(count) as count, casedate from (
-select sum(count) as count, casedate,monthnum, location, result from (
+select sum(count) as count, casedate, monthnum, caseyear, location, result from (
     
-    select count(object_id) as count, casedate, monthnum, location, result from 
+    select count(result) as count, casedate, monthnum, caseyear, location, result from 
 	(
-		select distinct object_id, casedate, monthnum, location, result from
+		select distinct object_id, casedate, monthnum, caseyear, location, result from
 		(
 		select 
 			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+            DATE_FORMAT(left(fevd.value,10), '%Y') as caseyear,
 			d.name as location, 
 			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
 			object_id
@@ -3761,16 +3770,17 @@ select sum(count) as count, casedate,monthnum, location, result from (
     
  union all 
  
- 	SELECT 0 as count, casedate, monthnum, name as location, 'Negative' as result FROM ost_department 
+ 	SELECT 0 as count, casedate, monthnum, caseyear, name as location, 'Negative' as result FROM ost_department 
 			join
 
-			(select distinct casedate, monthnum from
+			(select distinct casedate, monthnum, caseyear from
 			(
-				select distinct object_id, casedate, monthnum, location, result from
+				select distinct object_id, casedate, monthnum, caseyear, location, result from
 		(
 		select 
 			DATE_FORMAT(left(fevd.value,10), '%b %Y') as casedate, 
 			DATE_FORMAT(left(fevd.value,10), '%c') as monthnum,
+            DATE_FORMAT(left(fevd.value,10), '%Y') as caseyear,
 			d.name as location, 
 			left(right(fev.value,length(fev.value) - instr(fev.value,':')-1),length(right(fev.value,length(fev.value) - instr(fev.value,':')-1))-2) as result,
 			object_id
@@ -3788,9 +3798,9 @@ select sum(count) as count, casedate,monthnum, location, result from (
 			on 1=1
 )data
 group by casedate, location
-order by location, monthnum) data
+order by location, caseyear, monthnum) data
 
-group by casedate order by CAST(monthnum AS UNSIGNED)
+group by casedate order by CAST(caseyear AS UNSIGNED), CAST(monthnum AS UNSIGNED)
 ";
 
 $monthtotals = db_query($sql);	
