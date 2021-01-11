@@ -2641,6 +2641,9 @@ $(function() {
 						If ($total["CALENDARYEAR"] == 2020){
                          echo '5.20,';
 						}
+						If ($total["CALENDARYEAR"] == 2021){
+                         echo '1.74,';
+						}
                     }
             ?>]
 		
@@ -2658,6 +2661,9 @@ $(function() {
                          echo '5.30,';
 						}
 						If ($total["CALENDARYEAR"] == 2020){
+                         echo '5.10,';
+						}
+						If ($total["CALENDARYEAR"] == 2021){
                          echo '5.10,';
 						}
                     }
@@ -2678,6 +2684,9 @@ $(function() {
                          echo '3.80,';
 						}
 						If ($total["CALENDARYEAR"] == 2020){
+                         echo '3.50,';
+						}
+						If ($total["CALENDARYEAR"] == 2021){
                          echo '3.50,';
 						}
                     }
@@ -2959,6 +2968,9 @@ $(function() {
 						If ($total["CALENDARYEAR"] == 2020){
                          echo '1.45,';
 						}
+						If ($total["CALENDARYEAR"] == 2021){
+                         echo '0.90,';
+						}
                     }
             ?>]
 		
@@ -2978,6 +2990,9 @@ $(function() {
 						If ($total["CALENDARYEAR"] == 2020){
                          echo '2.50,';
 						}
+						If ($total["CALENDARYEAR"] == 2021){
+                         echo '2.50,';
+						}
                     }
             ?>]
 		
@@ -2995,6 +3010,9 @@ $(function() {
                          echo '2.70,';
 						}
 						If ($total["CALENDARYEAR"] == 2020){
+                         echo '2.40,';
+						}
+						If ($total["CALENDARYEAR"] == 2021){
                          echo '2.40,';
 						}
                     }
