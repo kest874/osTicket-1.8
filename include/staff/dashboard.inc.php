@@ -2451,6 +2451,7 @@ group by data.CALENDARYEAR,data.MONTHNUM,data.location
 order by data.CALENDARYEAR, data.MONTHNUM
 ";
 
+
 $locsdata = db_query($sql1); 
 $sql2="select sum(data.recordables) as recordables, h.hours, data.MONTHNAME,data.MONTHNUM,data.CALENDARYEAR, concat(data.MONTHNAME,' ',data.CALENDARYEAR) as period  from (
 	select sum(isrecordable)as recordables,0 as hours, d.name as location,
@@ -2696,8 +2697,13 @@ $(function() {
         ]
     });
 }); 
-////////////////////////////////////////////////////////////////////  DART  //////////////////////////////////////////////////////////////////// 
+
 <?php
+var_dump($sql);
+var_dump($sql1);
+var_dump($sql2);
+////////////////////////////////////////////////////////////////////  DART  //////////////////////////////////////////////////////////////////// 
+
 $sql="select distinct d.name as location
 from 
 ost_ticket t join ost_department d on t.dept_id = d.id join ost_ticket__cdata tc on tc.ticket_id = t.ticket_id  join ost_hours h on h.location = d.name and month(STR_TO_DATE(left(tc.dateofincident,10), '%Y-%m-%d')) = month(str_to_date(h.month,'%b')) and 
@@ -3239,6 +3245,18 @@ Highcharts.chart('associatetrend', {
 <div class="card-box">
 
     
+                                        <h4 class="header-title">Positivity Cases at NASG </h4>
+    
+                                        <div class="mt-3 text-center">
+
+                                           <iframe  width="1280" height="650" src="http://sssql01/PowerBI_Reports/powerbi/Reports/Covid%20Tests?rs:embed=true" frameborder="0" allowFullScreen="true"></iframe>
+          
+    
+                                        </div>
+ </div>
+<div class="card-box">
+
+    
                                         <h4 class="header-title">Daily Covid By Country</h4>
     
                                         <div class="mt-3 text-center">
@@ -3495,7 +3513,7 @@ $monthtotals = db_query($sql);
             type: 'column'
         },
         title: {
-            text: 'Positive Results by location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
+            text: 'Positive Case Results by location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
             style: {
             color: '#797979',
             fontSize: '14px',
@@ -3831,7 +3849,7 @@ $monthtotals = db_query($sql);
             type: 'column'
         },
         title: {
-            text: 'Negative Results by location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
+            text: 'Negative Case Results by location (<?php echo str_replace('-','/',$begindate)." - ".str_replace('-','/',$enddate) ?>)',
             style: {
             color: '#797979',
             fontSize: '14px',
