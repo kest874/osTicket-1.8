@@ -3242,7 +3242,9 @@ Highcharts.chart('associatetrend', {
     </div>
     
 </div>
-<div class="card-box col-lg-6">
+<div class="row">
+<div class="col-lg-6">
+<div class="card-box">
 
     
                                         <h4 class="header-title">Positivity Cases at NASG </h4>
@@ -3254,6 +3256,8 @@ Highcharts.chart('associatetrend', {
     
                                         </div>
  </div>
+ </div>
+</div>
 <div class="card-box">
 
     
