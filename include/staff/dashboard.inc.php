@@ -3251,7 +3251,7 @@ Highcharts.chart('associatetrend', {
     
                                         <div class="mt-3 text-center">
 
-                                           <iframe  width="500" height="500" src="http://sssql01/PowerBI_Reports/powerbi/Reports/Covid%20Tests?rs:embed=true" frameborder="0" allowFullScreen="true"></iframe>
+                                           <iframe  width="500" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiNzc2MzFiZjktNzI1OC00ZmZlLWFmNTgtNzlhMDJiMzEyNGVlIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
           
     
                                         </div>
