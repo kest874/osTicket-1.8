@@ -3242,14 +3242,14 @@ Highcharts.chart('associatetrend', {
     </div>
     
 </div>
-<div class="card-box">
+<div class="card-box col-lg-6">
 
     
                                         <h4 class="header-title">Positivity Cases at NASG </h4>
     
                                         <div class="mt-3 text-center">
 
-                                           <iframe  width="1280" height="650" src="http://sssql01/PowerBI_Reports/powerbi/Reports/Covid%20Tests?rs:embed=true" frameborder="0" allowFullScreen="true"></iframe>
+                                           <iframe  width="500" height="500" src="http://sssql01/PowerBI_Reports/powerbi/Reports/Covid%20Tests?rs:embed=true" frameborder="0" allowFullScreen="true"></iframe>
           
     
                                         </div>
