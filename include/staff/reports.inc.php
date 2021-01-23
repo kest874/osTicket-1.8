@@ -36,6 +36,20 @@ if(!defined('OSTSTAFFINC') || !$thisstaff) die('Access Denied');
 </div>    
 
 
+<div class="row table <?php if ($_SESSION['cv19case'] == 0) echo 'class="hidden"';?>">
+    <div>
+        
+            <strong>
+                <a href="http://sssql01/SSRS_ReportServer/Pages/ReportViewer.aspx?%2fSafety%2fOpenCases&rs:Format=Excel">
+                Open Covid Cases (Excel)</a>
+            </strong>
+    </div>
+    <div>
+            <em>&nbsp; Report showing Incident and Date Rates.</em>
+        
+    </div>
+</div>  
+
 
  </div> </div> </div>
 
