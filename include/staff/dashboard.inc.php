@@ -3256,32 +3256,132 @@ Highcharts.chart('associatetrend', {
  </div>
  </div>
 </div>
-<div class="card-box">
+<div class="row">
+	<div class="col-lg-6">
+		<div class="card-box">
 
     
-                                        <h4 class="header-title">Daily Covid By Country</h4>
+      <h4 class="header-title">Daily Covid Cases (Canada) </h4>
     
-                                        <div class="mt-3 text-center">
+      <div class="mt-3 text-center">
 
-                                           <iframe  width="1280" height="650" src="https://app.powerbi.com/view?r=eyJrIjoiN2Q0MzQ1MWYtY2U3Yi00MTg2LWE0OTItZGZjMjA2NWI0NGQzIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
-          
+         <iframe width="800" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiZTQ5NzJhYjctM2UzYy00NmZiLThlN2QtNTIxZTdjZDljOWZkIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
     
-                                        </div>
- </div>
- 
+      </div>
+ 		</div>
+ 	</div>
+
+		<div class="col-lg-6">
+				<div class="card-box">
+
+		    
+		       <h4 class="header-title">Daily Covid Cases (US) </h4>
+		    
+		       <div class="mt-3 text-center">
+
+		          <iframe width="800" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiZTQ5NzJhYjctM2UzYy00NmZiLThlN2QtNTIxZTdjZDljOWZkIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9&pageName=ReportSectione939a988b2f823c18606" frameborder="0" allowFullScreen="true"></iframe>
+		    
+		       </div>
+				</div>
+		</div>
+  
+</div>
+
+<div class="row">
+	<div class="col-lg-6">
+				<div class="card-box">
+
+		    
+		       <h4 class="header-title">Daily Covid Cases (Mexico) </h4>
+		    
+		       <div class="mt-3 text-center">
+
+		          <iframe width="800" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiZTQ5NzJhYjctM2UzYy00NmZiLThlN2QtNTIxZTdjZDljOWZkIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9&pageName=ReportSection158ab539a5fce4a15ea5" frameborder="0" allowFullScreen="true"></iframe>
+		    
+		       </div>
+				</div>
+		</div>
+		
+		<div class="col-lg-6">
+		<div class="card-box">
+
+    
+      <h4 class="header-title">Daily Covid Cases (Global) </h4>
+    
+      <div class="mt-3 text-center">
+
+         <iframe width="800" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiZTQ5NzJhYjctM2UzYy00NmZiLThlN2QtNTIxZTdjZDljOWZkIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9&pageName=ReportSection92f5046b26d441b979df" frameborder="0" allowFullScreen="true"></iframe>
+    
+      </div>
+ 		</div>
+ 	</div>
+  
+</div>
+
+
+<div class="row">
+	<div class="col-lg-6">
+		<div class="card-box">
+
+    
+      <h4 class="header-title">Daily Covid Cases (Indiana) </h4>
+    
+      <div class="mt-3 text-center">
+
+         <iframe width="800" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiMTM1NzAxNWQtY2YyMS00NzIzLThiNTItYTg1MWVlZTFhNWE5IiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9&pageName=ReportSection584c474fdf0c5c29819b" frameborder="0" allowFullScreen="true"></iframe>
+    
+      </div>
+ 		</div>
+ 	</div>
+
+		<div class="col-lg-6">
+				<div class="card-box">
+
+		    
+		       <h4 class="header-title">Daily Covid Cases (Michigan) </h4>
+		    
+		       <div class="mt-3 text-center">
+
+		          <iframe width="800" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiMTM1NzAxNWQtY2YyMS00NzIzLThiNTItYTg1MWVlZTFhNWE5IiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9&pageName=ReportSection8bc2fa2105680678d89b" frameborder="0" allowFullScreen="true"></iframe>
+		    
+		       </div>
+				</div>
+		</div>
+  
+</div>
+
+<div class="row">
+	<div class="col-lg-6">
+		<div class="card-box">
+
+    
+      <h4 class="header-title">Daily Covid Cases (Ohio) </h4>
+    
+      <div class="mt-3 text-center">
+
+         <iframe width="800" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiMTM1NzAxNWQtY2YyMS00NzIzLThiNTItYTg1MWVlZTFhNWE5IiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9&pageName=ReportSectione13ba6374d8a46aa8158" frameborder="0" allowFullScreen="true"></iframe>
+    
+      </div>
+ 		</div>
+ 	</div>
+
+		<div class="col-lg-6">
+				<div class="card-box">
+
+		    
+		       <h4 class="header-title">Daily Covid Cases (Tennessee) </h4>
+		    
+		       <div class="mt-3 text-center">
+
+		          <iframe width="800" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiMTM1NzAxNWQtY2YyMS00NzIzLThiNTItYTg1MWVlZTFhNWE5IiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9&pageName=ReportSectionb1f1049fd98dede0e87e" frameborder="0" allowFullScreen="true"></iframe>
+		    
+		       </div>
+				</div>
+		</div>
+  
+</div>
+
  <div class="card-box">
-
-    
-                                        <h4 class="header-title">Daily Covid By State</h4>
-    
-                                        <div class="mt-3 text-center">
-
-                                          <iframe  width="1280" height="650" src="https://app.powerbi.com/view?r=eyJrIjoiNWE0MGQwNDEtZDBlMC00NTYwLWI2NDctZGQzYjY3OGM3ZTJlIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
-           
-                                        </div>
- </div>
- 
-  <div class="card-box">
 
     
                                         <h4 class="header-title">Risk By State</h4>
@@ -3291,8 +3391,7 @@ Highcharts.chart('associatetrend', {
                                           <iframe  width="1280" height="900" src="https://app.powerbi.com/view?r=eyJrIjoiNDExYWI4ODgtZDYyMS00YmM4LWE0NjEtY2Q5YTAzNDIxNTYxIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
            
                                         </div>
- </div>
-		
+ </div>		
 <script>		
 		
 <?php
