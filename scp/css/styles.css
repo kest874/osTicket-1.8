@@ -711,6 +711,21 @@ a:focus {
   margin-right: auto;
   padding-left: 15px;
   padding-right: 15px; }
+  
+ .powerbi-container {
+    position: relative;
+    padding-bottom: 75%;
+    height: 0;
+    overflow: hidden;
+}
+
+.powerbi-container iframe {
+    position: absolute;
+    top:0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}  
 
 .footer {
   background-color: #f9f9f9;
