@@ -3386,7 +3386,18 @@ Highcharts.chart('associatetrend', {
 		</div>
   
 </div>
-		
+
+<div class="card-box">
+
+
+    <h4 class="header-title">Risk By State</h4>
+
+    <div class="mt-3 text-center powerbi-container">
+
+      <iframe  width="1280" height="900" src="https://app.powerbi.com/view?r=eyJrIjoiNDExYWI4ODgtZDYyMS00YmM4LWE0NjEtY2Q5YTAzNDIxNTYxIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
+
+    </div>
+ </div>		
 <script>		
 		
 <?php
