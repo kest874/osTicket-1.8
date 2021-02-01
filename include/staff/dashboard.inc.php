@@ -3209,55 +3209,19 @@ Highcharts.chart('associatetrend', {
 
 
 <div class="row">
-    <div class="col-lg-6">
-        <div class="portlet" id="opencovidpie" ><!-- /primary heading -->
-            
-        </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="portlet" id="PositivebyLocation" ><!-- /primary heading -->
-            
-        </div>
-    </div>
-	       
-</div>
-
-<div class="row">
-    <div class="col-lg-3">
-        <div class="portlet" id="pendingcovidpie" ><!-- /primary heading -->
-            
-        </div>
-    </div>
-		<div class="col-lg-3">
-        <div class="portlet" id="notestcovidpie" ><!-- /primary heading -->
-            
-        </div>
-    </div>
-	    <div class="col-lg-6">
-        <div class="portlet" id="NegativebyLocation" ><!-- /primary heading -->
-            
-        </div>
-    </div>
-    
-</div>
-
-
-<div class="row">
-	<div class="col-lg-6">
+	<div class="col-lg-12">
 			<div class="card-box">
 	
-	    
-	       <h4 class="header-title">Positivity Cases at NASG </h4>
-	    
 	       <div class="mt-3 text-center  powerbi-container">
 	
-	          <iframe  width="500" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiNzc2MzFiZjktNzI1OC00ZmZlLWFmNTgtNzlhMDJiMzEyNGVlIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
+	          <iframe  width="500" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiOWQ0MGU4YmEtODAxMy00NDIyLTljYWMtNWY5NWJkNzIwNGYwIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9&pageName=ReportSection" frameborder="0" allowFullScreen="true"></iframe>
 	       
 	    
 	       </div>
 			</div>
 	</div>
 </div>
+
 <div class="row">
 	<div class="col-lg-6">
 		<div class="card-box">
@@ -3274,8 +3238,6 @@ Highcharts.chart('associatetrend', {
  	</div>
 
 
-
-	
 
 		<div class="col-lg-6 ">
 				<div class="card-box">
