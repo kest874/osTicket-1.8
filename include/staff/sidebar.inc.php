@@ -9,7 +9,7 @@ if(!defined('ADMINPAGE')) {
 	 <li  class="has_sub">
     <a class="waves-effect waves-primary" href="javascript:void(0);" ><i class=" ti-dashboard"></i> <span class="menu-arrow"></span> Dashboard </a> 
         <ul class="list-unstyled">
-            <li <?php if ($_SESSION['cv19case'] == 0) echo 'class="hidden"';?>><a href="/scp/dashboard.php?a=2" title="" id="nav1">Covid-19</a></li>
+            <li <?php if ($_SESSION['cv19case'] == 0) echo 'class="hidden"';?>><a target="_blank" href="https://app.powerbi.com/groups/540caa9a-9767-445d-b410-6d6871bec1a2/reports/d1baffef-1cfb-46ac-82e4-92e9a4fc91da?ctid=a4f2f97b-705c-41eb-b275-596e5f0af0bb" title="" id="nav1">Covid-19</a></li>
             <li><a href="/scp/dashboard.php?begindate=<?php echo $begindate?>&enddate=<?php echo $enddate?>&a=1" title="" id="nav1">Incidents</a></li>
         </ul>
     </li>
