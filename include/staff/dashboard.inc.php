@@ -8,7 +8,7 @@
 <?php 
 $WhichDashboard = $_GET['a'];
 
-If (!$WhichDashboard) $WhichDashboard = 1;
+$WhichDashboard = 1;
 
 $sitecolor = array(
 "AST"=>"#52e462",
@@ -3208,23 +3208,6 @@ Highcharts.chart('associatetrend', {
 	if ($WhichDashboard == 2) { ?>
 
 
-<div class="row">
-	<div class="col-lg-12">
-			<div class="card-box">
-	
-	       <div class="mt-3 text-center  powerbi-container">
-	
-	          <iframe  width="500" height="500" src="https://app.powerbi.com/reportEmbed?reportId=699096fd-7c1a-42c2-9e56-b3118e55e28c&autoAuth=true&ctid=a4f2f97b-705c-41eb-b275-596e5f0af0bb&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly93YWJpLXVzLW5vcnRoLWNlbnRyYWwtYi1yZWRpcmVjdC5hbmFseXNpcy53aW5kb3dzLm5ldC8ifQ%3D%3D" frameborder="0" allowFullScreen="true"></iframe>
-	       
-	    
-	       </div>
-			</div>
-	</div>
-</div>
-
-
-<script>		
-		
 
 
 
