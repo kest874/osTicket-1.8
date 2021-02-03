@@ -3214,7 +3214,7 @@ Highcharts.chart('associatetrend', {
 	
 	       <div class="mt-3 text-center  powerbi-container">
 	
-	          <iframe  width="500" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiMWQ2NDM1NmEtN2E5My00YmU3LTk2YjItYzY2MDZiOGQ1NGU3IiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
+	          <iframe  width="500" height="500" src="https://app.powerbi.com/view?r=eyJrIjoiNTI4ZDI2MzgtYzA2YS00ZTIwLWIzMmEtMjU3YWQ2ODM0ZDVlIiwidCI6ImE0ZjJmOTdiLTcwNWMtNDFlYi1iMjc1LTU5NmU1ZjBhZjBiYiIsImMiOjN9" frameborder="0" allowFullScreen="true"></iframe>
 	       
 	    
 	       </div>
