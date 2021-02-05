@@ -22,7 +22,10 @@
 td.footable-last-visible > span > svg{
 	margin-top: -4px;
 }    
-    
+   
+.hidden {
+	display: none;
+}    
 @media screen and (max-width: 900px) {  
     .topbar .topbar-left {
         padding-bottom: 0px !important;

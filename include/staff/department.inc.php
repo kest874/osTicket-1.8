@@ -101,7 +101,7 @@ $info = Format::htmlchars(($errors && $_POST) ? $_POST : $info);
                 &nbsp;<span class="error">*&nbsp;<?php echo $errors['name']; ?></span>
             </td>
         </tr>
-        <tr>
+        <tr class="hidden">
             <td width="180" class="required">
                 <?php echo __('Type');?>:
             </td>
