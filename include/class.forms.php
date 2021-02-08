@@ -1911,8 +1911,7 @@ class DatetimeField extends FormField {
         return $value;
     }
     function to_php($value) {
-        if (strtotime($value) <= 0)
-            return 0;
+        
         return $value;
     }
     function display($value) {
