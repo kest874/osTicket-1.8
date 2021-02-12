@@ -183,6 +183,7 @@ $MyOpenIssuesTicket = Ticket::objects()
 $UnassignedTicket = Ticket::objects()
         ->filter(array('status_id' => '1')) //Awaiting Quote
         ->filter(array('topic_id__ne' => '12')) //open issue
+        ->filter(array('topic_id__ne' => '14')) //open issue
         ->aggregate(array('count' => SqlAggregate::COUNT('ticket_id')));
          
          foreach ($UnassignedTicket as $cUnassignedTicket) { 
