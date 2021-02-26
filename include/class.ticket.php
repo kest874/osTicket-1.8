@@ -4753,6 +4753,9 @@ implements RestrictedAccess, Threadable, Searchable {
         /* -------------------- OpsGenie ------------------------ */
         if ($ticket->getOwner()->getOrgId() == 12) {
         
+        
+        	$oteam = '[{"name": "VIP Support","type":"team"}]';
+        
 	        $url = "https://api.opsgenie.com/v2/alerts";
 	        $aParameter = array(
 	        'message' => 'New Support Ticket from '.$ticket->getName(),
@@ -4761,9 +4764,8 @@ implements RestrictedAccess, Threadable, Searchable {
 	                            'Subject' => (string) $ticket->getSubject(),
 	                           'Detail'=>(string) $ticket->getLastMessage(),
 	                           'Ticket Number' => '[#'.$ticket->getNumber().']'.$ost->getConfig()->getUrl().'scp/tickets.php?id='.$ticket->getId(),
-
-
 	                           ),
+	        'responders' => json_decode($oteam),
 	        'description' => $ticket->getSubject(),
 	        'note' => 'New ticket created in Support',
 	        'action' => 'create',
