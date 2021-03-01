@@ -2147,7 +2147,26 @@ implements RestrictedAccess, Threadable, Searchable {
         $assigner = $thisstaff ?: _S('SYSTEM (Auto Assignment)');
 
 				/* -------------------- OpsGenie ------------------------ */
-				if ($this->getOwner()->getOrgId() == 12) {
+				       
+        $opgenie = false;
+        
+        if (strpos($this->getSubject(), 'US IT Hotline') !==false){
+        	$opgenie = true;
+        }
+        
+        if (strpos($this->getSubject(), 'CAN IT Hotline') !==false){
+        	$opgenie = true;
+        } 
+        
+        if (strpos($this->getSubject(), 'MEX IT Hotline') !==false){
+        	$opgenie = true;
+        }
+        
+        if ($this->getOwner()->getOrgId() == 12){
+        	$opgenie = true;
+        }
+        
+        if ($opgenie = true) {
          
         $ticketnumber = $this->number;
         $url = "https://api.opsgenie.com/v2/alerts/".$ticketnumber."/close?identifierType=alias";
@@ -3558,7 +3577,25 @@ implements RestrictedAccess, Threadable, Searchable {
         $this->lastrespondent = $response->staff;
 
     	  /* -------------------- OpsGenie ------------------------ */
-        if ($this->getOwner()->getOrgId() == 12) {
+        $opgenie = false;
+        
+        if (strpos($this->getSubject(), 'US IT Hotline') !==false){
+        	$opgenie = true;
+        }
+        
+        if (strpos($this->getSubject(), 'CAN IT Hotline') !==false){
+        	$opgenie = true;
+        } 
+        
+        if (strpos($this->getSubject(), 'MEX IT Hotline') !==false){
+        	$opgenie = true;
+        }
+        
+        if ($this->getOwner()->getOrgId() == 12){
+        	$opgenie = true;
+        }
+        
+        if ($opgenie = true) {
 		
 	        $ticketnumber = $this->number;
 	        $url = "https://api.opsgenie.com/v2/alerts/".$ticketnumber."/close?identifierType=alias";
@@ -4750,11 +4787,31 @@ implements RestrictedAccess, Threadable, Searchable {
         ) {
             $ticket->onOpenLimit($autorespond && strcasecmp($origin, 'staff'));
         }
-        /* -------------------- OpsGenie ------------------------ */
-        if ($ticket->getOwner()->getOrgId() == 12) {
+       
+       /* -------------------- OpsGenie ------------------------ */ 
+        $opgenie = false;
         
+        if (strpos($ticket->getSubject(), 'US IT Hotline') !==false){
+        	$oteam = '[{"name": "US IT Hotline","type":"team"}]';
+        	$opgenie = true;
+        }
         
+        if (strpos($ticket->getSubject(), 'CAN IT Hotline') !==false){
+        	$oteam = '[{"name": "CAN IT Hotline","type":"team"}]';
+        	$opgenie = true;
+        } 
+        
+        if (strpos($ticket->getSubject(), 'MEX IT Hotline') !==false){
+        	$oteam = '[{"name": "MEX IT Hotline","type":"team"}]';
+        	$opgenie = true;
+        }
+        
+        if ($ticket->getOwner()->getOrgId() == 12){
         	$oteam = '[{"name": "VIP Support","type":"team"}]';
+        	$opgenie = true;
+        }
+        
+        if ($opgenie = true) {
         
 	        $url = "https://api.opsgenie.com/v2/alerts";
 	        $aParameter = array(
@@ -4796,7 +4853,7 @@ implements RestrictedAccess, Threadable, Searchable {
 
 	        $sResponse = curl_exec($c);
         }
-
+        
         // Fire post-create signal (for extra email sending, searching)
         Signal::send('ticket.created', $ticket);
 
