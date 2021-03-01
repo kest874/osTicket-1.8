@@ -2150,6 +2150,10 @@ implements RestrictedAccess, Threadable, Searchable {
 				       
         $opgenie = false;
         
+        if ($this->getOwner()->getOrgId() == 12){
+        	$opgenie = true;
+        }
+        
         if (strpos($this->getSubject(), 'US IT Hotline') !==false){
         	$opgenie = true;
         }
@@ -2161,11 +2165,7 @@ implements RestrictedAccess, Threadable, Searchable {
         if (strpos($this->getSubject(), 'MEX IT Hotline') !==false){
         	$opgenie = true;
         }
-        
-        if ($this->getOwner()->getOrgId() == 12){
-        	$opgenie = true;
-        }
-        
+                        
         if ($opgenie = true) {
          
         $ticketnumber = $this->number;
@@ -3579,6 +3579,10 @@ implements RestrictedAccess, Threadable, Searchable {
     	  /* -------------------- OpsGenie ------------------------ */
         $opgenie = false;
         
+        if ($this->getOwner()->getOrgId() == 12){
+        	$opgenie = true;
+        }
+        
         if (strpos($this->getSubject(), 'US IT Hotline') !==false){
         	$opgenie = true;
         }
@@ -3590,11 +3594,7 @@ implements RestrictedAccess, Threadable, Searchable {
         if (strpos($this->getSubject(), 'MEX IT Hotline') !==false){
         	$opgenie = true;
         }
-        
-        if ($this->getOwner()->getOrgId() == 12){
-        	$opgenie = true;
-        }
-        
+                        
         if ($opgenie = true) {
 		
 	        $ticketnumber = $this->number;
@@ -4791,26 +4791,29 @@ implements RestrictedAccess, Threadable, Searchable {
        /* -------------------- OpsGenie ------------------------ */ 
         $opgenie = false;
         
-        if (strpos($ticket->getSubject(), 'US IT Hotline') !==false){
-        	$oteam = '[{"name": "US IT Hotline","type":"team"}]';
-        	$opgenie = true;
-        }
-        
-        if (strpos($ticket->getSubject(), 'CAN IT Hotline') !==false){
-        	$oteam = '[{"name": "CAN IT Hotline","type":"team"}]';
-        	$opgenie = true;
-        } 
-        
-        if (strpos($ticket->getSubject(), 'MEX IT Hotline') !==false){
-        	$oteam = '[{"name": "MEX IT Hotline","type":"team"}]';
-        	$opgenie = true;
-        }
-        
         if ($ticket->getOwner()->getOrgId() == 12){
         	$oteam = '[{"name": "VIP Support","type":"team"}]';
         	$opgenie = true;
         }
         
+        if (strpos($ticket->getSubject(), 'US IT Hotline') !==false){
+        	$oteam = '[{"name": "US IT Hotline","type":"team"}]';
+        	$opgenie = true;
+        	if(!$user->getOrgId()) $user->setOrgId(19);       	
+        }
+        
+        if (strpos($ticket->getSubject(), 'CAN IT Hotline') !==false){
+        	$oteam = '[{"name": "CAN IT Hotline","type":"team"}]';
+        	$opgenie = true;
+        	if(!$user->getOrgId()) $user->setOrgId(18);   
+        } 
+        
+        if (strpos($ticket->getSubject(), 'MEX IT Hotline') !==false){
+        	$oteam = '[{"name": "MEX IT Hotline","type":"team"}]';
+        	$opgenie = true;
+        	if(!$user->getOrgId()) $user->setOrgId(20);   
+        }
+                
         if ($opgenie = true) {
         
 	        $url = "https://api.opsgenie.com/v2/alerts";

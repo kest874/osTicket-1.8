@@ -143,7 +143,17 @@ class UserModel extends VerySimpleModel {
     function getOrgId() {
          return $this->get('org_id');
     }
-
+    
+    function setOrgId($orgid, $save=true) {
+         
+         $this->set('org_id', $orgid);
+         
+         if ($save)
+            $this->save();
+            
+         return true;
+    }
+    
     function getOrganization() {
         return $this->org;
     }
