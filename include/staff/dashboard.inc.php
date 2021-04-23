@@ -90,7 +90,7 @@ $sitecolor = array(
 		<div class="portlet" >
 			<?php 
 				$sql="SELECT d.name as LOCATION,DATEDIFF(CURDATE(),max(dateofincident)) AS 'DaysSinceRecordable'
-				 FROM osticket_saftest.ost_ticket__cdata tcd join ost_ticket t on t.ticket_id = tcd.ticket_id 
+				 FROM osticket_saf.ost_ticket__cdata tcd join ost_ticket t on t.ticket_id = tcd.ticket_id 
 				 join ost_department d on t.dept_id = d.id where  t.isrecordable = 1 group by d.name order by d.name";
 			 
 			  $locsdata = db_query($sql);
@@ -115,7 +115,7 @@ $sitecolor = array(
         </tr>
         
         <?php
-        $sql = "SELECT * FROM ost_recordable_record;";
+        $sql = "SELECT * FROM ost_recordable_record where Location <> 'MI';";
 $locsdata = db_query($sql);
 ?>
         <tr>
