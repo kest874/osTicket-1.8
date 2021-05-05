@@ -436,7 +436,7 @@ $pageNav->setURL('tickets.php', $args);
 ?>
 
 
- <div class="btn-group btn-group-sm <?php if ($queue->getId() == 13 ||$queue->getId() == 12 ||$queue->getId() == 3)echo ' hidden';||$queue->getId() == 14)echo ' hidden'; ?>" role="group">
+ <div class="btn-group btn-group-sm <?php if ($queue->getId() == 16 || $queue->getId() == 13 ||$queue->getId() == 12 ||$queue->getId() == 3)echo ' hidden'; ?>" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle"  <?php if ($filters == 0){ echo 'disabled';}?>
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
          title="<?php echo __('Filter Incident Type'); ?>"><i class="fa fa-filter"></i> <?php echo $tselected;?>
@@ -484,7 +484,7 @@ $pageNav->setURL('tickets.php', $args);
           
           }
 ?> 
-    <div class="btn-group btn-group-sm <?php if ($queue->getId() == 13 ||$queue->getId() == 12 ||$queue->getId() == 3)echo ' hidden'; ?>" role="group">
+    <div class="btn-group btn-group-sm <?php if ($queue->getId() == 16 || $queue->getId() == 13 ||$queue->getId() == 12 ||$queue->getId() == 3)echo ' hidden'; ?>" role="group">
         <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-light dropdown-toggle" <?php if ($filters == 0){ echo 'disabled';}?>
         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-placement="bottom" data-toggle="tooltip" 
          title="<?php echo __('Filter Recordables'); ?>"><i class="fa fa-filter"></i> <?php echo $rselected;?>
