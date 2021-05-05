@@ -47,6 +47,10 @@ if(!defined('ADMINPAGE')) {
         		$hide = 0;
         		if ($_SESSION['cv19case'] == 0) $hide = 1;
             break;
+        case "Covid-19 Vaccinations":
+        		$hide = 0;
+        		if ($_SESSION['cv19vac'] == 0) $hide = 1;
+            break;    
         case "Covid-19 Temp Logs":
         		$hide = 0;
         		if ($_SESSION['cv19temp'] == 0) $hide = 1;
