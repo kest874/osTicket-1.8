@@ -257,6 +257,7 @@ if($msg) {echo "$.Notification.notify('success','top right', '', '".$msg."');";}
 		if (!$local) {$_SESSION['loc']= $thisstaff->dept_id;}
 	  $_SESSION['cv19case'] = $thisstaff->cv19case; 
 	  $_SESSION['cv19temp'] = $thisstaff->cv19temp; 
+	  $_SESSION['cv19vac'] = $thisstaff->cv19vac;
 ?>
             <div class="left side-menu">
                 <div class="sidebar-inner slimscrollleft">

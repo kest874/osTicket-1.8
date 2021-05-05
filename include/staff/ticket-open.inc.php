@@ -179,7 +179,7 @@ if ($_POST)
                     <?php    }
                         foreach($topics as $id =>$name) {
                         	
-                        	 if ($name != 'Covid-19 Case'&&$name != 'Covid-19 Temp Log') {
+                        	 if ($name != 'Covid-19 Case'&&$name != 'Covid-19 Temp Log'&&$name != 'Covid-19 Vaccination') {
                             echo sprintf('<option value="%d" %s %s>%s</option>',
                                 $id, ($info['topicId']==$id)?'selected="selected"':'',
                                 $selected, $name);
@@ -189,7 +189,12 @@ if ($_POST)
                             echo sprintf('<option value="%d" %s %s>%s</option>',
                                 $id, ($info['topicId']==$id)?'selected="selected"':'',
                                 $selected, $name);
-                         }     
+                         }
+                         if ($name == 'Covid-19 Vaccination' && $_SESSION['cv19vac'] == 1) {
+                            echo sprintf('<option value="%d" %s %s>%s</option>',
+                                $id, ($info['topicId']==$id)?'selected="selected"':'',
+                                $selected, $name);
+                         }      
                          if ($name == 'Covid-19 Temp Log' && $_SESSION['cv19temp'] == 1) {
                             echo sprintf('<option value="%d" %s %s>%s</option>',
                                 $id, ($info['topicId']==$id)?'selected="selected"':'',

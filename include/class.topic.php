@@ -318,6 +318,7 @@ implements TemplateVariable, Searchable {
         
        if ($_SESSION['cv19case'] == 0) {$cv19case = 12;} else {$cv19case = 0;};
        if ($_SESSION['cv19temp'] == 0) {$cv19temp = 13;} else {$cv19temp = 0;};
+       if ($_SESSION['cv19vac'] == 0) {$cv19temp = 14;} else {$cv19temp = 0;};
        
        $sfilter= ' where topic_id not in ('.$cv19case.','.$cv19temp .') ';
         	

@@ -533,16 +533,15 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         return $this->isadmin;
     }
 
-
     function cv19case() {
         return $this->cv19case;
     }
-
     function cv19temp() {
         return $this->cv19temp;
     }
-
-
+    function cv19vac() {
+        return $this->cv19vac;
+    }
 
     function canAccessDept($deptId) {
         
@@ -1067,6 +1066,7 @@ implements AuthenticatedUser, EmailContact, TemplateVariable, Searchable {
         $this->isadmin = $vars['isadmin'];
         $this->cv19case = $vars['cv19case'];
         $this->cv19temp = $vars['cv19temp'];
+        $this->cv19vac = $vars['cv19vac'];
         $this->isactive = isset($vars['islocked']) ? 0 : 1;
         $this->isvisible = isset($vars['isvisible'])?1:0;
         $this->onvacation = isset($vars['onvacation'])?1:0;
@@ -1449,6 +1449,13 @@ extends AbstractForm {
                 'label' => __('Covid Cases'),
                 'configuration' => array(
                     'desc' => __('Agent has access to enter Covid Cases'),
+                ),
+                'layout' => new GridFluidCell(6),
+            )),
+            'cv19vac' => new BooleanField(array(
+                'label' => __('Covid Vaccinations'),
+                'configuration' => array(
+                    'desc' => __('Agent has access to enter Covid Vaccinations'),
                 ),
                 'layout' => new GridFluidCell(6),
             )),

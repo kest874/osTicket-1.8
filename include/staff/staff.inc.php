@@ -201,7 +201,11 @@ if (count($bks) > 1) {
                 ?>>
              <label class="custom-control-label" for="cv19case"><?php echo __('Allow Covid Cases'); ?> </label>
       </div>
-         
+      <div class="custom-control custom-switch">
+             <input type="checkbox" class="custom-control-input" id="cv19vac" name="cv19vac" value="1" <?php echo ($staff->cv19vac) ? 'checked="checked"' : '';
+                ?>>
+             <label class="custom-control-label" for="cv19vac"><?php echo __('Allow Covid Vaccinations'); ?> </label>
+      </div>     
       <div class="custom-control custom-switch">
              <input type="checkbox" class="custom-control-input" id="cv19temp" name="cv19temp" value="1" <?php echo ($staff->cv19temp) ? 'checked="checked"' : '';
                 ?>>
